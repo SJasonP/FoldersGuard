@@ -28,6 +28,14 @@ type removeOptions struct {
 	force           bool
 }
 
+type moveOptions struct {
+	projectRef       string
+	itemPath         string
+	targetFolderPath string
+	contentRoot      string
+	passwordOptions  passwordOptions
+}
+
 func (c cli) renameCommand() *cobra.Command {
 	options := renameOptions{}
 	command := &cobra.Command{
@@ -70,6 +78,29 @@ func (c cli) removeCommand() *cobra.Command {
 	command.Flags().StringVar(&options.passwordOptions.passwordEnv, "password-env", "", "read password from an environment variable")
 	command.Flags().BoolVar(&options.force, "force", false, "accept metadata and content deletion")
 	mustMarkRequired(command, "force")
+	command.MarkFlagsMutuallyExclusive("password-stdin", "password-env")
+	return command
+}
+
+func (c cli) moveCommand() *cobra.Command {
+	options := moveOptions{}
+	command := &cobra.Command{
+		Use:           "move <project-ref> <item-path> <target-folder-path>",
+		Short:         "Move a file or folder in FG metadata.",
+		Example:       c.name + " move ./project.fg Root/old.txt Root/docs --content ./encrypted --password-env FG_PASSWORD",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		Args:          cobra.ExactArgs(3),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			options.projectRef = args[0]
+			options.itemPath = args[1]
+			options.targetFolderPath = args[2]
+			return c.runMove(options)
+		},
+	}
+	command.Flags().StringVar(&options.contentRoot, "content", "", "encrypted content folder")
+	command.Flags().BoolVar(&options.passwordOptions.passwordStdin, "password-stdin", false, "read password from stdin")
+	command.Flags().StringVar(&options.passwordOptions.passwordEnv, "password-env", "", "read password from an environment variable")
 	command.MarkFlagsMutuallyExclusive("password-stdin", "password-env")
 	return command
 }
@@ -175,6 +206,71 @@ func (c cli) runRemove(options removeOptions) error {
 	fmt.Fprintf(c.out, "operations=%d\n", len(result.Operations))
 	for _, operation := range result.Operations {
 		fmt.Fprintf(c.out, "operation=%s target=%s\n", operation.Type, operation.TargetPath)
+	}
+	return nil
+}
+
+func (c cli) runMove(options moveOptions) error {
+	password, err := c.readPassword(options.passwordOptions)
+	if err != nil {
+		return err
+	}
+	databasePath, err := databasePathFromProjectRef(options.projectRef)
+	if err != nil {
+		return err
+	}
+	if err := validateExistingFile(databasePath, "database"); err != nil {
+		return err
+	}
+	if options.contentRoot != "" {
+		if err := validateExistingDirectory(options.contentRoot, "encrypted content"); err != nil {
+			return err
+		}
+	}
+
+	ctx := context.Background()
+	database, err := db.OpenProject(ctx, db.Config{
+		Path:       databasePath,
+		DriverName: db.SQLCipherDriver,
+		Password:   password,
+	})
+	if err != nil {
+		return err
+	}
+	defer database.Close()
+
+	store, err := storage.NewStore(database)
+	if err != nil {
+		return err
+	}
+	result, err := store.MoveItem(ctx, options.itemPath, options.targetFolderPath, time.Now())
+	if err != nil {
+		return err
+	}
+	if options.contentRoot != "" {
+		for _, operation := range result.Operations {
+			if operation.Type != "move" {
+				return fmt.Errorf("unsupported content operation %q", operation.Type)
+			}
+			source, err := content.SafeJoin(options.contentRoot, operation.SourcePath)
+			if err != nil {
+				return fmt.Errorf("resolve move source: %w", err)
+			}
+			target, err := content.SafeJoin(options.contentRoot, operation.TargetPath)
+			if err != nil {
+				return fmt.Errorf("resolve move target: %w", err)
+			}
+			if err := os.Rename(source, target); err != nil {
+				return fmt.Errorf("move encrypted content %s to %s: %w", operation.SourcePath, operation.TargetPath, err)
+			}
+		}
+	}
+
+	fmt.Fprintf(c.out, "project_id=%s\n", result.ProjectID)
+	fmt.Fprintf(c.out, "operation_plan_id=%s\n", result.OperationPlanID)
+	fmt.Fprintf(c.out, "operations=%d\n", len(result.Operations))
+	for _, operation := range result.Operations {
+		fmt.Fprintf(c.out, "operation=%s source=%s target=%s\n", operation.Type, operation.SourcePath, operation.TargetPath)
 	}
 	return nil
 }

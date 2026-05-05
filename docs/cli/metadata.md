@@ -87,6 +87,13 @@ Behavior:
 - If `--content` is provided, FG applies the storage operations directly.
 - If `--content` is omitted, FG updates metadata and prints the storage operations for manual execution.
 
+Validation:
+
+- The root folder cannot be moved.
+- `<target-folder-path>` must be an existing folder path inside the FG project.
+- The target folder cannot be the moved item itself or inside the moved item.
+- The target folder must not already contain a sibling with the moved item's real name.
+
 Output:
 
 ```text

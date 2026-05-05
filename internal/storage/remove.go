@@ -12,6 +12,7 @@ import (
 
 type ContentOperation struct {
 	Type       string
+	SourcePath string
 	TargetPath string
 }
 
