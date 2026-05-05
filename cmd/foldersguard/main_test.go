@@ -17,6 +17,7 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	source := filepath.Join(root, "source")
 	contentOutput := filepath.Join(root, "content")
 	databaseOutput := filepath.Join(root, "project.fg")
+	restoreOutput := filepath.Join(root, "restored")
 	if err := os.MkdirAll(filepath.Join(source, "docs"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -76,6 +77,39 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	}
 	if encryptedFiles != 1 {
 		t.Fatalf("encrypted files = %d, want 1", encryptedFiles)
+	}
+
+	if err := cli.RunWithIO("foldersguard", []string{
+		"decrypt",
+		databaseOutput,
+		"--content", contentOutput,
+		"--out", restoreOutput,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	restored, err := os.ReadFile(filepath.Join(restoreOutput, "source", "docs", "note.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(restored, plaintext) {
+		t.Fatalf("restored plaintext = %q, want %q", restored, plaintext)
+	}
+
+	t.Setenv("FG_WRONG_PASSWORD", "wrong-password")
+	wrongPasswordOutput := filepath.Join(root, "wrong-password")
+	err = cli.RunWithIO("foldersguard", []string{
+		"decrypt",
+		databaseOutput,
+		"--content", contentOutput,
+		"--out", wrongPasswordOutput,
+		"--password-env", "FG_WRONG_PASSWORD",
+	}, nil, nil)
+	if err == nil {
+		t.Fatal("expected wrong password to fail")
+	}
+	if _, statErr := os.Stat(wrongPasswordOutput); !os.IsNotExist(statErr) {
+		t.Fatalf("wrong-password output stat error = %v, want not exist", statErr)
 	}
 }
 

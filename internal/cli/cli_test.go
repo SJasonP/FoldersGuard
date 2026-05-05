@@ -14,8 +14,17 @@ func TestHelpUsesInvokedName(t *testing.T) {
 		t.Fatal(err)
 	}
 	output := out.String()
-	if !strings.Contains(output, "foldersguard version") {
+	if !strings.Contains(output, "Usage:") {
+		t.Fatalf("help output = %q, want Cobra usage", output)
+	}
+	if !strings.Contains(output, "foldersguard [flags]") {
 		t.Fatalf("help output = %q, want foldersguard command examples", output)
+	}
+	if !strings.Contains(output, "decrypt") {
+		t.Fatalf("help output = %q, want decrypt command", output)
+	}
+	if strings.Contains(output, "completion") {
+		t.Fatalf("help output = %q, want no undocumented completion command", output)
 	}
 }
 

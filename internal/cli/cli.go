@@ -59,43 +59,32 @@ func (c cli) run(args []string) error {
 func (c cli) rootCommand() *cobra.Command {
 	root := &cobra.Command{
 		Use:           c.name,
+		Short:         "FoldersGuard protects folder contents with encrypted metadata and content objects.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 0 {
 				return fmt.Errorf("unknown command %q", args[0])
 			}
-			c.printUsage()
-			return nil
+			return cmd.Help()
 		},
 	}
 	root.SetIn(c.in)
 	root.SetOut(c.out)
 	root.SetErr(io.Discard)
-	root.SetHelpFunc(func(command *cobra.Command, args []string) {
-		c.printUsage()
-	})
+	root.CompletionOptions.DisableDefaultCmd = true
 	root.AddCommand(c.versionCommand())
 	root.AddCommand(c.schemaCommand())
 	root.AddCommand(c.planCommand())
 	root.AddCommand(c.encryptCommand())
+	root.AddCommand(c.decryptCommand())
 	return root
-}
-
-func (c cli) printUsage() {
-	fmt.Fprintln(c.out, "FoldersGuard")
-	fmt.Fprintln(c.out)
-	fmt.Fprintln(c.out, "Usage:")
-	fmt.Fprintf(c.out, "  %s help\n", c.name)
-	fmt.Fprintf(c.out, "  %s version\n", c.name)
-	fmt.Fprintf(c.out, "  %s schema\n", c.name)
-	fmt.Fprintf(c.out, "  %s plan encrypt <source-folder> --max-part-size <bytes>\n", c.name)
-	fmt.Fprintf(c.out, "  %s encrypt <source-folder> --content-out <encrypted-content-folder> --max-part-size <bytes> [--export <project.fg>] [--password-stdin | --password-env <name>]\n", c.name)
 }
 
 func (c cli) versionCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:           "version",
+		Short:         "Print the application id and native format version.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.NoArgs,
@@ -110,6 +99,7 @@ func (c cli) versionCommand() *cobra.Command {
 func (c cli) schemaCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:           "schema",
+		Short:         "Print the FG database schema version.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.NoArgs,
@@ -123,6 +113,7 @@ func (c cli) schemaCommand() *cobra.Command {
 func (c cli) planCommand() *cobra.Command {
 	plan := &cobra.Command{
 		Use:           "plan",
+		Short:         "Preview FG operations without writing encrypted content or databases.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
@@ -134,6 +125,8 @@ func (c cli) planEncryptCommand() *cobra.Command {
 	var maxPartSize int64
 	command := &cobra.Command{
 		Use:           "encrypt <source-folder>",
+		Short:         "Print an encryption plan without writing encrypted content or FG databases.",
+		Example:       c.name + " plan encrypt ./clear --max-part-size 1073741824",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(1),
@@ -145,6 +138,7 @@ func (c cli) planEncryptCommand() *cobra.Command {
 		},
 	}
 	command.Flags().Int64Var(&maxPartSize, "max-part-size", 0, "maximum part size in bytes")
+	mustMarkRequired(command, "max-part-size")
 	return command
 }
 
@@ -152,19 +146,15 @@ func (c cli) encryptCommand() *cobra.Command {
 	options := encryptOptions{}
 	command := &cobra.Command{
 		Use:           "encrypt <source-folder>",
+		Short:         "Encrypt one cleartext top-level folder and create one active FG project.",
+		Example:       c.name + " encrypt ./clear --content-out ./encrypted --max-part-size 1073741824 --password-env FG_PASSWORD",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			options.sourceFolder = args[0]
-			if options.contentOutput == "" {
-				return fmt.Errorf("--content-out is required")
-			}
 			if options.maxPartSize <= 0 {
 				return fmt.Errorf("max part size must be positive")
-			}
-			if options.passwordOptions.passwordStdin && options.passwordOptions.passwordEnv != "" {
-				return fmt.Errorf("choose only one password input mode")
 			}
 			return c.runEncrypt(options)
 		},
@@ -175,7 +165,45 @@ func (c cli) encryptCommand() *cobra.Command {
 	command.Flags().BoolVar(&options.passwordOptions.passwordStdin, "password-stdin", false, "read password from stdin")
 	command.Flags().StringVar(&options.passwordOptions.passwordEnv, "password-env", "", "read password from an environment variable")
 	command.Flags().BoolVar(&options.force, "force", false, "replace existing outputs")
+	mustMarkRequired(command, "content-out")
+	mustMarkRequired(command, "max-part-size")
+	mustMarkMutuallyExclusive(command, "password-stdin", "password-env")
 	return command
+}
+
+func (c cli) decryptCommand() *cobra.Command {
+	options := decryptOptions{}
+	command := &cobra.Command{
+		Use:           "decrypt <project-ref>",
+		Short:         "Decrypt encrypted content using a project or share database.",
+		Example:       c.name + " decrypt ./project.fg --content ./encrypted --out ./restored --password-env FG_PASSWORD",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		Args:          cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			options.projectRef = args[0]
+			return c.runDecrypt(options)
+		},
+	}
+	command.Flags().StringVar(&options.contentRoot, "content", "", "encrypted content folder")
+	command.Flags().StringVar(&options.outputRoot, "out", "", "restored plaintext output folder")
+	command.Flags().BoolVar(&options.passwordOptions.passwordStdin, "password-stdin", false, "read password from stdin")
+	command.Flags().StringVar(&options.passwordOptions.passwordEnv, "password-env", "", "read password from an environment variable")
+	command.Flags().BoolVar(&options.force, "force", false, "replace existing outputs")
+	mustMarkRequired(command, "content")
+	mustMarkRequired(command, "out")
+	mustMarkMutuallyExclusive(command, "password-stdin", "password-env")
+	return command
+}
+
+func mustMarkRequired(command *cobra.Command, name string) {
+	if err := command.MarkFlagRequired(name); err != nil {
+		panic(err)
+	}
+}
+
+func mustMarkMutuallyExclusive(command *cobra.Command, names ...string) {
+	command.MarkFlagsMutuallyExclusive(names...)
 }
 
 func (c cli) runPlanEncrypt(sourceFolder string, maxPartSize int64) error {
@@ -293,43 +321,107 @@ type encryptOptions struct {
 	force           bool
 }
 
+type decryptOptions struct {
+	projectRef      string
+	contentRoot     string
+	outputRoot      string
+	passwordOptions passwordOptions
+	force           bool
+}
+
+func (c cli) runDecrypt(options decryptOptions) error {
+	password, err := c.readPassword(options.passwordOptions)
+	if err != nil {
+		return err
+	}
+	databasePath, err := databasePathFromProjectRef(options.projectRef)
+	if err != nil {
+		return err
+	}
+	if err := validateExistingDirectory(options.contentRoot, "content"); err != nil {
+		return err
+	}
+	if err := validateOutputOutsideSource(options.contentRoot, options.outputRoot); err != nil {
+		return err
+	}
+
+	ctx := context.Background()
+	plan, err := readProjectDatabase(ctx, db.Config{
+		Path:       databasePath,
+		DriverName: db.SQLCipherDriver,
+		Password:   password,
+	})
+	if err != nil {
+		return err
+	}
+	if err := prepareDirectoryOutput(options.outputRoot, options.force, "output"); err != nil {
+		return err
+	}
+	if err := (project.Restorer{EncryptedRoot: options.contentRoot, OutputRoot: options.outputRoot}).RestoreContent(ctx, plan); err != nil {
+		return err
+	}
+
+	fmt.Fprintf(c.out, "project_id=%s\n", plan.Project.ID)
+	fmt.Fprintf(c.out, "output=%s\n", options.outputRoot)
+	fmt.Fprintf(c.out, "folders=%d\n", len(plan.Folders)+1)
+	fmt.Fprintf(c.out, "files=%d\n", len(plan.Files))
+	fmt.Fprintf(c.out, "parts=%d\n", len(plan.Parts))
+	fmt.Fprintf(c.out, "restored_files=%d\n", len(plan.Files))
+	return nil
+}
+
 func prepareContentOutput(path string, force bool) error {
+	return prepareDirectoryOutput(path, force, "content output")
+}
+
+func prepareDirectoryOutput(path string, force bool, label string) error {
 	info, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			if err := os.MkdirAll(path, 0o755); err != nil {
-				return fmt.Errorf("create content output folder: %w", err)
+				return fmt.Errorf("create %s folder: %w", label, err)
 			}
 			return nil
 		}
-		return fmt.Errorf("stat content output: %w", err)
+		return fmt.Errorf("stat %s: %w", label, err)
 	}
 	if !info.IsDir() {
 		if !force {
-			return fmt.Errorf("content output exists and is not a directory; use --force to replace it")
+			return fmt.Errorf("%s exists and is not a directory; use --force to replace it", label)
 		}
 		if err := os.Remove(path); err != nil {
-			return fmt.Errorf("remove existing content output file: %w", err)
+			return fmt.Errorf("remove existing %s file: %w", label, err)
 		}
 		if err := os.MkdirAll(path, 0o755); err != nil {
-			return fmt.Errorf("create content output folder: %w", err)
+			return fmt.Errorf("create %s folder: %w", label, err)
 		}
 		return nil
 	}
 	entries, err := os.ReadDir(path)
 	if err != nil {
-		return fmt.Errorf("read content output folder: %w", err)
+		return fmt.Errorf("read %s folder: %w", label, err)
 	}
 	if len(entries) > 0 {
 		if !force {
-			return fmt.Errorf("content output folder is not empty; use --force to replace it")
+			return fmt.Errorf("%s folder is not empty; use --force to replace it", label)
 		}
 		if err := os.RemoveAll(path); err != nil {
-			return fmt.Errorf("remove existing content output folder: %w", err)
+			return fmt.Errorf("remove existing %s folder: %w", label, err)
 		}
 		if err := os.MkdirAll(path, 0o755); err != nil {
-			return fmt.Errorf("create content output folder: %w", err)
+			return fmt.Errorf("create %s folder: %w", label, err)
 		}
+	}
+	return nil
+}
+
+func validateExistingDirectory(path, label string) error {
+	info, err := os.Stat(path)
+	if err != nil {
+		return fmt.Errorf("stat %s folder: %w", label, err)
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("%s must be a directory", label)
 	}
 	return nil
 }
@@ -390,6 +482,16 @@ func activeProjectDatabasePath(projectID string) (string, error) {
 	return filepath.Join(configDir, format.AppID, "projects", projectID+format.ProjectExtension), nil
 }
 
+func databasePathFromProjectRef(projectRef string) (string, error) {
+	if projectRef == "" {
+		return "", fmt.Errorf("project reference is required")
+	}
+	if format.IsProjectExtension(projectRef) || format.IsSetExtension(projectRef) {
+		return projectRef, nil
+	}
+	return activeProjectDatabasePath(projectRef)
+}
+
 func validateOutputOutsideSource(source, output string) error {
 	sourceAbs, err := filepath.Abs(source)
 	if err != nil {
@@ -435,4 +537,18 @@ func writeProjectDatabase(ctx context.Context, config db.Config, plan model.Plan
 		return err
 	}
 	return nil
+}
+
+func readProjectDatabase(ctx context.Context, config db.Config) (model.PlannedProject, error) {
+	database, err := db.OpenProject(ctx, config)
+	if err != nil {
+		return model.PlannedProject{}, err
+	}
+	defer database.Close()
+
+	store, err := storage.NewStore(database)
+	if err != nil {
+		return model.PlannedProject{}, err
+	}
+	return store.ReadPlannedProject(ctx)
 }
