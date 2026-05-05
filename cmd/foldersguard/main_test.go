@@ -368,3 +368,70 @@ func TestRunEncryptRejectsOutputEqualToSource(t *testing.T) {
 		t.Fatal("expected output-equals-source error")
 	}
 }
+
+func TestRunRemoveDeletesMetadataAndEncryptedContent(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	contentOutput := filepath.Join(root, "content")
+	databaseOutput := filepath.Join(root, "project.fg")
+	if err := os.MkdirAll(source, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "note.txt"), []byte("remove me"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Setenv("HOME", root)
+	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	if err := cli.RunWithIO("foldersguard", []string{
+		"encrypt",
+		source,
+		"--content-out", contentOutput,
+		"--export", databaseOutput,
+		"--max-part-size", "1024",
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	var removeOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"remove",
+		databaseOutput,
+		"source/note.txt",
+		"--content", contentOutput,
+		"--force",
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &removeOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, removeOutput.String(),
+		"operations=1\n",
+		"operation=delete target=",
+	)
+
+	var inspectOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"inspect",
+		databaseOutput,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &inspectOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, inspectOutput.String(), "files=0\n", "storage_objects=1\n")
+
+	var verifyOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"verify",
+		databaseOutput,
+		"--content", contentOutput,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &verifyOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, verifyOutput.String(),
+		"checked_objects=1\n",
+		"extra_objects=0\n",
+		"status=ok\n",
+	)
+}

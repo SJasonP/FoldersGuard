@@ -103,7 +103,7 @@ Removes an item from a project.
 Usage:
 
 ```text
-fg remove <project-ref> <item-path> [--content <encrypted-content-folder>] [--password-stdin | --password-env <name>] [--force]
+fg remove <project-ref> <item-path> --force [--content <encrypted-content-folder>] [--password-stdin | --password-env <name>]
 ```
 
 Behavior:
@@ -113,6 +113,11 @@ Behavior:
 - If `--content` is provided, FG deletes encrypted content directly.
 - If `--content` is omitted, FG updates metadata and prints the delete operations for manual execution.
 - Does not expose sibling or parent keys.
+
+Validation:
+
+- The root folder cannot be removed.
+- `--force` is required because the command changes FG metadata and may delete encrypted content.
 
 Output:
 
