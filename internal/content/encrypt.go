@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	fgcrypto "foldersguard/internal/crypto"
 	"foldersguard/internal/model"
@@ -222,6 +223,99 @@ func OpenObject(key []byte, encrypted []byte, associatedData []byte) ([]byte, er
 		}
 	}
 	return plaintext.Bytes(), nil
+}
+
+func OpenObjectFile(ctx context.Context, key []byte, encryptedPath, outputPath string, associatedData []byte) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if encryptedPath == "" {
+		return fmt.Errorf("encrypted path is required")
+	}
+	if outputPath == "" {
+		return fmt.Errorf("output path is required")
+	}
+	encrypted, err := os.ReadFile(encryptedPath)
+	if err != nil {
+		return fmt.Errorf("read encrypted object: %w", err)
+	}
+	plaintext, err := OpenObject(key, encrypted, associatedData)
+	if err != nil {
+		return err
+	}
+	if err := WritePlaintextFile(outputPath, plaintext); err != nil {
+		return err
+	}
+	return nil
+}
+
+func OpenObjectFromFile(ctx context.Context, key []byte, encryptedPath string, associatedData []byte) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if encryptedPath == "" {
+		return nil, fmt.Errorf("encrypted path is required")
+	}
+	encrypted, err := os.ReadFile(encryptedPath)
+	if err != nil {
+		return nil, fmt.Errorf("read encrypted object: %w", err)
+	}
+	plaintext, err := OpenObject(key, encrypted, associatedData)
+	if err != nil {
+		return nil, err
+	}
+	return plaintext, nil
+}
+
+func WritePlaintextFile(outputPath string, plaintext []byte) error {
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
+		return fmt.Errorf("create plaintext directory: %w", err)
+	}
+	temp, err := os.CreateTemp(filepath.Dir(outputPath), "."+filepath.Base(outputPath)+".*.tmp")
+	if err != nil {
+		return fmt.Errorf("create temporary plaintext: %w", err)
+	}
+	tempPath := temp.Name()
+	committed := false
+	defer func() {
+		if !committed {
+			_ = os.Remove(tempPath)
+		}
+	}()
+
+	if _, err := temp.Write(plaintext); err != nil {
+		_ = temp.Close()
+		return fmt.Errorf("write temporary plaintext: %w", err)
+	}
+	if err := temp.Chmod(0o600); err != nil {
+		_ = temp.Close()
+		return fmt.Errorf("restrict temporary plaintext permissions: %w", err)
+	}
+	if err := temp.Close(); err != nil {
+		return fmt.Errorf("close temporary plaintext: %w", err)
+	}
+	if err := os.Rename(tempPath, outputPath); err != nil {
+		return fmt.Errorf("commit plaintext: %w", err)
+	}
+	committed = true
+	return nil
+}
+
+func SafeJoin(root, relative string) (string, error) {
+	if root == "" {
+		return "", fmt.Errorf("root path is required")
+	}
+	if relative == "" {
+		return "", fmt.Errorf("relative path is required")
+	}
+	if filepath.IsAbs(relative) {
+		return "", fmt.Errorf("absolute relative path rejected")
+	}
+	cleanRelative := filepath.Clean(filepath.FromSlash(relative))
+	if cleanRelative == "." || cleanRelative == ".." || strings.HasPrefix(cleanRelative, ".."+string(os.PathSeparator)) {
+		return "", fmt.Errorf("path escapes root")
+	}
+	return filepath.Join(root, cleanRelative), nil
 }
 
 func writeChunkRecord(writer io.Writer, final bool, plaintextLen uint32, ciphertext []byte) error {
