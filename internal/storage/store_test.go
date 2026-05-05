@@ -94,6 +94,7 @@ func TestWritePlannedProject(t *testing.T) {
 		Files: []model.File{{
 			ID:               fileID,
 			Key:              make([]byte, 32),
+			SourcePath:       "/tmp/file.txt",
 			OriginalSize:     10,
 			ContentAlgorithm: "AES-256-GCM",
 			StorageKind:      model.StorageKindSingle,

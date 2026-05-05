@@ -41,6 +41,7 @@ type Item struct {
 type File struct {
 	ID               uuid.UUID
 	Key              []byte
+	SourcePath       string
 	OriginalSize     int64
 	ContentAlgorithm string
 	StorageKind      StorageKind

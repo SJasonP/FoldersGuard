@@ -144,6 +144,7 @@ func (p Planner) Plan(scan fswalk.ScanResult) (model.PlannedProject, error) {
 			plan.Files = append(plan.Files, model.File{
 				ID:               itemID,
 				Key:              key,
+				SourcePath:       entry.AbsolutePath,
 				OriginalSize:     entry.Size,
 				ContentAlgorithm: format.ContentAlgorithm,
 				StorageKind:      storageKind,
