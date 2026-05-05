@@ -155,7 +155,7 @@ func (c cli) runRename(options renameOptions) error {
 	if err != nil {
 		return err
 	}
-	databasePath, err := databasePathFromProjectRef(options.projectRef)
+	databasePath, err := projectDatabasePathFromProjectRef(options.projectRef)
 	if err != nil {
 		return err
 	}
@@ -199,7 +199,7 @@ func (c cli) runRemove(options removeOptions) error {
 	if err != nil {
 		return err
 	}
-	databasePath, err := databasePathFromProjectRef(options.projectRef)
+	databasePath, err := projectDatabasePathFromProjectRef(options.projectRef)
 	if err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ func (c cli) runMove(options moveOptions) error {
 	if err != nil {
 		return err
 	}
-	databasePath, err := databasePathFromProjectRef(options.projectRef)
+	databasePath, err := projectDatabasePathFromProjectRef(options.projectRef)
 	if err != nil {
 		return err
 	}
@@ -325,7 +325,7 @@ func (c cli) runAdd(options addOptions) error {
 	if err != nil {
 		return err
 	}
-	databasePath, err := databasePathFromProjectRef(options.projectRef)
+	databasePath, err := projectDatabasePathFromProjectRef(options.projectRef)
 	if err != nil {
 		return err
 	}

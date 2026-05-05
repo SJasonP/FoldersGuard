@@ -128,3 +128,28 @@ func TestExportMissingProjectDoesNotCreateFiles(t *testing.T) {
 		t.Fatalf("active database stat error = %v, want not exist", statErr)
 	}
 }
+
+func TestMetadataCommandsRejectShareDatabases(t *testing.T) {
+	root := t.TempDir()
+	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	shareDatabase := filepath.Join(root, "share.fgs")
+	if err := os.WriteFile(shareDatabase, []byte("not a database"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	commands := [][]string{
+		{"rename", shareDatabase, "Root/old.txt", "new.txt", "--password-env", "FG_TEST_PASSWORD"},
+		{"add", shareDatabase, filepath.Join(root, "new.txt"), "Root", "--staging-content", filepath.Join(root, "staging"), "--max-part-size", "1024", "--password-env", "FG_TEST_PASSWORD"},
+		{"move", shareDatabase, "Root/old.txt", "Root/docs", "--password-env", "FG_TEST_PASSWORD"},
+		{"remove", shareDatabase, "Root/old.txt", "--force", "--password-env", "FG_TEST_PASSWORD"},
+	}
+	for _, args := range commands {
+		err := RunWithIO("foldersguard", args, nil, nil)
+		if err == nil {
+			t.Fatalf("command %v succeeded, want .fgs rejection", args)
+		}
+		if !strings.Contains(err.Error(), "do not accept .fgs") {
+			t.Fatalf("command %v error = %v, want .fgs rejection", args, err)
+		}
+	}
+}

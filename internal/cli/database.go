@@ -31,6 +31,13 @@ func databasePathFromProjectRef(projectRef string) (string, error) {
 	return activeProjectDatabasePath(projectRef)
 }
 
+func projectDatabasePathFromProjectRef(projectRef string) (string, error) {
+	if format.IsSetExtension(projectRef) {
+		return "", fmt.Errorf("project editing commands do not accept %s databases", format.SetExtension)
+	}
+	return databasePathFromProjectRef(projectRef)
+}
+
 func writeProjectDatabase(ctx context.Context, config db.Config, plan model.PlannedProject) error {
 	database, err := db.OpenProject(ctx, config)
 	if err != nil {
