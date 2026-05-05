@@ -12,7 +12,7 @@ fg rename <project-ref> <item-path> <new-name> [--password-stdin | --password-en
 
 Arguments:
 
-- `<item-path>`: real-name path inside the FG project.
+- `<item-path>`: real-name path inside the FG project, starting with the root folder name.
 - `<new-name>`: new file or folder name, not a path.
 
 Behavior:

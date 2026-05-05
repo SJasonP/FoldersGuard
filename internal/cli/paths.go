@@ -63,6 +63,17 @@ func validateExistingDirectory(path, label string) error {
 	return nil
 }
 
+func validateExistingFile(path, label string) error {
+	info, err := os.Stat(path)
+	if err != nil {
+		return fmt.Errorf("stat %s file: %w", label, err)
+	}
+	if info.IsDir() {
+		return fmt.Errorf("%s must be a file", label)
+	}
+	return nil
+}
+
 func prepareFileOutput(path string, force bool) error {
 	info, err := os.Stat(path)
 	if err != nil {

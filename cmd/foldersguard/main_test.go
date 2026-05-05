@@ -18,7 +18,7 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	contentOutput := filepath.Join(root, "content")
 	databaseOutput := filepath.Join(root, "project.fg")
 	databaseExport := filepath.Join(root, "exported.fg")
-	restoreOutput := filepath.Join(root, "restored")
+	renamedRestoreOutput := filepath.Join(root, "renamed-restored")
 	if err := os.MkdirAll(filepath.Join(source, "docs"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -115,16 +115,32 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 		"status=ok\n",
 	)
 
+	var renameOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"rename",
+		databaseOutput,
+		"source/docs/note.txt",
+		"renamed.txt",
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &renameOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, renameOutput.String(),
+		"old_name=note.txt\n",
+		"new_name=renamed.txt\n",
+		"content_operations=0\n",
+	)
+
 	if err := cli.RunWithIO("foldersguard", []string{
 		"decrypt",
 		databaseOutput,
 		"--content", contentOutput,
-		"--out", restoreOutput,
+		"--out", renamedRestoreOutput,
 		"--password-env", "FG_TEST_PASSWORD",
 	}, nil, nil); err != nil {
 		t.Fatal(err)
 	}
-	restored, err := os.ReadFile(filepath.Join(restoreOutput, "source", "docs", "note.txt"))
+	restored, err := os.ReadFile(filepath.Join(renamedRestoreOutput, "source", "docs", "renamed.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,6 +163,16 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	if _, statErr := os.Stat(wrongPasswordOutput); !os.IsNotExist(statErr) {
 		t.Fatalf("wrong-password output stat error = %v, want not exist", statErr)
 	}
+
+	var inspectRenamedOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"inspect",
+		databaseOutput,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &inspectRenamedOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, inspectRenamedOutput.String(), "files=1\n")
 
 	tamperFirstEncryptedFile(t, contentOutput)
 	var tamperedVerifyOutput bytes.Buffer

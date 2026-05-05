@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"foldersguard/internal/db"
-	"foldersguard/internal/storage"
 )
 
 type inspectOptions struct {
@@ -46,25 +45,11 @@ func (c cli) runInspect(options inspectOptions) error {
 	}
 
 	ctx := context.Background()
-	database, err := db.OpenProject(ctx, db.Config{
+	plan, meta, err := readProjectDatabaseWithMeta(ctx, db.Config{
 		Path:       databasePath,
 		DriverName: db.SQLCipherDriver,
 		Password:   password,
 	})
-	if err != nil {
-		return err
-	}
-	defer database.Close()
-
-	store, err := storage.NewStore(database)
-	if err != nil {
-		return err
-	}
-	meta, err := store.Meta(ctx)
-	if err != nil {
-		return err
-	}
-	plan, err := store.ReadPlannedProject(ctx)
 	if err != nil {
 		return err
 	}
