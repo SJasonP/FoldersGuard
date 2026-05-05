@@ -79,6 +79,22 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 		t.Fatalf("encrypted files = %d, want 1", encryptedFiles)
 	}
 
+	var inspectOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"inspect",
+		databaseOutput,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &inspectOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, inspectOutput.String(),
+		"database_type=project\n",
+		"root_name=source\n",
+		"files=1\n",
+		"parts=0\n",
+		"storage_objects=3\n",
+	)
+
 	if err := cli.RunWithIO("foldersguard", []string{
 		"decrypt",
 		databaseOutput,
@@ -110,6 +126,15 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	}
 	if _, statErr := os.Stat(wrongPasswordOutput); !os.IsNotExist(statErr) {
 		t.Fatalf("wrong-password output stat error = %v, want not exist", statErr)
+	}
+}
+
+func assertOutputContains(t *testing.T, output string, want ...string) {
+	t.Helper()
+	for _, expected := range want {
+		if !bytes.Contains([]byte(output), []byte(expected)) {
+			t.Fatalf("output = %q, want %q", output, expected)
+		}
 	}
 }
 
