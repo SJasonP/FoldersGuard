@@ -17,6 +17,7 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	source := filepath.Join(root, "source")
 	contentOutput := filepath.Join(root, "content")
 	databaseOutput := filepath.Join(root, "project.fg")
+	databaseExport := filepath.Join(root, "exported.fg")
 	restoreOutput := filepath.Join(root, "restored")
 	if err := os.MkdirAll(filepath.Join(source, "docs"), 0o755); err != nil {
 		t.Fatal(err)
@@ -28,6 +29,7 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 
 	t.Setenv("HOME", root)
 	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	var encryptOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"encrypt",
 		source,
@@ -35,9 +37,10 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 		"--export", databaseOutput,
 		"--max-part-size", "1024",
 		"--password-env", "FG_TEST_PASSWORD",
-	}, nil, nil); err != nil {
+	}, nil, &encryptOutput); err != nil {
 		t.Fatal(err)
 	}
+	projectID := outputValue(t, encryptOutput.String(), "project_id")
 
 	if _, err := os.Stat(databaseOutput); err != nil {
 		t.Fatalf("database output missing: %v", err)
@@ -159,6 +162,47 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 		"tampered_objects=1\n",
 		"status=failed\n",
 	)
+
+	var exportOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"export",
+		projectID,
+		"--out", databaseExport,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &exportOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, exportOutput.String(),
+		"project_id="+projectID+"\n",
+		"database_output="+databaseExport+"\n",
+	)
+
+	t.Setenv("HOME", filepath.Join(root, "import-home"))
+	var importOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"import",
+		databaseExport,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &importOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, importOutput.String(),
+		"project_id="+projectID+"\n",
+		"imported=true\n",
+	)
+
+	var importedInspectOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"inspect",
+		projectID,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &importedInspectOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, importedInspectOutput.String(),
+		"project_id="+projectID+"\n",
+		"database_type=project\n",
+	)
 }
 
 func assertOutputContains(t *testing.T, output string, want ...string) {
@@ -168,6 +212,18 @@ func assertOutputContains(t *testing.T, output string, want ...string) {
 			t.Fatalf("output = %q, want %q", output, expected)
 		}
 	}
+}
+
+func outputValue(t *testing.T, output, key string) string {
+	t.Helper()
+	prefix := key + "="
+	for _, line := range bytes.Split([]byte(output), []byte("\n")) {
+		if bytes.HasPrefix(line, []byte(prefix)) {
+			return string(bytes.TrimPrefix(line, []byte(prefix)))
+		}
+	}
+	t.Fatalf("output = %q, missing key %q", output, key)
+	return ""
 }
 
 func tamperFirstEncryptedFile(t *testing.T, root string) {

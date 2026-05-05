@@ -101,3 +101,30 @@ func TestEncryptRejectsExistingExportWithoutForce(t *testing.T) {
 		t.Fatal("expected existing export to be rejected")
 	}
 }
+
+func TestExportMissingProjectDoesNotCreateFiles(t *testing.T) {
+	root := t.TempDir()
+	output := filepath.Join(root, "missing.fg")
+
+	t.Setenv("HOME", root)
+	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	err := RunWithIO("fg", []string{
+		"export",
+		"missing-project",
+		"--out", output,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, nil)
+	if err == nil {
+		t.Fatal("expected missing project export to fail")
+	}
+	if _, statErr := os.Stat(output); !os.IsNotExist(statErr) {
+		t.Fatalf("output stat error = %v, want not exist", statErr)
+	}
+	active, err := activeProjectDatabasePath("missing-project")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, statErr := os.Stat(active); !os.IsNotExist(statErr) {
+		t.Fatalf("active database stat error = %v, want not exist", statErr)
+	}
+}

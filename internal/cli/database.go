@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -59,15 +60,68 @@ func writeProjectDatabase(ctx context.Context, config db.Config, plan model.Plan
 }
 
 func readProjectDatabase(ctx context.Context, config db.Config) (model.PlannedProject, error) {
+	plan, _, err := readProjectDatabaseWithMeta(ctx, config)
+	return plan, err
+}
+
+func readProjectDatabaseWithMeta(ctx context.Context, config db.Config) (model.PlannedProject, map[string]string, error) {
+	info, err := os.Stat(config.Path)
+	if err != nil {
+		return model.PlannedProject{}, nil, fmt.Errorf("stat database: %w", err)
+	}
+	if info.IsDir() {
+		return model.PlannedProject{}, nil, fmt.Errorf("database path is a directory")
+	}
+
 	database, err := db.OpenProject(ctx, config)
 	if err != nil {
-		return model.PlannedProject{}, err
+		return model.PlannedProject{}, nil, err
 	}
 	defer database.Close()
 
 	store, err := storage.NewStore(database)
 	if err != nil {
-		return model.PlannedProject{}, err
+		return model.PlannedProject{}, nil, err
 	}
-	return store.ReadPlannedProject(ctx)
+	meta, err := store.Meta(ctx)
+	if err != nil {
+		return model.PlannedProject{}, nil, err
+	}
+	plan, err := store.ReadPlannedProject(ctx)
+	if err != nil {
+		return model.PlannedProject{}, nil, err
+	}
+	return plan, meta, nil
+}
+
+func copyFile(source, target string) error {
+	input, err := os.Open(source)
+	if err != nil {
+		return fmt.Errorf("open source database: %w", err)
+	}
+	defer input.Close()
+
+	output, err := os.OpenFile(target, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
+	if err != nil {
+		return fmt.Errorf("create target database: %w", err)
+	}
+	committed := false
+	defer func() {
+		_ = output.Close()
+		if !committed {
+			_ = os.Remove(target)
+		}
+	}()
+
+	if _, err := io.Copy(output, input); err != nil {
+		return fmt.Errorf("copy database: %w", err)
+	}
+	if err := output.Sync(); err != nil {
+		return fmt.Errorf("sync target database: %w", err)
+	}
+	if err := output.Close(); err != nil {
+		return fmt.Errorf("close target database: %w", err)
+	}
+	committed = true
+	return nil
 }

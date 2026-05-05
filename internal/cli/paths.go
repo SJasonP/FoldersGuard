@@ -107,3 +107,18 @@ func validateOutputOutsideSource(source, output string) error {
 	}
 	return fmt.Errorf("output path must be outside the source folder")
 }
+
+func validateDistinctPaths(left, right string) error {
+	leftAbs, err := filepath.Abs(left)
+	if err != nil {
+		return fmt.Errorf("resolve source path: %w", err)
+	}
+	rightAbs, err := filepath.Abs(right)
+	if err != nil {
+		return fmt.Errorf("resolve target path: %w", err)
+	}
+	if leftAbs == rightAbs {
+		return fmt.Errorf("source and target paths must be different")
+	}
+	return nil
+}
