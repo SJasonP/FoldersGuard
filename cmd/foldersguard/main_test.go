@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"foldersguard/internal/cli"
 	"foldersguard/internal/db"
 	"foldersguard/internal/storage"
 )
@@ -24,8 +25,16 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Setenv("FG_PASSWORD", "test-password")
-	if err := run([]string{"encrypt", source, contentOutput, databaseOutput, "1024"}); err != nil {
+	t.Setenv("HOME", root)
+	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	if err := cli.RunWithIO("foldersguard", []string{
+		"encrypt",
+		source,
+		"--content-out", contentOutput,
+		"--export", databaseOutput,
+		"--max-part-size", "1024",
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -125,8 +134,16 @@ func TestRunEncryptRejectsOutputInsideSource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Setenv("FG_PASSWORD", "test-password")
-	err := run([]string{"encrypt", source, filepath.Join(source, "content"), filepath.Join(root, "project.fg"), "1024"})
+	t.Setenv("HOME", root)
+	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	err := cli.RunWithIO("foldersguard", []string{
+		"encrypt",
+		source,
+		"--content-out", filepath.Join(source, "content"),
+		"--export", filepath.Join(root, "project.fg"),
+		"--max-part-size", "1024",
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, nil)
 	if err == nil {
 		t.Fatal("expected output-inside-source error")
 	}
@@ -139,8 +156,16 @@ func TestRunEncryptRejectsOutputEqualToSource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Setenv("FG_PASSWORD", "test-password")
-	err := run([]string{"encrypt", source, source, filepath.Join(root, "project.fg"), "1024"})
+	t.Setenv("HOME", root)
+	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	err := cli.RunWithIO("foldersguard", []string{
+		"encrypt",
+		source,
+		"--content-out", source,
+		"--export", filepath.Join(root, "project.fg"),
+		"--max-part-size", "1024",
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, nil)
 	if err == nil {
 		t.Fatal("expected output-equals-source error")
 	}

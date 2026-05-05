@@ -12,6 +12,10 @@ The primary executable name is `foldersguard`.
 
 The short executable alias is `fg`.
 
+FG is distributed as one primary executable named `foldersguard`.
+
+The short alias `fg` is a filesystem link to `foldersguard`, not a separate executable build.
+
 `foldersguard` and `fg` provide the same commands, flags, validation rules, output format, and exit codes.
 
 Normal command output goes to stdout.
