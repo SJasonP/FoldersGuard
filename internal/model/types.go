@@ -60,3 +60,31 @@ type Part struct {
 	Size        int64
 	Integrity   []byte
 }
+
+type StorageObjectType string
+
+const (
+	StorageObjectTypeFile   StorageObjectType = "file"
+	StorageObjectTypeFolder StorageObjectType = "folder"
+	StorageObjectTypePart   StorageObjectType = "part"
+)
+
+type StorageObject struct {
+	ID          uuid.UUID
+	ItemID      uuid.UUID
+	Type        StorageObjectType
+	VisiblePath string
+	Size        *int64
+	Integrity   []byte
+}
+
+type PlannedProject struct {
+	Project        Project
+	RootItem       Item
+	RootFolder     Folder
+	Items          []Item
+	Folders        []Folder
+	Files          []File
+	Parts          []Part
+	StorageObjects []StorageObject
+}

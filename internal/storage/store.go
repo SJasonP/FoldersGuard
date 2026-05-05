@@ -76,28 +76,6 @@ func (s *Store) InitProject(ctx context.Context, spec ProjectSpec) error {
 		return err
 	}
 
-	if _, err := tx.ExecContext(ctx, `
-INSERT INTO items (
-	item_id, parent_id, item_type, visible_name, real_name, sort_name, created_at, updated_at
-) VALUES (?, NULL, 'folder', ?, ?, ?, ?, ?)`,
-		spec.RootFolderID.String(),
-		spec.RootVisibleName.String(),
-		spec.RootRealName,
-		sortName(spec.RootRealName),
-		createdAt,
-		createdAt,
-	); err != nil {
-		return fmt.Errorf("insert root item: %w", err)
-	}
-
-	if _, err := tx.ExecContext(ctx, `
-INSERT INTO folders (folder_id, folder_key) VALUES (?, ?)`,
-		spec.RootFolderID.String(),
-		spec.RootFolderKey,
-	); err != nil {
-		return fmt.Errorf("insert root folder: %w", err)
-	}
-
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("commit init project: %w", err)
 	}
