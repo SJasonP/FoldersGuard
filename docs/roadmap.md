@@ -10,7 +10,7 @@ Primary work:
 - Implement the v1 encryption suite.
 - Implement hierarchical folder and file keys.
 - Implement password-protected top-level folders.
-- Implement encrypted SQLite FG project databases.
+- Implement SQLCipher-encrypted FG project databases.
 - Implement separated FG data storage under project id `com.SJasonP.FoldersGuard`.
 - Implement FG data export.
 - Implement `.fg` and `.fgs` database extension rules.

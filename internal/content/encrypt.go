@@ -70,7 +70,7 @@ func (e Encryptor) encryptSingle(ctx context.Context, aead cipher.AEAD, source F
 
 	outputPath := filepath.Join(e.OutputRoot, filepath.FromSlash(source.VisiblePath))
 	associatedData := []byte("fg-content-v1:file:" + source.FileID)
-	if err := sealReader(ctx, aead, input, outputPath, associatedData); err != nil {
+	if err := e.sealReader(ctx, aead, input, outputPath, associatedData); err != nil {
 		return fmt.Errorf("encrypt single file: %w", err)
 	}
 	return nil
@@ -99,14 +99,14 @@ func (e Encryptor) encryptSplit(ctx context.Context, aead cipher.AEAD, source Fi
 		section := io.NewSectionReader(input, part.Offset, part.Size)
 		outputPath := filepath.Join(dir, part.VisibleName.String())
 		associatedData := []byte(fmt.Sprintf("fg-content-v1:part:%s:%d:%d:%d", source.FileID, part.Index, part.Offset, part.Size))
-		if err := sealReader(ctx, aead, section, outputPath, associatedData); err != nil {
+		if err := e.sealReader(ctx, aead, section, outputPath, associatedData); err != nil {
 			return fmt.Errorf("encrypt part %d: %w", part.Index, err)
 		}
 	}
 	return nil
 }
 
-func sealReader(ctx context.Context, aead cipher.AEAD, reader io.Reader, outputPath string, associatedData []byte) error {
+func (e Encryptor) sealReader(ctx context.Context, aead cipher.AEAD, reader io.Reader, outputPath string, associatedData []byte) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func sealReader(ctx context.Context, aead cipher.AEAD, reader io.Reader, outputP
 	}
 	defer output.Close()
 
-	if err := writeEncryptedObject(ctx, aead, reader, output, associatedData, defaultChunkSize); err != nil {
+	if err := writeEncryptedObject(ctx, aead, reader, output, associatedData, e.ChunkSize); err != nil {
 		return err
 	}
 	return nil

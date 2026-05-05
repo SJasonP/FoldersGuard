@@ -11,5 +11,5 @@ const (
 
 	ContentAlgorithm  = "AES-256-GCM"
 	KDFAlgorithm      = "Argon2id"
-	DatabaseAlgorithm = "SQLCipher-compatible"
+	DatabaseAlgorithm = "SQLCipher"
 )

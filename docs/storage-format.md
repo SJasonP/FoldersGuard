@@ -31,13 +31,13 @@ FG data stores the metadata for one or more FG projects. V1 allows active FG dat
 
 The platform-specific path is derived from the project id `com.SJasonP.FoldersGuard` and follows the host OS conventions.
 
-FG data is stored as encrypted SQLite databases. FG data may be exported. Exported FG data is a database file that can be backed up or transferred.
+FG data is stored as SQLCipher-encrypted SQLite databases. FG data may be exported. Exported FG data is a database file that can be backed up or transferred.
 
 ## Encrypted SQLite Databases
 
 FG uses SQLite for its internal data model.
 
-The database is encrypted as a whole. FG uses SQLCipher or an equivalent SQLite encryption layer. FG does not rely on hiding table names or database filenames for security.
+The database is encrypted by SQLCipher. FG does not rely on hiding table names or database filenames for security.
 
 Rationale:
 
@@ -76,7 +76,7 @@ Sharing always produces `.fgs`.
 
 ## Project Database
 
-Each top-level folder is represented by one encrypted SQLite project database.
+Each top-level folder is represented by one SQLCipher-encrypted project database.
 
 The project database contains all searchable and mutable FG data for that top-level folder:
 
@@ -258,9 +258,8 @@ The v1 encryption suite protects project databases, share databases, file conten
 
 Rules:
 
-- User passwords are processed with Argon2id.
-- FG derives a 256-bit database key and uses it to unlock the encrypted SQLite database.
-- Project databases and share databases use SQLCipher or an equivalent SQLite encryption layer.
+- Project databases and share databases use SQLCipher.
+- Database passwords are processed by SQLCipher's password-based keying.
 - File content and part content use AES-256-GCM.
 - File keys are 256-bit random keys.
 - Folder keys are 256-bit random keys.

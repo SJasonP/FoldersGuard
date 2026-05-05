@@ -4,7 +4,7 @@
 
 FoldersGuard, abbreviated as FG, is encryption software for protecting folders and the files inside them. The core product idea is that a folder is the natural unit for storage, download, upload, sharing, and authorization.
 
-FG encrypts each file independently, while FG's own encrypted SQLite data stores the metadata and internal keys needed to open folders and files. Users unlock FG data with passwords. If a user has the password or share database for a folder, they can decrypt everything inside that folder recursively. They cannot decrypt sibling folders, parent folders, or unrelated files unless access is explicitly shared.
+FG encrypts each file independently, while FG's own SQLCipher-encrypted database stores the metadata and internal keys needed to open folders and files. Users unlock FG data with passwords. If a user has the password or share database for a folder, they can decrypt everything inside that folder recursively. They cannot decrypt sibling folders, parent folders, or unrelated files unless access is explicitly shared.
 
 FG operates on one top-level folder at a time. The top-level folder is the root operating boundary for encryption, decryption, verification, and sharing.
 
@@ -74,14 +74,14 @@ FG native mode is the only supported encryption mode.
 - Every folder has its own folder key.
 - The top-level folder must have a password.
 - FG data stores encrypted metadata and child keys for folders and files.
-- FG data is stored as an encrypted SQLite database.
+- FG data is stored as a SQLCipher-encrypted SQLite database.
 - Real file and directory names are stored only inside encrypted FG databases or share databases.
 - Visible file and directory names are UUID values.
 - Directory hierarchy is preserved.
 - With split files treated as one logical file, encrypted output preserves the original folder and file structure.
 - Large files use FG balanced splitting.
 - File parts are storage fragments of one logical file, not independently encrypted files.
-- Share databases are FG proprietary encrypted SQLite databases containing a share-scoped data subset.
+- Share databases are FG proprietary SQLCipher-encrypted databases containing a share-scoped data subset.
 - Share generation always creates `.fgs` databases.
 - Share databases may be password-protected or unprotected.
 - Unprotected share databases can be opened without a password and are bearer secrets: anyone with the encrypted content and share database can decrypt the shared content.
