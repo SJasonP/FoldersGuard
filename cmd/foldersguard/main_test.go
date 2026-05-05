@@ -95,6 +95,23 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 		"storage_objects=3\n",
 	)
 
+	var verifyOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"verify",
+		databaseOutput,
+		"--content", contentOutput,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &verifyOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, verifyOutput.String(),
+		"checked_objects=3\n",
+		"missing_objects=0\n",
+		"tampered_objects=0\n",
+		"extra_objects=0\n",
+		"status=ok\n",
+	)
+
 	if err := cli.RunWithIO("foldersguard", []string{
 		"decrypt",
 		databaseOutput,
@@ -127,6 +144,21 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	if _, statErr := os.Stat(wrongPasswordOutput); !os.IsNotExist(statErr) {
 		t.Fatalf("wrong-password output stat error = %v, want not exist", statErr)
 	}
+
+	tamperFirstEncryptedFile(t, contentOutput)
+	var tamperedVerifyOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"verify",
+		databaseOutput,
+		"--content", contentOutput,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &tamperedVerifyOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, tamperedVerifyOutput.String(),
+		"tampered_objects=1\n",
+		"status=failed\n",
+	)
 }
 
 func assertOutputContains(t *testing.T, output string, want ...string) {
@@ -135,6 +167,31 @@ func assertOutputContains(t *testing.T, output string, want ...string) {
 		if !bytes.Contains([]byte(output), []byte(expected)) {
 			t.Fatalf("output = %q, want %q", output, expected)
 		}
+	}
+}
+
+func tamperFirstEncryptedFile(t *testing.T, root string) {
+	t.Helper()
+	var encryptedFile string
+	err := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !entry.IsDir() && encryptedFile == "" {
+			encryptedFile = path
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(encryptedFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data[len(data)-1] ^= 0xff
+	if err := os.WriteFile(encryptedFile, data, 0o600); err != nil {
+		t.Fatal(err)
 	}
 }
 

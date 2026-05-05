@@ -65,6 +65,7 @@ func (c cli) rootCommand() *cobra.Command {
 	root.AddCommand(c.encryptCommand())
 	root.AddCommand(c.decryptCommand())
 	root.AddCommand(c.inspectCommand())
+	root.AddCommand(c.verifyCommand())
 	return root
 }
 
