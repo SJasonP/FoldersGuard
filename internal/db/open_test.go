@@ -50,6 +50,34 @@ func TestOpenProjectSQLCipherAcceptsQuotedPassword(t *testing.T) {
 	}
 }
 
+func TestOpenProjectSQLCipherRejectsWrongPasswordAtOpen(t *testing.T) {
+	ctx := context.Background()
+	path := filepath.Join(t.TempDir(), "project.fg")
+	database, err := OpenProject(ctx, Config{
+		Path:       path,
+		DriverName: SQLCipherDriver,
+		Password:   "correct",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := database.ExecContext(ctx, `CREATE TABLE secret (value TEXT)`); err != nil {
+		t.Fatal(err)
+	}
+	if err := database.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = OpenProject(ctx, Config{
+		Path:       path,
+		DriverName: SQLCipherDriver,
+		Password:   "wrong",
+	})
+	if err == nil {
+		t.Fatal("expected wrong password to fail during open")
+	}
+}
+
 func TestOpenProjectSQLCipherCreatesEncryptedDatabase(t *testing.T) {
 	ctx := context.Background()
 	path := filepath.Join(t.TempDir(), "project.fg")
@@ -80,6 +108,13 @@ func TestOpenProjectSQLCipherCreatesEncryptedDatabase(t *testing.T) {
 	}
 	if bytes.Contains(data, []byte("hidden-name")) {
 		t.Fatal("SQLCipher database contains plaintext row")
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := info.Mode().Perm(); got != 0o600 {
+		t.Fatalf("database permissions = %o, want 600", got)
 	}
 
 	reopened, err := OpenProject(ctx, Config{

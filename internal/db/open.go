@@ -17,6 +17,8 @@ import (
 const (
 	PlainDriver     = "sqlite"
 	SQLCipherDriver = "sqlite3"
+
+	sqlcipherPageSize = "4096"
 )
 
 type Config struct {
@@ -74,9 +76,13 @@ func openSQLCipher(ctx context.Context, path, password string) (*sql.DB, error) 
 		return nil, fmt.Errorf("open SQLCipher database: %w", err)
 	}
 	db.SetMaxOpenConns(1)
-	if err := db.PingContext(ctx); err != nil {
+	if err := validateSQLCipherOpen(ctx, db); err != nil {
 		_ = db.Close()
-		return nil, fmt.Errorf("ping SQLCipher database: %w", err)
+		return nil, err
+	}
+	if err := restrictDatabaseFile(path); err != nil {
+		_ = db.Close()
+		return nil, err
 	}
 	return db, nil
 }
@@ -84,7 +90,7 @@ func openSQLCipher(ctx context.Context, path, password string) (*sql.DB, error) 
 func sqlcipherDSN(path, password string) string {
 	values := url.Values{}
 	values.Set("_pragma_key", escapeSQLCipherPragmaString(password))
-	values.Set("_pragma_cipher_page_size", "4096")
+	values.Set("_pragma_cipher_page_size", sqlcipherPageSize)
 	values.Set("_foreign_keys", "on")
 	values.Set("_busy_timeout", "5000")
 	values.Set("_journal_mode", "DELETE")
@@ -94,6 +100,47 @@ func sqlcipherDSN(path, password string) string {
 
 func escapeSQLCipherPragmaString(value string) string {
 	return strings.ReplaceAll(value, `"`, `""`)
+}
+
+func validateSQLCipherOpen(ctx context.Context, database *sql.DB) error {
+	var count int
+	if err := database.QueryRowContext(ctx, `SELECT count(*) FROM sqlite_master`).Scan(&count); err != nil {
+		return fmt.Errorf("open SQLCipher database with configured key: %w", err)
+	}
+	if err := expectPragma(ctx, database, "cipher_page_size", sqlcipherPageSize); err != nil {
+		return err
+	}
+	if err := expectPragma(ctx, database, "foreign_keys", "1"); err != nil {
+		return err
+	}
+	if err := expectPragma(ctx, database, "secure_delete", "1"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func expectPragma(ctx context.Context, database *sql.DB, name, want string) error {
+	var got string
+	if err := database.QueryRowContext(ctx, `PRAGMA `+name).Scan(&got); err != nil {
+		return fmt.Errorf("read PRAGMA %s: %w", name, err)
+	}
+	if got != want {
+		return fmt.Errorf("PRAGMA %s = %s, want %s", name, got, want)
+	}
+	return nil
+}
+
+func restrictDatabaseFile(path string) error {
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("stat SQLCipher database: %w", err)
+	}
+	if err := os.Chmod(path, 0o600); err != nil {
+		return fmt.Errorf("restrict SQLCipher database permissions: %w", err)
+	}
+	return nil
 }
 
 var _ = sqlcipher.Version
