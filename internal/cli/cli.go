@@ -69,6 +69,7 @@ func (c cli) rootCommand() *cobra.Command {
 	root.AddCommand(c.exportCommand())
 	root.AddCommand(c.importCommand())
 	root.AddCommand(c.renameCommand())
+	root.AddCommand(c.addCommand())
 	root.AddCommand(c.moveCommand())
 	root.AddCommand(c.removeCommand())
 	return root

@@ -122,6 +122,36 @@ func ScanTopFolder(root string) (ScanResult, error) {
 	return result, nil
 }
 
+func ScanPath(path string) (ScanResult, error) {
+	if path == "" {
+		return ScanResult{}, errors.New("path is required")
+	}
+
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return ScanResult{}, fmt.Errorf("resolve path: %w", err)
+	}
+
+	info, err := os.Lstat(absPath)
+	if err != nil {
+		return ScanResult{}, fmt.Errorf("stat path: %w", err)
+	}
+	if info.Mode().Type() == 0 {
+		return ScanResult{
+			Root: Entry{
+				RootRelativePath: ".",
+				AbsolutePath:     absPath,
+				Type:             EntryTypeFile,
+				Size:             info.Size(),
+			},
+		}, nil
+	}
+	if info.IsDir() {
+		return ScanTopFolder(absPath)
+	}
+	return ScanResult{}, fmt.Errorf("path is unsupported: %s", unsupportedReason(info.Mode()))
+}
+
 func isRegularDir(info fs.FileInfo) bool {
 	return info.IsDir() && info.Mode().Type() == os.ModeDir
 }

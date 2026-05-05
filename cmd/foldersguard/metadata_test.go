@@ -155,3 +155,88 @@ func TestRunMoveUpdatesMetadataAndEncryptedContent(t *testing.T) {
 		t.Fatalf("restored plaintext = %q, want %q", restored, plaintext)
 	}
 }
+
+func TestRunAddUpdatesMetadataAndEncryptedContent(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	addSource := filepath.Join(root, "new.txt")
+	contentOutput := filepath.Join(root, "content")
+	stagingOutput := filepath.Join(root, "staging")
+	databaseOutput := filepath.Join(root, "project.fg")
+	restoreOutput := filepath.Join(root, "restored")
+	if err := os.MkdirAll(filepath.Join(source, "docs"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "docs", "old.txt"), []byte("old"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	addedPlaintext := []byte("new content")
+	if err := os.WriteFile(addSource, addedPlaintext, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Setenv("HOME", root)
+	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	if err := cli.RunWithIO("foldersguard", []string{
+		"encrypt",
+		source,
+		"--content-out", contentOutput,
+		"--export", databaseOutput,
+		"--max-part-size", "1024",
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	var addOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"add",
+		databaseOutput,
+		addSource,
+		"source/docs",
+		"--staging-content", stagingOutput,
+		"--content", contentOutput,
+		"--max-part-size", "1024",
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &addOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, addOutput.String(),
+		"staging_content="+stagingOutput+"\n",
+		"operations=1\n",
+		"operation=upload source=",
+		" target=",
+	)
+
+	var verifyOutput bytes.Buffer
+	if err := cli.RunWithIO("foldersguard", []string{
+		"verify",
+		databaseOutput,
+		"--content", contentOutput,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &verifyOutput); err != nil {
+		t.Fatal(err)
+	}
+	assertOutputContains(t, verifyOutput.String(),
+		"checked_objects=4\n",
+		"extra_objects=0\n",
+		"status=ok\n",
+	)
+
+	if err := cli.RunWithIO("foldersguard", []string{
+		"decrypt",
+		databaseOutput,
+		"--content", contentOutput,
+		"--out", restoreOutput,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	restored, err := os.ReadFile(filepath.Join(restoreOutput, "source", "docs", "new.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(restored, addedPlaintext) {
+		t.Fatalf("restored plaintext = %q, want %q", restored, addedPlaintext)
+	}
+}

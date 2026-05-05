@@ -47,12 +47,13 @@ Adds cleartext content to an existing project.
 Usage:
 
 ```text
-fg add <project-ref> <source-path> <target-folder-path> --staging-content <folder> [--content <encrypted-content-folder>] [--password-stdin | --password-env <name>] [--force]
+fg add <project-ref> <source-path> <target-folder-path> --staging-content <folder> --max-part-size <bytes> [--content <encrypted-content-folder>] [--password-stdin | --password-env <name>] [--force]
 ```
 
 Behavior:
 
 - Scans `<source-path>`.
+- Uses `--max-part-size` to calculate native balanced splitting for newly added files.
 - Encrypts new content into `--staging-content`.
 - Updates FG metadata with new items, keys, and storage objects.
 - Produces storage operation instructions telling the user where to upload or move staged encrypted content.
