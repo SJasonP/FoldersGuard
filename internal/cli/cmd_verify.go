@@ -6,7 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"foldersguard/internal/project"
+	"foldersguard/internal/app"
+	"foldersguard/internal/db"
+	"foldersguard/internal/format"
 )
 
 type verifyOptions struct {
@@ -38,29 +40,44 @@ func (c cli) verifyCommand() *cobra.Command {
 }
 
 func (c cli) runVerify(options verifyOptions) error {
-	if err := validateExistingDirectory(options.contentRoot, "content"); err != nil {
-		return err
-	}
-
 	ctx := context.Background()
-	plan, err := c.readDatabaseFromProjectRef(ctx, options.projectRef, options.passwordOptions)
+	service, err := app.NewService("")
 	if err != nil {
 		return err
 	}
-	report, err := (project.Verifier{EncryptedRoot: options.contentRoot}).VerifyContent(ctx, plan)
+	if format.IsSetExtension(options.projectRef) && !hasPasswordInput(options.passwordOptions) {
+		result, err := service.Verify(ctx, app.DatabaseOpen{
+			ProjectRef: options.projectRef,
+			Password:   db.UnprotectedSharePassword,
+		}, options.contentRoot)
+		if err == nil {
+			writeVerifyResult(c.out, result)
+			return nil
+		}
+	}
+	password, err := c.readDatabasePassword(options.projectRef, options.passwordOptions)
+	if err != nil {
+		return err
+	}
+	result, err := service.Verify(ctx, app.DatabaseOpen{
+		ProjectRef: options.projectRef,
+		Password:   password,
+	}, options.contentRoot)
 	if err != nil {
 		return err
 	}
 
-	status := "ok"
-	if !report.OK() {
-		status = "failed"
-	}
-	fmt.Fprintf(c.out, "project_id=%s\n", plan.Project.ID)
-	fmt.Fprintf(c.out, "checked_objects=%d\n", report.CheckedObjects)
-	fmt.Fprintf(c.out, "missing_objects=%d\n", report.MissingObjects)
-	fmt.Fprintf(c.out, "tampered_objects=%d\n", report.TamperedObjects)
-	fmt.Fprintf(c.out, "extra_objects=%d\n", report.ExtraObjects)
-	fmt.Fprintf(c.out, "status=%s\n", status)
+	writeVerifyResult(c.out, result)
 	return nil
+}
+
+func writeVerifyResult(out interface {
+	Write([]byte) (int, error)
+}, result app.VerifyResult) {
+	fmt.Fprintf(out, "project_id=%s\n", result.ProjectID)
+	fmt.Fprintf(out, "checked_objects=%d\n", result.CheckedObjects)
+	fmt.Fprintf(out, "missing_objects=%d\n", result.MissingObjects)
+	fmt.Fprintf(out, "tampered_objects=%d\n", result.TamperedObjects)
+	fmt.Fprintf(out, "extra_objects=%d\n", result.ExtraObjects)
+	fmt.Fprintf(out, "status=%s\n", result.Status)
 }

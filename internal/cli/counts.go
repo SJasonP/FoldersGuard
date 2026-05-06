@@ -1,10 +1,10 @@
 package cli
 
-import "foldersguard/internal/model"
+import (
+	"foldersguard/internal/app"
+	"foldersguard/internal/model"
+)
 
 func countFolders(plan model.PlannedProject) int {
-	if plan.Project.DatabaseType == "share" && plan.RootItem.RealName == "" {
-		return len(plan.Folders)
-	}
-	return len(plan.Folders) + 1
+	return app.CountFolders(plan)
 }

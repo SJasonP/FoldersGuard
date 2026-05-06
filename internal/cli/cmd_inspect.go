@@ -5,6 +5,10 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+
+	"foldersguard/internal/app"
+	"foldersguard/internal/db"
+	"foldersguard/internal/format"
 )
 
 type inspectOptions struct {
@@ -34,21 +38,47 @@ func (c cli) inspectCommand() *cobra.Command {
 
 func (c cli) runInspect(options inspectOptions) error {
 	ctx := context.Background()
-	plan, meta, err := c.readDatabaseWithMetaFromProjectRef(ctx, options.projectRef, options.passwordOptions)
+	service, err := app.NewService("")
 	if err != nil {
 		return err
 	}
-
-	fmt.Fprintf(c.out, "project_id=%s\n", plan.Project.ID)
-	fmt.Fprintf(c.out, "database_type=%s\n", meta["database_type"])
-	fmt.Fprintf(c.out, "root_folder_id=%s\n", plan.Project.RootFolderID)
-	fmt.Fprintf(c.out, "root_name=%s\n", plan.RootItem.RealName)
-	fmt.Fprintf(c.out, "format_version=%s\n", meta["format_version"])
-	fmt.Fprintf(c.out, "schema_version=%s\n", meta["schema_version"])
-	fmt.Fprintf(c.out, "items=%d\n", len(plan.Items)+1)
-	fmt.Fprintf(c.out, "folders=%d\n", countFolders(plan))
-	fmt.Fprintf(c.out, "files=%d\n", len(plan.Files))
-	fmt.Fprintf(c.out, "parts=%d\n", len(plan.Parts))
-	fmt.Fprintf(c.out, "storage_objects=%d\n", len(plan.StorageObjects))
+	if format.IsSetExtension(options.projectRef) && !hasPasswordInput(options.passwordOptions) {
+		result, err := service.Inspect(ctx, app.DatabaseOpen{
+			ProjectRef: options.projectRef,
+			Password:   db.UnprotectedSharePassword,
+		})
+		if err == nil {
+			writeInspectResult(c.out, result)
+			return nil
+		}
+	}
+	password, err := c.readDatabasePassword(options.projectRef, options.passwordOptions)
+	if err != nil {
+		return err
+	}
+	result, err := service.Inspect(ctx, app.DatabaseOpen{
+		ProjectRef: options.projectRef,
+		Password:   password,
+	})
+	if err != nil {
+		return err
+	}
+	writeInspectResult(c.out, result)
 	return nil
+}
+
+func writeInspectResult(out interface {
+	Write([]byte) (int, error)
+}, result app.InspectResult) {
+	fmt.Fprintf(out, "project_id=%s\n", result.ProjectID)
+	fmt.Fprintf(out, "database_type=%s\n", result.DatabaseType)
+	fmt.Fprintf(out, "root_folder_id=%s\n", result.RootFolderID)
+	fmt.Fprintf(out, "root_name=%s\n", result.RootName)
+	fmt.Fprintf(out, "format_version=%s\n", result.FormatVersion)
+	fmt.Fprintf(out, "schema_version=%s\n", result.SchemaVersion)
+	fmt.Fprintf(out, "items=%d\n", result.Items)
+	fmt.Fprintf(out, "folders=%d\n", result.Folders)
+	fmt.Fprintf(out, "files=%d\n", result.Files)
+	fmt.Fprintf(out, "parts=%d\n", result.Parts)
+	fmt.Fprintf(out, "storage_objects=%d\n", result.StorageObjects)
 }
