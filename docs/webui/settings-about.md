@@ -13,6 +13,7 @@ Supported settings:
 - Clear recently used paths.
 - Window state persistence.
 - Theme: system, light, or dark.
+- Language: system, English (United States), or Simplified Chinese.
 
 Default settings:
 
@@ -20,6 +21,7 @@ Default settings:
 - Operation guide format defaults to `txt`.
 - Default maximum part size defaults to no limit.
 - Theme defaults to system.
+- Language defaults to system.
 - Recently used paths are remembered.
 
 Settings behavior:
@@ -27,6 +29,40 @@ Settings behavior:
 - Settings changes require confirmation before saving.
 - Settings that affect running jobs apply only to future operations.
 - Clearing recently used paths does not affect projects, encrypted content, or FG databases.
+
+## Localization
+
+The WebUI supports localization.
+
+Supported languages:
+
+- English (United States).
+- Simplified Chinese.
+
+Localization behavior:
+
+- All user-visible WebUI text must come from localization resources.
+- English (United States) is the fallback language.
+- Missing translations fall back to English (United States).
+- The language setting supports system matching.
+- System language changes are applied automatically when the language setting is system.
+- Adding a new language must not require changing UI component logic.
+- Dates, times, numbers, and file sizes are formatted through localization-aware formatters.
+- Paths, project ids, UUID names, command names, file extensions, and cryptographic algorithm identifiers are not translated.
+
+## Theme
+
+The WebUI supports complete light and dark themes.
+
+Theme behavior:
+
+- Every WebUI screen, modal, form, table, tree, progress indicator, error state, warning state, empty state, and disabled state must support both light and dark themes.
+- Theme defaults to system.
+- When theme is system, the WebUI automatically matches the host operating system light or dark appearance.
+- When the host system appearance changes while the WebUI is running, the WebUI updates without restart.
+- User-selected light or dark theme overrides system matching.
+- Theme changes apply immediately.
+- Color is not the only indicator for errors, warnings, pending changes, selected items, or destructive actions.
 
 ## About
 

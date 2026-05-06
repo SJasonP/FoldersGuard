@@ -106,6 +106,32 @@ The frontend may cache display models for responsiveness, but Go services remain
 - Pending change applicability.
 - Storage operation plans.
 
+## Localization Implementation
+
+The frontend uses structured localization resources for all user-visible strings.
+
+Rules:
+
+- English (United States) and Simplified Chinese resources must both be present.
+- English (United States) is the fallback locale.
+- UI components reference translation keys instead of hard-coded display strings.
+- Adding a new language must be limited to adding locale resources and registering the locale.
+- Locale-aware formatting is used for dates, times, numbers, and file sizes.
+- Localization resources do not contain passwords, internal keys, database keys, or decrypted key material.
+
+## Theme Implementation
+
+The frontend uses theme tokens rather than hard-coded colors in components.
+
+Rules:
+
+- Light and dark token sets must cover all UI states.
+- The default theme follows the host system appearance.
+- System theme changes are observed while the WebUI is running.
+- A user-selected light or dark theme overrides system matching.
+- Theme state is stored as a user preference, not as project data.
+- Theme tokens must preserve readable contrast for normal text, disabled controls, warnings, errors, selected items, and destructive actions.
+
 ## Packaging
 
 The distributed desktop application is built from the Go backend and bundled frontend assets.

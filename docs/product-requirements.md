@@ -23,6 +23,8 @@ Encrypted content and FG data are separate. The encrypted content tree contains 
 - Support large files by splitting them into balanced parts when needed.
 - Require both sender and recipient to use FG.
 - Provide a local desktop WebUI for normal interactive use.
+- Provide WebUI localization for American English and Simplified Chinese, with an extensible structure for adding more languages.
+- Provide a complete WebUI dark theme and automatically follow system light or dark appearance by default.
 - Provide a CLI for stable automation and scripting.
 - Allow renaming files and directories by updating only FG data, without requiring access to encrypted content.
 - For adding, moving, or deleting encrypted content in manually managed storage, generate clear operation instructions for the user.
