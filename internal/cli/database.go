@@ -18,7 +18,7 @@ func activeProjectDatabasePath(projectID string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("resolve user config directory: %w", err)
 	}
-	return filepath.Join(configDir, format.AppID, "projects", projectID+format.ProjectExtension), nil
+	return filepath.Join(configDir, format.DataDirName, "projects", projectID+format.ProjectExtension), nil
 }
 
 func databasePathFromProjectRef(projectRef string) (string, error) {

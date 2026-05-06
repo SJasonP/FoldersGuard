@@ -17,6 +17,12 @@ App id:
 com.SJasonP.FoldersGuard
 ```
 
+FG data directory name:
+
+```text
+FoldersGuard
+```
+
 ## Encrypted Content Layout
 
 FG native mode stores encrypted content as a directory tree. The logical tree shape mirrors the original cleartext hierarchy, but visible names are UUID values.
@@ -29,7 +35,7 @@ FG reserved filenames and exported FG data do not need to be hidden. It is accep
 
 FG data stores the metadata for one or more FG projects. V1 allows active FG data to live only in FG's data directory.
 
-The platform-specific path is derived from the app id `com.SJasonP.FoldersGuard` and follows the host OS conventions.
+The platform-specific path is the host OS user configuration directory plus the `FoldersGuard` data directory name.
 
 FG data is stored as SQLCipher-encrypted SQLite databases. FG data may be exported. Exported FG data is a database file that can be backed up or transferred.
 

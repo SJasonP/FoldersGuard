@@ -2,6 +2,7 @@ package format
 
 const (
 	AppID               = "com.SJasonP.FoldersGuard"
+	DataDirName         = "FoldersGuard"
 	NativeFormatVersion = "fg-native-v1"
 	SchemaVersion       = 1
 	CryptoSuite         = "fg-v1"

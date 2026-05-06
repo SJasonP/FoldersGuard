@@ -10,7 +10,7 @@ FG creates one active project from one top-level folder at a time. Share databas
 
 Encrypted content and FG data are separate. The encrypted content tree is the portable storage payload. FG data is the private encrypted project database that maps UUID names to real names, stores metadata records, tracks internal keys, and records the relationship between original structure and encrypted structure.
 
-The FG app id is `com.SJasonP.FoldersGuard`. Each FG project also has its own generated project id.
+The FG app id is `com.SJasonP.FoldersGuard`. The FG data directory name is `FoldersGuard`. Each FG project also has its own generated project id.
 
 ## Core Concepts
 

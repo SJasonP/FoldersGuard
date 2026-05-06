@@ -34,7 +34,7 @@ As a user, I want to encrypt a folder so that all files under it are protected, 
 
 ### Manage One FG Project
 
-As a user, I want one top-level folder to behave like one FG project, with active project metadata tracked in FG's data directory under the app id `com.SJasonP.FoldersGuard`.
+As a user, I want one top-level folder to behave like one FG project, with active project metadata tracked in FG's `FoldersGuard` data directory.
 
 ### Unlock A Top-Level Folder
 

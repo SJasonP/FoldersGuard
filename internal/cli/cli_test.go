@@ -124,6 +124,9 @@ func TestExportMissingProjectDoesNotCreateFiles(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if !strings.Contains(active, string(filepath.Separator)+"FoldersGuard"+string(filepath.Separator)) {
+		t.Fatalf("active database path = %q, want FoldersGuard data directory", active)
+	}
 	if _, statErr := os.Stat(active); !os.IsNotExist(statErr) {
 		t.Fatalf("active database stat error = %v, want not exist", statErr)
 	}
