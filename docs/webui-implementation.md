@@ -10,9 +10,31 @@ The v1 WebUI uses:
 - React for the frontend component model.
 - TypeScript for frontend type checking.
 - Vite for frontend development and bundling.
+- Ant Design for the primary React component library.
 - Go application services as the only bridge to FG core behavior.
 
 The WebUI frontend is bundled into the desktop application. FG does not run a general remote web service for the WebUI by default.
+
+## UI Component Model
+
+The frontend uses Ant Design components for standard application UI.
+
+Ant Design is used for:
+
+- Application layout.
+- Menus and navigation.
+- Forms and validation display.
+- Tables, lists, and empty states.
+- Trees and directory-style item selection.
+- Modals, drawers, confirmations, and progress feedback.
+- Tabs, segmented controls, switches, checkboxes, radio groups, selects, and file-operation controls.
+- Messages and notifications.
+
+The frontend should prefer Ant Design components over custom controls when Ant Design provides the needed behavior.
+
+Custom components may wrap Ant Design primitives to express FG-specific workflows, but they must keep Ant Design accessibility, keyboard behavior, validation behavior, and theme integration intact.
+
+Icons use Ant Design icons by default. Additional icon packages may be introduced only when Ant Design does not provide a suitable icon for a required command or state.
 
 ## Implementation Rules
 
@@ -108,7 +130,7 @@ The frontend may cache display models for responsiveness, but Go services remain
 
 ## Localization Implementation
 
-The frontend uses structured localization resources for all user-visible strings.
+The frontend uses structured localization resources for all user-visible strings and connects the selected locale to Ant Design's locale provider.
 
 Rules:
 
@@ -116,12 +138,13 @@ Rules:
 - English (United States) is the fallback locale.
 - UI components reference translation keys instead of hard-coded display strings.
 - Adding a new language must be limited to adding locale resources and registering the locale.
+- Ant Design locale configuration must match the active FG locale.
 - Locale-aware formatting is used for dates, times, numbers, and file sizes.
 - Localization resources do not contain passwords, internal keys, database keys, or decrypted key material.
 
 ## Theme Implementation
 
-The frontend uses theme tokens rather than hard-coded colors in components.
+The frontend uses Ant Design theme tokens rather than hard-coded colors in components.
 
 Rules:
 
@@ -129,6 +152,7 @@ Rules:
 - The default theme follows the host system appearance.
 - System theme changes are observed while the WebUI is running.
 - A user-selected light or dark theme overrides system matching.
+- Ant Design theme configuration must switch between light and dark algorithms according to FG theme state.
 - Theme state is stored as a user preference, not as project data.
 - Theme tokens must preserve readable contrast for normal text, disabled controls, warnings, errors, selected items, and destructive actions.
 
