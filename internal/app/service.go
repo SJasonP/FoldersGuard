@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
+	"time"
 
 	"foldersguard/internal/db"
 	"foldersguard/internal/format"
@@ -46,6 +48,13 @@ type VerifyResult struct {
 	Status          string
 }
 
+type ActiveProjectSummary struct {
+	ProjectID    string
+	FileName     string
+	ModifiedAt   time.Time
+	Availability string
+}
+
 func NewService(dataDir string) (Service, error) {
 	if dataDir == "" {
 		resolved, err := DefaultDataDir()
@@ -69,6 +78,13 @@ func (s Service) ProjectsDir() string {
 	return filepath.Join(s.DataDir, "projects")
 }
 
+func (s Service) EnsureDataDir() error {
+	if err := os.MkdirAll(s.ProjectsDir(), 0o755); err != nil {
+		return fmt.Errorf("create data directory: %w", err)
+	}
+	return nil
+}
+
 func (s Service) ActiveProjectDatabasePath(projectID string) (string, error) {
 	if projectID == "" {
 		return "", fmt.Errorf("project id is required")
@@ -90,6 +106,45 @@ func (s Service) DatabasePathFromProjectRef(projectRef string) (string, error) {
 		return projectRef, nil
 	}
 	return s.ActiveProjectDatabasePath(projectRef)
+}
+
+func (s Service) ListActiveProjects() ([]ActiveProjectSummary, error) {
+	if err := s.EnsureDataDir(); err != nil {
+		return nil, err
+	}
+
+	entries, err := os.ReadDir(s.ProjectsDir())
+	if err != nil {
+		return nil, fmt.Errorf("read projects directory: %w", err)
+	}
+
+	var projects []ActiveProjectSummary
+	for _, entry := range entries {
+		if filepath.Ext(entry.Name()) != format.ProjectExtension {
+			continue
+		}
+
+		project := ActiveProjectSummary{
+			ProjectID:    entry.Name()[:len(entry.Name())-len(format.ProjectExtension)],
+			FileName:     entry.Name(),
+			Availability: "available",
+		}
+
+		info, err := entry.Info()
+		if err != nil || info.IsDir() {
+			project.Availability = "unavailable"
+			projects = append(projects, project)
+			continue
+		}
+
+		project.ModifiedAt = info.ModTime().UTC()
+		projects = append(projects, project)
+	}
+
+	sort.Slice(projects, func(i, j int) bool {
+		return projects[i].ProjectID < projects[j].ProjectID
+	})
+	return projects, nil
 }
 
 func (s Service) ReadDatabase(ctx context.Context, input DatabaseOpen) (model.PlannedProject, map[string]string, error) {

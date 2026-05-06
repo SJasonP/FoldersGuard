@@ -5,3 +5,7 @@
 export function AppInfo() {
   return window['go']['main']['App']['AppInfo']();
 }
+
+export function ListLocalProjects() {
+  return window['go']['main']['App']['ListLocalProjects']();
+}

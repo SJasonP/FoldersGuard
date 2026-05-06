@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"foldersguard/internal/db"
 	"foldersguard/internal/format"
@@ -115,5 +116,46 @@ func TestServiceInspectAndVerify(t *testing.T) {
 	}
 	if verify.Status != "ok" || verify.MissingObjects != 0 || verify.TamperedObjects != 0 || verify.ExtraObjects != 0 {
 		t.Fatalf("verify result = %+v", verify)
+	}
+}
+
+func TestServiceEnsureDataDirAndListActiveProjects(t *testing.T) {
+	root := t.TempDir()
+	service, err := NewService(filepath.Join(root, "data"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := service.EnsureDataDir(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(service.ProjectsDir()); err != nil {
+		t.Fatalf("projects dir stat error = %v", err)
+	}
+
+	now := time.Date(2026, 5, 6, 12, 0, 0, 0, time.UTC)
+	projectPath := filepath.Join(service.ProjectsDir(), "alpha"+format.ProjectExtension)
+	if err := os.WriteFile(projectPath, []byte("project"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chtimes(projectPath, now, now); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(service.ProjectsDir(), "ignore"+format.SetExtension), []byte("share"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	projects, err := service.ListActiveProjects()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(projects) != 1 {
+		t.Fatalf("project count = %d, want 1", len(projects))
+	}
+	if projects[0].ProjectID != "alpha" || projects[0].FileName != "alpha"+format.ProjectExtension || projects[0].Availability != "available" {
+		t.Fatalf("project summary = %+v", projects[0])
+	}
+	if !projects[0].ModifiedAt.Equal(now) {
+		t.Fatalf("modified at = %s, want %s", projects[0].ModifiedAt, now)
 	}
 }

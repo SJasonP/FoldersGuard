@@ -3,3 +3,5 @@
 import {main} from '../models';
 
 export function AppInfo():Promise<main.AppInfo>;
+
+export function ListLocalProjects():Promise<Array<main.LocalProjectSummary>>;

@@ -12,7 +12,6 @@ import {
   Space,
   Table,
   Typography,
-  theme,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -26,7 +25,8 @@ import {
 } from '@ant-design/icons';
 import enUS from 'antd/locale/en_US';
 import zhCN from 'antd/locale/zh_CN';
-import { AppInfo } from '../wailsjs/go/main/App';
+import { AppInfo, ListLocalProjects } from '../wailsjs/go/main/App';
+import { main } from '../wailsjs/go/models';
 import type { SupportedLanguage } from './i18n';
 import i18n from './i18n';
 import { resolveTheme, themeAlgorithm, type ThemeMode } from './theme';
@@ -42,6 +42,7 @@ type LocalProject = {
 };
 
 type AppInfoModel = Awaited<ReturnType<typeof AppInfo>>;
+type LocalProjectSummary = main.LocalProjectSummary;
 
 const antLocales: Record<SupportedLanguage, typeof enUS> = {
   'en-US': enUS,
@@ -55,6 +56,10 @@ function App() {
   const [themeMode] = useState<ThemeMode>('system');
   const [resolvedTheme, setResolvedTheme] = useState(resolveTheme(themeMode));
   const [info, setInfo] = useState<AppInfoModel | null>(null);
+  const [projectSearch, setProjectSearch] = useState('');
+  const [projects, setProjects] = useState<LocalProjectSummary[]>([]);
+  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [projectsError, setProjectsError] = useState<string | null>(null);
 
   useEffect(() => {
     AppInfo().then(setInfo).catch(() => setInfo(null));
@@ -72,7 +77,54 @@ function App() {
     return () => media.removeEventListener('change', update);
   }, [themeMode]);
 
-  const projects = useMemo<LocalProject[]>(() => [], []);
+  const loadProjects = async () => {
+    setProjectsLoading(true);
+    setProjectsError(null);
+    try {
+      const nextProjects = await ListLocalProjects();
+      setProjects(nextProjects);
+    } catch {
+      setProjects([]);
+      setProjectsError(t('errorLoadingProjects'));
+    } finally {
+      setProjectsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const visibleProjects = useMemo<LocalProject[]>(
+    () =>
+      projects
+        .filter((project) => {
+          const query = projectSearch.trim().toLowerCase();
+          if (query === '') {
+            return true;
+          }
+          return (
+            project.projectId.toLowerCase().includes(query) ||
+            project.fileName.toLowerCase().includes(query) ||
+            project.availabilityStatus.toLowerCase().includes(query)
+          );
+        })
+        .map((project) => ({
+          key: project.projectId,
+          projectId: project.projectId,
+          fileName: project.fileName,
+          modifiedTime: project.modifiedAt
+            ? new Intl.DateTimeFormat(language, {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(new Date(project.modifiedAt))
+            : '',
+          availabilityStatus: t(project.availabilityStatus),
+        })),
+    [language, projectSearch, projects, t],
+  );
+
   const columns = useMemo<ColumnsType<LocalProject>>(
     () => [
       { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },
@@ -133,13 +185,21 @@ function App() {
                   <Flex justify="space-between" align="center" gap={16}>
                     <Typography.Title level={2}>{t('localProjects')}</Typography.Title>
                     <Space>
-                      <Input.Search placeholder={t('searchProjects')} />
-                      <Button icon={<ReloadOutlined />}>{t('refresh')}</Button>
+                      <Input.Search
+                        placeholder={t('searchProjects')}
+                        value={projectSearch}
+                        onChange={(event) => setProjectSearch(event.target.value)}
+                      />
+                      <Button icon={<ReloadOutlined />} onClick={() => void loadProjects()}>
+                        {t('refresh')}
+                      </Button>
                     </Space>
                   </Flex>
+                  {projectsError ? <Typography.Text type="danger">{projectsError}</Typography.Text> : null}
                   <Table
                     columns={columns}
-                    dataSource={projects}
+                    dataSource={visibleProjects}
+                    loading={projectsLoading}
                     locale={{ emptyText: <Empty description={t('noProjects')} /> }}
                     pagination={false}
                   />

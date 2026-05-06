@@ -1,5 +1,5 @@
 export namespace main {
-	
+
 	export class AppInfo {
 	    productName: string;
 	    appId: string;
@@ -8,11 +8,11 @@ export namespace main {
 	    dataDir: string;
 	    cliExecutableName: string;
 	    cliShortAlias: string;
-	
+
 	    static createFrom(source: any = {}) {
 	        return new AppInfo(source);
 	    }
-	
+
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.productName = source["productName"];
@@ -22,6 +22,24 @@ export namespace main {
 	        this.dataDir = source["dataDir"];
 	        this.cliExecutableName = source["cliExecutableName"];
 	        this.cliShortAlias = source["cliShortAlias"];
+	    }
+	}
+	export class LocalProjectSummary {
+	    projectId: string;
+	    fileName: string;
+	    modifiedAt: string;
+	    availabilityStatus: string;
+
+	    static createFrom(source: any = {}) {
+	        return new LocalProjectSummary(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.fileName = source["fileName"];
+	        this.modifiedAt = source["modifiedAt"];
+	        this.availabilityStatus = source["availabilityStatus"];
 	    }
 	}
 
