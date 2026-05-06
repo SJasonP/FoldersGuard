@@ -155,8 +155,8 @@ func TestProjectCommandsRejectDatabasePaths(t *testing.T) {
 		{"remove", projectDatabase, "Root/old.txt", "--force", "--password-env", "FG_TEST_PASSWORD"},
 		{"plan", "add", shareDatabase, filepath.Join(root, "new.txt"), "Root", "--staging-content", filepath.Join(root, "staging-plan"), "--max-part-size", "1024", "--password-env", "FG_TEST_PASSWORD"},
 		{"plan", "add", projectDatabase, filepath.Join(root, "new.txt"), "Root", "--staging-content", filepath.Join(root, "staging-plan"), "--max-part-size", "1024", "--password-env", "FG_TEST_PASSWORD"},
-		{"share", shareDatabase, "Root", "--content", root, "--out-content", filepath.Join(root, "out-content"), "--out-database", filepath.Join(root, "out.fgs"), "--password-env", "FG_TEST_PASSWORD", "--no-share-password"},
-		{"share", projectDatabase, "Root", "--content", root, "--out-content", filepath.Join(root, "out-content"), "--out-database", filepath.Join(root, "out.fgs"), "--password-env", "FG_TEST_PASSWORD", "--no-share-password"},
+		{"share", shareDatabase, "Root", "--out-database", filepath.Join(root, "out.fgs"), "--password-env", "FG_TEST_PASSWORD", "--no-share-password"},
+		{"share", projectDatabase, "Root", "--out-database", filepath.Join(root, "out.fgs"), "--password-env", "FG_TEST_PASSWORD", "--no-share-password"},
 	}
 	for _, args := range commands {
 		err := RunWithIO("foldersguard", args, nil, nil)
@@ -212,10 +212,6 @@ func TestPasswordRequiredInNonInteractiveMode(t *testing.T) {
 
 func TestShareRequiresActiveProjectBeforeDefaultSharePassword(t *testing.T) {
 	root := t.TempDir()
-	contentRoot := filepath.Join(root, "content")
-	if err := os.MkdirAll(contentRoot, 0o755); err != nil {
-		t.Fatal(err)
-	}
 	database := filepath.Join(root, "project.fg")
 	if err := os.WriteFile(database, []byte("not a database"), 0o600); err != nil {
 		t.Fatal(err)
@@ -225,8 +221,6 @@ func TestShareRequiresActiveProjectBeforeDefaultSharePassword(t *testing.T) {
 		"share",
 		database,
 		"Root",
-		"--content", contentRoot,
-		"--out-content", filepath.Join(root, "out-content"),
 		"--out-database", filepath.Join(root, "share.fgs"),
 		"--password-env", "FG_TEST_PASSWORD",
 	}, strings.NewReader(""), nil)
@@ -244,8 +238,6 @@ func TestShareRejectsTwoStdinPasswordModes(t *testing.T) {
 		"share",
 		filepath.Join(root, "missing.fg"),
 		"Root",
-		"--content", root,
-		"--out-content", filepath.Join(root, "out-content"),
 		"--out-database", filepath.Join(root, "share.fgs"),
 		"--password-stdin",
 		"--share-password-stdin",

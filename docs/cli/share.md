@@ -24,6 +24,7 @@ Behavior:
 - Includes captured filesystem metadata for selected files and folder subtrees.
 - Writes a `.fgs` share database.
 - Does not copy, stage, upload, move, or delete encrypted content.
+- Prints encrypted content location mappings the user must provide with the share.
 - Does not grant access to parent folders, sibling files, sibling folders, or unrelated content unless those items are explicitly selected.
 
 Password behavior:
@@ -51,4 +52,5 @@ files=<count>
 folders=<count>
 parts=<count>
 password_protected=<true|false>
+content_location source=<encrypted-visible-path> target=<share-visible-path>
 ```
