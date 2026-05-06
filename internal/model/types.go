@@ -29,14 +29,20 @@ type Project struct {
 }
 
 type Item struct {
-	ID          uuid.UUID
-	ParentID    *uuid.UUID
-	Type        ItemType
-	VisibleName uuid.UUID
-	RealName    string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   *time.Time
+	ID                 uuid.UUID
+	ParentID           *uuid.UUID
+	Type               ItemType
+	VisibleName        uuid.UUID
+	RealName           string
+	OriginalMode       uint32
+	OriginalModTime    time.Time
+	OriginalAccessTime *time.Time
+	OriginalBirthTime  *time.Time
+	WindowsAttributes  *uint32
+	MetadataCaps       []string
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+	DeletedAt          *time.Time
 }
 
 type File struct {

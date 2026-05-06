@@ -11,6 +11,7 @@ import (
 
 	"foldersguard/internal/crypto"
 	"foldersguard/internal/format"
+	"foldersguard/internal/fsmeta"
 	"foldersguard/internal/fswalk"
 	"foldersguard/internal/model"
 )
@@ -48,6 +49,7 @@ func (p Planner) Plan(scan fswalk.ScanResult) (model.PlannedProject, error) {
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
+	applyMetadata(&rootItem, scan.Root.Metadata)
 
 	plan := model.PlannedProject{
 		Project: model.Project{
@@ -104,6 +106,7 @@ func (p Planner) Plan(scan fswalk.ScanResult) (model.PlannedProject, error) {
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		}
+		applyMetadata(&item, entry.Metadata)
 
 		visiblePath := parentVisible + "/" + visibleName.String()
 		pathToID[entry.RootRelativePath] = itemID
@@ -197,6 +200,15 @@ func (p Planner) Plan(scan fswalk.ScanResult) (model.PlannedProject, error) {
 	}
 
 	return plan, nil
+}
+
+func applyMetadata(item *model.Item, metadata fsmeta.Metadata) {
+	item.OriginalMode = metadata.Mode
+	item.OriginalModTime = metadata.ModTime
+	item.OriginalAccessTime = metadata.AccessTime
+	item.OriginalBirthTime = metadata.BirthTime
+	item.WindowsAttributes = metadata.WindowsAttributes
+	item.MetadataCaps = metadata.Capabilities
 }
 
 func (p Planner) now() time.Time {

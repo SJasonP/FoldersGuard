@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"foldersguard/internal/fsmeta"
 	"foldersguard/internal/model"
 )
 
@@ -48,17 +49,37 @@ func writeItems(ctx context.Context, tx *sql.Tx, items []model.Item) error {
 		if item.DeletedAt != nil {
 			deletedAt = formatTime(*item.DeletedAt)
 		}
+		var accessTime any
+		if item.OriginalAccessTime != nil {
+			accessTime = formatTime(*item.OriginalAccessTime)
+		}
+		var birthTime any
+		if item.OriginalBirthTime != nil {
+			birthTime = formatTime(*item.OriginalBirthTime)
+		}
+		var windowsAttributes any
+		if item.WindowsAttributes != nil {
+			windowsAttributes = *item.WindowsAttributes
+		}
 
 		if _, err := tx.ExecContext(ctx, `
 INSERT INTO items (
-	item_id, parent_id, item_type, visible_name, real_name, sort_name, created_at, updated_at, deleted_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+	item_id, parent_id, item_type, visible_name, real_name, sort_name,
+	original_mode, original_mod_time, original_access_time, original_birth_time, windows_attributes, metadata_capabilities,
+	created_at, updated_at, deleted_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			item.ID.String(),
 			parentID,
 			string(item.Type),
 			item.VisibleName.String(),
 			item.RealName,
 			sortName(item.RealName),
+			item.OriginalMode,
+			formatTime(item.OriginalModTime),
+			accessTime,
+			birthTime,
+			windowsAttributes,
+			fsmeta.CapabilitiesString(item.MetadataCaps),
 			formatTime(item.CreatedAt),
 			formatTime(item.UpdatedAt),
 			deletedAt,

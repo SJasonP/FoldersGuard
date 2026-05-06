@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+
+	"foldersguard/internal/fsmeta"
 )
 
 type EntryType string
@@ -21,6 +23,7 @@ type Entry struct {
 	AbsolutePath     string
 	Type             EntryType
 	Size             int64
+	Metadata         fsmeta.Metadata
 }
 
 type ScanResult struct {
@@ -56,6 +59,11 @@ func ScanTopFolder(root string) (ScanResult, error) {
 			Type:             EntryTypeFolder,
 		},
 	}
+	rootMetadata, err := fsmeta.Capture(absRoot, info)
+	if err != nil {
+		return ScanResult{}, err
+	}
+	result.Root.Metadata = rootMetadata
 
 	err = filepath.WalkDir(absRoot, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -77,6 +85,13 @@ func ScanTopFolder(root string) (ScanResult, error) {
 		}
 
 		mode := info.Mode()
+		metadata, err := fsmeta.Capture(path, info)
+		if err != nil {
+			if d.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
 		switch {
 		case mode.Type() == 0:
 			result.Entries = append(result.Entries, Entry{
@@ -84,12 +99,14 @@ func ScanTopFolder(root string) (ScanResult, error) {
 				AbsolutePath:     path,
 				Type:             EntryTypeFile,
 				Size:             info.Size(),
+				Metadata:         metadata,
 			})
 		case isRegularDir(info):
 			result.Entries = append(result.Entries, Entry{
 				RootRelativePath: rel(absRoot, path),
 				AbsolutePath:     path,
 				Type:             EntryTypeFolder,
+				Metadata:         metadata,
 			})
 		default:
 			if d.IsDir() {
@@ -124,12 +141,17 @@ func ScanPath(path string) (ScanResult, error) {
 		return ScanResult{}, fmt.Errorf("stat path: %w", err)
 	}
 	if info.Mode().Type() == 0 {
+		metadata, err := fsmeta.Capture(absPath, info)
+		if err != nil {
+			return ScanResult{}, err
+		}
 		return ScanResult{
 			Root: Entry{
 				RootRelativePath: ".",
 				AbsolutePath:     absPath,
 				Type:             EntryTypeFile,
 				Size:             info.Size(),
+				Metadata:         metadata,
 			},
 		}, nil
 	}

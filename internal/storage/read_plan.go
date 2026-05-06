@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"foldersguard/internal/format"
+	"foldersguard/internal/fsmeta"
 	"foldersguard/internal/model"
 )
 
@@ -98,7 +99,9 @@ func validateMeta(meta map[string]string) error {
 
 func (s *Store) readItems(ctx context.Context, rootFolderID uuid.UUID) ([]model.Item, model.Item, error) {
 	rows, err := s.db.QueryContext(ctx, `
-SELECT item_id, parent_id, item_type, visible_name, real_name, created_at, updated_at, deleted_at
+SELECT item_id, parent_id, item_type, visible_name, real_name,
+	original_mode, original_mod_time, original_access_time, original_birth_time, windows_attributes, metadata_capabilities,
+	created_at, updated_at, deleted_at
 FROM items
 ORDER BY parent_id IS NOT NULL, sort_name, item_id`)
 	if err != nil {
@@ -139,9 +142,26 @@ ORDER BY parent_id IS NOT NULL, sort_name, item_id`)
 func scanItem(scanner interface {
 	Scan(dest ...any) error
 }) (model.Item, error) {
-	var idText, itemType, visibleNameText, realName, createdAtText, updatedAtText string
-	var parentIDText, deletedAtText sql.NullString
-	if err := scanner.Scan(&idText, &parentIDText, &itemType, &visibleNameText, &realName, &createdAtText, &updatedAtText, &deletedAtText); err != nil {
+	var idText, itemType, visibleNameText, realName, originalModTimeText, metadataCapsText, createdAtText, updatedAtText string
+	var originalModeValue int64
+	var parentIDText, accessTimeText, birthTimeText, deletedAtText sql.NullString
+	var windowsAttributes sql.NullInt64
+	if err := scanner.Scan(
+		&idText,
+		&parentIDText,
+		&itemType,
+		&visibleNameText,
+		&realName,
+		&originalModeValue,
+		&originalModTimeText,
+		&accessTimeText,
+		&birthTimeText,
+		&windowsAttributes,
+		&metadataCapsText,
+		&createdAtText,
+		&updatedAtText,
+		&deletedAtText,
+	); err != nil {
 		return model.Item{}, fmt.Errorf("scan item: %w", err)
 	}
 
@@ -161,6 +181,14 @@ func scanItem(scanner interface {
 	if err != nil {
 		return model.Item{}, fmt.Errorf("parse item updated_at for %s: %w", id, err)
 	}
+	originalModTime, err := parseTime(originalModTimeText)
+	if err != nil {
+		return model.Item{}, fmt.Errorf("parse item original_mod_time for %s: %w", id, err)
+	}
+	if originalModeValue < 0 || originalModeValue > int64(^uint32(0)) {
+		return model.Item{}, fmt.Errorf("item %s original mode out of range", id)
+	}
+	originalMode := uint32(originalModeValue)
 
 	var parentID *uuid.UUID
 	if parentIDText.Valid {
@@ -178,20 +206,50 @@ func scanItem(scanner interface {
 		}
 		deletedAt = &parsed
 	}
+	var originalAccessTime *time.Time
+	if accessTimeText.Valid {
+		parsed, err := parseTime(accessTimeText.String)
+		if err != nil {
+			return model.Item{}, fmt.Errorf("parse item original_access_time for %s: %w", id, err)
+		}
+		originalAccessTime = &parsed
+	}
+	var originalBirthTime *time.Time
+	if birthTimeText.Valid {
+		parsed, err := parseTime(birthTimeText.String)
+		if err != nil {
+			return model.Item{}, fmt.Errorf("parse item original_birth_time for %s: %w", id, err)
+		}
+		originalBirthTime = &parsed
+	}
+	var windowsAttrs *uint32
+	if windowsAttributes.Valid {
+		if windowsAttributes.Int64 < 0 || windowsAttributes.Int64 > int64(^uint32(0)) {
+			return model.Item{}, fmt.Errorf("item %s windows attributes out of range", id)
+		}
+		attrs := uint32(windowsAttributes.Int64)
+		windowsAttrs = &attrs
+	}
 
 	typedItem, err := parseItemType(itemType)
 	if err != nil {
 		return model.Item{}, err
 	}
 	return model.Item{
-		ID:          id,
-		ParentID:    parentID,
-		Type:        typedItem,
-		VisibleName: visibleName,
-		RealName:    realName,
-		CreatedAt:   createdAt,
-		UpdatedAt:   updatedAt,
-		DeletedAt:   deletedAt,
+		ID:                 id,
+		ParentID:           parentID,
+		Type:               typedItem,
+		VisibleName:        visibleName,
+		RealName:           realName,
+		OriginalMode:       originalMode,
+		OriginalModTime:    originalModTime,
+		OriginalAccessTime: originalAccessTime,
+		OriginalBirthTime:  originalBirthTime,
+		WindowsAttributes:  windowsAttrs,
+		MetadataCaps:       fsmeta.ParseCapabilities(metadataCapsText),
+		CreatedAt:          createdAt,
+		UpdatedAt:          updatedAt,
+		DeletedAt:          deletedAt,
 	}, nil
 }
 

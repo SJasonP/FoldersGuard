@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"foldersguard/internal/content"
+	"foldersguard/internal/fsmeta"
 	"foldersguard/internal/model"
 )
 
@@ -31,6 +32,8 @@ func (r Restorer) RestoreContent(ctx context.Context, plan model.PlannedProject)
 	}
 	visiblePaths := visiblePathsByItem(plan)
 	partsByFile := partsByFileID(plan.Parts)
+
+	itemByID := itemsByID(plan)
 
 	if err := r.createFolders(ctx, plan, logicalPaths); err != nil {
 		return err
@@ -65,6 +68,16 @@ func (r Restorer) RestoreContent(ctx context.Context, plan model.PlannedProject)
 		default:
 			return fmt.Errorf("unsupported storage kind %q", file.StorageKind)
 		}
+		item, ok := itemByID[file.ID.String()]
+		if !ok {
+			return fmt.Errorf("missing item for file %s", file.ID)
+		}
+		if err := fsmeta.Apply(outputPath, metadataFromItem(item)); err != nil {
+			return fmt.Errorf("restore metadata for file %s: %w", file.ID, err)
+		}
+	}
+	if err := r.restoreFolderMetadata(ctx, plan, logicalPaths, itemByID); err != nil {
+		return err
 	}
 	return nil
 }
@@ -99,6 +112,45 @@ func (r Restorer) createFolders(ctx context.Context, plan model.PlannedProject, 
 		}
 		if err := os.MkdirAll(outputPath, 0o755); err != nil {
 			return fmt.Errorf("create restored folder %s: %w", realPath, err)
+		}
+	}
+	return nil
+}
+
+func (r Restorer) restoreFolderMetadata(ctx context.Context, plan model.PlannedProject, logicalPaths map[string]string, itemByID map[string]model.Item) error {
+	ids := make([]string, 0, len(logicalPaths))
+	folderIDs := make(map[string]struct{})
+	if !isVirtualRoot(plan) {
+		folderIDs[plan.RootFolder.ID.String()] = struct{}{}
+	}
+	for _, folder := range plan.Folders {
+		folderIDs[folder.ID.String()] = struct{}{}
+	}
+	for id := range folderIDs {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool {
+		return pathDepth(logicalPaths[ids[i]]) > pathDepth(logicalPaths[ids[j]])
+	})
+
+	for _, id := range ids {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		realPath, ok := logicalPaths[id]
+		if !ok {
+			return fmt.Errorf("missing logical path for folder %s", id)
+		}
+		item, ok := itemByID[id]
+		if !ok {
+			return fmt.Errorf("missing item for folder %s", id)
+		}
+		outputPath, err := content.SafeJoin(r.OutputRoot, realPath)
+		if err != nil {
+			return fmt.Errorf("resolve output path for folder %s: %w", id, err)
+		}
+		if err := fsmeta.Apply(outputPath, metadataFromItem(item)); err != nil {
+			return fmt.Errorf("restore metadata for folder %s: %w", id, err)
 		}
 	}
 	return nil
@@ -229,6 +281,27 @@ func logicalRealPaths(plan model.PlannedProject) (map[string]string, error) {
 
 func isVirtualRoot(plan model.PlannedProject) bool {
 	return plan.Project.DatabaseType == "share" && plan.RootItem.RealName == ""
+}
+
+func itemsByID(plan model.PlannedProject) map[string]model.Item {
+	output := map[string]model.Item{
+		plan.RootItem.ID.String(): plan.RootItem,
+	}
+	for _, item := range plan.Items {
+		output[item.ID.String()] = item
+	}
+	return output
+}
+
+func metadataFromItem(item model.Item) fsmeta.Metadata {
+	return fsmeta.Metadata{
+		Mode:              item.OriginalMode,
+		ModTime:           item.OriginalModTime,
+		AccessTime:        item.OriginalAccessTime,
+		BirthTime:         item.OriginalBirthTime,
+		WindowsAttributes: item.WindowsAttributes,
+		Capabilities:      item.MetadataCaps,
+	}
 }
 
 func validateRealName(name string) error {

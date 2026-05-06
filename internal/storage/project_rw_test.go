@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"foldersguard/internal/fsmeta"
 	"foldersguard/internal/model"
 )
 
@@ -26,6 +27,8 @@ func TestWritePlannedProject(t *testing.T) {
 	fileID := uuid.New()
 	partID := uuid.New()
 	now := time.Date(2026, 5, 5, 10, 0, 0, 0, time.UTC)
+	originalMod := time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)
+	originalAccess := time.Date(2024, 1, 2, 3, 4, 6, 0, time.UTC)
 	rootVisible := uuid.New()
 	fileVisible := uuid.New()
 	partVisible := uuid.New()
@@ -35,22 +38,29 @@ func TestWritePlannedProject(t *testing.T) {
 	plan := model.PlannedProject{
 		Project: model.Project{ID: projectID, RootFolderID: rootID, CreatedAt: now, UpdatedAt: now},
 		RootItem: model.Item{
-			ID:          rootID,
-			Type:        model.ItemTypeFolder,
-			VisibleName: rootVisible,
-			RealName:    "Root",
-			CreatedAt:   now,
-			UpdatedAt:   now,
+			ID:              rootID,
+			Type:            model.ItemTypeFolder,
+			VisibleName:     rootVisible,
+			RealName:        "Root",
+			OriginalMode:    uint32(0o40755),
+			OriginalModTime: originalMod,
+			MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+			CreatedAt:       now,
+			UpdatedAt:       now,
 		},
 		RootFolder: model.Folder{ID: rootID, Key: make([]byte, 32)},
 		Items: []model.Item{{
-			ID:          fileID,
-			ParentID:    &parentID,
-			Type:        model.ItemTypeFile,
-			VisibleName: fileVisible,
-			RealName:    "file.txt",
-			CreatedAt:   now,
-			UpdatedAt:   now,
+			ID:                 fileID,
+			ParentID:           &parentID,
+			Type:               model.ItemTypeFile,
+			VisibleName:        fileVisible,
+			RealName:           "file.txt",
+			OriginalMode:       uint32(0o100600),
+			OriginalModTime:    originalMod,
+			OriginalAccessTime: &originalAccess,
+			MetadataCaps:       []string{fsmeta.CapabilityAccessTime, fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+			CreatedAt:          now,
+			UpdatedAt:          now,
 		}},
 		Files: []model.File{{
 			ID:               fileID,
@@ -80,16 +90,26 @@ func TestWritePlannedProject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var itemType, realName string
+	var itemType, realName, accessTime, metadataCaps string
+	var originalMode int64
 	err = db.QueryRowContext(ctx, `
-SELECT item_type, real_name FROM items WHERE item_id = ?`,
+SELECT item_type, real_name, original_mode, original_access_time, metadata_capabilities FROM items WHERE item_id = ?`,
 		fileID.String(),
-	).Scan(&itemType, &realName)
+	).Scan(&itemType, &realName, &originalMode, &accessTime, &metadataCaps)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if itemType != "file" || realName != "file.txt" {
 		t.Fatalf("file item = (%s, %s), want (file, file.txt)", itemType, realName)
+	}
+	if originalMode != int64(0o100600) {
+		t.Fatalf("original mode = %o, want 100600", originalMode)
+	}
+	if accessTime == "" {
+		t.Fatal("original access time was not stored")
+	}
+	if metadataCaps != "access_time,mod_time,mode" {
+		t.Fatalf("metadata capabilities = %q, want access_time,mod_time,mode", metadataCaps)
 	}
 
 	var keyLen int
@@ -126,6 +146,10 @@ func TestReadPlannedProject(t *testing.T) {
 	fileVisible := uuid.New()
 	partVisible := uuid.New()
 	now := time.Date(2026, 5, 5, 10, 0, 0, 0, time.UTC)
+	originalMod := time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)
+	originalAccess := time.Date(2024, 1, 2, 3, 4, 6, 0, time.UTC)
+	originalBirth := time.Date(2024, 1, 2, 3, 4, 7, 0, time.UTC)
+	windowsAttrs := uint32(0x23)
 	rootParent := rootID
 	fileSize := int64(42)
 	partSize := int64(21)
@@ -133,32 +157,50 @@ func TestReadPlannedProject(t *testing.T) {
 	plan := model.PlannedProject{
 		Project: model.Project{ID: projectID, RootFolderID: rootID, CreatedAt: now, UpdatedAt: now},
 		RootItem: model.Item{
-			ID:          rootID,
-			Type:        model.ItemTypeFolder,
-			VisibleName: rootVisible,
-			RealName:    "Root",
-			CreatedAt:   now,
-			UpdatedAt:   now,
+			ID:              rootID,
+			Type:            model.ItemTypeFolder,
+			VisibleName:     rootVisible,
+			RealName:        "Root",
+			OriginalMode:    uint32(0o40755),
+			OriginalModTime: originalMod,
+			MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+			CreatedAt:       now,
+			UpdatedAt:       now,
 		},
 		RootFolder: model.Folder{ID: rootID, Key: bytesOf(1, 32)},
 		Items: []model.Item{
 			{
-				ID:          folderID,
-				ParentID:    &rootParent,
-				Type:        model.ItemTypeFolder,
-				VisibleName: folderVisible,
-				RealName:    "Folder",
-				CreatedAt:   now,
-				UpdatedAt:   now,
+				ID:              folderID,
+				ParentID:        &rootParent,
+				Type:            model.ItemTypeFolder,
+				VisibleName:     folderVisible,
+				RealName:        "Folder",
+				OriginalMode:    uint32(0o40700),
+				OriginalModTime: originalMod,
+				MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+				CreatedAt:       now,
+				UpdatedAt:       now,
 			},
 			{
-				ID:          fileID,
-				ParentID:    &rootParent,
-				Type:        model.ItemTypeFile,
-				VisibleName: fileVisible,
-				RealName:    "file.txt",
-				CreatedAt:   now,
-				UpdatedAt:   now,
+				ID:                 fileID,
+				ParentID:           &rootParent,
+				Type:               model.ItemTypeFile,
+				VisibleName:        fileVisible,
+				RealName:           "file.txt",
+				OriginalMode:       uint32(0o100600),
+				OriginalModTime:    originalMod,
+				OriginalAccessTime: &originalAccess,
+				OriginalBirthTime:  &originalBirth,
+				WindowsAttributes:  &windowsAttrs,
+				MetadataCaps: []string{
+					fsmeta.CapabilityAccessTime,
+					fsmeta.CapabilityBirthTime,
+					fsmeta.CapabilityMode,
+					fsmeta.CapabilityModTime,
+					fsmeta.CapabilityWindowsAttributes,
+				},
+				CreatedAt: now,
+				UpdatedAt: now,
 			},
 		},
 		Folders: []model.Folder{{ID: folderID, Key: bytesOf(2, 32)}},
@@ -237,6 +279,22 @@ func TestReadPlannedProject(t *testing.T) {
 	if len(read.Items) != 2 {
 		t.Fatalf("items = %d, want 2", len(read.Items))
 	}
+	readFileItem, ok := itemByID(read.Items, fileID)
+	if !ok {
+		t.Fatalf("file item %s not found in %+v", fileID, read.Items)
+	}
+	if readFileItem.OriginalMode != uint32(0o100600) {
+		t.Fatalf("original mode = %o, want 100600", readFileItem.OriginalMode)
+	}
+	if readFileItem.OriginalAccessTime == nil || !readFileItem.OriginalAccessTime.Equal(originalAccess) {
+		t.Fatalf("original access time = %v, want %s", readFileItem.OriginalAccessTime, originalAccess)
+	}
+	if readFileItem.OriginalBirthTime == nil || !readFileItem.OriginalBirthTime.Equal(originalBirth) {
+		t.Fatalf("original birth time = %v, want %s", readFileItem.OriginalBirthTime, originalBirth)
+	}
+	if readFileItem.WindowsAttributes == nil || *readFileItem.WindowsAttributes != windowsAttrs {
+		t.Fatalf("windows attributes = %v, want %d", readFileItem.WindowsAttributes, windowsAttrs)
+	}
 	if len(read.Folders) != 1 {
 		t.Fatalf("folders = %d, want 1", len(read.Folders))
 	}
@@ -255,6 +313,15 @@ func TestReadPlannedProject(t *testing.T) {
 	if len(read.StorageObjects) != 4 {
 		t.Fatalf("storage objects = %d, want 4", len(read.StorageObjects))
 	}
+}
+
+func itemByID(items []model.Item, id uuid.UUID) (model.Item, bool) {
+	for _, item := range items {
+		if item.ID == id {
+			return item, true
+		}
+	}
+	return model.Item{}, false
 }
 
 func TestReadPlannedProjectRejectsWrongAppID(t *testing.T) {
@@ -311,22 +378,28 @@ func TestReadPlannedProjectAllowsVirtualRootShare(t *testing.T) {
 	plan := model.PlannedProject{
 		Project: model.Project{ID: projectID, RootFolderID: rootID, DatabaseType: "share", CreatedAt: now, UpdatedAt: now},
 		RootItem: model.Item{
-			ID:          rootID,
-			Type:        model.ItemTypeFolder,
-			VisibleName: rootVisible,
-			RealName:    "",
-			CreatedAt:   now,
-			UpdatedAt:   now,
+			ID:              rootID,
+			Type:            model.ItemTypeFolder,
+			VisibleName:     rootVisible,
+			RealName:        "",
+			OriginalMode:    uint32(0o40755),
+			OriginalModTime: now,
+			MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+			CreatedAt:       now,
+			UpdatedAt:       now,
 		},
 		RootFolder: model.Folder{ID: rootID, Key: bytesOf(3, 32)},
 		Items: []model.Item{{
-			ID:          fileID,
-			ParentID:    &parentID,
-			Type:        model.ItemTypeFile,
-			VisibleName: fileVisible,
-			RealName:    "note.txt",
-			CreatedAt:   now,
-			UpdatedAt:   now,
+			ID:              fileID,
+			ParentID:        &parentID,
+			Type:            model.ItemTypeFile,
+			VisibleName:     fileVisible,
+			RealName:        "note.txt",
+			OriginalMode:    uint32(0o100600),
+			OriginalModTime: now,
+			MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+			CreatedAt:       now,
+			UpdatedAt:       now,
 		}},
 		Files: []model.File{{
 			ID:               fileID,

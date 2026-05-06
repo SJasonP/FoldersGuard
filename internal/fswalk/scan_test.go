@@ -4,6 +4,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
+
+	"foldersguard/internal/fsmeta"
 )
 
 func TestScanTopFolder(t *testing.T) {
@@ -42,6 +45,46 @@ func TestScanTopFolder(t *testing.T) {
 	if _, ok := entries["link.txt"]; ok {
 		t.Fatal("symlink was included, want ignored")
 	}
+	if result.Root.Metadata.Mode == 0 {
+		t.Fatal("root metadata mode was not captured")
+	}
+	if result.Root.Metadata.ModTime.IsZero() {
+		t.Fatal("root metadata modification time was not captured")
+	}
+	if !hasCapability(result.Root.Metadata.Capabilities, fsmeta.CapabilityMode) {
+		t.Fatal("root metadata missing mode capability")
+	}
+	if !hasCapability(result.Root.Metadata.Capabilities, fsmeta.CapabilityModTime) {
+		t.Fatal("root metadata missing modification time capability")
+	}
+}
+
+func TestScanTopFolderCapturesRestorableMetadata(t *testing.T) {
+	root := t.TempDir()
+	file := filepath.Join(root, "file.txt")
+	mustWrite(t, file, []byte("x"))
+	wantMod := time.Date(2023, 2, 3, 4, 5, 6, 0, time.UTC)
+	if err := os.Chtimes(file, wantMod, wantMod); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(file, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := ScanTopFolder(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Entries) != 1 {
+		t.Fatalf("entries = %d, want 1", len(result.Entries))
+	}
+	metadata := result.Entries[0].Metadata
+	if metadata.Mode&0o777 != 0o600 {
+		t.Fatalf("metadata mode = %o, want 600", metadata.Mode&0o777)
+	}
+	if !sameFilesystemSecond(metadata.ModTime, wantMod) {
+		t.Fatalf("metadata mod time = %s, want %s", metadata.ModTime, wantMod)
+	}
 }
 
 func TestScanTopFolderRejectsFileRoot(t *testing.T) {
@@ -73,4 +116,17 @@ func mustHardlink(t *testing.T, oldname, newname string) {
 	if err := os.Link(oldname, newname); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func hasCapability(capabilities []string, want string) bool {
+	for _, capability := range capabilities {
+		if capability == want {
+			return true
+		}
+	}
+	return false
+}
+
+func sameFilesystemSecond(got, want time.Time) bool {
+	return got.UTC().Truncate(time.Second).Equal(want.UTC().Truncate(time.Second))
 }

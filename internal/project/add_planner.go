@@ -40,6 +40,7 @@ func (p AddPlanner) Plan(scan fswalk.ScanResult) (model.PlannedProject, error) {
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
+	applyMetadata(&rootItem, scan.Root.Metadata)
 
 	plan := model.PlannedProject{
 		RootItem: rootItem,
@@ -107,6 +108,7 @@ func (p AddPlanner) Plan(scan fswalk.ScanResult) (model.PlannedProject, error) {
 			CreatedAt:   now,
 			UpdatedAt:   now,
 		}
+		applyMetadata(&item, entry.Metadata)
 		visiblePath := parentVisible + "/" + visibleName.String()
 		pathToID[entry.RootRelativePath] = itemID
 		pathToVisible[entry.RootRelativePath] = visiblePath

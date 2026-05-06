@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"foldersguard/internal/content"
 	"foldersguard/internal/fswalk"
@@ -61,6 +62,17 @@ func TestRestorerRestoreContent(t *testing.T) {
 	mustMkdir(t, filepath.Join(source, "dir"))
 	mustWrite(t, filepath.Join(source, "dir", "small.txt"), []byte("small"))
 	mustWrite(t, filepath.Join(source, "large.txt"), []byte("large-content"))
+	wantFileTime := time.Date(2022, 3, 4, 5, 6, 7, 0, time.UTC)
+	wantDirTime := time.Date(2021, 2, 3, 4, 5, 6, 0, time.UTC)
+	if err := os.Chtimes(filepath.Join(source, "dir", "small.txt"), wantFileTime, wantFileTime); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(filepath.Join(source, "dir", "small.txt"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chtimes(filepath.Join(source, "dir"), wantDirTime, wantDirTime); err != nil {
+		t.Fatal(err)
+	}
 
 	scan, err := fswalk.ScanTopFolder(source)
 	if err != nil {
@@ -80,6 +92,8 @@ func TestRestorerRestoreContent(t *testing.T) {
 
 	assertFile(t, filepath.Join(restored, filepath.Base(source), "dir", "small.txt"), []byte("small"))
 	assertFile(t, filepath.Join(restored, filepath.Base(source), "large.txt"), []byte("large-content"))
+	assertMetadata(t, filepath.Join(restored, filepath.Base(source), "dir", "small.txt"), 0o600, wantFileTime)
+	assertMetadata(t, filepath.Join(restored, filepath.Base(source), "dir"), 0, wantDirTime)
 }
 
 func TestRestorerRejectsTamperedContent(t *testing.T) {
@@ -189,5 +203,19 @@ func assertFile(t *testing.T, path string, want []byte) {
 	}
 	if !bytes.Equal(got, want) {
 		t.Fatalf("%s = %q, want %q", path, got, want)
+	}
+}
+
+func assertMetadata(t *testing.T, path string, wantPerm os.FileMode, wantModTime time.Time) {
+	t.Helper()
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if wantPerm != 0 && info.Mode().Perm() != wantPerm {
+		t.Fatalf("%s mode = %o, want %o", path, info.Mode().Perm(), wantPerm)
+	}
+	if !info.ModTime().UTC().Truncate(time.Second).Equal(wantModTime.UTC().Truncate(time.Second)) {
+		t.Fatalf("%s mod time = %s, want %s", path, info.ModTime(), wantModTime)
 	}
 }
