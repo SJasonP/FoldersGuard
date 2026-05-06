@@ -86,11 +86,10 @@ func writeFiles(ctx context.Context, tx *sql.Tx, files []model.File) error {
 	for _, file := range files {
 		if _, err := tx.ExecContext(ctx, `
 INSERT INTO files (
-	file_id, file_key, source_path, original_size, content_algorithm, storage_kind
-) VALUES (?, ?, ?, ?, ?, ?)`,
+	file_id, file_key, original_size, content_algorithm, storage_kind
+) VALUES (?, ?, ?, ?, ?)`,
 			file.ID.String(),
 			file.Key,
-			file.SourcePath,
 			file.OriginalSize,
 			file.ContentAlgorithm,
 			string(file.StorageKind),

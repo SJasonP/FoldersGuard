@@ -240,7 +240,7 @@ func (s *Store) readFolders(ctx context.Context, rootFolderID uuid.UUID, rootIte
 
 func (s *Store) readFiles(ctx context.Context) ([]model.File, error) {
 	rows, err := s.db.QueryContext(ctx, `
-SELECT file_id, file_key, source_path, original_size, content_algorithm, storage_kind
+SELECT file_id, file_key, original_size, content_algorithm, storage_kind
 FROM files
 ORDER BY file_id`)
 	if err != nil {
@@ -252,9 +252,8 @@ ORDER BY file_id`)
 	for rows.Next() {
 		var idText, contentAlgorithm, storageKindText string
 		var key []byte
-		var sourcePath sql.NullString
 		var originalSize int64
-		if err := rows.Scan(&idText, &key, &sourcePath, &originalSize, &contentAlgorithm, &storageKindText); err != nil {
+		if err := rows.Scan(&idText, &key, &originalSize, &contentAlgorithm, &storageKindText); err != nil {
 			return nil, fmt.Errorf("scan file: %w", err)
 		}
 		id, err := uuid.Parse(idText)
@@ -274,14 +273,9 @@ ORDER BY file_id`)
 		if err != nil {
 			return nil, err
 		}
-		var path string
-		if sourcePath.Valid {
-			path = sourcePath.String
-		}
 		files = append(files, model.File{
 			ID:               id,
 			Key:              key,
-			SourcePath:       path,
 			OriginalSize:     originalSize,
 			ContentAlgorithm: contentAlgorithm,
 			StorageKind:      storageKind,

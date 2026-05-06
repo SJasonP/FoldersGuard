@@ -55,7 +55,6 @@ func TestWritePlannedProject(t *testing.T) {
 		Files: []model.File{{
 			ID:               fileID,
 			Key:              make([]byte, 32),
-			SourcePath:       "/tmp/file.txt",
 			OriginalSize:     10,
 			ContentAlgorithm: "AES-256-GCM",
 			StorageKind:      model.StorageKindSingle,
@@ -166,7 +165,6 @@ func TestReadPlannedProject(t *testing.T) {
 		Files: []model.File{{
 			ID:               fileID,
 			Key:              bytesOf(3, 32),
-			SourcePath:       "/tmp/file.txt",
 			OriginalSize:     42,
 			ContentAlgorithm: "AES-256-GCM",
 			StorageKind:      model.StorageKindSplit,
@@ -333,7 +331,6 @@ func TestReadPlannedProjectAllowsVirtualRootShare(t *testing.T) {
 		Files: []model.File{{
 			ID:               fileID,
 			Key:              bytesOf(4, 32),
-			SourcePath:       "/tmp/note.txt",
 			OriginalSize:     size,
 			ContentAlgorithm: "AES-256-GCM",
 			StorageKind:      model.StorageKindSingle,

@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+const KeySize256 = 32
+
 func GenerateKey256() ([]byte, error) {
 	key := make([]byte, KeySize256)
 	if _, err := rand.Read(key); err != nil {

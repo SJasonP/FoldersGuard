@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS folders (
 CREATE TABLE IF NOT EXISTS files (
 	file_id TEXT PRIMARY KEY,
 	file_key BLOB NOT NULL,
-	source_path TEXT,
 	original_size INTEGER NOT NULL,
 	content_algorithm TEXT NOT NULL,
 	storage_kind TEXT NOT NULL CHECK (storage_kind IN ('single', 'split')),

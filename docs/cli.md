@@ -30,7 +30,7 @@ Successful commands exit with status code `0`.
 
 Failed commands exit with status code `1`.
 
-Passwords, internal file keys, folder keys, and decrypted metadata secrets must never be printed in command output, logs, or errors.
+Passwords, internal file keys, and folder keys must never be printed in command output, logs, or errors.
 
 All paths are local filesystem paths.
 

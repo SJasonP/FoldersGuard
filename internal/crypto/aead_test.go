@@ -31,19 +31,3 @@ func TestSealOpenAES256GCM(t *testing.T) {
 		t.Fatal("expected authentication failure with wrong associated data")
 	}
 }
-
-func TestDeriveKey(t *testing.T) {
-	salt, err := GenerateSalt()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	params := Argon2idParams{Time: 1, MemoryKiB: 64, Parallelism: 1, KeyLen: KeySize256}
-	key, err := DeriveKey("password", salt, params)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(key) != KeySize256 {
-		t.Fatalf("key length = %d, want %d", len(key), KeySize256)
-	}
-}

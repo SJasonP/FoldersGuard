@@ -382,13 +382,12 @@ The implementation detects:
 
 All native storage data includes version information.
 
-At minimum:
+Required version and algorithm metadata:
 
 - Native format version.
 - FG database schema version.
 - Encryption algorithm identifier.
 - Crypto suite identifier.
-- Feature flags for optional behavior.
 
 The implementation rejects unsupported format versions.
 

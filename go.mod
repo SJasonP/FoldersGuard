@@ -6,7 +6,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/mutecomm/go-sqlcipher/v4 v4.4.2
 	github.com/spf13/cobra v1.10.2
-	golang.org/x/crypto v0.50.0
 	golang.org/x/term v0.42.0
 	modernc.org/sqlite v1.50.0
 )

@@ -10,6 +10,5 @@ const (
 	SetExtension     = ".fgs"
 
 	ContentAlgorithm  = "AES-256-GCM"
-	KDFAlgorithm      = "Argon2id"
 	DatabaseAlgorithm = "SQLCipher"
 )
