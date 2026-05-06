@@ -1,19 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  App as AntApp,
-  Button,
-  ConfigProvider,
-  Descriptions,
-  Drawer,
-  Form,
-  Input,
-  Layout,
-  Menu,
-  Modal,
-  Space,
-  Typography,
-} from 'antd';
+import { App as AntApp, Button, ConfigProvider, Layout, Menu, Space, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   FolderAddOutlined,
@@ -26,21 +13,22 @@ import {
 } from '@ant-design/icons';
 import enUS from 'antd/locale/en_US';
 import zhCN from 'antd/locale/zh_CN';
-import { AppInfo, ClearRecentPaths, InspectProject, ListLocalProjects, ReadSettings, SaveSettings } from '../wailsjs/go/main/App';
+import { AppInfo } from '../wailsjs/go/main/App';
 import type { SupportedLanguage } from './i18n';
 import i18n from './i18n';
 import { resolveTheme, themeAlgorithm, type ThemeMode } from './theme';
-import type {
-  AppInfoModel,
-  InspectProjectResultModel,
-  LocalProjectRow,
-  LocalProjectSummary,
-  NavigationKey,
-  SettingsModel,
-} from './types';
+import type { AppInfoModel, LocalProjectRow, NavigationKey } from './types';
+import { useAppSettings } from './hooks/useAppSettings';
+import { useLocalProjects } from './hooks/useLocalProjects';
+import { useProjectActions } from './hooks/useProjectActions';
 import { HomeView } from './views/HomeView';
 import { SettingsView } from './views/SettingsView';
 import { AboutView } from './views/AboutView';
+import { ProjectActionsDrawer } from './components/project-actions/ProjectActionsDrawer';
+import { InspectProjectModal } from './components/project-actions/InspectProjectModal';
+import { InspectProjectDrawer } from './components/project-actions/InspectProjectDrawer';
+import { ExportProjectModal } from './components/project-actions/ExportProjectModal';
+import { DeleteProjectModal } from './components/project-actions/DeleteProjectModal';
 
 const antLocales: Record<SupportedLanguage, typeof enUS> = {
   'en-US': enUS,
@@ -55,20 +43,6 @@ function App() {
   const [themeMode, setThemeMode] = useState<ThemeMode>('system');
   const [resolvedTheme, setResolvedTheme] = useState(resolveTheme(themeMode));
   const [info, setInfo] = useState<AppInfoModel | null>(null);
-  const [projectSearch, setProjectSearch] = useState('');
-  const [projects, setProjects] = useState<LocalProjectSummary[]>([]);
-  const [projectsLoading, setProjectsLoading] = useState(true);
-  const [projectsError, setProjectsError] = useState<string | null>(null);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const [settings, setSettings] = useState<SettingsModel | null>(null);
-  const [settingsLoading, setSettingsLoading] = useState(true);
-  const [settingsSaving, setSettingsSaving] = useState(false);
-  const [projectActionsOpen, setProjectActionsOpen] = useState(false);
-  const [inspectDialogOpen, setInspectDialogOpen] = useState(false);
-  const [inspectLoading, setInspectLoading] = useState(false);
-  const [inspectResult, setInspectResult] = useState<InspectProjectResultModel | null>(null);
-  const [inspectResultOpen, setInspectResultOpen] = useState(false);
-  const [inspectForm] = Form.useForm<{ password: string }>();
 
   useEffect(() => {
     AppInfo().then(setInfo).catch(() => setInfo(null));
@@ -86,125 +60,61 @@ function App() {
     return () => media.removeEventListener('change', update);
   }, [themeMode]);
 
-  const applySettings = (nextSettings: SettingsModel) => {
-    setSettings(nextSettings);
-    setThemeMode((nextSettings.theme || 'system') as ThemeMode);
-    if (nextSettings.language === 'zh-CN') {
-      setLanguage('zh-CN');
-      return;
-    }
-    if (nextSettings.language === 'en-US') {
-      setLanguage('en-US');
-      return;
-    }
-    const browserLanguage = typeof navigator !== 'undefined' ? navigator.language : 'en-US';
-    setLanguage(browserLanguage.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en-US');
-  };
+  const {
+    settings,
+    settingsLoading,
+    settingsSaving,
+    handleSaveSettings,
+    handleClearRecentPaths,
+  } = useAppSettings({
+    messageApi: antApp.message,
+    t,
+    setLanguage,
+    setThemeMode,
+  });
 
-  const loadProjects = async () => {
-    setProjectsLoading(true);
-    setProjectsError(null);
-    try {
-      const nextProjects = await ListLocalProjects();
-      setProjects(nextProjects);
-    } catch {
-      setProjects([]);
-      setProjectsError(t('errorLoadingProjects'));
-    } finally {
-      setProjectsLoading(false);
-    }
-  };
+  const {
+    projectSearch,
+    setProjectSearch,
+    projectsLoading,
+    projectsError,
+    selectedProject,
+    selectedProjectId,
+    setSelectedProjectId,
+    visibleProjects,
+    loadProjects,
+  } = useLocalProjects({
+    language,
+    t,
+  });
 
-  useEffect(() => {
-    void loadProjects();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadSettings = async () => {
-      setSettingsLoading(true);
-      try {
-        const nextSettings = await ReadSettings();
-        if (cancelled) {
-          return;
-        }
-        applySettings(nextSettings);
-      } catch {
-        if (!cancelled) {
-          antApp.message.error(t('errorLoadingSettings'));
-        }
-      } finally {
-        if (!cancelled) {
-          setSettingsLoading(false);
-        }
-      }
-    };
-    void loadSettings();
-    return () => {
-      cancelled = true;
-    };
-  }, [antApp.message, t]);
-
-  const handleSaveSettings = async (values: SettingsModel) => {
-    setSettingsSaving(true);
-    try {
-      const saved = await SaveSettings(values);
-      applySettings(saved);
-      antApp.message.success(t('settingsSaved'));
-    } catch {
-      antApp.message.error(t('errorSavingSettings'));
-    } finally {
-      setSettingsSaving(false);
-    }
-  };
-
-  const handleClearRecentPaths = async () => {
-    setSettingsSaving(true);
-    try {
-      const cleared = await ClearRecentPaths();
-      applySettings(cleared);
-      antApp.message.success(t('settingsSaved'));
-    } catch {
-      antApp.message.error(t('errorSavingSettings'));
-    } finally {
-      setSettingsSaving(false);
-    }
-  };
-
-  const visibleProjects = useMemo<LocalProjectRow[]>(
-    () =>
-      projects
-        .filter((project) => {
-          const query = projectSearch.trim().toLowerCase();
-          if (query === '') {
-            return true;
-          }
-          return (
-            project.projectId.toLowerCase().includes(query) ||
-            project.fileName.toLowerCase().includes(query) ||
-            project.availabilityStatus.toLowerCase().includes(query)
-          );
-        })
-        .map((project) => ({
-          key: project.projectId,
-          projectId: project.projectId,
-          fileName: project.fileName,
-          modifiedTime: project.modifiedAt
-            ? new Intl.DateTimeFormat(language, {
-                dateStyle: 'medium',
-                timeStyle: 'short',
-              }).format(new Date(project.modifiedAt))
-            : '',
-          availabilityStatus: t(project.availabilityStatus),
-        })),
-    [language, projectSearch, projects, t],
-  );
-
-  const selectedProject = useMemo(
-    () => projects.find((project) => project.projectId === selectedProjectId) ?? null,
-    [projects, selectedProjectId],
-  );
+  const {
+    deleteDialogOpen,
+    deleteLoading,
+    exportDialogOpen,
+    exportLoading,
+    inspectDialogOpen,
+    inspectLoading,
+    inspectResult,
+    inspectResultOpen,
+    projectActionsOpen,
+    setDeleteDialogOpen,
+    setExportDialogOpen,
+    setInspectDialogOpen,
+    setInspectResultOpen,
+    setProjectActionsOpen,
+    openProjectActions,
+    handleDeleteProject,
+    handleExportProject,
+    handleInspectProject,
+  } = useProjectActions({
+    messageApi: antApp.message,
+    t,
+    selectedProjectId,
+    selectedProject,
+    reloadProjects: loadProjects,
+    clearSelectedProject: () => setSelectedProjectId(null),
+  });
 
   const columns = useMemo<ColumnsType<LocalProjectRow>>(
     () => [
@@ -215,35 +125,6 @@ function App() {
     ],
     [t],
   );
-
-  const handleOpenProjectActions = () => {
-    if (!selectedProjectId) {
-      return;
-    }
-    setProjectActionsOpen(true);
-  };
-
-  const handleInspectProject = async (values: { password: string }) => {
-    if (!selectedProjectId) {
-      return;
-    }
-    setInspectLoading(true);
-    try {
-      const result = await InspectProject({
-        projectId: selectedProjectId,
-        password: values.password,
-      });
-      setInspectDialogOpen(false);
-      inspectForm.resetFields();
-      setProjectActionsOpen(false);
-      setInspectResult(result);
-      setInspectResultOpen(true);
-    } catch {
-      antApp.message.error(t('inspectProjectFailed'));
-    } finally {
-      setInspectLoading(false);
-    }
-  };
 
   return (
     <ConfigProvider
@@ -301,7 +182,7 @@ function App() {
                   onProjectSearchChange={setProjectSearch}
                   onRefresh={() => void loadProjects()}
                   onSelectProject={setSelectedProjectId}
-                  onOpenProjectActions={handleOpenProjectActions}
+                  onOpenProjectActions={openProjectActions}
                   t={t}
                 />
               )}
@@ -319,69 +200,42 @@ function App() {
             </Layout.Content>
           </Layout>
         </Layout>
-        <Drawer
-          title={t('projectActions')}
+        <ProjectActionsDrawer
           open={projectActionsOpen}
+          project={selectedProject}
           onClose={() => setProjectActionsOpen(false)}
-          width={360}
-        >
-          <Space direction="vertical" size="middle" className="content-stack">
-            {selectedProject ? (
-              <Typography.Text type="secondary">
-                {selectedProject.projectId} / {selectedProject.fileName}
-              </Typography.Text>
-            ) : null}
-            <Button
-              block
-              type="primary"
-              onClick={() => {
-                setInspectDialogOpen(true);
-              }}
-            >
-              {t('inspectProject')}
-            </Button>
-          </Space>
-        </Drawer>
-        <Modal
-          title={t('inspectProject')}
+          onInspect={() => setInspectDialogOpen(true)}
+          onExport={() => setExportDialogOpen(true)}
+          onDelete={() => setDeleteDialogOpen(true)}
+          t={t}
+        />
+        <InspectProjectModal
           open={inspectDialogOpen}
-          onCancel={() => {
-            setInspectDialogOpen(false);
-            inspectForm.resetFields();
-          }}
-          onOk={() => void inspectForm.submit()}
-          okText={t('inspectProject')}
-          confirmLoading={inspectLoading}
-        >
-          <Form form={inspectForm} layout="vertical" onFinish={(values) => void handleInspectProject(values)}>
-            <Form.Item name="password" label={t('password')} rules={[{ required: true, message: t('passwordRequired') }]}>
-              <Input.Password autoComplete="current-password" />
-            </Form.Item>
-          </Form>
-        </Modal>
-        <Drawer
-          title={t('projectDetails')}
+          loading={inspectLoading}
+          onCancel={() => setInspectDialogOpen(false)}
+          onSubmit={(password) => void handleInspectProject(password)}
+          t={t}
+        />
+        <InspectProjectDrawer
           open={inspectResultOpen}
+          result={inspectResult}
           onClose={() => setInspectResultOpen(false)}
-          width={540}
-        >
-          {inspectResult ? (
-            <Descriptions column={1} bordered size="small">
-              <Descriptions.Item label={t('projectId')}>{inspectResult.projectId}</Descriptions.Item>
-              <Descriptions.Item label={t('projectName')}>{inspectResult.rootName}</Descriptions.Item>
-              <Descriptions.Item label={t('rootFolderId')}>{inspectResult.rootFolderId}</Descriptions.Item>
-              <Descriptions.Item label={t('rootName')}>{inspectResult.rootName}</Descriptions.Item>
-              <Descriptions.Item label={t('formatVersion')}>{inspectResult.formatVersion}</Descriptions.Item>
-              <Descriptions.Item label={t('schemaVersion')}>{inspectResult.schemaVersion}</Descriptions.Item>
-              <Descriptions.Item label={t('databaseType')}>{inspectResult.databaseType}</Descriptions.Item>
-              <Descriptions.Item label={t('itemCount')}>{inspectResult.items}</Descriptions.Item>
-              <Descriptions.Item label={t('folderCount')}>{inspectResult.folders}</Descriptions.Item>
-              <Descriptions.Item label={t('fileCount')}>{inspectResult.files}</Descriptions.Item>
-              <Descriptions.Item label={t('partCount')}>{inspectResult.parts}</Descriptions.Item>
-              <Descriptions.Item label={t('storageObjects')}>{inspectResult.storageObjects}</Descriptions.Item>
-            </Descriptions>
-          ) : null}
-        </Drawer>
+          t={t}
+        />
+        <ExportProjectModal
+          open={exportDialogOpen}
+          loading={exportLoading}
+          onCancel={() => setExportDialogOpen(false)}
+          onSubmit={(values) => void handleExportProject(values)}
+          t={t}
+        />
+        <DeleteProjectModal
+          open={deleteDialogOpen}
+          loading={deleteLoading}
+          onCancel={() => setDeleteDialogOpen(false)}
+          onSubmit={(password) => void handleDeleteProject(password)}
+          t={t}
+        />
       </AntApp>
     </ConfigProvider>
   );

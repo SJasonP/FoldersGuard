@@ -55,6 +55,27 @@ type ActiveProjectSummary struct {
 	Availability string
 }
 
+type ExportProjectInput struct {
+	ProjectID  string
+	Password   string
+	OutputPath string
+	Force      bool
+}
+
+type ExportProjectResult struct {
+	ProjectID  string
+	OutputPath string
+}
+
+type DeleteProjectInput struct {
+	ProjectID string
+	Password  string
+}
+
+type DeleteProjectResult struct {
+	ProjectID string
+}
+
 func NewService(dataDir string) (Service, error) {
 	if dataDir == "" {
 		resolved, err := DefaultDataDir()
@@ -191,6 +212,62 @@ func (s Service) Verify(ctx context.Context, input DatabaseOpen, encryptedRoot s
 		ExtraObjects:    report.ExtraObjects,
 		Status:          status,
 	}, nil
+}
+
+func (s Service) ExportProject(ctx context.Context, input ExportProjectInput) (ExportProjectResult, error) {
+	if !format.IsProjectExtension(input.OutputPath) {
+		return ExportProjectResult{}, fmt.Errorf("database output must use %s extension", format.ProjectExtension)
+	}
+	sourcePath, err := s.ActiveProjectDatabasePath(input.ProjectID)
+	if err != nil {
+		return ExportProjectResult{}, err
+	}
+	plan, meta, err := ReadDatabase(ctx, db.Config{
+		Path:       sourcePath,
+		DriverName: db.SQLCipherDriver,
+		Password:   input.Password,
+	})
+	if err != nil {
+		return ExportProjectResult{}, err
+	}
+	if meta["database_type"] != "project" {
+		return ExportProjectResult{}, fmt.Errorf("database type = %q, want project", meta["database_type"])
+	}
+	if err := ValidateDistinctPaths(sourcePath, input.OutputPath); err != nil {
+		return ExportProjectResult{}, err
+	}
+	if err := PrepareFileOutput(input.OutputPath, input.Force); err != nil {
+		return ExportProjectResult{}, err
+	}
+	if err := CopyFile(sourcePath, input.OutputPath); err != nil {
+		return ExportProjectResult{}, err
+	}
+	return ExportProjectResult{
+		ProjectID:  plan.Project.ID.String(),
+		OutputPath: input.OutputPath,
+	}, nil
+}
+
+func (s Service) DeleteProject(ctx context.Context, input DeleteProjectInput) (DeleteProjectResult, error) {
+	sourcePath, err := s.ActiveProjectDatabasePath(input.ProjectID)
+	if err != nil {
+		return DeleteProjectResult{}, err
+	}
+	_, meta, err := ReadDatabase(ctx, db.Config{
+		Path:       sourcePath,
+		DriverName: db.SQLCipherDriver,
+		Password:   input.Password,
+	})
+	if err != nil {
+		return DeleteProjectResult{}, err
+	}
+	if meta["database_type"] != "project" {
+		return DeleteProjectResult{}, fmt.Errorf("database type = %q, want project", meta["database_type"])
+	}
+	if err := os.Remove(sourcePath); err != nil {
+		return DeleteProjectResult{}, fmt.Errorf("delete active project database: %w", err)
+	}
+	return DeleteProjectResult{ProjectID: input.ProjectID}, nil
 }
 
 func WriteProjectDatabase(ctx context.Context, config db.Config, plan model.PlannedProject) error {

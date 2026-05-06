@@ -24,6 +24,64 @@ export namespace main {
 	        this.cliShortAlias = source["cliShortAlias"];
 	    }
 	}
+	export class DeleteProjectRequest {
+	    projectId: string;
+	    password: string;
+
+	    static createFrom(source: any = {}) {
+	        return new DeleteProjectRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.password = source["password"];
+	    }
+	}
+	export class DeleteProjectResult {
+	    projectId: string;
+
+	    static createFrom(source: any = {}) {
+	        return new DeleteProjectResult(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	    }
+	}
+	export class ExportProjectRequest {
+	    projectId: string;
+	    password: string;
+	    outputPath: string;
+	    force: boolean;
+
+	    static createFrom(source: any = {}) {
+	        return new ExportProjectRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.password = source["password"];
+	        this.outputPath = source["outputPath"];
+	        this.force = source["force"];
+	    }
+	}
+	export class ExportProjectResult {
+	    projectId: string;
+	    outputPath: string;
+
+	    static createFrom(source: any = {}) {
+	        return new ExportProjectResult(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.outputPath = source["outputPath"];
+	    }
+	}
 	export class InspectProjectRequest {
 	    projectId: string;
 	    password: string;

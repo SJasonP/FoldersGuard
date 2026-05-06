@@ -1,0 +1,81 @@
+package main
+
+import (
+	"time"
+
+	"foldersguard/internal/app"
+)
+
+func (a *App) ListLocalProjects() ([]LocalProjectSummary, error) {
+	projects, err := a.service.ListActiveProjects()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]LocalProjectSummary, 0, len(projects))
+	for _, project := range projects {
+		modifiedAt := ""
+		if !project.ModifiedAt.IsZero() {
+			modifiedAt = project.ModifiedAt.Format(time.RFC3339)
+		}
+		result = append(result, LocalProjectSummary{
+			ProjectID:          project.ProjectID,
+			FileName:           project.FileName,
+			ModifiedAt:         modifiedAt,
+			AvailabilityStatus: project.Availability,
+		})
+	}
+	return result, nil
+}
+
+func (a *App) InspectProject(request InspectProjectRequest) (InspectProjectResult, error) {
+	result, err := a.service.Inspect(a.ctx, app.DatabaseOpen{
+		ProjectRef: request.ProjectID,
+		Password:   request.Password,
+	})
+	if err != nil {
+		return InspectProjectResult{}, err
+	}
+	return InspectProjectResult{
+		ProjectID:      result.ProjectID,
+		DatabaseType:   result.DatabaseType,
+		RootFolderID:   result.RootFolderID,
+		RootName:       result.RootName,
+		FormatVersion:  result.FormatVersion,
+		SchemaVersion:  result.SchemaVersion,
+		Items:          result.Items,
+		Folders:        result.Folders,
+		Files:          result.Files,
+		Parts:          result.Parts,
+		StorageObjects: result.StorageObjects,
+	}, nil
+}
+
+func (a *App) ExportProject(request ExportProjectRequest) (ExportProjectResult, error) {
+	result, err := a.service.ExportProject(a.ctx, app.ExportProjectInput{
+		ProjectID:  request.ProjectID,
+		Password:   request.Password,
+		OutputPath: request.OutputPath,
+		Force:      request.Force,
+	})
+	if err != nil {
+		return ExportProjectResult{}, err
+	}
+	return ExportProjectResult{
+		ProjectID:  result.ProjectID,
+		OutputPath: result.OutputPath,
+	}, nil
+}
+
+func (a *App) DeleteProject(request DeleteProjectRequest) (DeleteProjectResult, error) {
+	result, err := a.service.DeleteProject(a.ctx, app.DeleteProjectInput{
+		ProjectID: request.ProjectID,
+		Password:  request.Password,
+	})
+	if err != nil {
+		return DeleteProjectResult{}, err
+	}
+	return DeleteProjectResult{
+		ProjectID: result.ProjectID,
+	}, nil
+}

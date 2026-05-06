@@ -159,3 +159,70 @@ func TestServiceEnsureDataDirAndListActiveProjects(t *testing.T) {
 		t.Fatalf("modified at = %s, want %s", projects[0].ModifiedAt, now)
 	}
 }
+
+func TestServiceExportAndDeleteProject(t *testing.T) {
+	ctx := context.Background()
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	dataDir := filepath.Join(root, "data")
+	databasePath := filepath.Join(dataDir, "projects", "project-id"+format.ProjectExtension)
+	exportPath := filepath.Join(root, "exported"+format.ProjectExtension)
+	password := "test-password"
+
+	if err := os.MkdirAll(source, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "note.txt"), []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	scan, err := fswalk.ScanTopFolder(source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := project.Planner{MaxPartSize: 1024}.Plan(scan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := WriteProjectDatabase(ctx, db.Config{
+		Path:       databasePath,
+		DriverName: db.SQLCipherDriver,
+		Password:   password,
+	}, plan); err != nil {
+		t.Fatal(err)
+	}
+
+	service, err := NewService(dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	exported, err := service.ExportProject(ctx, ExportProjectInput{
+		ProjectID:  "project-id",
+		Password:   password,
+		OutputPath: exportPath,
+		Force:      false,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if exported.ProjectID != plan.Project.ID.String() || exported.OutputPath != exportPath {
+		t.Fatalf("export result = %+v", exported)
+	}
+	if _, err := os.Stat(exportPath); err != nil {
+		t.Fatalf("exported path stat error = %v", err)
+	}
+
+	deleted, err := service.DeleteProject(ctx, DeleteProjectInput{
+		ProjectID: "project-id",
+		Password:  password,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if deleted.ProjectID != "project-id" {
+		t.Fatalf("delete result = %+v", deleted)
+	}
+	if _, err := os.Stat(databasePath); !os.IsNotExist(err) {
+		t.Fatalf("database stat error = %v, want not exist", err)
+	}
+}
