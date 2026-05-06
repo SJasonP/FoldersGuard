@@ -35,7 +35,7 @@ func (c cli) inspectCommand() *cobra.Command {
 }
 
 func (c cli) runInspect(options inspectOptions) error {
-	password, err := c.readPassword(options.passwordOptions)
+	password, err := c.readDatabasePassword(options.projectRef, options.passwordOptions)
 	if err != nil {
 		return err
 	}

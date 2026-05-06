@@ -44,7 +44,7 @@ func (c cli) decryptCommand() *cobra.Command {
 }
 
 func (c cli) runDecrypt(options decryptOptions) error {
-	password, err := c.readPassword(options.passwordOptions)
+	password, err := c.readDatabasePassword(options.projectRef, options.passwordOptions)
 	if err != nil {
 		return err
 	}

@@ -39,7 +39,7 @@ func (c cli) verifyCommand() *cobra.Command {
 }
 
 func (c cli) runVerify(options verifyOptions) error {
-	password, err := c.readPassword(options.passwordOptions)
+	password, err := c.readDatabasePassword(options.projectRef, options.passwordOptions)
 	if err != nil {
 		return err
 	}

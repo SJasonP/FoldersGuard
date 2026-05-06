@@ -18,7 +18,8 @@ const (
 	PlainDriver     = "sqlite"
 	SQLCipherDriver = "sqlite3"
 
-	sqlcipherPageSize = "4096"
+	sqlcipherPageSize        = "4096"
+	UnprotectedSharePassword = "FoldersGuard:v1:unprotected-share"
 )
 
 type Config struct {

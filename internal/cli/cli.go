@@ -68,6 +68,7 @@ func (c cli) rootCommand() *cobra.Command {
 	root.AddCommand(c.verifyCommand())
 	root.AddCommand(c.exportCommand())
 	root.AddCommand(c.importCommand())
+	root.AddCommand(c.shareCommand())
 	root.AddCommand(c.renameCommand())
 	root.AddCommand(c.addCommand())
 	root.AddCommand(c.moveCommand())

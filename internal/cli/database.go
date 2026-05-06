@@ -39,6 +39,14 @@ func projectDatabasePathFromProjectRef(projectRef string) (string, error) {
 }
 
 func writeProjectDatabase(ctx context.Context, config db.Config, plan model.PlannedProject) error {
+	return writeDatabase(ctx, config, plan, "project")
+}
+
+func writeShareDatabase(ctx context.Context, config db.Config, plan model.PlannedProject) error {
+	return writeDatabase(ctx, config, plan, "share")
+}
+
+func writeDatabase(ctx context.Context, config db.Config, plan model.PlannedProject, databaseType string) error {
 	database, err := db.OpenProject(ctx, config)
 	if err != nil {
 		return err
@@ -55,7 +63,7 @@ func writeProjectDatabase(ctx context.Context, config db.Config, plan model.Plan
 		RootVisibleName: plan.RootItem.VisibleName,
 		RootRealName:    plan.RootItem.RealName,
 		RootFolderKey:   plan.RootFolder.Key,
-		DatabaseType:    "project",
+		DatabaseType:    databaseType,
 		CreatedAt:       plan.Project.CreatedAt,
 	}); err != nil {
 		return err

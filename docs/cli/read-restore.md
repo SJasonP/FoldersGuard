@@ -27,6 +27,7 @@ Behavior:
 Validation:
 
 - Password-protected databases require a password.
+- Unprotected `.fgs` share databases can be opened without a password flag.
 - `--content` must exist and be a directory.
 - `--out` must not be inside `--content`.
 - Restored paths must remain inside `--out`.
@@ -56,6 +57,7 @@ fg inspect <project-ref> [--password-stdin | --password-env <name>]
 Behavior:
 
 - Opens the project or share database.
+- Unprotected `.fgs` share databases can be opened without a password flag.
 - Prints project id, database type, root item, format version, schema version, item counts, file counts, folder counts, part counts, and skipped-entry records stored in metadata.
 - Does not require encrypted content to be present.
 - Does not decrypt file content.
@@ -89,6 +91,7 @@ fg verify <project-ref> --content <encrypted-content-folder> [--password-stdin |
 Behavior:
 
 - Opens the project or share database.
+- Unprotected `.fgs` share databases can be opened without a password flag.
 - Checks that required encrypted content paths exist.
 - Authenticates encrypted file objects and split parts.
 - Reports missing, extra, or tampered content.
