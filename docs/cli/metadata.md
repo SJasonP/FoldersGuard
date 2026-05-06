@@ -7,7 +7,7 @@ Renames a file or folder in FG metadata.
 Usage:
 
 ```text
-fg rename <project-ref> <item-path> <new-name> [--password-stdin | --password-env <name>]
+fg rename <project-id> <item-path> <new-name> [--password-stdin | --password-env <name>]
 ```
 
 Arguments:
@@ -47,7 +47,7 @@ Adds cleartext content to an existing project.
 Usage:
 
 ```text
-fg add <project-ref> <source-path> <target-folder-path> --staging-content <folder> --max-part-size <bytes> [--content <encrypted-content-folder>] [--password-stdin | --password-env <name>] [--force]
+fg add <project-id> <source-path> <target-folder-path> --staging-content <folder> --max-part-size <bytes> [--content <encrypted-content-folder>] [--password-stdin | --password-env <name>] [--force]
 ```
 
 Behavior:
@@ -77,7 +77,7 @@ Moves an item within FG metadata and produces any required storage operation pla
 Usage:
 
 ```text
-fg move <project-ref> <item-path> <target-folder-path> [--content <encrypted-content-folder>] [--password-stdin | --password-env <name>]
+fg move <project-id> <item-path> <target-folder-path> [--content <encrypted-content-folder>] [--password-stdin | --password-env <name>]
 ```
 
 Behavior:
@@ -111,7 +111,7 @@ Removes an item from a project.
 Usage:
 
 ```text
-fg remove <project-ref> <item-path> --force [--content <encrypted-content-folder>] [--password-stdin | --password-env <name>]
+fg remove <project-id> <item-path> --force [--content <encrypted-content-folder>] [--password-stdin | --password-env <name>]
 ```
 
 Behavior:

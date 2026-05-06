@@ -31,6 +31,7 @@ func TestRunPlanMetadataCommands(t *testing.T) {
 
 	t.Setenv("HOME", root)
 	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	var encryptOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"encrypt",
 		source,
@@ -38,15 +39,16 @@ func TestRunPlanMetadataCommands(t *testing.T) {
 		"--export", databaseOutput,
 		"--max-part-size", "1024",
 		"--password-env", "FG_TEST_PASSWORD",
-	}, nil, nil); err != nil {
+	}, nil, &encryptOutput); err != nil {
 		t.Fatal(err)
 	}
+	projectID := outputValue(t, encryptOutput.String(), "project_id")
 
 	var addOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"plan",
 		"add",
-		databaseOutput,
+		projectID,
 		addSource,
 		"source/docs",
 		"--staging-content", stagingOutput,
@@ -64,7 +66,7 @@ func TestRunPlanMetadataCommands(t *testing.T) {
 	if err := cli.RunWithIO("foldersguard", []string{
 		"plan",
 		"move",
-		databaseOutput,
+		projectID,
 		"source/docs/note.txt",
 		"source/archive",
 		"--password-env", "FG_TEST_PASSWORD",
@@ -77,7 +79,7 @@ func TestRunPlanMetadataCommands(t *testing.T) {
 	if err := cli.RunWithIO("foldersguard", []string{
 		"plan",
 		"remove",
-		databaseOutput,
+		projectID,
 		"source/docs/note.txt",
 		"--password-env", "FG_TEST_PASSWORD",
 	}, nil, &removeOutput); err != nil {
@@ -88,7 +90,7 @@ func TestRunPlanMetadataCommands(t *testing.T) {
 	var inspectOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"inspect",
-		databaseOutput,
+		projectID,
 		"--password-env", "FG_TEST_PASSWORD",
 	}, nil, &inspectOutput); err != nil {
 		t.Fatal(err)

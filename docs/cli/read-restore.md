@@ -2,7 +2,7 @@
 
 ## `fg decrypt`
 
-Decrypts encrypted content using a project or share database.
+Decrypts encrypted content using an active project or share database.
 
 Usage:
 
@@ -12,13 +12,13 @@ fg decrypt <project-ref> --content <encrypted-content-folder> --out <output-fold
 
 Arguments:
 
-- `<project-ref>`: project id, exported `.fg`, or `.fgs` share database.
+- `<project-ref>`: project id or `.fgs` share database.
 - `--content <encrypted-content-folder>`: encrypted content folder.
 - `--out <output-folder>`: restored plaintext output folder.
 
 Behavior:
 
-- Opens the project or share database.
+- Opens the active project database from FG's data directory or opens a `.fgs` share database directly.
 - Restores real names from FG metadata.
 - Reads encrypted content from `--content`.
 - Authenticates encrypted file objects and split parts before committing restored plaintext files.
@@ -28,6 +28,7 @@ Validation:
 
 - Password-protected databases require a password.
 - Unprotected `.fgs` share databases can be opened without a password flag.
+- Exported `.fg` databases must be imported before use.
 - `--content` must exist and be a directory.
 - `--out` must not be inside `--content`.
 - Restored paths must remain inside `--out`.
@@ -56,8 +57,9 @@ fg inspect <project-ref> [--password-stdin | --password-env <name>]
 
 Behavior:
 
-- Opens the project or share database.
+- Opens the active project database from FG's data directory or opens a `.fgs` share database directly.
 - Unprotected `.fgs` share databases can be opened without a password flag.
+- Exported `.fg` databases must be imported before use.
 - Prints project id, database type, root item, format version, schema version, item counts, file counts, folder counts, and part counts.
 - Does not require encrypted content to be present.
 - Does not decrypt file content.
@@ -90,8 +92,9 @@ fg verify <project-ref> --content <encrypted-content-folder> [--password-stdin |
 
 Behavior:
 
-- Opens the project or share database.
+- Opens the active project database from FG's data directory or opens a `.fgs` share database directly.
 - Unprotected `.fgs` share databases can be opened without a password flag.
+- Exported `.fg` databases must be imported before use.
 - Checks that required encrypted content paths exist.
 - Authenticates encrypted file objects and split parts.
 - Reports missing, extra, or tampered content.

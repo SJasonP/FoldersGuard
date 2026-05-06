@@ -72,9 +72,9 @@ func (c cli) planEncryptCommand() *cobra.Command {
 func (c cli) planAddCommand() *cobra.Command {
 	options := planAddOptions{}
 	command := &cobra.Command{
-		Use:           "add <project-ref> <source-path> <target-folder-path>",
+		Use:           "add <project-id> <source-path> <target-folder-path>",
 		Short:         "Print add operations without writing content or metadata.",
-		Example:       c.name + " plan add ./project.fg ./new Root/docs --staging-content ./staging --max-part-size 1073741824 --password-env FG_PASSWORD",
+		Example:       c.name + " plan add <project-id> ./new Root/docs --staging-content ./staging --max-part-size 1073741824 --password-env FG_PASSWORD",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(3),
@@ -101,9 +101,9 @@ func (c cli) planAddCommand() *cobra.Command {
 func (c cli) planMoveCommand() *cobra.Command {
 	options := planMoveOptions{}
 	command := &cobra.Command{
-		Use:           "move <project-ref> <item-path> <target-folder-path>",
+		Use:           "move <project-id> <item-path> <target-folder-path>",
 		Short:         "Print move operations without writing content or metadata.",
-		Example:       c.name + " plan move ./project.fg Root/old.txt Root/docs --password-env FG_PASSWORD",
+		Example:       c.name + " plan move <project-id> Root/old.txt Root/docs --password-env FG_PASSWORD",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(3),
@@ -123,9 +123,9 @@ func (c cli) planMoveCommand() *cobra.Command {
 func (c cli) planRemoveCommand() *cobra.Command {
 	options := planRemoveOptions{}
 	command := &cobra.Command{
-		Use:           "remove <project-ref> <item-path>",
+		Use:           "remove <project-id> <item-path>",
 		Short:         "Print remove operations without writing content or metadata.",
-		Example:       c.name + " plan remove ./project.fg Root/old.txt --password-env FG_PASSWORD",
+		Example:       c.name + " plan remove <project-id> Root/old.txt --password-env FG_PASSWORD",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(2),
@@ -164,7 +164,7 @@ func (c cli) runPlanAdd(options planAddOptions) error {
 	if err != nil {
 		return err
 	}
-	databasePath, err := projectDatabasePathFromProjectRef(options.projectRef)
+	databasePath, err := activeProjectDatabasePathFromID(options.projectRef)
 	if err != nil {
 		return err
 	}
@@ -239,7 +239,7 @@ func (c cli) planMetadataOperation(projectRef string, passwordOptions passwordOp
 	if err != nil {
 		return "", nil, err
 	}
-	databasePath, err := projectDatabasePathFromProjectRef(projectRef)
+	databasePath, err := activeProjectDatabasePathFromID(projectRef)
 	if err != nil {
 		return "", nil, err
 	}

@@ -129,27 +129,62 @@ func TestExportMissingProjectDoesNotCreateFiles(t *testing.T) {
 	}
 }
 
-func TestMetadataCommandsRejectShareDatabases(t *testing.T) {
+func TestProjectCommandsRejectDatabasePaths(t *testing.T) {
 	root := t.TempDir()
 	t.Setenv("FG_TEST_PASSWORD", "test-password")
 	shareDatabase := filepath.Join(root, "share.fgs")
+	projectDatabase := filepath.Join(root, "project.fg")
 	if err := os.WriteFile(shareDatabase, []byte("not a database"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(projectDatabase, []byte("not a database"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
 	commands := [][]string{
 		{"rename", shareDatabase, "Root/old.txt", "new.txt", "--password-env", "FG_TEST_PASSWORD"},
+		{"rename", projectDatabase, "Root/old.txt", "new.txt", "--password-env", "FG_TEST_PASSWORD"},
 		{"add", shareDatabase, filepath.Join(root, "new.txt"), "Root", "--staging-content", filepath.Join(root, "staging"), "--max-part-size", "1024", "--password-env", "FG_TEST_PASSWORD"},
+		{"add", projectDatabase, filepath.Join(root, "new.txt"), "Root", "--staging-content", filepath.Join(root, "staging"), "--max-part-size", "1024", "--password-env", "FG_TEST_PASSWORD"},
 		{"move", shareDatabase, "Root/old.txt", "Root/docs", "--password-env", "FG_TEST_PASSWORD"},
+		{"move", projectDatabase, "Root/old.txt", "Root/docs", "--password-env", "FG_TEST_PASSWORD"},
 		{"remove", shareDatabase, "Root/old.txt", "--force", "--password-env", "FG_TEST_PASSWORD"},
+		{"remove", projectDatabase, "Root/old.txt", "--force", "--password-env", "FG_TEST_PASSWORD"},
+		{"plan", "add", shareDatabase, filepath.Join(root, "new.txt"), "Root", "--staging-content", filepath.Join(root, "staging-plan"), "--max-part-size", "1024", "--password-env", "FG_TEST_PASSWORD"},
+		{"plan", "add", projectDatabase, filepath.Join(root, "new.txt"), "Root", "--staging-content", filepath.Join(root, "staging-plan"), "--max-part-size", "1024", "--password-env", "FG_TEST_PASSWORD"},
+		{"share", shareDatabase, "Root", "--content", root, "--out-content", filepath.Join(root, "out-content"), "--out-database", filepath.Join(root, "out.fgs"), "--password-env", "FG_TEST_PASSWORD", "--no-share-password"},
+		{"share", projectDatabase, "Root", "--content", root, "--out-content", filepath.Join(root, "out-content"), "--out-database", filepath.Join(root, "out.fgs"), "--password-env", "FG_TEST_PASSWORD", "--no-share-password"},
 	}
 	for _, args := range commands {
 		err := RunWithIO("foldersguard", args, nil, nil)
-		if err == nil {
-			t.Fatalf("command %v succeeded, want .fgs rejection", args)
+		if err == nil || !strings.Contains(err.Error(), "project id must reference an active project") {
+			t.Fatalf("command %v error = %v, want active project id rejection", args, err)
 		}
-		if !strings.Contains(err.Error(), "do not accept .fgs") {
-			t.Fatalf("command %v error = %v, want .fgs rejection", args, err)
+	}
+}
+
+func TestReadCommandsRejectExportedProjectDatabasePath(t *testing.T) {
+	root := t.TempDir()
+	contentRoot := filepath.Join(root, "content")
+	outputRoot := filepath.Join(root, "out")
+	if err := os.MkdirAll(contentRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	projectDatabase := filepath.Join(root, "project.fg")
+	if err := os.WriteFile(projectDatabase, []byte("not a database"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	commands := [][]string{
+		{"inspect", projectDatabase, "--password-env", "FG_TEST_PASSWORD"},
+		{"verify", projectDatabase, "--content", contentRoot, "--password-env", "FG_TEST_PASSWORD"},
+		{"decrypt", projectDatabase, "--content", contentRoot, "--out", outputRoot, "--password-env", "FG_TEST_PASSWORD"},
+	}
+	for _, args := range commands {
+		err := RunWithIO("foldersguard", args, nil, nil)
+		if err == nil || !strings.Contains(err.Error(), "must be imported before use") {
+			t.Fatalf("command %v error = %v, want import requirement", args, err)
 		}
 	}
 }
@@ -172,7 +207,7 @@ func TestPasswordRequiredInNonInteractiveMode(t *testing.T) {
 	}
 }
 
-func TestShareAllowsDefaultInteractiveSharePasswordMode(t *testing.T) {
+func TestShareRequiresActiveProjectBeforeDefaultSharePassword(t *testing.T) {
 	root := t.TempDir()
 	contentRoot := filepath.Join(root, "content")
 	if err := os.MkdirAll(contentRoot, 0o755); err != nil {
@@ -193,10 +228,10 @@ func TestShareAllowsDefaultInteractiveSharePasswordMode(t *testing.T) {
 		"--password-env", "FG_TEST_PASSWORD",
 	}, strings.NewReader(""), nil)
 	if err == nil {
-		t.Fatal("expected non-interactive share password requirement")
+		t.Fatal("expected active project id requirement")
 	}
-	if !strings.Contains(err.Error(), "password input is required") {
-		t.Fatalf("error = %v, want share password requirement", err)
+	if !strings.Contains(err.Error(), "project id must reference an active project") {
+		t.Fatalf("error = %v, want active project id requirement", err)
 	}
 }
 

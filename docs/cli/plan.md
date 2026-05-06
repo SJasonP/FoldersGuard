@@ -36,7 +36,7 @@ Prints the storage operations that would be required to add cleartext content.
 Usage:
 
 ```text
-fg plan add <project-ref> <source-path> <target-folder-path> --staging-content <folder> --max-part-size <bytes> [--password-stdin | --password-env <name>]
+fg plan add <project-id> <source-path> <target-folder-path> --staging-content <folder> --max-part-size <bytes> [--password-stdin | --password-env <name>]
 ```
 
 Behavior:
@@ -65,7 +65,7 @@ Prints the storage operations that would be required to move an item.
 Usage:
 
 ```text
-fg plan move <project-ref> <item-path> <target-folder-path> [--password-stdin | --password-env <name>]
+fg plan move <project-id> <item-path> <target-folder-path> [--password-stdin | --password-env <name>]
 ```
 
 Behavior:
@@ -91,7 +91,7 @@ Prints the storage operations that would be required to remove an item.
 Usage:
 
 ```text
-fg plan remove <project-ref> <item-path> [--password-stdin | --password-env <name>]
+fg plan remove <project-id> <item-path> [--password-stdin | --password-env <name>]
 ```
 
 Behavior:

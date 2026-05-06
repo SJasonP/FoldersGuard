@@ -82,7 +82,7 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	var inspectOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"inspect",
-		databaseOutput,
+		projectID,
 		"--password-env", "FG_TEST_PASSWORD",
 	}, nil, &inspectOutput); err != nil {
 		t.Fatal(err)
@@ -98,7 +98,7 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	var verifyOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"verify",
-		databaseOutput,
+		projectID,
 		"--content", contentOutput,
 		"--password-env", "FG_TEST_PASSWORD",
 	}, nil, &verifyOutput); err != nil {
@@ -115,7 +115,7 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	var renameOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"rename",
-		databaseOutput,
+		projectID,
 		"source/docs/note.txt",
 		"renamed.txt",
 		"--password-env", "FG_TEST_PASSWORD",
@@ -130,7 +130,7 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 
 	if err := cli.RunWithIO("foldersguard", []string{
 		"decrypt",
-		databaseOutput,
+		projectID,
 		"--content", contentOutput,
 		"--out", renamedRestoreOutput,
 		"--password-env", "FG_TEST_PASSWORD",
@@ -149,7 +149,7 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	wrongPasswordOutput := filepath.Join(root, "wrong-password")
 	err = cli.RunWithIO("foldersguard", []string{
 		"decrypt",
-		databaseOutput,
+		projectID,
 		"--content", contentOutput,
 		"--out", wrongPasswordOutput,
 		"--password-env", "FG_WRONG_PASSWORD",
@@ -164,7 +164,7 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	var inspectRenamedOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"inspect",
-		databaseOutput,
+		projectID,
 		"--password-env", "FG_TEST_PASSWORD",
 	}, nil, &inspectRenamedOutput); err != nil {
 		t.Fatal(err)
@@ -175,7 +175,7 @@ func TestRunEncryptCreatesEncryptedContentAndDatabase(t *testing.T) {
 	var tamperedVerifyOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"verify",
-		databaseOutput,
+		projectID,
 		"--content", contentOutput,
 		"--password-env", "FG_TEST_PASSWORD",
 	}, nil, &tamperedVerifyOutput); err != nil {

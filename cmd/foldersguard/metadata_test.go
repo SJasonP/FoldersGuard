@@ -23,6 +23,7 @@ func TestRunRemoveDeletesMetadataAndEncryptedContent(t *testing.T) {
 
 	t.Setenv("HOME", root)
 	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	var encryptOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"encrypt",
 		source,
@@ -30,14 +31,15 @@ func TestRunRemoveDeletesMetadataAndEncryptedContent(t *testing.T) {
 		"--export", databaseOutput,
 		"--max-part-size", "1024",
 		"--password-env", "FG_TEST_PASSWORD",
-	}, nil, nil); err != nil {
+	}, nil, &encryptOutput); err != nil {
 		t.Fatal(err)
 	}
+	projectID := outputValue(t, encryptOutput.String(), "project_id")
 
 	var removeOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"remove",
-		databaseOutput,
+		projectID,
 		"source/note.txt",
 		"--content", contentOutput,
 		"--force",
@@ -53,7 +55,7 @@ func TestRunRemoveDeletesMetadataAndEncryptedContent(t *testing.T) {
 	var inspectOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"inspect",
-		databaseOutput,
+		projectID,
 		"--password-env", "FG_TEST_PASSWORD",
 	}, nil, &inspectOutput); err != nil {
 		t.Fatal(err)
@@ -63,7 +65,7 @@ func TestRunRemoveDeletesMetadataAndEncryptedContent(t *testing.T) {
 	var verifyOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"verify",
-		databaseOutput,
+		projectID,
 		"--content", contentOutput,
 		"--password-env", "FG_TEST_PASSWORD",
 	}, nil, &verifyOutput); err != nil {
@@ -95,6 +97,7 @@ func TestRunMoveUpdatesMetadataAndEncryptedContent(t *testing.T) {
 
 	t.Setenv("HOME", root)
 	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	var encryptOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"encrypt",
 		source,
@@ -102,14 +105,15 @@ func TestRunMoveUpdatesMetadataAndEncryptedContent(t *testing.T) {
 		"--export", databaseOutput,
 		"--max-part-size", "1024",
 		"--password-env", "FG_TEST_PASSWORD",
-	}, nil, nil); err != nil {
+	}, nil, &encryptOutput); err != nil {
 		t.Fatal(err)
 	}
+	projectID := outputValue(t, encryptOutput.String(), "project_id")
 
 	var moveOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"move",
-		databaseOutput,
+		projectID,
 		"source/docs/note.txt",
 		"source/archive",
 		"--content", contentOutput,
@@ -126,7 +130,7 @@ func TestRunMoveUpdatesMetadataAndEncryptedContent(t *testing.T) {
 	var verifyOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"verify",
-		databaseOutput,
+		projectID,
 		"--content", contentOutput,
 		"--password-env", "FG_TEST_PASSWORD",
 	}, nil, &verifyOutput); err != nil {
@@ -140,7 +144,7 @@ func TestRunMoveUpdatesMetadataAndEncryptedContent(t *testing.T) {
 
 	if err := cli.RunWithIO("foldersguard", []string{
 		"decrypt",
-		databaseOutput,
+		projectID,
 		"--content", contentOutput,
 		"--out", restoreOutput,
 		"--password-env", "FG_TEST_PASSWORD",
@@ -177,6 +181,7 @@ func TestRunAddUpdatesMetadataAndEncryptedContent(t *testing.T) {
 
 	t.Setenv("HOME", root)
 	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	var encryptOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"encrypt",
 		source,
@@ -184,14 +189,15 @@ func TestRunAddUpdatesMetadataAndEncryptedContent(t *testing.T) {
 		"--export", databaseOutput,
 		"--max-part-size", "1024",
 		"--password-env", "FG_TEST_PASSWORD",
-	}, nil, nil); err != nil {
+	}, nil, &encryptOutput); err != nil {
 		t.Fatal(err)
 	}
+	projectID := outputValue(t, encryptOutput.String(), "project_id")
 
 	var addOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"add",
-		databaseOutput,
+		projectID,
 		addSource,
 		"source/docs",
 		"--staging-content", stagingOutput,
@@ -211,7 +217,7 @@ func TestRunAddUpdatesMetadataAndEncryptedContent(t *testing.T) {
 	var verifyOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"verify",
-		databaseOutput,
+		projectID,
 		"--content", contentOutput,
 		"--password-env", "FG_TEST_PASSWORD",
 	}, nil, &verifyOutput); err != nil {
@@ -225,7 +231,7 @@ func TestRunAddUpdatesMetadataAndEncryptedContent(t *testing.T) {
 
 	if err := cli.RunWithIO("foldersguard", []string{
 		"decrypt",
-		databaseOutput,
+		projectID,
 		"--content", contentOutput,
 		"--out", restoreOutput,
 		"--password-env", "FG_TEST_PASSWORD",

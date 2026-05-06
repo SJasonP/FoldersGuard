@@ -53,9 +53,9 @@ type addOptions struct {
 func (c cli) renameCommand() *cobra.Command {
 	options := renameOptions{}
 	command := &cobra.Command{
-		Use:           "rename <project-ref> <item-path> <new-name>",
+		Use:           "rename <project-id> <item-path> <new-name>",
 		Short:         "Rename a file or folder in FG metadata.",
-		Example:       c.name + " rename ./project.fg Root/old.txt new.txt --password-env FG_PASSWORD",
+		Example:       c.name + " rename <project-id> Root/old.txt new.txt --password-env FG_PASSWORD",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(3),
@@ -75,9 +75,9 @@ func (c cli) renameCommand() *cobra.Command {
 func (c cli) removeCommand() *cobra.Command {
 	options := removeOptions{}
 	command := &cobra.Command{
-		Use:           "remove <project-ref> <item-path>",
+		Use:           "remove <project-id> <item-path>",
 		Short:         "Remove a file or folder from FG metadata.",
-		Example:       c.name + " remove ./project.fg Root/old.txt --force --content ./encrypted --password-env FG_PASSWORD",
+		Example:       c.name + " remove <project-id> Root/old.txt --force --content ./encrypted --password-env FG_PASSWORD",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(2),
@@ -99,9 +99,9 @@ func (c cli) removeCommand() *cobra.Command {
 func (c cli) moveCommand() *cobra.Command {
 	options := moveOptions{}
 	command := &cobra.Command{
-		Use:           "move <project-ref> <item-path> <target-folder-path>",
+		Use:           "move <project-id> <item-path> <target-folder-path>",
 		Short:         "Move a file or folder in FG metadata.",
-		Example:       c.name + " move ./project.fg Root/old.txt Root/docs --content ./encrypted --password-env FG_PASSWORD",
+		Example:       c.name + " move <project-id> Root/old.txt Root/docs --content ./encrypted --password-env FG_PASSWORD",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(3),
@@ -122,9 +122,9 @@ func (c cli) moveCommand() *cobra.Command {
 func (c cli) addCommand() *cobra.Command {
 	options := addOptions{}
 	command := &cobra.Command{
-		Use:           "add <project-ref> <source-path> <target-folder-path>",
+		Use:           "add <project-id> <source-path> <target-folder-path>",
 		Short:         "Add cleartext content to an existing FG project.",
-		Example:       c.name + " add ./project.fg ./new Root/docs --staging-content ./staging --max-part-size 1073741824 --password-env FG_PASSWORD",
+		Example:       c.name + " add <project-id> ./new Root/docs --staging-content ./staging --max-part-size 1073741824 --password-env FG_PASSWORD",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(3),
@@ -155,7 +155,7 @@ func (c cli) runRename(options renameOptions) error {
 	if err != nil {
 		return err
 	}
-	databasePath, err := projectDatabasePathFromProjectRef(options.projectRef)
+	databasePath, err := activeProjectDatabasePathFromID(options.projectRef)
 	if err != nil {
 		return err
 	}
@@ -199,7 +199,7 @@ func (c cli) runRemove(options removeOptions) error {
 	if err != nil {
 		return err
 	}
-	databasePath, err := projectDatabasePathFromProjectRef(options.projectRef)
+	databasePath, err := activeProjectDatabasePathFromID(options.projectRef)
 	if err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ func (c cli) runMove(options moveOptions) error {
 	if err != nil {
 		return err
 	}
-	databasePath, err := projectDatabasePathFromProjectRef(options.projectRef)
+	databasePath, err := activeProjectDatabasePathFromID(options.projectRef)
 	if err != nil {
 		return err
 	}
@@ -325,7 +325,7 @@ func (c cli) runAdd(options addOptions) error {
 	if err != nil {
 		return err
 	}
-	databasePath, err := projectDatabasePathFromProjectRef(options.projectRef)
+	databasePath, err := activeProjectDatabasePathFromID(options.projectRef)
 	if err != nil {
 		return err
 	}

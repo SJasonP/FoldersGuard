@@ -25,17 +25,23 @@ func databasePathFromProjectRef(projectRef string) (string, error) {
 	if projectRef == "" {
 		return "", fmt.Errorf("project reference is required")
 	}
-	if format.IsProjectExtension(projectRef) || format.IsSetExtension(projectRef) {
+	if format.IsProjectExtension(projectRef) {
+		return "", fmt.Errorf("exported %s databases must be imported before use", format.ProjectExtension)
+	}
+	if format.IsSetExtension(projectRef) {
 		return projectRef, nil
 	}
 	return activeProjectDatabasePath(projectRef)
 }
 
-func projectDatabasePathFromProjectRef(projectRef string) (string, error) {
-	if format.IsSetExtension(projectRef) {
-		return "", fmt.Errorf("project editing commands do not accept %s databases", format.SetExtension)
+func activeProjectDatabasePathFromID(projectID string) (string, error) {
+	if projectID == "" {
+		return "", fmt.Errorf("project id is required")
 	}
-	return databasePathFromProjectRef(projectRef)
+	if format.IsProjectExtension(projectID) || format.IsSetExtension(projectID) {
+		return "", fmt.Errorf("project id must reference an active project, not a database path")
+	}
+	return activeProjectDatabasePath(projectID)
 }
 
 func writeProjectDatabase(ctx context.Context, config db.Config, plan model.PlannedProject) error {

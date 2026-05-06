@@ -35,6 +35,7 @@ func TestRunShareCreatesRestorableShare(t *testing.T) {
 	t.Setenv("HOME", root)
 	t.Setenv("FG_TEST_PASSWORD", "test-password")
 	t.Setenv("FG_SHARE_PASSWORD", "share-password")
+	var encryptOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"encrypt",
 		source,
@@ -42,14 +43,15 @@ func TestRunShareCreatesRestorableShare(t *testing.T) {
 		"--export", databaseOutput,
 		"--max-part-size", "1024",
 		"--password-env", "FG_TEST_PASSWORD",
-	}, nil, nil); err != nil {
+	}, nil, &encryptOutput); err != nil {
 		t.Fatal(err)
 	}
+	projectID := outputValue(t, encryptOutput.String(), "project_id")
 
 	var shareOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"share",
-		databaseOutput,
+		projectID,
 		"source/docs",
 		"--content", contentOutput,
 		"--out-content", shareContent,
@@ -119,6 +121,7 @@ func TestRunShareCreatesUnprotectedShare(t *testing.T) {
 
 	t.Setenv("HOME", root)
 	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	var encryptOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"encrypt",
 		source,
@@ -126,14 +129,15 @@ func TestRunShareCreatesUnprotectedShare(t *testing.T) {
 		"--export", databaseOutput,
 		"--max-part-size", "1024",
 		"--password-env", "FG_TEST_PASSWORD",
-	}, nil, nil); err != nil {
+	}, nil, &encryptOutput); err != nil {
 		t.Fatal(err)
 	}
+	projectID := outputValue(t, encryptOutput.String(), "project_id")
 
 	var shareOutput bytes.Buffer
 	if err := cli.RunWithIO("foldersguard", []string{
 		"share",
-		databaseOutput,
+		projectID,
 		"source/note.txt",
 		"--content", contentOutput,
 		"--out-content", shareContent,

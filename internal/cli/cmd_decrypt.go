@@ -22,7 +22,7 @@ func (c cli) decryptCommand() *cobra.Command {
 	command := &cobra.Command{
 		Use:           "decrypt <project-ref>",
 		Short:         "Decrypt encrypted content using a project or share database.",
-		Example:       c.name + " decrypt ./project.fg --content ./encrypted --out ./restored --password-env FG_PASSWORD",
+		Example:       c.name + " decrypt <project-id> --content ./encrypted --out ./restored --password-env FG_PASSWORD",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(1),

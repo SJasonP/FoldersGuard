@@ -29,9 +29,9 @@ type shareOptions struct {
 func (c cli) shareCommand() *cobra.Command {
 	options := shareOptions{}
 	command := &cobra.Command{
-		Use:           "share <project-ref> <item-path>",
+		Use:           "share <project-id> <item-path>",
 		Short:         "Create a share database and encrypted content subset.",
-		Example:       c.name + " share ./project.fg Root/docs --content ./encrypted --out-content ./shared-content --out-database ./share.fgs --share-password-env FG_SHARE_PASSWORD --password-env FG_PASSWORD",
+		Example:       c.name + " share <project-id> Root/docs --content ./encrypted --out-content ./shared-content --out-database ./share.fgs --share-password-env FG_SHARE_PASSWORD --password-env FG_PASSWORD",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(2),
@@ -67,7 +67,7 @@ func (c cli) runShare(options shareOptions) error {
 	if !format.IsSetExtension(options.outputDatabase) {
 		return fmt.Errorf("share database output must use %s extension", format.SetExtension)
 	}
-	databasePath, err := projectDatabasePathFromProjectRef(options.projectRef)
+	databasePath, err := activeProjectDatabasePathFromID(options.projectRef)
 	if err != nil {
 		return err
 	}

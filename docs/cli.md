@@ -71,17 +71,16 @@ Commands that operate on project data use a project reference.
 A project reference may be:
 
 - A project id.
-- A path to an exported `.fg` project database.
 
-When a command receives a project id, FG opens the matching project database from FG's data directory.
+FG opens the matching active project database from FG's data directory.
 
-When a command receives a database path, FG opens that database file directly.
+Exported `.fg` files are not active databases. They are accepted only by `fg import` as input and by `fg export` as output.
 
 Commands that explicitly accept share databases also accept a path to an `.fgs` share database.
 
 Share databases are accepted by read/restore commands only: `fg decrypt`, `fg inspect`, and `fg verify`.
 
-Project editing and share creation commands reject `.fgs` inputs.
+Project editing, planning, and share creation commands require a project id and reject external `.fg` and `.fgs` database paths.
 
 ## Output And Overwrite Rules
 

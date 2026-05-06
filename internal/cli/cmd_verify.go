@@ -20,7 +20,7 @@ func (c cli) verifyCommand() *cobra.Command {
 	command := &cobra.Command{
 		Use:           "verify <project-ref>",
 		Short:         "Verify database and encrypted content consistency.",
-		Example:       c.name + " verify ./project.fg --content ./encrypted --password-env FG_PASSWORD",
+		Example:       c.name + " verify <project-id> --content ./encrypted --password-env FG_PASSWORD",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(1),

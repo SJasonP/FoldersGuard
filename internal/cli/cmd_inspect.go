@@ -17,7 +17,7 @@ func (c cli) inspectCommand() *cobra.Command {
 	command := &cobra.Command{
 		Use:           "inspect <project-ref>",
 		Short:         "Display FG metadata without decrypting file content.",
-		Example:       c.name + " inspect ./project.fg --password-env FG_PASSWORD",
+		Example:       c.name + " inspect <project-id> --password-env FG_PASSWORD",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Args:          cobra.ExactArgs(1),
