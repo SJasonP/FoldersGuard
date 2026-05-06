@@ -123,7 +123,7 @@ func (c cli) runEncrypt(options encryptOptions) error {
 		fmt.Fprintf(c.out, "database_export=%s\n", options.databaseExport)
 	}
 	fmt.Fprintf(c.out, "items=%d\n", len(plan.Items)+1)
-	fmt.Fprintf(c.out, "folders=%d\n", len(plan.Folders)+1)
+	fmt.Fprintf(c.out, "folders=%d\n", countFolders(plan))
 	fmt.Fprintf(c.out, "files=%d\n", len(plan.Files))
 	fmt.Fprintf(c.out, "parts=%d\n", len(plan.Parts))
 	fmt.Fprintf(c.out, "storage_objects=%d\n", len(plan.StorageObjects))

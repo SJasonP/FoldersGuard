@@ -100,6 +100,10 @@ A share database is generated from a project database.
 
 It contains only the subset required to restore the shared file or folder subtree.
 
+Share databases are rootless sets from the user's point of view. A `.fgs` database may contain one file, multiple files, one directory, multiple directories, or a mixed set of files and directories as top-level objects.
+
+Internally, v1 stores these top-level objects under a virtual folder root so the same parent-child schema can be used. This virtual root is not restored as a user-visible directory and is not part of the shared content tree.
+
 A share database may be password-protected or unprotected:
 
 - Password-protected share database: the recipient must enter the share password.

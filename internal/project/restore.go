@@ -71,7 +71,10 @@ func (r Restorer) RestoreContent(ctx context.Context, plan model.PlannedProject)
 
 func (r Restorer) createFolders(ctx context.Context, plan model.PlannedProject, logicalPaths map[string]string) error {
 	ids := make([]string, 0, len(logicalPaths))
-	folderIDs := map[string]struct{}{plan.RootFolder.ID.String(): {}}
+	folderIDs := make(map[string]struct{})
+	if !isVirtualRoot(plan) {
+		folderIDs[plan.RootFolder.ID.String()] = struct{}{}
+	}
 	for _, folder := range plan.Folders {
 		folderIDs[folder.ID.String()] = struct{}{}
 	}
@@ -175,8 +178,11 @@ func (r Restorer) restoreSplit(ctx context.Context, file model.File, visiblePath
 }
 
 func logicalRealPaths(plan model.PlannedProject) (map[string]string, error) {
-	if err := validateRealName(plan.RootItem.RealName); err != nil {
-		return nil, fmt.Errorf("invalid root real name: %w", err)
+	virtualRoot := isVirtualRoot(plan)
+	if !virtualRoot {
+		if err := validateRealName(plan.RootItem.RealName); err != nil {
+			return nil, fmt.Errorf("invalid root real name: %w", err)
+		}
 	}
 	paths := map[string]string{
 		plan.RootItem.ID.String(): plan.RootItem.RealName,
@@ -200,7 +206,11 @@ func logicalRealPaths(plan model.PlannedProject) (map[string]string, error) {
 		})
 		for _, item := range children {
 			parentPath := paths[parentID]
-			paths[item.ID.String()] = filepath.ToSlash(filepath.Join(parentPath, item.RealName))
+			if parentPath == "" {
+				paths[item.ID.String()] = item.RealName
+			} else {
+				paths[item.ID.String()] = filepath.ToSlash(filepath.Join(parentPath, item.RealName))
+			}
 			if err := walk(item.ID.String()); err != nil {
 				return err
 			}
@@ -215,6 +225,10 @@ func logicalRealPaths(plan model.PlannedProject) (map[string]string, error) {
 		return nil, fmt.Errorf("items contain missing or cyclic parent references")
 	}
 	return paths, nil
+}
+
+func isVirtualRoot(plan model.PlannedProject) bool {
+	return plan.Project.DatabaseType == "share" && plan.RootItem.RealName == ""
 }
 
 func validateRealName(name string) error {

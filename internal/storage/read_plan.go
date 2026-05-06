@@ -41,7 +41,7 @@ func (s *Store) ReadPlannedProject(ctx context.Context) (model.PlannedProject, e
 	if err != nil {
 		return model.PlannedProject{}, err
 	}
-	folders, rootFolder, err := s.readFolders(ctx, rootFolderID)
+	folders, rootFolder, err := s.readFolders(ctx, rootFolderID, rootItem.Type)
 	if err != nil {
 		return model.PlannedProject{}, err
 	}
@@ -62,6 +62,7 @@ func (s *Store) ReadPlannedProject(ctx context.Context) (model.PlannedProject, e
 		Project: model.Project{
 			ID:           projectID,
 			RootFolderID: rootFolderID,
+			DatabaseType: meta["database_type"],
 			CreatedAt:    createdAt,
 			UpdatedAt:    updatedAt,
 		},
@@ -194,7 +195,7 @@ func scanItem(scanner interface {
 	}, nil
 }
 
-func (s *Store) readFolders(ctx context.Context, rootFolderID uuid.UUID) ([]model.Folder, model.Folder, error) {
+func (s *Store) readFolders(ctx context.Context, rootFolderID uuid.UUID, rootItemType model.ItemType) ([]model.Folder, model.Folder, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT folder_id, folder_key FROM folders ORDER BY folder_id`)
 	if err != nil {
 		return nil, model.Folder{}, fmt.Errorf("query folders: %w", err)
@@ -227,6 +228,9 @@ func (s *Store) readFolders(ctx context.Context, rootFolderID uuid.UUID) ([]mode
 	}
 	if err := rows.Err(); err != nil {
 		return nil, model.Folder{}, fmt.Errorf("iterate folders: %w", err)
+	}
+	if rootItemType != model.ItemTypeFolder {
+		return nil, model.Folder{}, fmt.Errorf("root item %s has unsupported type %s", rootFolderID, rootItemType)
 	}
 	if !foundRoot {
 		return nil, model.Folder{}, fmt.Errorf("root folder %s not found", rootFolderID)

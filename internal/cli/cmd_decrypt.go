@@ -77,7 +77,7 @@ func (c cli) runDecrypt(options decryptOptions) error {
 
 	fmt.Fprintf(c.out, "project_id=%s\n", plan.Project.ID)
 	fmt.Fprintf(c.out, "output=%s\n", options.outputRoot)
-	fmt.Fprintf(c.out, "folders=%d\n", len(plan.Folders)+1)
+	fmt.Fprintf(c.out, "folders=%d\n", countFolders(plan))
 	fmt.Fprintf(c.out, "files=%d\n", len(plan.Files))
 	fmt.Fprintf(c.out, "parts=%d\n", len(plan.Parts))
 	fmt.Fprintf(c.out, "restored_files=%d\n", len(plan.Files))

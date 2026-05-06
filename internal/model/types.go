@@ -23,6 +23,7 @@ const (
 type Project struct {
 	ID           uuid.UUID
 	RootFolderID uuid.UUID
+	DatabaseType string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }

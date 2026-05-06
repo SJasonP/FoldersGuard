@@ -113,7 +113,7 @@ func validateProjectSpec(spec ProjectSpec) error {
 	if spec.RootVisibleName == uuid.Nil {
 		return errors.New("root visible name is required")
 	}
-	if strings.TrimSpace(spec.RootRealName) == "" {
+	if strings.TrimSpace(spec.RootRealName) == "" && spec.DatabaseType != "share" {
 		return errors.New("root real name is required")
 	}
 	if len(spec.RootFolderKey) != 32 {
