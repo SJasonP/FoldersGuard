@@ -69,6 +69,46 @@ func (a *App) VerifyProject(request VerifyProjectRequest) (VerifyProjectResult, 
 	}, nil
 }
 
+func (a *App) LoadShare(request LoadShareRequest) (ShareSummary, error) {
+	result, err := a.service.InspectShare(a.ctx, app.ShareOpen{
+		DatabasePath: request.DatabasePath,
+		Password:     request.Password,
+	})
+	if err != nil {
+		return ShareSummary{}, err
+	}
+	return ShareSummary{
+		ShareID:           result.ShareID,
+		DatabaseType:      result.DatabaseType,
+		FormatVersion:     result.FormatVersion,
+		SchemaVersion:     result.SchemaVersion,
+		TopLevelItems:     result.TopLevelItems,
+		Files:             result.Files,
+		Folders:           result.Folders,
+		Parts:             result.Parts,
+		StorageObjects:    result.StorageObjects,
+		PasswordProtected: result.PasswordProtected,
+	}, nil
+}
+
+func (a *App) VerifyShare(request VerifyShareRequest) (VerifyProjectResult, error) {
+	result, err := a.service.VerifyShare(a.ctx, app.ShareOpen{
+		DatabasePath: request.DatabasePath,
+		Password:     request.Password,
+	}, request.EncryptedPath)
+	if err != nil {
+		return VerifyProjectResult{}, err
+	}
+	return VerifyProjectResult{
+		ProjectID:       result.ProjectID,
+		CheckedObjects:  result.CheckedObjects,
+		MissingObjects:  result.MissingObjects,
+		TamperedObjects: result.TamperedObjects,
+		ExtraObjects:    result.ExtraObjects,
+		Status:          result.Status,
+	}, nil
+}
+
 func (a *App) ExportProject(request ExportProjectRequest) (ExportProjectResult, error) {
 	result, err := a.service.ExportProject(a.ctx, app.ExportProjectInput{
 		ProjectID:  request.ProjectID,

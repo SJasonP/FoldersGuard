@@ -17,6 +17,19 @@ type LocalProjectSummary struct {
 	AvailabilityStatus string `json:"availabilityStatus"`
 }
 
+type ShareSummary struct {
+	ShareID           string `json:"shareId"`
+	DatabaseType      string `json:"databaseType"`
+	FormatVersion     string `json:"formatVersion"`
+	SchemaVersion     string `json:"schemaVersion"`
+	TopLevelItems     int    `json:"topLevelItems"`
+	Files             int    `json:"files"`
+	Folders           int    `json:"folders"`
+	Parts             int    `json:"parts"`
+	StorageObjects    int    `json:"storageObjects"`
+	PasswordProtected bool   `json:"passwordProtected"`
+}
+
 type Settings struct {
 	OperationGuideFormat   string   `json:"operationGuideFormat"`
 	DefaultMaxPartSize     int64    `json:"defaultMaxPartSize"`
@@ -60,6 +73,17 @@ type VerifyProjectResult struct {
 	TamperedObjects int    `json:"tamperedObjects"`
 	ExtraObjects    int    `json:"extraObjects"`
 	Status          string `json:"status"`
+}
+
+type LoadShareRequest struct {
+	DatabasePath string `json:"databasePath"`
+	Password     string `json:"password"`
+}
+
+type VerifyShareRequest struct {
+	DatabasePath  string `json:"databasePath"`
+	Password      string `json:"password"`
+	EncryptedPath string `json:"encryptedPath"`
 }
 
 type ExportProjectRequest struct {

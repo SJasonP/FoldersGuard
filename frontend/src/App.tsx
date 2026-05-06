@@ -23,6 +23,7 @@ import { useLocalProjects } from './hooks/useLocalProjects';
 import { useProjectCreate } from './hooks/useProjectCreate';
 import { useProjectImport } from './hooks/useProjectImport';
 import { useProjectActions } from './hooks/useProjectActions';
+import { useShareActions } from './hooks/useShareActions';
 import { HomeView } from './views/HomeView';
 import { SettingsView } from './views/SettingsView';
 import { AboutView } from './views/AboutView';
@@ -35,6 +36,8 @@ import { VerifyProjectModal } from './components/project-actions/VerifyProjectMo
 import { VerifyProjectDrawer } from './components/project-actions/VerifyProjectDrawer';
 import { ExportProjectModal } from './components/project-actions/ExportProjectModal';
 import { DeleteProjectModal } from './components/project-actions/DeleteProjectModal';
+import { LoadShareModal } from './components/share-actions/LoadShareModal';
+import { ShareSessionLayer } from './components/share-actions/ShareSessionLayer';
 
 const antLocales: Record<SupportedLanguage, typeof enUS> = {
   'en-US': enUS,
@@ -116,6 +119,28 @@ function App() {
     messageApi: antApp.message,
     t,
     reloadProjects: loadProjects,
+  });
+
+  const {
+    closeShareSession,
+    handleLoadShare,
+    handleVerifyShare,
+    inspectShareOpen,
+    loadShareDialogOpen,
+    loadedShare,
+    setLoadShareDialogOpen,
+    setInspectShareOpen,
+    setVerifyShareDialogOpen,
+    setVerifyShareResultOpen,
+    shareActionsOpen,
+    shareLoading,
+    verifyShareDialogOpen,
+    verifyShareLoading,
+    verifyShareResult,
+    verifyShareResultOpen,
+  } = useShareActions({
+    messageApi: antApp.message,
+    t,
   });
 
   const {
@@ -201,7 +226,9 @@ function App() {
                 <Button icon={<ImportOutlined />} onClick={() => setImportDialogOpen(true)}>
                   {t('importProject')}
                 </Button>
-                <Button icon={<ShareAltOutlined />}>{t('loadShare')}</Button>
+                <Button icon={<ShareAltOutlined />} onClick={() => setLoadShareDialogOpen(true)}>
+                  {t('loadShare')}
+                </Button>
               </Space>
               <Space>
                 <Button onClick={() => setLanguage(language === 'en-US' ? 'zh-CN' : 'en-US')}>
@@ -265,6 +292,13 @@ function App() {
           onSubmit={(values) => void handleImportProject(values)}
           t={t}
         />
+        <LoadShareModal
+          open={loadShareDialogOpen}
+          loading={shareLoading}
+          onCancel={() => setLoadShareDialogOpen(false)}
+          onSubmit={(values) => void handleLoadShare(values)}
+          t={t}
+        />
         <InspectProjectModal
           open={inspectDialogOpen}
           loading={inspectLoading}
@@ -303,6 +337,23 @@ function App() {
           loading={deleteLoading}
           onCancel={() => setDeleteDialogOpen(false)}
           onSubmit={(password) => void handleDeleteProject(password)}
+          t={t}
+        />
+        <ShareSessionLayer
+          shareActionsOpen={shareActionsOpen}
+          verifyShareDialogOpen={verifyShareDialogOpen}
+          verifyShareLoading={verifyShareLoading}
+          verifyShareResult={verifyShareResult}
+          verifyShareResultOpen={verifyShareResultOpen}
+          loadedShare={loadedShare}
+          inspectShareOpen={inspectShareOpen}
+          onCloseShareSession={closeShareSession}
+          onOpenInspectShare={() => setInspectShareOpen(true)}
+          onCloseInspectShare={() => setInspectShareOpen(false)}
+          onOpenVerifyShare={() => setVerifyShareDialogOpen(true)}
+          onCloseVerifyShare={() => setVerifyShareDialogOpen(false)}
+          onVerifyShare={(values) => void handleVerifyShare(values)}
+          onCloseVerifyShareResult={() => setVerifyShareResultOpen(false)}
           t={t}
         />
       </AntApp>

@@ -9,6 +9,11 @@ type DatabaseOpen struct {
 	Password   string
 }
 
+type ShareOpen struct {
+	DatabasePath string
+	Password     string
+}
+
 type InspectResult struct {
 	ProjectID      string
 	DatabaseType   string
@@ -91,4 +96,17 @@ type CreateProjectResult struct {
 	DeletedCleartextFiles   int
 	DeletedCleartextFolders int
 	FailedFiles             int
+}
+
+type ShareSummary struct {
+	ShareID           string
+	DatabaseType      string
+	FormatVersion     string
+	SchemaVersion     string
+	TopLevelItems     int
+	Files             int
+	Folders           int
+	Parts             int
+	StorageObjects    int
+	PasswordProtected bool
 }

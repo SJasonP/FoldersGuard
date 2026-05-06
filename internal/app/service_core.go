@@ -79,3 +79,37 @@ func (s Service) ReadDatabase(ctx context.Context, input DatabaseOpen) (model.Pl
 		Password:   input.Password,
 	})
 }
+
+func (s Service) ReadShareDatabase(ctx context.Context, input ShareOpen) (model.PlannedProject, map[string]string, bool, error) {
+	if !format.IsSetExtension(input.DatabasePath) {
+		return model.PlannedProject{}, nil, false, fmt.Errorf("share database must use %s extension", format.SetExtension)
+	}
+	if err := ValidateDatabasePath(input.DatabasePath); err != nil {
+		return model.PlannedProject{}, nil, false, err
+	}
+
+	if input.Password == "" {
+		plan, meta, err := ReadDatabase(ctx, db.Config{
+			Path:       input.DatabasePath,
+			DriverName: db.SQLCipherDriver,
+			Password:   db.UnprotectedSharePassword,
+		})
+		if err == nil {
+			return plan, meta, false, nil
+		}
+	}
+
+	if input.Password == "" {
+		return model.PlannedProject{}, nil, false, fmt.Errorf("share password is required")
+	}
+
+	plan, meta, err := ReadDatabase(ctx, db.Config{
+		Path:       input.DatabasePath,
+		DriverName: db.SQLCipherDriver,
+		Password:   input.Password,
+	})
+	if err != nil {
+		return model.PlannedProject{}, nil, false, err
+	}
+	return plan, meta, true, nil
+}

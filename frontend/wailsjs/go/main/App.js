@@ -34,6 +34,10 @@ export function ListLocalProjects() {
   return window['go']['main']['App']['ListLocalProjects']();
 }
 
+export function LoadShare(arg1) {
+  return window['go']['main']['App']['LoadShare'](arg1);
+}
+
 export function ReadSettings() {
   return window['go']['main']['App']['ReadSettings']();
 }
@@ -44,4 +48,8 @@ export function SaveSettings(arg1) {
 
 export function VerifyProject(arg1) {
   return window['go']['main']['App']['VerifyProject'](arg1);
+}
+
+export function VerifyShare(arg1) {
+  return window['go']['main']['App']['VerifyShare'](arg1);
 }

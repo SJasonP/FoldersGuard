@@ -127,3 +127,31 @@ func CountFolders(plan model.PlannedProject) int {
 	}
 	return len(plan.Folders) + 1
 }
+
+func shareSummary(plan model.PlannedProject, meta map[string]string, passwordProtected bool) ShareSummary {
+	return ShareSummary{
+		ShareID:           plan.Project.ID.String(),
+		DatabaseType:      meta["database_type"],
+		FormatVersion:     meta["format_version"],
+		SchemaVersion:     meta["schema_version"],
+		TopLevelItems:     countTopLevelItems(plan),
+		Files:             len(plan.Files),
+		Folders:           CountFolders(plan),
+		Parts:             len(plan.Parts),
+		StorageObjects:    len(plan.StorageObjects),
+		PasswordProtected: passwordProtected,
+	}
+}
+
+func countTopLevelItems(plan model.PlannedProject) int {
+	count := 0
+	for _, item := range plan.Items {
+		if item.ParentID == nil {
+			continue
+		}
+		if item.ParentID.String() == plan.RootItem.ID.String() {
+			count++
+		}
+	}
+	return count
+}

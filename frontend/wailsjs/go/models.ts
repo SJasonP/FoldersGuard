@@ -210,6 +210,20 @@ export namespace main {
 	        this.storageObjects = source["storageObjects"];
 	    }
 	}
+	export class LoadShareRequest {
+	    databasePath: string;
+	    password: string;
+
+	    static createFrom(source: any = {}) {
+	        return new LoadShareRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.databasePath = source["databasePath"];
+	        this.password = source["password"];
+	    }
+	}
 	export class LocalProjectSummary {
 	    projectId: string;
 	    fileName: string;
@@ -254,6 +268,36 @@ export namespace main {
 	        this.language = source["language"];
 	    }
 	}
+	export class ShareSummary {
+	    shareId: string;
+	    databaseType: string;
+	    formatVersion: string;
+	    schemaVersion: string;
+	    topLevelItems: number;
+	    files: number;
+	    folders: number;
+	    parts: number;
+	    storageObjects: number;
+	    passwordProtected: boolean;
+
+	    static createFrom(source: any = {}) {
+	        return new ShareSummary(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.shareId = source["shareId"];
+	        this.databaseType = source["databaseType"];
+	        this.formatVersion = source["formatVersion"];
+	        this.schemaVersion = source["schemaVersion"];
+	        this.topLevelItems = source["topLevelItems"];
+	        this.files = source["files"];
+	        this.folders = source["folders"];
+	        this.parts = source["parts"];
+	        this.storageObjects = source["storageObjects"];
+	        this.passwordProtected = source["passwordProtected"];
+	    }
+	}
 	export class VerifyProjectRequest {
 	    projectId: string;
 	    password: string;
@@ -290,6 +334,22 @@ export namespace main {
 	        this.tamperedObjects = source["tamperedObjects"];
 	        this.extraObjects = source["extraObjects"];
 	        this.status = source["status"];
+	    }
+	}
+	export class VerifyShareRequest {
+	    databasePath: string;
+	    password: string;
+	    encryptedPath: string;
+
+	    static createFrom(source: any = {}) {
+	        return new VerifyShareRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.databasePath = source["databasePath"];
+	        this.password = source["password"];
+	        this.encryptedPath = source["encryptedPath"];
 	    }
 	}
 

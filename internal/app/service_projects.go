@@ -87,6 +87,46 @@ func (s Service) Verify(ctx context.Context, input DatabaseOpen, encryptedRoot s
 	}, nil
 }
 
+func (s Service) InspectShare(ctx context.Context, input ShareOpen) (ShareSummary, error) {
+	plan, meta, passwordProtected, err := s.ReadShareDatabase(ctx, input)
+	if err != nil {
+		return ShareSummary{}, err
+	}
+	if meta["database_type"] != "share" {
+		return ShareSummary{}, fmt.Errorf("database type = %q, want share", meta["database_type"])
+	}
+	return shareSummary(plan, meta, passwordProtected), nil
+}
+
+func (s Service) VerifyShare(ctx context.Context, input ShareOpen, encryptedRoot string) (VerifyResult, error) {
+	if err := ValidateExistingDirectory(encryptedRoot, "content"); err != nil {
+		return VerifyResult{}, err
+	}
+	plan, meta, _, err := s.ReadShareDatabase(ctx, input)
+	if err != nil {
+		return VerifyResult{}, err
+	}
+	if meta["database_type"] != "share" {
+		return VerifyResult{}, fmt.Errorf("database type = %q, want share", meta["database_type"])
+	}
+	report, err := (project.Verifier{EncryptedRoot: encryptedRoot}).VerifyContent(ctx, plan)
+	if err != nil {
+		return VerifyResult{}, err
+	}
+	status := "ok"
+	if !report.OK() {
+		status = "failed"
+	}
+	return VerifyResult{
+		ProjectID:       plan.Project.ID.String(),
+		CheckedObjects:  report.CheckedObjects,
+		MissingObjects:  report.MissingObjects,
+		TamperedObjects: report.TamperedObjects,
+		ExtraObjects:    report.ExtraObjects,
+		Status:          status,
+	}, nil
+}
+
 func (s Service) ExportProject(ctx context.Context, input ExportProjectInput) (ExportProjectResult, error) {
 	if !format.IsProjectExtension(input.OutputPath) {
 		return ExportProjectResult{}, fmt.Errorf("database output must use %s extension", format.ProjectExtension)
