@@ -127,9 +127,5 @@ func (c cli) runEncrypt(options encryptOptions) error {
 	fmt.Fprintf(c.out, "files=%d\n", len(plan.Files))
 	fmt.Fprintf(c.out, "parts=%d\n", len(plan.Parts))
 	fmt.Fprintf(c.out, "storage_objects=%d\n", len(plan.StorageObjects))
-	fmt.Fprintf(c.out, "skipped=%d\n", len(scan.Skipped))
-	for _, skipped := range scan.Skipped {
-		fmt.Fprintf(c.out, "skipped_entry=%s reason=%s\n", skipped.RootRelativePath, skipped.Reason)
-	}
 	return nil
 }

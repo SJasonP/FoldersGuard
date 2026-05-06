@@ -22,7 +22,7 @@ Behavior:
 - Creates one FG project in FG's data directory.
 - Requires a project password.
 - Scans regular files and directories under `<source-folder>`.
-- Skips unsupported filesystem entries and reports them.
+- Ignores unsupported filesystem entries as if they do not exist.
 - Generates UUID visible names for encrypted files and directories.
 - Generates random internal file and folder keys.
 - Encrypts each file independently.
@@ -51,10 +51,6 @@ folders=<count>
 files=<count>
 parts=<count>
 storage_objects=<count>
-skipped=<count>
-skipped_entry=<path> reason=<reason>
 ```
 
 `database_export` is printed only when `--export` is used.
-
-`skipped_entry` lines are printed only when entries were skipped.

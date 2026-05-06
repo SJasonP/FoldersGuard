@@ -92,10 +92,9 @@ FG native mode is the only supported encryption mode.
 
 FG supports only regular files and directories.
 
-- Symlinks are skipped.
-- Hard links are not preserved as hard links.
-- Sockets, FIFOs, device files, and other special entries are skipped.
-- Skipped entries are reported so the user knows the encrypted result is intentionally limited to supported entries.
+- Symlinks, sockets, FIFOs, device files, and other special entries are ignored as if they do not exist.
+- Unsupported entries are not represented in FG metadata and are not reported in normal command output.
+- Hard link relationships are not preserved; each hard link path is processed as a normal regular file.
 
 ## Security Expectations
 

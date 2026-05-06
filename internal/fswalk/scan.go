@@ -23,16 +23,9 @@ type Entry struct {
 	Size             int64
 }
 
-type SkippedEntry struct {
-	RootRelativePath string
-	AbsolutePath     string
-	Reason           string
-}
-
 type ScanResult struct {
 	Root    Entry
 	Entries []Entry
-	Skipped []SkippedEntry
 }
 
 func ScanTopFolder(root string) (ScanResult, error) {
@@ -66,7 +59,6 @@ func ScanTopFolder(root string) (ScanResult, error) {
 
 	err = filepath.WalkDir(absRoot, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
-			result.Skipped = append(result.Skipped, skipped(absRoot, path, "walk error: "+walkErr.Error()))
 			if d != nil && d.IsDir() {
 				return filepath.SkipDir
 			}
@@ -78,7 +70,6 @@ func ScanTopFolder(root string) (ScanResult, error) {
 
 		info, err := d.Info()
 		if err != nil {
-			result.Skipped = append(result.Skipped, skipped(absRoot, path, "stat error: "+err.Error()))
 			if d.IsDir() {
 				return filepath.SkipDir
 			}
@@ -101,7 +92,6 @@ func ScanTopFolder(root string) (ScanResult, error) {
 				Type:             EntryTypeFolder,
 			})
 		default:
-			result.Skipped = append(result.Skipped, skipped(absRoot, path, unsupportedReason(mode)))
 			if d.IsDir() {
 				return filepath.SkipDir
 			}
@@ -114,9 +104,6 @@ func ScanTopFolder(root string) (ScanResult, error) {
 
 	sort.Slice(result.Entries, func(i, j int) bool {
 		return result.Entries[i].RootRelativePath < result.Entries[j].RootRelativePath
-	})
-	sort.Slice(result.Skipped, func(i, j int) bool {
-		return result.Skipped[i].RootRelativePath < result.Skipped[j].RootRelativePath
 	})
 
 	return result, nil
@@ -154,14 +141,6 @@ func ScanPath(path string) (ScanResult, error) {
 
 func isRegularDir(info fs.FileInfo) bool {
 	return info.IsDir() && info.Mode().Type() == os.ModeDir
-}
-
-func skipped(root, path, reason string) SkippedEntry {
-	return SkippedEntry{
-		RootRelativePath: rel(root, path),
-		AbsolutePath:     path,
-		Reason:           reason,
-	}
 }
 
 func rel(root, path string) string {

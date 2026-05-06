@@ -203,16 +203,17 @@ Tradeoff:
 
 FG supports only regular files and directories.
 
-Unsupported entries are skipped:
+Unsupported entries are ignored as if they do not exist:
 
 - Symlinks.
-- Hard links as link relationships.
 - Sockets.
 - FIFOs.
 - Device files.
 - Other special filesystem entries.
 
-Skipping is reported to the user. FG avoids silently implying that unsupported entries were protected.
+Unsupported entries are not represented in FG metadata and are not reported in normal command output.
+
+Hard link relationships are not preserved. Each hard link path is processed as a normal regular file.
 
 ## Implementation Language
 

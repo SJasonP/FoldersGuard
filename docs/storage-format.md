@@ -394,15 +394,18 @@ At minimum:
 
 The implementation rejects unsupported format versions.
 
-## Unsupported Entries
+## Filesystem Entry Scope
 
 Only regular files and directories are represented in native storage.
 
-Unsupported entries are skipped and reported:
+Unsupported entries are ignored as if they do not exist:
 
 - Symlinks.
-- Hard link relationships.
 - Sockets.
 - FIFOs.
 - Device files.
 - Other special filesystem entries.
+
+Unsupported entries are not recorded in the database.
+
+Hard link relationships are not represented. Each hard link path is stored as a normal regular file entry.

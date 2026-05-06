@@ -14,7 +14,7 @@ Behavior:
 
 - Scans regular files and directories under `<source-folder>`.
 - Calculates file splitting and encrypted storage object counts.
-- Reports unsupported filesystem entries that would be skipped.
+- Ignores unsupported filesystem entries as if they do not exist.
 - Does not generate durable project data.
 - Does not write encrypted content.
 - Does not create or update FG databases.
@@ -27,8 +27,6 @@ folders=<count>
 files=<count>
 parts=<count>
 storage_objects=<count>
-skipped=<count>
-skipped_entry=<path> reason=<reason>
 ```
 
 ## `fg plan add`

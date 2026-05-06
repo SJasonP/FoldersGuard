@@ -11,6 +11,7 @@ func TestScanTopFolder(t *testing.T) {
 	mustMkdir(t, filepath.Join(root, "dir"))
 	mustWrite(t, filepath.Join(root, "dir", "file.txt"), []byte("hello"))
 	mustWrite(t, filepath.Join(root, "root.txt"), []byte("root"))
+	mustHardlink(t, filepath.Join(root, "root.txt"), filepath.Join(root, "hardlink.txt"))
 
 	if err := os.Symlink(filepath.Join(root, "root.txt"), filepath.Join(root, "link.txt")); err != nil {
 		t.Fatal(err)
@@ -35,12 +36,11 @@ func TestScanTopFolder(t *testing.T) {
 	if entries["root.txt"] != EntryTypeFile {
 		t.Fatalf("root.txt type = %q, want file", entries["root.txt"])
 	}
-
-	if len(result.Skipped) != 1 {
-		t.Fatalf("skipped = %d, want 1", len(result.Skipped))
+	if entries["hardlink.txt"] != EntryTypeFile {
+		t.Fatalf("hardlink.txt type = %q, want file", entries["hardlink.txt"])
 	}
-	if result.Skipped[0].RootRelativePath != "link.txt" {
-		t.Fatalf("skipped path = %q, want link.txt", result.Skipped[0].RootRelativePath)
+	if _, ok := entries["link.txt"]; ok {
+		t.Fatal("symlink was included, want ignored")
 	}
 }
 
@@ -64,6 +64,13 @@ func mustMkdir(t *testing.T, path string) {
 func mustWrite(t *testing.T, path string, data []byte) {
 	t.Helper()
 	if err := os.WriteFile(path, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func mustHardlink(t *testing.T, oldname, newname string) {
+	t.Helper()
+	if err := os.Link(oldname, newname); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -24,5 +24,4 @@ Primary work:
 - Implement FG share databases.
 - Implement native balanced splitting.
 - Implement validation and integrity checks.
-- Implement unsupported entry skipping and reporting.
 - Provide CLI commands for core operations.
