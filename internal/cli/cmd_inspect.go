@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-
-	"foldersguard/internal/db"
 )
 
 type inspectOptions struct {
@@ -35,21 +33,8 @@ func (c cli) inspectCommand() *cobra.Command {
 }
 
 func (c cli) runInspect(options inspectOptions) error {
-	password, err := c.readDatabasePassword(options.projectRef, options.passwordOptions)
-	if err != nil {
-		return err
-	}
-	databasePath, err := databasePathFromProjectRef(options.projectRef)
-	if err != nil {
-		return err
-	}
-
 	ctx := context.Background()
-	plan, meta, err := readProjectDatabaseWithMeta(ctx, db.Config{
-		Path:       databasePath,
-		DriverName: db.SQLCipherDriver,
-		Password:   password,
-	})
+	plan, meta, err := c.readDatabaseWithMetaFromProjectRef(ctx, options.projectRef, options.passwordOptions)
 	if err != nil {
 		return err
 	}

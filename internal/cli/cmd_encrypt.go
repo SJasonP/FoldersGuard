@@ -51,7 +51,7 @@ func (c cli) encryptCommand() *cobra.Command {
 }
 
 func (c cli) runEncrypt(options encryptOptions) error {
-	password, err := c.readPassword(options.passwordOptions)
+	password, err := c.readNewPassword(options.passwordOptions)
 	if err != nil {
 		return err
 	}

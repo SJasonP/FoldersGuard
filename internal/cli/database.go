@@ -79,13 +79,59 @@ func readProjectDatabase(ctx context.Context, config db.Config) (model.PlannedPr
 	return plan, err
 }
 
-func readProjectDatabaseWithMeta(ctx context.Context, config db.Config) (model.PlannedProject, map[string]string, error) {
-	info, err := os.Stat(config.Path)
+func (c cli) readDatabaseFromProjectRef(ctx context.Context, projectRef string, options passwordOptions) (model.PlannedProject, error) {
+	plan, _, err := c.readDatabaseWithMetaFromProjectRef(ctx, projectRef, options)
+	return plan, err
+}
+
+func (c cli) readDatabaseWithMetaFromProjectRef(ctx context.Context, projectRef string, options passwordOptions) (model.PlannedProject, map[string]string, error) {
+	databasePath, err := databasePathFromProjectRef(projectRef)
 	if err != nil {
-		return model.PlannedProject{}, nil, fmt.Errorf("stat database: %w", err)
+		return model.PlannedProject{}, nil, err
+	}
+	if err := validateDatabasePath(databasePath); err != nil {
+		return model.PlannedProject{}, nil, err
+	}
+	if format.IsSetExtension(projectRef) && !hasPasswordInput(options) {
+		plan, meta, err := readProjectDatabaseWithMeta(ctx, db.Config{
+			Path:       databasePath,
+			DriverName: db.SQLCipherDriver,
+			Password:   db.UnprotectedSharePassword,
+		})
+		if err == nil {
+			return plan, meta, nil
+		}
+	}
+
+	password, err := c.readDatabasePassword(projectRef, options)
+	if err != nil {
+		return model.PlannedProject{}, nil, err
+	}
+	plan, meta, err := readProjectDatabaseWithMeta(ctx, db.Config{
+		Path:       databasePath,
+		DriverName: db.SQLCipherDriver,
+		Password:   password,
+	})
+	if err != nil {
+		return model.PlannedProject{}, nil, err
+	}
+	return plan, meta, nil
+}
+
+func validateDatabasePath(path string) error {
+	info, err := os.Stat(path)
+	if err != nil {
+		return fmt.Errorf("stat database: %w", err)
 	}
 	if info.IsDir() {
-		return model.PlannedProject{}, nil, fmt.Errorf("database path is a directory")
+		return fmt.Errorf("database path is a directory")
+	}
+	return nil
+}
+
+func readProjectDatabaseWithMeta(ctx context.Context, config db.Config) (model.PlannedProject, map[string]string, error) {
+	if err := validateDatabasePath(config.Path); err != nil {
+		return model.PlannedProject{}, nil, err
 	}
 
 	database, err := db.OpenProject(ctx, config)

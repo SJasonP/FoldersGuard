@@ -55,15 +55,12 @@ func (c cli) shareCommand() *cobra.Command {
 	mustMarkRequired(command, "out-database")
 	command.MarkFlagsMutuallyExclusive("password-stdin", "password-env")
 	command.MarkFlagsMutuallyExclusive("share-password-stdin", "share-password-env", "no-share-password")
+	command.MarkFlagsMutuallyExclusive("password-stdin", "share-password-stdin")
 	return command
 }
 
 func (c cli) runShare(options shareOptions) error {
 	password, err := c.readPassword(options.passwordOptions)
-	if err != nil {
-		return err
-	}
-	sharePassword, passwordProtected, err := c.readSharePassword(options.sharePasswordOptions)
 	if err != nil {
 		return err
 	}
@@ -87,6 +84,10 @@ func (c cli) runShare(options shareOptions) error {
 		return err
 	}
 	if err := prepareFileOutput(options.outputDatabase, options.force); err != nil {
+		return err
+	}
+	sharePassword, passwordProtected, err := c.readSharePassword(options.sharePasswordOptions)
+	if err != nil {
 		return err
 	}
 

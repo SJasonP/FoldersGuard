@@ -43,8 +43,10 @@ Passwords are never accepted as positional arguments or flag values.
 Default interactive behavior:
 
 - Commands that need a password prompt with hidden input.
-- Password creation prompts require confirmation.
+- Project password creation prompts require confirmation.
+- Password-protected share creation prompts require confirmation.
 - Password confirmation is not required when opening an existing database.
+- Unprotected `.fgs` share databases can be opened by read/restore commands without a password prompt.
 
 Automation behavior:
 
@@ -59,7 +61,8 @@ Rules:
 - Password-protected `.fgs` share databases reject empty passwords.
 - Unprotected `.fgs` share databases require an explicit `--no-share-password` flag at creation time.
 - Environment-variable password input is intended for automation.
-- A single command must not combine `--password-stdin` and `--share-password-stdin`.
+- Interactive and environment-variable password input can collect both the project password and share password in one command.
+- A single command must not combine `--password-stdin` and `--share-password-stdin`, because stdin can provide only one password value.
 
 ## Project References
 

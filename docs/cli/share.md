@@ -27,9 +27,10 @@ Behavior:
 
 Password behavior:
 
+- By default, FG prompts for a share password and creates a password-protected share database.
 - If `--share-password-stdin` or `--share-password-env` is used, the share database is password-protected.
 - If `--no-share-password` is used, the share database is unprotected and must be treated as a bearer secret.
-- Exactly one share password mode must be selected.
+- `--no-share-password` must be explicit; FG never creates an unprotected share database by default.
 
 Validation:
 

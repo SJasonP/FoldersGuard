@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -10,20 +9,29 @@ import (
 )
 
 func Run(args []string) error {
-	return newCLI("foldersguard", os.Stdin, os.Stdout).run(args)
+	return newCLIWithErr("foldersguard", os.Stdin, os.Stdout, os.Stderr).run(args)
 }
 
 func RunWithIO(name string, args []string, in io.Reader, out io.Writer) error {
 	return newCLI(name, in, out).run(args)
 }
 
+func RunWithIOErr(name string, args []string, in io.Reader, out io.Writer, errOut io.Writer) error {
+	return newCLIWithErr(name, in, out, errOut).run(args)
+}
+
 type cli struct {
 	name string
 	in   io.Reader
 	out  io.Writer
+	err  io.Writer
 }
 
 func newCLI(name string, in io.Reader, out io.Writer) cli {
+	return newCLIWithErr(name, in, out, io.Discard)
+}
+
+func newCLIWithErr(name string, in io.Reader, out io.Writer, errOut io.Writer) cli {
 	if name == "" {
 		name = "foldersguard"
 	}
@@ -33,7 +41,10 @@ func newCLI(name string, in io.Reader, out io.Writer) cli {
 	if out == nil {
 		out = io.Discard
 	}
-	return cli{name: name, in: in, out: out}
+	if errOut == nil {
+		errOut = io.Discard
+	}
+	return cli{name: name, in: in, out: out, err: errOut}
 }
 
 func (c cli) run(args []string) error {
@@ -48,10 +59,8 @@ func (c cli) rootCommand() *cobra.Command {
 		Short:         "FoldersGuard protects folder contents with encrypted metadata and content objects.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Args:          cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 0 {
-				return fmt.Errorf("unknown command %q", args[0])
-			}
 			return cmd.Help()
 		},
 	}

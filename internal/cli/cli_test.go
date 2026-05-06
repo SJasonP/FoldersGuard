@@ -153,3 +153,69 @@ func TestMetadataCommandsRejectShareDatabases(t *testing.T) {
 		}
 	}
 }
+
+func TestPasswordRequiredInNonInteractiveMode(t *testing.T) {
+	root := t.TempDir()
+	database := filepath.Join(root, "project.fg")
+	if err := os.WriteFile(database, []byte("not a database"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	err := RunWithIO("fg", []string{
+		"import",
+		database,
+	}, strings.NewReader(""), nil)
+	if err == nil {
+		t.Fatal("expected password requirement error")
+	}
+	if !strings.Contains(err.Error(), "password input is required") {
+		t.Fatalf("error = %v, want password requirement", err)
+	}
+}
+
+func TestShareAllowsDefaultInteractiveSharePasswordMode(t *testing.T) {
+	root := t.TempDir()
+	contentRoot := filepath.Join(root, "content")
+	if err := os.MkdirAll(contentRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	database := filepath.Join(root, "project.fg")
+	if err := os.WriteFile(database, []byte("not a database"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	err := RunWithIO("fg", []string{
+		"share",
+		database,
+		"Root",
+		"--content", contentRoot,
+		"--out-content", filepath.Join(root, "out-content"),
+		"--out-database", filepath.Join(root, "share.fgs"),
+		"--password-env", "FG_TEST_PASSWORD",
+	}, strings.NewReader(""), nil)
+	if err == nil {
+		t.Fatal("expected non-interactive share password requirement")
+	}
+	if !strings.Contains(err.Error(), "password input is required") {
+		t.Fatalf("error = %v, want share password requirement", err)
+	}
+}
+
+func TestShareRejectsTwoStdinPasswordModes(t *testing.T) {
+	root := t.TempDir()
+	err := RunWithIO("fg", []string{
+		"share",
+		filepath.Join(root, "missing.fg"),
+		"Root",
+		"--content", root,
+		"--out-content", filepath.Join(root, "out-content"),
+		"--out-database", filepath.Join(root, "share.fgs"),
+		"--password-stdin",
+		"--share-password-stdin",
+	}, strings.NewReader("test-password"), nil)
+	if err == nil {
+		t.Fatal("expected mutually exclusive stdin flags")
+	}
+	if !strings.Contains(err.Error(), "if any flags in the group") {
+		t.Fatalf("error = %v, want Cobra mutual exclusion error", err)
+	}
+}

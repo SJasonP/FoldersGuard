@@ -22,9 +22,13 @@ Database passwords are currently provided to SQLCipher's password-based keying. 
 
 ## Password Handling
 
-The current CLI development interface reads the project password from `FG_PASSWORD`.
+Passwords are never accepted as positional arguments or flag values.
 
-This avoids placing the password directly in command-line arguments. It is not the final interactive password input model.
+Interactive password prompts use hidden input and write prompts to stderr, so stdout remains reserved for command output.
+
+Project password creation and password-protected share creation require confirmation.
+
+Automation can provide passwords through stdin or through an explicitly named environment variable. This avoids placing passwords directly in command-line arguments.
 
 ## Content Encryption
 

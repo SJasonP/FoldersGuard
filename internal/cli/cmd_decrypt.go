@@ -6,7 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"foldersguard/internal/db"
 	"foldersguard/internal/project"
 )
 
@@ -44,14 +43,6 @@ func (c cli) decryptCommand() *cobra.Command {
 }
 
 func (c cli) runDecrypt(options decryptOptions) error {
-	password, err := c.readDatabasePassword(options.projectRef, options.passwordOptions)
-	if err != nil {
-		return err
-	}
-	databasePath, err := databasePathFromProjectRef(options.projectRef)
-	if err != nil {
-		return err
-	}
 	if err := validateExistingDirectory(options.contentRoot, "content"); err != nil {
 		return err
 	}
@@ -60,11 +51,7 @@ func (c cli) runDecrypt(options decryptOptions) error {
 	}
 
 	ctx := context.Background()
-	plan, err := readProjectDatabase(ctx, db.Config{
-		Path:       databasePath,
-		DriverName: db.SQLCipherDriver,
-		Password:   password,
-	})
+	plan, err := c.readDatabaseFromProjectRef(ctx, options.projectRef, options.passwordOptions)
 	if err != nil {
 		return err
 	}
