@@ -17,45 +17,35 @@ type MoveResult struct {
 	Operations      []ContentOperation
 }
 
+func (s *Store) PlanMove(ctx context.Context, itemPath, targetFolderPath string) (uuid.UUID, []ContentOperation, error) {
+	plan, err := s.ReadPlannedProject(ctx)
+	if err != nil {
+		return uuid.Nil, nil, err
+	}
+	operation, err := planMoveOperation(plan, itemPath, targetFolderPath)
+	if err != nil {
+		return uuid.Nil, nil, err
+	}
+	return plan.Project.ID, []ContentOperation{operation}, nil
+}
+
 func (s *Store) MoveItem(ctx context.Context, itemPath, targetFolderPath string, now time.Time) (MoveResult, error) {
 	plan, err := s.ReadPlannedProject(ctx)
 	if err != nil {
 		return MoveResult{}, err
 	}
+	operation, err := planMoveOperation(plan, itemPath, targetFolderPath)
+	if err != nil {
+		return MoveResult{}, err
+	}
+
 	item, err := itemByRealPath(plan, itemPath)
 	if err != nil {
 		return MoveResult{}, err
 	}
-	if item.ParentID == nil {
-		return MoveResult{}, fmt.Errorf("root item cannot be moved")
-	}
 	targetFolder, err := itemByRealPath(plan, targetFolderPath)
 	if err != nil {
 		return MoveResult{}, fmt.Errorf("target folder: %w", err)
-	}
-	if targetFolder.Type != model.ItemTypeFolder {
-		return MoveResult{}, fmt.Errorf("target path is not a folder")
-	}
-	if targetFolder.ID == item.ID || isDescendantOf(plan, targetFolder.ID, item.ID) {
-		return MoveResult{}, fmt.Errorf("target folder cannot be inside moved item")
-	}
-	if siblingNameExists(plan, targetFolder.ID, item.ID, item.RealName) {
-		return MoveResult{}, fmt.Errorf("sibling name %q already exists", item.RealName)
-	}
-
-	sourcePrefix, err := visiblePathForItem(plan, item.ID)
-	if err != nil {
-		return MoveResult{}, err
-	}
-	targetParentPath, err := visiblePathForItem(plan, targetFolder.ID)
-	if err != nil {
-		return MoveResult{}, err
-	}
-	targetPrefix := targetParentPath + "/" + item.VisibleName.String()
-	operation := ContentOperation{
-		Type:       "move",
-		SourcePath: sourcePrefix,
-		TargetPath: targetPrefix,
 	}
 
 	updatedAt := formatTime(now.UTC())
@@ -104,7 +94,7 @@ WHERE item_id = ?`,
 	}
 
 	for _, object := range plan.StorageObjects {
-		newPath, ok := replaceVisiblePathPrefix(object.VisiblePath, sourcePrefix, targetPrefix)
+		newPath, ok := replaceVisiblePathPrefix(object.VisiblePath, operation.SourcePath, operation.TargetPath)
 		if !ok {
 			continue
 		}
@@ -129,6 +119,44 @@ WHERE object_id = ?`,
 		ProjectID:       plan.Project.ID,
 		OperationPlanID: operationPlanID,
 		Operations:      []ContentOperation{operation},
+	}, nil
+}
+
+func planMoveOperation(plan model.PlannedProject, itemPath, targetFolderPath string) (ContentOperation, error) {
+	item, err := itemByRealPath(plan, itemPath)
+	if err != nil {
+		return ContentOperation{}, err
+	}
+	if item.ParentID == nil {
+		return ContentOperation{}, fmt.Errorf("root item cannot be moved")
+	}
+	targetFolder, err := itemByRealPath(plan, targetFolderPath)
+	if err != nil {
+		return ContentOperation{}, fmt.Errorf("target folder: %w", err)
+	}
+	if targetFolder.Type != model.ItemTypeFolder {
+		return ContentOperation{}, fmt.Errorf("target path is not a folder")
+	}
+	if targetFolder.ID == item.ID || isDescendantOf(plan, targetFolder.ID, item.ID) {
+		return ContentOperation{}, fmt.Errorf("target folder cannot be inside moved item")
+	}
+	if siblingNameExists(plan, targetFolder.ID, item.ID, item.RealName) {
+		return ContentOperation{}, fmt.Errorf("sibling name %q already exists", item.RealName)
+	}
+
+	sourcePrefix, err := visiblePathForItem(plan, item.ID)
+	if err != nil {
+		return ContentOperation{}, err
+	}
+	targetParentPath, err := visiblePathForItem(plan, targetFolder.ID)
+	if err != nil {
+		return ContentOperation{}, err
+	}
+	targetPrefix := targetParentPath + "/" + item.VisibleName.String()
+	return ContentOperation{
+		Type:       "move",
+		SourcePath: sourcePrefix,
+		TargetPath: targetPrefix,
 	}, nil
 }
 

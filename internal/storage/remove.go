@@ -22,6 +22,25 @@ type RemoveResult struct {
 	Operations      []ContentOperation
 }
 
+func (s *Store) PlanRemove(ctx context.Context, itemPath string) (uuid.UUID, []ContentOperation, error) {
+	plan, err := s.ReadPlannedProject(ctx)
+	if err != nil {
+		return uuid.Nil, nil, err
+	}
+	item, err := itemByRealPath(plan, itemPath)
+	if err != nil {
+		return uuid.Nil, nil, err
+	}
+	if item.ParentID == nil {
+		return uuid.Nil, nil, fmt.Errorf("root item cannot be removed")
+	}
+	operation, err := deleteOperationForItem(plan, item.ID)
+	if err != nil {
+		return uuid.Nil, nil, err
+	}
+	return plan.Project.ID, []ContentOperation{operation}, nil
+}
+
 func (s *Store) RemoveItem(ctx context.Context, itemPath string, now time.Time) (RemoveResult, error) {
 	plan, err := s.ReadPlannedProject(ctx)
 	if err != nil {

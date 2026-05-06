@@ -38,13 +38,14 @@ Prints the storage operations that would be required to add cleartext content.
 Usage:
 
 ```text
-fg plan add <project-ref> <source-path> <target-folder-path> --staging-content <folder> [--password-stdin | --password-env <name>]
+fg plan add <project-ref> <source-path> <target-folder-path> --staging-content <folder> --max-part-size <bytes> [--password-stdin | --password-env <name>]
 ```
 
 Behavior:
 
 - Opens the project database.
 - Scans `<source-path>`.
+- Uses `--max-part-size` to calculate native balanced splitting for newly added files.
 - Uses `--staging-content` to calculate planned staged encrypted content paths.
 - Calculates the metadata and encrypted storage changes that would be required.
 - Does not write staged encrypted content.
