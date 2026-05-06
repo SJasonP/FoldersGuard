@@ -11,7 +11,7 @@ FG native mode separates encrypted content from FG data.
 
 FG data is not embedded in the encrypted content tree. In v1, FG data is stored only in FG's data directory, but users may export it.
 
-Project id:
+App id:
 
 ```text
 com.SJasonP.FoldersGuard
@@ -29,7 +29,7 @@ FG reserved filenames and exported FG data do not need to be hidden. It is accep
 
 FG data stores the metadata for one or more FG projects. V1 allows active FG data to live only in FG's data directory.
 
-The platform-specific path is derived from the project id `com.SJasonP.FoldersGuard` and follows the host OS conventions.
+The platform-specific path is derived from the app id `com.SJasonP.FoldersGuard` and follows the host OS conventions.
 
 FG data is stored as SQLCipher-encrypted SQLite databases. FG data may be exported. Exported FG data is a database file that can be backed up or transferred.
 
@@ -89,7 +89,6 @@ The project database contains all searchable and mutable FG data for that top-le
 - Storage layout.
 - Part layout.
 - Integrity metadata.
-- Optional filesystem metadata.
 - Operation plans.
 
 The top-level folder must require a password. There is no passwordless project database mode.
@@ -254,7 +253,7 @@ Rules:
 - Folder keys define the logical authorization boundary and support share database generation.
 - The project database stores these keys inside the encrypted database.
 
-The database password unlocks the project database. Once the database is unlocked, FG can access internal keys and decrypt content according to the operation.
+The database password unlocks the project database through SQLCipher. Once the database is unlocked, FG can access internal keys and decrypt content according to the operation.
 
 ## V1 Encryption Suite
 
@@ -388,7 +387,6 @@ At minimum:
 - Native format version.
 - FG database schema version.
 - Encryption algorithm identifier.
-- KDF identifier, if password-derived keys are supported.
 - Crypto suite identifier.
 - Feature flags for optional behavior.
 

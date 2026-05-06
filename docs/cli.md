@@ -66,11 +66,9 @@ Rules:
 
 ## Project References
 
-Commands that operate on project data use a project reference.
+Commands that operate on active project data use a project reference.
 
-A project reference may be:
-
-- A project id.
+A project reference is a project id.
 
 FG opens the matching active project database from FG's data directory.
 

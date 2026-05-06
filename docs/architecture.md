@@ -6,11 +6,11 @@ FG uses a hierarchical key model. Files are encrypted independently. FG's own en
 
 The folder is the central authorization boundary. Users do not normally handle raw keys directly; they unlock data with passwords or FG share database files. Unlocking a folder grants access to that folder and everything beneath it, but not to unrelated folders or files.
 
-FG operates on one top-level folder at a time. The top-level folder is the root operating boundary.
+FG creates one active project from one top-level folder at a time. Share databases may describe a rootless shared payload instead of a normal project root.
 
 Encrypted content and FG data are separate. The encrypted content tree is the portable storage payload. FG data is the private encrypted project database that maps UUID names to real names, stores metadata records, tracks internal keys, and records the relationship between original structure and encrypted structure.
 
-The FG project id is `com.SJasonP.FoldersGuard`.
+The FG app id is `com.SJasonP.FoldersGuard`. Each FG project also has its own generated project id.
 
 ## Core Concepts
 
@@ -28,20 +28,20 @@ A file is the smallest independently shareable content object.
 A folder is the smallest recursively shareable collection.
 
 - Each folder has one internal folder key.
-- The folder key grants access to that folder's metadata and child keys inside the unlocked FG database.
-- The folder metadata record contains child metadata and child key references for immediate children.
-- If a metadata record includes a child folder key, access continues recursively into that child folder.
+- Folder keys define logical authorization boundaries and are included in share-scoped data when that folder is shared.
+- Folder records identify child relationships inside the unlocked FG database.
+- Sharing a folder includes the metadata and internal keys needed to restore that folder recursively.
 - The top-level folder must have a password.
 
 ### Top-Level Folder
 
-The top-level folder is mandatory and unique for each FG operation.
+The top-level folder is mandatory and unique for each active project.
 
 Rules:
 
-- `fg encrypt` encrypts one top-level folder.
-- `fg decrypt` decrypts one top-level folder or one shared file/folder payload.
-- `fg verify` verifies one top-level folder or one shared file/folder payload.
+- `fg encrypt` creates one active project from one top-level folder.
+- Project metadata operations use that project root as the normal operating boundary.
+- `fg decrypt` and `fg verify` can operate on either one active project or one `.fgs` shared payload.
 - The top-level folder password is required.
 - Unlocking the top-level folder allows recursive access to all supported contents under it.
 
@@ -63,7 +63,6 @@ FG data contains enough information to:
 - Store folder keys for direct child folders.
 - Store file sizes and part layout.
 - Verify integrity.
-- Preserve supported filesystem metadata.
 - Rename entries without requiring encrypted content to be present.
 - Generate manual storage operation instructions for upload, move, and delete workflows.
 
@@ -112,15 +111,13 @@ When a file is split, the split representation is still one logical file in FG d
 ## Key Hierarchy
 
 ```text
-Top-level password
-  unlocks root folder key
-    root folder key unlocks root metadata in FG data
-      metadata contains file keys for root files
-      metadata contains folder keys for child folders
-        child folder key
-          unlocks child metadata in FG data
-            contains file keys for child files
-            contains folder keys for nested folders
+Project password
+  unlocks SQLCipher project database
+    database contains root metadata
+    database contains file keys for root files
+    database contains folder keys for child folders
+      child folder key marks a recursive authorization boundary
+        share generation can include the child's subtree metadata and keys
 ```
 
 ## Sharing Model
@@ -158,7 +155,7 @@ V1 encryption suite:
 - 256-bit random file keys and folder keys.
 - Explicit versioning and algorithm identifiers in database metadata and content headers.
 
-The security model depends on strong user passwords, memory-hard password derivation, 256-bit symmetric keys, and authenticated encryption.
+The security model depends on strong user passwords, SQLCipher password-based database keying, 256-bit symmetric keys, and authenticated encryption.
 
 ## FG Reserved Data
 
