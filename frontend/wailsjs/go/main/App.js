@@ -41,3 +41,7 @@ export function ReadSettings() {
 export function SaveSettings(arg1) {
   return window['go']['main']['App']['SaveSettings'](arg1);
 }
+
+export function VerifyProject(arg1) {
+  return window['go']['main']['App']['VerifyProject'](arg1);
+}

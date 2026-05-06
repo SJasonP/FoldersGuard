@@ -47,6 +47,21 @@ type InspectProjectResult struct {
 	StorageObjects int    `json:"storageObjects"`
 }
 
+type VerifyProjectRequest struct {
+	ProjectID     string `json:"projectId"`
+	Password      string `json:"password"`
+	EncryptedPath string `json:"encryptedPath"`
+}
+
+type VerifyProjectResult struct {
+	ProjectID       string `json:"projectId"`
+	CheckedObjects  int    `json:"checkedObjects"`
+	MissingObjects  int    `json:"missingObjects"`
+	TamperedObjects int    `json:"tamperedObjects"`
+	ExtraObjects    int    `json:"extraObjects"`
+	Status          string `json:"status"`
+}
+
 type ExportProjectRequest struct {
 	ProjectID  string `json:"projectId"`
 	Password   string `json:"password"`

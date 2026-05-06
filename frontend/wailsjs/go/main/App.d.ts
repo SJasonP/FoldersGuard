@@ -21,3 +21,5 @@ export function ListLocalProjects():Promise<Array<main.LocalProjectSummary>>;
 export function ReadSettings():Promise<main.Settings>;
 
 export function SaveSettings(arg1:main.Settings):Promise<main.Settings>;
+
+export function VerifyProject(arg1:main.VerifyProjectRequest):Promise<main.VerifyProjectResult>;

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
-import { DeleteProject, ExportProject, InspectProject } from '../../wailsjs/go/main/App';
+import { DeleteProject, ExportProject, InspectProject, VerifyProject } from '../../wailsjs/go/main/App';
 import type {
   DeleteProjectResultModel,
   ExportProjectResultModel,
   InspectProjectResultModel,
   LocalProjectSummary,
+  VerifyProjectResultModel,
 } from '../types';
 
 type UseProjectActionsArgs = {
@@ -30,6 +31,10 @@ export function useProjectActions({
   const [inspectLoading, setInspectLoading] = useState(false);
   const [inspectResult, setInspectResult] = useState<InspectProjectResultModel | null>(null);
   const [inspectResultOpen, setInspectResultOpen] = useState(false);
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<VerifyProjectResultModel | null>(null);
+  const [verifyResultOpen, setVerifyResultOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -85,6 +90,29 @@ export function useProjectActions({
     }
   };
 
+  const handleVerifyProject = async (values: { password: string; encryptedPath: string }) => {
+    if (!selectedProjectId) {
+      return;
+    }
+    setVerifyLoading(true);
+    try {
+      const result: VerifyProjectResultModel = await VerifyProject({
+        projectId: selectedProjectId,
+        password: values.password,
+        encryptedPath: values.encryptedPath,
+      });
+      setVerifyDialogOpen(false);
+      setProjectActionsOpen(false);
+      setVerifyResult(result);
+      setVerifyResultOpen(true);
+      messageApi.success(t('verifyProjectSucceeded'));
+    } catch {
+      messageApi.error(t('verifyProjectFailed'));
+    } finally {
+      setVerifyLoading(false);
+    }
+  };
+
   const handleDeleteProject = async (password: string) => {
     if (!selectedProjectId) {
       return;
@@ -120,14 +148,21 @@ export function useProjectActions({
     inspectResultOpen,
     projectActionsOpen,
     selectedProject,
+    verifyDialogOpen,
+    verifyLoading,
+    verifyResult,
+    verifyResultOpen,
     setDeleteDialogOpen,
     setExportDialogOpen,
     setInspectDialogOpen,
     setInspectResultOpen,
     setProjectActionsOpen,
+    setVerifyDialogOpen,
+    setVerifyResultOpen,
     openProjectActions,
     handleDeleteProject,
     handleExportProject,
     handleInspectProject,
+    handleVerifyProject,
   };
 }

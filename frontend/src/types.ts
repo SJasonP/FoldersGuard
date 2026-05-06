@@ -14,6 +14,8 @@ export type InspectProjectRequestModel = main.InspectProjectRequest;
 export type InspectProjectResultModel = main.InspectProjectResult;
 export type LocalProjectSummary = main.LocalProjectSummary;
 export type SettingsModel = main.Settings;
+export type VerifyProjectRequestModel = main.VerifyProjectRequest;
+export type VerifyProjectResultModel = main.VerifyProjectResult;
 
 export type LocalProjectRow = {
   key: string;

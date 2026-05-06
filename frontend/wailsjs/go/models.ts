@@ -254,4 +254,43 @@ export namespace main {
 	        this.language = source["language"];
 	    }
 	}
+	export class VerifyProjectRequest {
+	    projectId: string;
+	    password: string;
+	    encryptedPath: string;
+
+	    static createFrom(source: any = {}) {
+	        return new VerifyProjectRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.password = source["password"];
+	        this.encryptedPath = source["encryptedPath"];
+	    }
+	}
+	export class VerifyProjectResult {
+	    projectId: string;
+	    checkedObjects: number;
+	    missingObjects: number;
+	    tamperedObjects: number;
+	    extraObjects: number;
+	    status: string;
+
+	    static createFrom(source: any = {}) {
+	        return new VerifyProjectResult(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.checkedObjects = source["checkedObjects"];
+	        this.missingObjects = source["missingObjects"];
+	        this.tamperedObjects = source["tamperedObjects"];
+	        this.extraObjects = source["extraObjects"];
+	        this.status = source["status"];
+	    }
+	}
+
 }

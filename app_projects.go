@@ -51,6 +51,24 @@ func (a *App) InspectProject(request InspectProjectRequest) (InspectProjectResul
 	}, nil
 }
 
+func (a *App) VerifyProject(request VerifyProjectRequest) (VerifyProjectResult, error) {
+	result, err := a.service.Verify(a.ctx, app.DatabaseOpen{
+		ProjectRef: request.ProjectID,
+		Password:   request.Password,
+	}, request.EncryptedPath)
+	if err != nil {
+		return VerifyProjectResult{}, err
+	}
+	return VerifyProjectResult{
+		ProjectID:       result.ProjectID,
+		CheckedObjects:  result.CheckedObjects,
+		MissingObjects:  result.MissingObjects,
+		TamperedObjects: result.TamperedObjects,
+		ExtraObjects:    result.ExtraObjects,
+		Status:          result.Status,
+	}, nil
+}
+
 func (a *App) ExportProject(request ExportProjectRequest) (ExportProjectResult, error) {
 	result, err := a.service.ExportProject(a.ctx, app.ExportProjectInput{
 		ProjectID:  request.ProjectID,

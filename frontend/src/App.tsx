@@ -31,6 +31,8 @@ import { ImportProjectModal } from './components/project-actions/ImportProjectMo
 import { ProjectActionsDrawer } from './components/project-actions/ProjectActionsDrawer';
 import { InspectProjectModal } from './components/project-actions/InspectProjectModal';
 import { InspectProjectDrawer } from './components/project-actions/InspectProjectDrawer';
+import { VerifyProjectModal } from './components/project-actions/VerifyProjectModal';
+import { VerifyProjectDrawer } from './components/project-actions/VerifyProjectDrawer';
 import { ExportProjectModal } from './components/project-actions/ExportProjectModal';
 import { DeleteProjectModal } from './components/project-actions/DeleteProjectModal';
 
@@ -126,15 +128,22 @@ function App() {
     inspectResult,
     inspectResultOpen,
     projectActionsOpen,
+    verifyDialogOpen,
+    verifyLoading,
+    verifyResult,
+    verifyResultOpen,
     setDeleteDialogOpen,
     setExportDialogOpen,
     setInspectDialogOpen,
     setInspectResultOpen,
     setProjectActionsOpen,
+    setVerifyDialogOpen,
+    setVerifyResultOpen,
     openProjectActions,
     handleDeleteProject,
     handleExportProject,
     handleInspectProject,
+    handleVerifyProject,
   } = useProjectActions({
     messageApi: antApp.message,
     t,
@@ -235,6 +244,7 @@ function App() {
           project={selectedProject}
           onClose={() => setProjectActionsOpen(false)}
           onInspect={() => setInspectDialogOpen(true)}
+          onVerify={() => setVerifyDialogOpen(true)}
           onExport={() => setExportDialogOpen(true)}
           onDelete={() => setDeleteDialogOpen(true)}
           t={t}
@@ -266,6 +276,19 @@ function App() {
           open={inspectResultOpen}
           result={inspectResult}
           onClose={() => setInspectResultOpen(false)}
+          t={t}
+        />
+        <VerifyProjectModal
+          open={verifyDialogOpen}
+          loading={verifyLoading}
+          onCancel={() => setVerifyDialogOpen(false)}
+          onSubmit={(values) => void handleVerifyProject(values)}
+          t={t}
+        />
+        <VerifyProjectDrawer
+          open={verifyResultOpen}
+          result={verifyResult}
+          onClose={() => setVerifyResultOpen(false)}
           t={t}
         />
         <ExportProjectModal
