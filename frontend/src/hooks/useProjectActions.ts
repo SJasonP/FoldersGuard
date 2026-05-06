@@ -99,7 +99,7 @@ export function useProjectActions({
       setProjectActionsOpen(false);
       setInspectResultOpen(false);
       setInspectResult(null);
-      clearSelectedProject()
+      clearSelectedProject();
       await reloadProjects();
       messageApi.success(`${t('deleteProjectSucceeded')}: ${result.projectId}`);
     } catch {

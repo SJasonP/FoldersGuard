@@ -82,6 +82,34 @@ export namespace main {
 	        this.outputPath = source["outputPath"];
 	    }
 	}
+	export class ImportProjectRequest {
+	    inputPath: string;
+	    password: string;
+	    force: boolean;
+
+	    static createFrom(source: any = {}) {
+	        return new ImportProjectRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.inputPath = source["inputPath"];
+	        this.password = source["password"];
+	        this.force = source["force"];
+	    }
+	}
+	export class ImportProjectResult {
+	    projectId: string;
+
+	    static createFrom(source: any = {}) {
+	        return new ImportProjectResult(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	    }
+	}
 	export class InspectProjectRequest {
 	    projectId: string;
 	    password: string;

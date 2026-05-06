@@ -226,3 +226,58 @@ func TestServiceExportAndDeleteProject(t *testing.T) {
 		t.Fatalf("database stat error = %v, want not exist", err)
 	}
 }
+
+func TestServiceImportProject(t *testing.T) {
+	ctx := context.Background()
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	importPath := filepath.Join(root, "incoming"+format.ProjectExtension)
+	dataDir := filepath.Join(root, "data")
+	password := "test-password"
+
+	if err := os.MkdirAll(source, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "note.txt"), []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	scan, err := fswalk.ScanTopFolder(source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := project.Planner{MaxPartSize: 1024}.Plan(scan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := WriteProjectDatabase(ctx, db.Config{
+		Path:       importPath,
+		DriverName: db.SQLCipherDriver,
+		Password:   password,
+	}, plan); err != nil {
+		t.Fatal(err)
+	}
+
+	service, err := NewService(dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	imported, err := service.ImportProject(ctx, ImportProjectInput{
+		InputPath: importPath,
+		Password:  password,
+		Force:     false,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if imported.ProjectID != plan.Project.ID.String() {
+		t.Fatalf("import result = %+v", imported)
+	}
+	activePath, err := service.ActiveProjectDatabasePath(plan.Project.ID.String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(activePath); err != nil {
+		t.Fatalf("active database stat error = %v", err)
+	}
+}

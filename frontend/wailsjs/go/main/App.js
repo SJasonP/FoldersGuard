@@ -18,6 +18,10 @@ export function ExportProject(arg1) {
   return window['go']['main']['App']['ExportProject'](arg1);
 }
 
+export function ImportProject(arg1) {
+  return window['go']['main']['App']['ImportProject'](arg1);
+}
+
 export function InspectProject(arg1) {
   return window['go']['main']['App']['InspectProject'](arg1);
 }

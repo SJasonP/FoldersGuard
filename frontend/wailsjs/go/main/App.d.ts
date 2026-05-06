@@ -10,6 +10,8 @@ export function DeleteProject(arg1:main.DeleteProjectRequest):Promise<main.Delet
 
 export function ExportProject(arg1:main.ExportProjectRequest):Promise<main.ExportProjectResult>;
 
+export function ImportProject(arg1:main.ImportProjectRequest):Promise<main.ImportProjectResult>;
+
 export function InspectProject(arg1:main.InspectProjectRequest):Promise<main.InspectProjectResult>;
 
 export function ListLocalProjects():Promise<Array<main.LocalProjectSummary>>;

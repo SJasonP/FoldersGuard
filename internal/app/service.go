@@ -76,6 +76,16 @@ type DeleteProjectResult struct {
 	ProjectID string
 }
 
+type ImportProjectInput struct {
+	InputPath string
+	Password  string
+	Force     bool
+}
+
+type ImportProjectResult struct {
+	ProjectID string
+}
+
 func NewService(dataDir string) (Service, error) {
 	if dataDir == "" {
 		resolved, err := DefaultDataDir()
@@ -268,6 +278,41 @@ func (s Service) DeleteProject(ctx context.Context, input DeleteProjectInput) (D
 		return DeleteProjectResult{}, fmt.Errorf("delete active project database: %w", err)
 	}
 	return DeleteProjectResult{ProjectID: input.ProjectID}, nil
+}
+
+func (s Service) ImportProject(ctx context.Context, input ImportProjectInput) (ImportProjectResult, error) {
+	if !format.IsProjectExtension(input.InputPath) {
+		return ImportProjectResult{}, fmt.Errorf("input must use %s extension", format.ProjectExtension)
+	}
+
+	plan, meta, err := ReadDatabase(ctx, db.Config{
+		Path:       input.InputPath,
+		DriverName: db.SQLCipherDriver,
+		Password:   input.Password,
+	})
+	if err != nil {
+		return ImportProjectResult{}, err
+	}
+	if meta["database_type"] != "project" {
+		return ImportProjectResult{}, fmt.Errorf("database type = %q, want project", meta["database_type"])
+	}
+
+	activePath, err := s.ActiveProjectDatabasePath(plan.Project.ID.String())
+	if err != nil {
+		return ImportProjectResult{}, err
+	}
+	if err := ValidateDistinctPaths(input.InputPath, activePath); err != nil {
+		return ImportProjectResult{}, err
+	}
+	if err := PrepareFileOutput(activePath, input.Force); err != nil {
+		return ImportProjectResult{}, err
+	}
+	if err := CopyFile(input.InputPath, activePath); err != nil {
+		return ImportProjectResult{}, err
+	}
+	return ImportProjectResult{
+		ProjectID: plan.Project.ID.String(),
+	}, nil
 }
 
 func WriteProjectDatabase(ctx context.Context, config db.Config, plan model.PlannedProject) error {

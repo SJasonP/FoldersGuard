@@ -67,3 +67,13 @@ type DeleteProjectRequest struct {
 type DeleteProjectResult struct {
 	ProjectID string `json:"projectId"`
 }
+
+type ImportProjectRequest struct {
+	InputPath string `json:"inputPath"`
+	Password  string `json:"password"`
+	Force     bool   `json:"force"`
+}
+
+type ImportProjectResult struct {
+	ProjectID string `json:"projectId"`
+}

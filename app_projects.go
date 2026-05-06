@@ -79,3 +79,17 @@ func (a *App) DeleteProject(request DeleteProjectRequest) (DeleteProjectResult, 
 		ProjectID: result.ProjectID,
 	}, nil
 }
+
+func (a *App) ImportProject(request ImportProjectRequest) (ImportProjectResult, error) {
+	result, err := a.service.ImportProject(a.ctx, app.ImportProjectInput{
+		InputPath: request.InputPath,
+		Password:  request.Password,
+		Force:     request.Force,
+	})
+	if err != nil {
+		return ImportProjectResult{}, err
+	}
+	return ImportProjectResult{
+		ProjectID: result.ProjectID,
+	}, nil
+}

@@ -20,10 +20,12 @@ import { resolveTheme, themeAlgorithm, type ThemeMode } from './theme';
 import type { AppInfoModel, LocalProjectRow, NavigationKey } from './types';
 import { useAppSettings } from './hooks/useAppSettings';
 import { useLocalProjects } from './hooks/useLocalProjects';
+import { useProjectImport } from './hooks/useProjectImport';
 import { useProjectActions } from './hooks/useProjectActions';
 import { HomeView } from './views/HomeView';
 import { SettingsView } from './views/SettingsView';
 import { AboutView } from './views/AboutView';
+import { ImportProjectModal } from './components/project-actions/ImportProjectModal';
 import { ProjectActionsDrawer } from './components/project-actions/ProjectActionsDrawer';
 import { InspectProjectModal } from './components/project-actions/InspectProjectModal';
 import { InspectProjectDrawer } from './components/project-actions/InspectProjectDrawer';
@@ -86,6 +88,17 @@ function App() {
   } = useLocalProjects({
     language,
     t,
+  });
+
+  const {
+    importDialogOpen,
+    importLoading,
+    setImportDialogOpen,
+    handleImportProject,
+  } = useProjectImport({
+    messageApi: antApp.message,
+    t,
+    reloadProjects: loadProjects,
   });
 
   const {
@@ -161,7 +174,9 @@ function App() {
                 <Button icon={<FolderAddOutlined />} type="primary">
                   {t('createProject')}
                 </Button>
-                <Button icon={<ImportOutlined />}>{t('importProject')}</Button>
+                <Button icon={<ImportOutlined />} onClick={() => setImportDialogOpen(true)}>
+                  {t('importProject')}
+                </Button>
                 <Button icon={<ShareAltOutlined />}>{t('loadShare')}</Button>
               </Space>
               <Space>
@@ -207,6 +222,13 @@ function App() {
           onInspect={() => setInspectDialogOpen(true)}
           onExport={() => setExportDialogOpen(true)}
           onDelete={() => setDeleteDialogOpen(true)}
+          t={t}
+        />
+        <ImportProjectModal
+          open={importDialogOpen}
+          loading={importLoading}
+          onCancel={() => setImportDialogOpen(false)}
+          onSubmit={(values) => void handleImportProject(values)}
           t={t}
         />
         <InspectProjectModal
