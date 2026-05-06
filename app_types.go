@@ -68,6 +68,29 @@ type DeleteProjectResult struct {
 	ProjectID string `json:"projectId"`
 }
 
+type CreateProjectRequest struct {
+	SourcePath     string `json:"sourcePath"`
+	ContentOutput  string `json:"contentOutput"`
+	Password       string `json:"password"`
+	MaxPartSize    int64  `json:"maxPartSize"`
+	Force          bool   `json:"force"`
+	SourceCleanup  string `json:"sourceCleanup"`
+	DatabaseExport string `json:"databaseExport"`
+}
+
+type CreateProjectResult struct {
+	ProjectID               string `json:"projectId"`
+	ProjectName             string `json:"projectName"`
+	ContentOutput           string `json:"contentOutput"`
+	DatabaseExport          string `json:"databaseExport"`
+	EncryptedFiles          int    `json:"encryptedFiles"`
+	EncryptedFolders        int    `json:"encryptedFolders"`
+	EncryptedParts          int    `json:"encryptedParts"`
+	DeletedCleartextFiles   int    `json:"deletedCleartextFiles"`
+	DeletedCleartextFolders int    `json:"deletedCleartextFolders"`
+	FailedFiles             int    `json:"failedFiles"`
+}
+
 type ImportProjectRequest struct {
 	InputPath string `json:"inputPath"`
 	Password  string `json:"password"`

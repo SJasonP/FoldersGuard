@@ -10,6 +10,10 @@ export function ClearRecentPaths() {
   return window['go']['main']['App']['ClearRecentPaths']();
 }
 
+export function CreateProject(arg1) {
+  return window['go']['main']['App']['CreateProject'](arg1);
+}
+
 export function DeleteProject(arg1) {
   return window['go']['main']['App']['DeleteProject'](arg1);
 }

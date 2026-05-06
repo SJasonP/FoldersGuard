@@ -20,11 +20,13 @@ import { resolveTheme, themeAlgorithm, type ThemeMode } from './theme';
 import type { AppInfoModel, LocalProjectRow, NavigationKey } from './types';
 import { useAppSettings } from './hooks/useAppSettings';
 import { useLocalProjects } from './hooks/useLocalProjects';
+import { useProjectCreate } from './hooks/useProjectCreate';
 import { useProjectImport } from './hooks/useProjectImport';
 import { useProjectActions } from './hooks/useProjectActions';
 import { HomeView } from './views/HomeView';
 import { SettingsView } from './views/SettingsView';
 import { AboutView } from './views/AboutView';
+import { CreateProjectModal } from './components/project-actions/CreateProjectModal';
 import { ImportProjectModal } from './components/project-actions/ImportProjectModal';
 import { ProjectActionsDrawer } from './components/project-actions/ProjectActionsDrawer';
 import { InspectProjectModal } from './components/project-actions/InspectProjectModal';
@@ -88,6 +90,19 @@ function App() {
   } = useLocalProjects({
     language,
     t,
+  });
+
+  const {
+    createDialogOpen,
+    createLoading,
+    defaultSourceCleanup,
+    setCreateDialogOpen,
+    handleCreateProject,
+  } = useProjectCreate({
+    messageApi: antApp.message,
+    t,
+    settings,
+    reloadProjects: loadProjects,
   });
 
   const {
@@ -171,7 +186,7 @@ function App() {
           <Layout>
             <Layout.Header className="app-header">
               <Space>
-                <Button icon={<FolderAddOutlined />} type="primary">
+                <Button icon={<FolderAddOutlined />} type="primary" onClick={() => setCreateDialogOpen(true)}>
                   {t('createProject')}
                 </Button>
                 <Button icon={<ImportOutlined />} onClick={() => setImportDialogOpen(true)}>
@@ -222,6 +237,15 @@ function App() {
           onInspect={() => setInspectDialogOpen(true)}
           onExport={() => setExportDialogOpen(true)}
           onDelete={() => setDeleteDialogOpen(true)}
+          t={t}
+        />
+        <CreateProjectModal
+          open={createDialogOpen}
+          loading={createLoading}
+          settings={settings}
+          defaultSourceCleanup={defaultSourceCleanup}
+          onCancel={() => setCreateDialogOpen(false)}
+          onSubmit={(values) => void handleCreateProject(values)}
           t={t}
         />
         <ImportProjectModal

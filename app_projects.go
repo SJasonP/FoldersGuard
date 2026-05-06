@@ -80,6 +80,33 @@ func (a *App) DeleteProject(request DeleteProjectRequest) (DeleteProjectResult, 
 	}, nil
 }
 
+func (a *App) CreateProject(request CreateProjectRequest) (CreateProjectResult, error) {
+	result, err := a.service.CreateProject(a.ctx, app.CreateProjectInput{
+		SourcePath:     request.SourcePath,
+		ContentOutput:  request.ContentOutput,
+		Password:       request.Password,
+		MaxPartSize:    request.MaxPartSize,
+		Force:          request.Force,
+		SourceCleanup:  request.SourceCleanup,
+		DatabaseExport: request.DatabaseExport,
+	})
+	if err != nil {
+		return CreateProjectResult{}, err
+	}
+	return CreateProjectResult{
+		ProjectID:               result.ProjectID,
+		ProjectName:             result.ProjectName,
+		ContentOutput:           result.ContentOutput,
+		DatabaseExport:          result.DatabaseExport,
+		EncryptedFiles:          result.EncryptedFiles,
+		EncryptedFolders:        result.EncryptedFolders,
+		EncryptedParts:          result.EncryptedParts,
+		DeletedCleartextFiles:   result.DeletedCleartextFiles,
+		DeletedCleartextFolders: result.DeletedCleartextFolders,
+		FailedFiles:             result.FailedFiles,
+	}, nil
+}
+
 func (a *App) ImportProject(request ImportProjectRequest) (ImportProjectResult, error) {
 	result, err := a.service.ImportProject(a.ctx, app.ImportProjectInput{
 		InputPath: request.InputPath,

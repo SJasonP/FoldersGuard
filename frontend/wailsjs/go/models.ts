@@ -24,6 +24,60 @@ export namespace main {
 	        this.cliShortAlias = source["cliShortAlias"];
 	    }
 	}
+	export class CreateProjectRequest {
+	    sourcePath: string;
+	    contentOutput: string;
+	    password: string;
+	    maxPartSize: number;
+	    force: boolean;
+	    sourceCleanup: string;
+	    databaseExport: string;
+
+	    static createFrom(source: any = {}) {
+	        return new CreateProjectRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sourcePath = source["sourcePath"];
+	        this.contentOutput = source["contentOutput"];
+	        this.password = source["password"];
+	        this.maxPartSize = source["maxPartSize"];
+	        this.force = source["force"];
+	        this.sourceCleanup = source["sourceCleanup"];
+	        this.databaseExport = source["databaseExport"];
+	    }
+	}
+	export class CreateProjectResult {
+	    projectId: string;
+	    projectName: string;
+	    contentOutput: string;
+	    databaseExport: string;
+	    encryptedFiles: number;
+	    encryptedFolders: number;
+	    encryptedParts: number;
+	    deletedCleartextFiles: number;
+	    deletedCleartextFolders: number;
+	    failedFiles: number;
+
+	    static createFrom(source: any = {}) {
+	        return new CreateProjectResult(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.projectName = source["projectName"];
+	        this.contentOutput = source["contentOutput"];
+	        this.databaseExport = source["databaseExport"];
+	        this.encryptedFiles = source["encryptedFiles"];
+	        this.encryptedFolders = source["encryptedFolders"];
+	        this.encryptedParts = source["encryptedParts"];
+	        this.deletedCleartextFiles = source["deletedCleartextFiles"];
+	        this.deletedCleartextFolders = source["deletedCleartextFolders"];
+	        this.failedFiles = source["failedFiles"];
+	    }
+	}
 	export class DeleteProjectRequest {
 	    projectId: string;
 	    password: string;
@@ -200,6 +254,4 @@ export namespace main {
 	        this.language = source["language"];
 	    }
 	}
-
 }
-

@@ -227,6 +227,83 @@ func TestServiceExportAndDeleteProject(t *testing.T) {
 	}
 }
 
+func TestServiceCreateProject(t *testing.T) {
+	ctx := context.Background()
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	encrypted := filepath.Join(root, "encrypted")
+	dataDir := filepath.Join(root, "data")
+	password := "test-password"
+
+	if err := os.MkdirAll(filepath.Join(source, "docs"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "docs", "note.txt"), []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	service, err := NewService(dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.SaveSettings(Settings{
+		OperationGuideFormat:   GuideFormatTXT,
+		DefaultMaxPartSize:     0,
+		SourceCleanupMode:      SourceCleanupDelete,
+		RememberRecentPaths:    true,
+		RecentPaths:            []string{},
+		WindowStatePersistence: true,
+		Theme:                  ThemeSystem,
+		Language:               LanguageSystem,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := service.CreateProject(ctx, CreateProjectInput{
+		SourcePath:    source,
+		ContentOutput: encrypted,
+		Password:      password,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.ProjectID == "" || result.ProjectName != "source" {
+		t.Fatalf("create result = %+v", result)
+	}
+	if result.EncryptedFiles != 1 || result.EncryptedFolders != 2 || result.DeletedCleartextFiles != 1 {
+		t.Fatalf("create result counts = %+v", result)
+	}
+
+	activePath, err := service.ActiveProjectDatabasePath(result.ProjectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(activePath); err != nil {
+		t.Fatalf("active database stat error = %v", err)
+	}
+
+	var encryptedFiles int
+	err = filepath.Walk(encrypted, func(path string, info os.FileInfo, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if !info.IsDir() {
+			encryptedFiles++
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if encryptedFiles != 1 {
+		t.Fatalf("encrypted files = %d, want 1", encryptedFiles)
+	}
+
+	if _, err := os.Stat(filepath.Join(source, "docs", "note.txt")); !os.IsNotExist(err) {
+		t.Fatalf("source file stat error = %v, want not exist", err)
+	}
+}
+
 func TestServiceImportProject(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()

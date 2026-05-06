@@ -13,6 +13,7 @@ import (
 type Executor struct {
 	OutputRoot string
 	Encryptor  content.Encryptor
+	AfterFile  func(model.File) error
 }
 
 func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject) error {
@@ -56,6 +57,11 @@ func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject)
 			Parts:        partsByFile[file.ID.String()],
 		}); err != nil {
 			return fmt.Errorf("encrypt file %s: %w", file.ID, err)
+		}
+		if e.AfterFile != nil {
+			if err := e.AfterFile(file); err != nil {
+				return fmt.Errorf("post-encrypt file %s: %w", file.ID, err)
+			}
 		}
 	}
 
