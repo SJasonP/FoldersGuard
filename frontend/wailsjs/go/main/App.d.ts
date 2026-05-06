@@ -4,4 +4,10 @@ import {main} from '../models';
 
 export function AppInfo():Promise<main.AppInfo>;
 
+export function ClearRecentPaths():Promise<main.Settings>;
+
 export function ListLocalProjects():Promise<Array<main.LocalProjectSummary>>;
+
+export function ReadSettings():Promise<main.Settings>;
+
+export function SaveSettings(arg1:main.Settings):Promise<main.Settings>;

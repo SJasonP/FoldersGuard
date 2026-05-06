@@ -6,6 +6,18 @@ export function AppInfo() {
   return window['go']['main']['App']['AppInfo']();
 }
 
+export function ClearRecentPaths() {
+  return window['go']['main']['App']['ClearRecentPaths']();
+}
+
 export function ListLocalProjects() {
   return window['go']['main']['App']['ListLocalProjects']();
+}
+
+export function ReadSettings() {
+  return window['go']['main']['App']['ReadSettings']();
+}
+
+export function SaveSettings(arg1) {
+  return window['go']['main']['App']['SaveSettings'](arg1);
 }

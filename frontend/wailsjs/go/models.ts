@@ -42,6 +42,32 @@ export namespace main {
 	        this.availabilityStatus = source["availabilityStatus"];
 	    }
 	}
+	export class Settings {
+	    operationGuideFormat: string;
+	    defaultMaxPartSize: number;
+	    sourceCleanupMode: string;
+	    rememberRecentPaths: boolean;
+	    recentPaths: string[];
+	    windowStatePersistence: boolean;
+	    theme: string;
+	    language: string;
+
+	    static createFrom(source: any = {}) {
+	        return new Settings(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.operationGuideFormat = source["operationGuideFormat"];
+	        this.defaultMaxPartSize = source["defaultMaxPartSize"];
+	        this.sourceCleanupMode = source["sourceCleanupMode"];
+	        this.rememberRecentPaths = source["rememberRecentPaths"];
+	        this.recentPaths = source["recentPaths"];
+	        this.windowStatePersistence = source["windowStatePersistence"];
+	        this.theme = source["theme"];
+	        this.language = source["language"];
+	    }
+	}
 
 }
 

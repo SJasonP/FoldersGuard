@@ -30,6 +30,17 @@ type LocalProjectSummary struct {
 	AvailabilityStatus string `json:"availabilityStatus"`
 }
 
+type Settings struct {
+	OperationGuideFormat   string   `json:"operationGuideFormat"`
+	DefaultMaxPartSize     int64    `json:"defaultMaxPartSize"`
+	SourceCleanupMode      string   `json:"sourceCleanupMode"`
+	RememberRecentPaths    bool     `json:"rememberRecentPaths"`
+	RecentPaths            []string `json:"recentPaths"`
+	WindowStatePersistence bool     `json:"windowStatePersistence"`
+	Theme                  string   `json:"theme"`
+	Language               string   `json:"language"`
+}
+
 func NewApp() (*App, error) {
 	service, err := app.NewService("")
 	if err != nil {
@@ -77,4 +88,64 @@ func (a *App) ListLocalProjects() ([]LocalProjectSummary, error) {
 		})
 	}
 	return result, nil
+}
+
+func (a *App) ReadSettings() (Settings, error) {
+	settings, err := a.service.ReadSettings()
+	if err != nil {
+		return Settings{}, err
+	}
+	return Settings{
+		OperationGuideFormat:   settings.OperationGuideFormat,
+		DefaultMaxPartSize:     settings.DefaultMaxPartSize,
+		SourceCleanupMode:      settings.SourceCleanupMode,
+		RememberRecentPaths:    settings.RememberRecentPaths,
+		RecentPaths:            append([]string(nil), settings.RecentPaths...),
+		WindowStatePersistence: settings.WindowStatePersistence,
+		Theme:                  settings.Theme,
+		Language:               settings.Language,
+	}, nil
+}
+
+func (a *App) SaveSettings(settings Settings) (Settings, error) {
+	saved, err := a.service.SaveSettings(app.Settings{
+		OperationGuideFormat:   settings.OperationGuideFormat,
+		DefaultMaxPartSize:     settings.DefaultMaxPartSize,
+		SourceCleanupMode:      settings.SourceCleanupMode,
+		RememberRecentPaths:    settings.RememberRecentPaths,
+		RecentPaths:            append([]string(nil), settings.RecentPaths...),
+		WindowStatePersistence: settings.WindowStatePersistence,
+		Theme:                  settings.Theme,
+		Language:               settings.Language,
+	})
+	if err != nil {
+		return Settings{}, err
+	}
+	return Settings{
+		OperationGuideFormat:   saved.OperationGuideFormat,
+		DefaultMaxPartSize:     saved.DefaultMaxPartSize,
+		SourceCleanupMode:      saved.SourceCleanupMode,
+		RememberRecentPaths:    saved.RememberRecentPaths,
+		RecentPaths:            append([]string(nil), saved.RecentPaths...),
+		WindowStatePersistence: saved.WindowStatePersistence,
+		Theme:                  saved.Theme,
+		Language:               saved.Language,
+	}, nil
+}
+
+func (a *App) ClearRecentPaths() (Settings, error) {
+	settings, err := a.service.ClearRecentPaths()
+	if err != nil {
+		return Settings{}, err
+	}
+	return Settings{
+		OperationGuideFormat:   settings.OperationGuideFormat,
+		DefaultMaxPartSize:     settings.DefaultMaxPartSize,
+		SourceCleanupMode:      settings.SourceCleanupMode,
+		RememberRecentPaths:    settings.RememberRecentPaths,
+		RecentPaths:            append([]string(nil), settings.RecentPaths...),
+		WindowStatePersistence: settings.WindowStatePersistence,
+		Theme:                  settings.Theme,
+		Language:               settings.Language,
+	}, nil
 }

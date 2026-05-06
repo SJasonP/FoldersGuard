@@ -4,13 +4,9 @@ import {
   App as AntApp,
   Button,
   ConfigProvider,
-  Empty,
-  Flex,
-  Input,
   Layout,
   Menu,
   Space,
-  Table,
   Typography,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -25,24 +21,14 @@ import {
 } from '@ant-design/icons';
 import enUS from 'antd/locale/en_US';
 import zhCN from 'antd/locale/zh_CN';
-import { AppInfo, ListLocalProjects } from '../wailsjs/go/main/App';
-import { main } from '../wailsjs/go/models';
+import { AppInfo, ClearRecentPaths, ListLocalProjects, ReadSettings, SaveSettings } from '../wailsjs/go/main/App';
 import type { SupportedLanguage } from './i18n';
 import i18n from './i18n';
 import { resolveTheme, themeAlgorithm, type ThemeMode } from './theme';
-
-type NavigationKey = 'home' | 'settings' | 'about';
-
-type LocalProject = {
-  key: string;
-  projectId: string;
-  fileName: string;
-  modifiedTime: string;
-  availabilityStatus: string;
-};
-
-type AppInfoModel = Awaited<ReturnType<typeof AppInfo>>;
-type LocalProjectSummary = main.LocalProjectSummary;
+import type { AppInfoModel, LocalProjectRow, LocalProjectSummary, NavigationKey, SettingsModel } from './types';
+import { HomeView } from './views/HomeView';
+import { SettingsView } from './views/SettingsView';
+import { AboutView } from './views/AboutView';
 
 const antLocales: Record<SupportedLanguage, typeof enUS> = {
   'en-US': enUS,
@@ -51,15 +37,19 @@ const antLocales: Record<SupportedLanguage, typeof enUS> = {
 
 function App() {
   const { t } = useTranslation();
+  const antApp = AntApp.useApp();
   const [navigation, setNavigation] = useState<NavigationKey>('home');
-  const [language, setLanguage] = useState<SupportedLanguage>('en-US');
-  const [themeMode] = useState<ThemeMode>('system');
+  const [language, setLanguage] = useState<'en-US' | 'zh-CN'>('en-US');
+  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
   const [resolvedTheme, setResolvedTheme] = useState(resolveTheme(themeMode));
   const [info, setInfo] = useState<AppInfoModel | null>(null);
   const [projectSearch, setProjectSearch] = useState('');
   const [projects, setProjects] = useState<LocalProjectSummary[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [projectsError, setProjectsError] = useState<string | null>(null);
+  const [settings, setSettings] = useState<SettingsModel | null>(null);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [settingsSaving, setSettingsSaving] = useState(false);
 
   useEffect(() => {
     AppInfo().then(setInfo).catch(() => setInfo(null));
@@ -76,6 +66,21 @@ function App() {
     media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, [themeMode]);
+
+  const applySettings = (nextSettings: SettingsModel) => {
+    setSettings(nextSettings);
+    setThemeMode((nextSettings.theme || 'system') as ThemeMode);
+    if (nextSettings.language === 'zh-CN') {
+      setLanguage('zh-CN');
+      return;
+    }
+    if (nextSettings.language === 'en-US') {
+      setLanguage('en-US');
+      return;
+    }
+    const browserLanguage = typeof navigator !== 'undefined' ? navigator.language : 'en-US';
+    setLanguage(browserLanguage.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en-US');
+  };
 
   const loadProjects = async () => {
     setProjectsLoading(true);
@@ -96,7 +101,59 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const visibleProjects = useMemo<LocalProject[]>(
+  useEffect(() => {
+    let cancelled = false;
+    const loadSettings = async () => {
+      setSettingsLoading(true);
+      try {
+        const nextSettings = await ReadSettings();
+        if (cancelled) {
+          return;
+        }
+        applySettings(nextSettings);
+      } catch {
+        if (!cancelled) {
+          antApp.message.error(t('errorLoadingSettings'));
+        }
+      } finally {
+        if (!cancelled) {
+          setSettingsLoading(false);
+        }
+      }
+    };
+    void loadSettings();
+    return () => {
+      cancelled = true;
+    };
+  }, [antApp.message, t]);
+
+  const handleSaveSettings = async (values: SettingsModel) => {
+    setSettingsSaving(true);
+    try {
+      const saved = await SaveSettings(values);
+      applySettings(saved);
+      antApp.message.success(t('settingsSaved'));
+    } catch {
+      antApp.message.error(t('errorSavingSettings'));
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+
+  const handleClearRecentPaths = async () => {
+    setSettingsSaving(true);
+    try {
+      const cleared = await ClearRecentPaths();
+      applySettings(cleared);
+      antApp.message.success(t('settingsSaved'));
+    } catch {
+      antApp.message.error(t('errorSavingSettings'));
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+
+  const visibleProjects = useMemo<LocalProjectRow[]>(
     () =>
       projects
         .filter((project) => {
@@ -125,7 +182,7 @@ function App() {
     [language, projectSearch, projects, t],
   );
 
-  const columns = useMemo<ColumnsType<LocalProject>>(
+  const columns = useMemo<ColumnsType<LocalProjectRow>>(
     () => [
       { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },
       { title: t('projectName'), dataIndex: 'fileName', key: 'fileName' },
@@ -181,57 +238,28 @@ function App() {
             </Layout.Header>
             <Layout.Content className="app-content">
               {navigation === 'home' && (
-                <Space direction="vertical" size="large" className="content-stack">
-                  <Flex justify="space-between" align="center" gap={16}>
-                    <Typography.Title level={2}>{t('localProjects')}</Typography.Title>
-                    <Space>
-                      <Input.Search
-                        placeholder={t('searchProjects')}
-                        value={projectSearch}
-                        onChange={(event) => setProjectSearch(event.target.value)}
-                      />
-                      <Button icon={<ReloadOutlined />} onClick={() => void loadProjects()}>
-                        {t('refresh')}
-                      </Button>
-                    </Space>
-                  </Flex>
-                  {projectsError ? <Typography.Text type="danger">{projectsError}</Typography.Text> : null}
-                  <Table
-                    columns={columns}
-                    dataSource={visibleProjects}
-                    loading={projectsLoading}
-                    locale={{ emptyText: <Empty description={t('noProjects')} /> }}
-                    pagination={false}
-                  />
-                </Space>
+                <HomeView
+                  columns={columns}
+                  loading={projectsLoading}
+                  projects={visibleProjects}
+                  projectSearch={projectSearch}
+                  projectsError={projectsError}
+                  onProjectSearchChange={setProjectSearch}
+                  onRefresh={() => void loadProjects()}
+                  t={t}
+                />
               )}
               {navigation === 'settings' && (
-                <Space direction="vertical" size="middle" className="content-stack">
-                  <Typography.Title level={2}>{t('settings')}</Typography.Title>
-                  <Typography.Text type="secondary">{t('startSubtitle')}</Typography.Text>
-                </Space>
+                <SettingsView
+                  settings={settings}
+                  loading={settingsLoading}
+                  saving={settingsSaving}
+                  onSave={(values) => void handleSaveSettings(values)}
+                  onClearRecentPaths={() => void handleClearRecentPaths()}
+                  t={t}
+                />
               )}
-              {navigation === 'about' && (
-                <Space direction="vertical" size="middle" className="content-stack">
-                  <Typography.Title level={2}>{t('about')}</Typography.Title>
-                  {info && (
-                    <div className="about-grid">
-                      <Typography.Text>{t('appId')}</Typography.Text>
-                      <Typography.Text code>{info.appId}</Typography.Text>
-                      <Typography.Text>{t('formatVersion')}</Typography.Text>
-                      <Typography.Text code>{info.nativeFormatVersion}</Typography.Text>
-                      <Typography.Text>{t('schemaVersion')}</Typography.Text>
-                      <Typography.Text code>{info.schemaVersion}</Typography.Text>
-                      <Typography.Text>{t('dataDirectory')}</Typography.Text>
-                      <Typography.Text code>{info.dataDir}</Typography.Text>
-                      <Typography.Text>{t('cliExecutable')}</Typography.Text>
-                      <Typography.Text code>{info.cliExecutableName}</Typography.Text>
-                      <Typography.Text>{t('cliAlias')}</Typography.Text>
-                      <Typography.Text code>{info.cliShortAlias}</Typography.Text>
-                    </div>
-                  )}
-                </Space>
-              )}
+              {navigation === 'about' && <AboutView info={info} t={t} />}
             </Layout.Content>
           </Layout>
         </Layout>
