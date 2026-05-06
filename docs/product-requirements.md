@@ -4,7 +4,7 @@
 
 FoldersGuard, abbreviated as FG, is encryption software for protecting folders and the files inside them. The core product idea is that a folder is the natural unit for storage, download, upload, sharing, and authorization.
 
-FG encrypts each file independently, while FG's own SQLCipher-encrypted database stores the metadata and internal keys needed to open folders and files. Users unlock FG data with passwords. If a user has the password or share database for a folder, they can decrypt everything inside that folder recursively. They cannot decrypt sibling folders, parent folders, or unrelated files unless access is explicitly shared.
+FG encrypts each file independently, while FG's own SQLCipher-encrypted database stores the metadata and internal keys needed to open folders and files. Users unlock FG data with passwords. If a user has the password for a folder, they can decrypt everything inside that folder recursively. If a user has a share database, they can decrypt only the content described by that share database. They cannot decrypt sibling folders, parent folders, or unrelated files unless access is explicitly shared.
 
 FG creates one active project from one top-level folder at a time. The top-level folder is the root operating boundary for normal project encryption, project metadata operations, project verification, project decryption, and share generation. Share databases may describe a rootless shared payload instead of a normal project root.
 
@@ -22,6 +22,8 @@ Encrypted content and FG data are separate. The encrypted content tree contains 
 - Preserve the portable filesystem metadata users expect when restoring normal files and directories.
 - Support large files by splitting them into balanced parts when needed.
 - Require both sender and recipient to use FG.
+- Provide a local desktop WebUI for normal interactive use.
+- Provide a CLI for stable automation and scripting.
 - Allow renaming files and directories by updating only FG data, without requiring access to encrypted content.
 - For adding, moving, or deleting encrypted content in manually managed storage, generate clear operation instructions for the user.
 - Use `.fg` for normal FG project databases that contain exactly one top-level object and that object is a directory.
@@ -37,6 +39,14 @@ As a user, I want to encrypt a folder so that all files under it are protected, 
 
 As a user, I want one top-level folder to behave like one FG project, with active project metadata tracked in FG's `FoldersGuard` data directory.
 
+### Use A Local WebUI
+
+As a user, I want to create, modify, decrypt, share, import, export, and delete FG projects through a local desktop WebUI without memorizing CLI commands.
+
+### Automate With CLI
+
+As a user, I want scriptable CLI commands for FG workflows so that automated jobs can use the same core behavior as the WebUI.
+
 ### Unlock A Top-Level Folder
 
 As a user, I want the top-level FG folder to require a password so that opening the root grants access to all content inside it.
@@ -48,6 +58,10 @@ As a user, I want to send an encrypted folder and an FG-generated share database
 ### Share A Single File
 
 As a user, I want to send one encrypted file and an FG-generated share database to another person so they can decrypt only that file.
+
+### Share Selected Items
+
+As a user, I want to share any selected set of encrypted files and folders with one FG share database so the recipient can decrypt only that selected set.
 
 ### Hide Names
 

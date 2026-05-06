@@ -56,7 +56,7 @@ Database types:
 
 - Project database: the active database for one top-level folder, normally represented as `.fg` when exported.
 - Exported project database: a portable copy of a project database.
-- Share database: a database containing only the metadata and keys needed for one shared file or folder subtree, always represented as `.fgs`.
+- Share database: a database containing only the metadata and keys needed for selected shared files and folders, always represented as `.fgs`.
 
 ## File Extensions
 
@@ -103,7 +103,7 @@ The top-level folder must require a password. There is no passwordless project d
 
 A share database is generated from a project database.
 
-It contains only the subset required to restore the shared file or folder subtree.
+It contains only the subset required to restore the selected shared files and folders.
 
 Share databases are rootless sets from the user's point of view. A `.fgs` database may contain one file, multiple files, one directory, multiple directories, or a mixed set of files and directories as top-level objects.
 
