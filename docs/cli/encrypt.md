@@ -23,6 +23,7 @@ Behavior:
 - Requires a project password.
 - Scans regular files and directories under `<source-folder>`.
 - Ignores unsupported filesystem entries as if they do not exist.
+- Captures restorable filesystem metadata for supported files and directories.
 - Generates UUID visible names for encrypted files and directories.
 - Generates random internal file and folder keys.
 - Encrypts each file independently.

@@ -22,6 +22,7 @@ Behavior:
 
 - Opens the source project database from FG's data directory.
 - Selects only metadata and keys required for `<item-path>`.
+- Includes captured filesystem metadata for the shared file or folder subtree.
 - Copies or stages the encrypted content needed for the selected file or folder.
 - Writes a `.fgs` share database.
 - Does not grant access to parent folders, sibling files, sibling folders, or unrelated content.

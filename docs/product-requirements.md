@@ -19,6 +19,7 @@ Encrypted content and FG data are separate. The encrypted content tree contains 
 - Preserve directory hierarchy in v1 so users can manually upload, download, and share a folder from normal file storage or cloud drives.
 - Preserve entry count and structure for supported regular files and directories: with split parts treated as one logical file, the encrypted content tree matches the original tree's supported folder and file layout.
 - Hide real file and directory names by replacing visible names with generated UUID values.
+- Preserve the portable filesystem metadata users expect when restoring normal files and directories.
 - Support large files by splitting them into balanced parts when needed.
 - Require both sender and recipient to use FG.
 - Allow renaming files and directories by updating only FG data, without requiring access to encrypted content.
@@ -56,6 +57,10 @@ As a user, I want encrypted files and directories to use random UUID names so th
 
 As a user, I want to rename a protected file or folder in FG without needing the encrypted content to be present, because renaming changes only the encrypted name mapping stored in FG data.
 
+### Restore Filesystem Metadata
+
+As a user, I want restored files and folders to keep their original modification times, access times, creation times when supported, permissions, and basic Windows file attributes when supported.
+
 ### Generate Manual Storage Instructions
 
 As a user, I want FG to tell me exactly how to upload, move, or delete encrypted objects when the encrypted content is stored somewhere FG cannot operate directly.
@@ -78,6 +83,7 @@ FG native mode is the only supported encryption mode.
 - Real file and directory names are stored only inside encrypted FG databases or share databases.
 - Visible file and directory names are UUID values.
 - Directory hierarchy is preserved.
+- Portable filesystem metadata is preserved for supported regular files and directories.
 - With split files treated as one logical file, encrypted output preserves the original folder and file structure.
 - Large files use FG balanced splitting.
 - File parts are storage fragments of one logical file, not independently encrypted files.
@@ -95,6 +101,28 @@ FG supports only regular files and directories.
 - Symlinks, sockets, FIFOs, device files, and other special entries are ignored as if they do not exist.
 - Unsupported entries are not represented in FG metadata and are not reported in normal command output.
 - Hard link relationships are not preserved; each hard link path is processed as a normal regular file.
+
+### Filesystem Metadata Policy
+
+FG preserves normal restorable metadata for supported files and directories.
+
+Required metadata:
+
+- File and directory type.
+- Real name.
+- Parent-child structure.
+- File size.
+- Modification time.
+- Access time.
+- Creation time when the host platform and filesystem support it.
+- Permission mode.
+- Basic Windows file attributes when the host platform supports them.
+
+Restore rules:
+
+- File content authenticity has priority over metadata restoration.
+- Directory metadata is restored after child entries are restored.
+- Platform or filesystem limitations may reduce timestamp precision.
 
 ## Security Expectations
 

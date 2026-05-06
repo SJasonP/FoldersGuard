@@ -59,6 +59,7 @@ FG data contains enough information to:
 - Restore cleartext folder and file names.
 - Map real names to visible UUID names.
 - Track child type: file or folder.
+- Restore captured filesystem metadata for supported files and directories.
 - Store file keys for direct child files.
 - Store folder keys for direct child folders.
 - Store file sizes and part layout.
@@ -211,6 +212,35 @@ Unsupported entries are ignored as if they do not exist:
 Unsupported entries are not represented in FG metadata and are not reported in normal command output.
 
 Hard link relationships are not preserved. Each hard link path is processed as a normal regular file.
+
+## Filesystem Metadata Policy
+
+FG preserves first-tier filesystem metadata for supported regular files and directories.
+
+Metadata captured for restore:
+
+- Item type.
+- Real name.
+- Parent-child structure.
+- File size.
+- Modification time.
+- Access time when available.
+- Creation time when available.
+- Permission mode.
+- Basic Windows file attributes when available.
+
+Implementation model:
+
+- FG records which metadata fields were captured for each item.
+- Restore applies only recorded fields and tolerates host filesystem timestamp rounding.
+
+Restore order:
+
+- Create directories.
+- Restore file contents.
+- Apply file permissions and attributes.
+- Apply file timestamps.
+- Apply directory permissions, attributes, and timestamps after child entries are restored.
 
 ## Implementation Language
 

@@ -53,6 +53,7 @@ fg add <project-id> <source-path> <target-folder-path> --staging-content <folder
 Behavior:
 
 - Scans `<source-path>`.
+- Captures restorable filesystem metadata for the newly added files and directories.
 - Uses `--max-part-size` to calculate native balanced splitting for newly added files.
 - Encrypts new content into `--staging-content`.
 - Updates FG metadata with new items, keys, and storage objects.

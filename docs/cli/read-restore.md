@@ -20,6 +20,7 @@ Behavior:
 
 - Opens the active project database from FG's data directory or opens a `.fgs` share database directly.
 - Restores real names from FG metadata.
+- Restores captured filesystem metadata for supported files and directories.
 - Reads encrypted content from `--content`.
 - Authenticates encrypted file objects and split parts before committing restored plaintext files.
 - Writes restored plaintext under `--out`.

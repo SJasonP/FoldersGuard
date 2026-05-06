@@ -36,6 +36,17 @@ File content and split part content use AES-256-GCM.
 
 Each file has a random 256-bit file key. Split parts of one logical file use the same file key and are authenticated with part-specific associated data.
 
+## Filesystem Metadata
+
+FG stores captured filesystem metadata inside the SQLCipher-encrypted project or share database.
+
+Restore policy:
+
+- FG records which metadata fields were captured and restores only those fields.
+- Directory metadata is restored after child files and folders are restored.
+
+FG does not rely on filesystem metadata for cryptographic authentication. Content authentication and database authentication remain separate from metadata restoration.
+
 ## Verification Coverage
 
 Current tests verify:

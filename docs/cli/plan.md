@@ -14,6 +14,7 @@ Behavior:
 
 - Scans regular files and directories under `<source-folder>`.
 - Calculates file splitting and encrypted storage object counts.
+- Calculates captured filesystem metadata fields.
 - Ignores unsupported filesystem entries as if they do not exist.
 - Does not generate durable project data.
 - Does not write encrypted content.
@@ -43,6 +44,7 @@ Behavior:
 
 - Opens the project database.
 - Scans `<source-path>`.
+- Calculates captured filesystem metadata fields for the added files and directories.
 - Uses `--max-part-size` to calculate native balanced splitting for newly added files.
 - Uses `--staging-content` to calculate planned staged encrypted content paths.
 - Calculates the metadata and encrypted storage changes that would be required.

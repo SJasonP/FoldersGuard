@@ -156,6 +156,12 @@ items:
   visible_name: uuid
   real_name
   sort_name
+  original_mode
+  original_mod_time
+  original_access_time
+  original_birth_time
+  windows_attributes
+  metadata_capabilities
   created_at
   updated_at
   deleted_at
@@ -167,6 +173,15 @@ Notes:
 - `visible_name` maps to the UUID name in the encrypted content tree.
 - `parent_id` records the logical tree.
 - Metadata-only rename updates `real_name` and does not change `visible_name`.
+- `created_at` and `updated_at` are FG metadata record times, not original filesystem timestamps.
+- `original_mode` stores the original portable file mode bits.
+- `original_mod_time` stores the original modification time.
+- `original_access_time` stores the original access time when available.
+- `original_birth_time` stores the original creation time when available.
+- `windows_attributes` stores basic Windows file attributes when available.
+- `metadata_capabilities` records which original filesystem metadata fields were captured for the item.
+
+Original filesystem timestamps are stored in UTC with nanosecond precision. Host filesystems may round or truncate timestamps when FG restores them.
 
 ### folders
 
@@ -246,6 +261,30 @@ operation_steps:
   target_visible_path
   expected_integrity
 ```
+
+## Filesystem Metadata
+
+FG data stores restorable filesystem metadata for every supported file and directory item.
+
+Required restorable metadata:
+
+- Item type.
+- Real name.
+- Parent-child structure.
+- File size for files.
+- Modification time.
+- Access time when available.
+- Creation time when available.
+- Permission mode.
+- Basic Windows file attributes when available.
+
+Rules:
+
+- Filesystem metadata is stored inside the SQLCipher-encrypted database.
+- Metadata capture records the fields that were actually available on the source platform.
+- Restore uses the recorded capability set and does not invent missing platform metadata.
+- Directory metadata is restored after child entries are restored.
+- Split files have one logical metadata record on the file item; individual parts do not have user-visible filesystem metadata.
 
 ## Internal Keys
 
