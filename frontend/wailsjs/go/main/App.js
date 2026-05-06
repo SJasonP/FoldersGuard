@@ -10,6 +10,10 @@ export function ClearRecentPaths() {
   return window['go']['main']['App']['ClearRecentPaths']();
 }
 
+export function InspectProject(arg1) {
+  return window['go']['main']['App']['InspectProject'](arg1);
+}
+
 export function ListLocalProjects() {
   return window['go']['main']['App']['ListLocalProjects']();
 }

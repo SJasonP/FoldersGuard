@@ -41,6 +41,25 @@ type Settings struct {
 	Language               string   `json:"language"`
 }
 
+type InspectProjectRequest struct {
+	ProjectID string `json:"projectId"`
+	Password  string `json:"password"`
+}
+
+type InspectProjectResult struct {
+	ProjectID      string `json:"projectId"`
+	DatabaseType   string `json:"databaseType"`
+	RootFolderID   string `json:"rootFolderId"`
+	RootName       string `json:"rootName"`
+	FormatVersion  string `json:"formatVersion"`
+	SchemaVersion  string `json:"schemaVersion"`
+	Items          int    `json:"items"`
+	Folders        int    `json:"folders"`
+	Files          int    `json:"files"`
+	Parts          int    `json:"parts"`
+	StorageObjects int    `json:"storageObjects"`
+}
+
 func NewApp() (*App, error) {
 	service, err := app.NewService("")
 	if err != nil {
@@ -147,5 +166,28 @@ func (a *App) ClearRecentPaths() (Settings, error) {
 		WindowStatePersistence: settings.WindowStatePersistence,
 		Theme:                  settings.Theme,
 		Language:               settings.Language,
+	}, nil
+}
+
+func (a *App) InspectProject(request InspectProjectRequest) (InspectProjectResult, error) {
+	result, err := a.service.Inspect(a.ctx, app.DatabaseOpen{
+		ProjectRef: request.ProjectID,
+		Password:   request.Password,
+	})
+	if err != nil {
+		return InspectProjectResult{}, err
+	}
+	return InspectProjectResult{
+		ProjectID:      result.ProjectID,
+		DatabaseType:   result.DatabaseType,
+		RootFolderID:   result.RootFolderID,
+		RootName:       result.RootName,
+		FormatVersion:  result.FormatVersion,
+		SchemaVersion:  result.SchemaVersion,
+		Items:          result.Items,
+		Folders:        result.Folders,
+		Files:          result.Files,
+		Parts:          result.Parts,
+		StorageObjects: result.StorageObjects,
 	}, nil
 }

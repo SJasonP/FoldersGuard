@@ -4,8 +4,13 @@ import {
   App as AntApp,
   Button,
   ConfigProvider,
+  Descriptions,
+  Drawer,
+  Form,
+  Input,
   Layout,
   Menu,
+  Modal,
   Space,
   Typography,
 } from 'antd';
@@ -21,11 +26,18 @@ import {
 } from '@ant-design/icons';
 import enUS from 'antd/locale/en_US';
 import zhCN from 'antd/locale/zh_CN';
-import { AppInfo, ClearRecentPaths, ListLocalProjects, ReadSettings, SaveSettings } from '../wailsjs/go/main/App';
+import { AppInfo, ClearRecentPaths, InspectProject, ListLocalProjects, ReadSettings, SaveSettings } from '../wailsjs/go/main/App';
 import type { SupportedLanguage } from './i18n';
 import i18n from './i18n';
 import { resolveTheme, themeAlgorithm, type ThemeMode } from './theme';
-import type { AppInfoModel, LocalProjectRow, LocalProjectSummary, NavigationKey, SettingsModel } from './types';
+import type {
+  AppInfoModel,
+  InspectProjectResultModel,
+  LocalProjectRow,
+  LocalProjectSummary,
+  NavigationKey,
+  SettingsModel,
+} from './types';
 import { HomeView } from './views/HomeView';
 import { SettingsView } from './views/SettingsView';
 import { AboutView } from './views/AboutView';
@@ -47,9 +59,16 @@ function App() {
   const [projects, setProjects] = useState<LocalProjectSummary[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [projectsError, setProjectsError] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [settings, setSettings] = useState<SettingsModel | null>(null);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsSaving, setSettingsSaving] = useState(false);
+  const [projectActionsOpen, setProjectActionsOpen] = useState(false);
+  const [inspectDialogOpen, setInspectDialogOpen] = useState(false);
+  const [inspectLoading, setInspectLoading] = useState(false);
+  const [inspectResult, setInspectResult] = useState<InspectProjectResultModel | null>(null);
+  const [inspectResultOpen, setInspectResultOpen] = useState(false);
+  const [inspectForm] = Form.useForm<{ password: string }>();
 
   useEffect(() => {
     AppInfo().then(setInfo).catch(() => setInfo(null));
@@ -182,6 +201,11 @@ function App() {
     [language, projectSearch, projects, t],
   );
 
+  const selectedProject = useMemo(
+    () => projects.find((project) => project.projectId === selectedProjectId) ?? null,
+    [projects, selectedProjectId],
+  );
+
   const columns = useMemo<ColumnsType<LocalProjectRow>>(
     () => [
       { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },
@@ -191,6 +215,35 @@ function App() {
     ],
     [t],
   );
+
+  const handleOpenProjectActions = () => {
+    if (!selectedProjectId) {
+      return;
+    }
+    setProjectActionsOpen(true);
+  };
+
+  const handleInspectProject = async (values: { password: string }) => {
+    if (!selectedProjectId) {
+      return;
+    }
+    setInspectLoading(true);
+    try {
+      const result = await InspectProject({
+        projectId: selectedProjectId,
+        password: values.password,
+      });
+      setInspectDialogOpen(false);
+      inspectForm.resetFields();
+      setProjectActionsOpen(false);
+      setInspectResult(result);
+      setInspectResultOpen(true);
+    } catch {
+      antApp.message.error(t('inspectProjectFailed'));
+    } finally {
+      setInspectLoading(false);
+    }
+  };
 
   return (
     <ConfigProvider
@@ -244,8 +297,11 @@ function App() {
                   projects={visibleProjects}
                   projectSearch={projectSearch}
                   projectsError={projectsError}
+                  selectedProjectId={selectedProjectId}
                   onProjectSearchChange={setProjectSearch}
                   onRefresh={() => void loadProjects()}
+                  onSelectProject={setSelectedProjectId}
+                  onOpenProjectActions={handleOpenProjectActions}
                   t={t}
                 />
               )}
@@ -263,6 +319,69 @@ function App() {
             </Layout.Content>
           </Layout>
         </Layout>
+        <Drawer
+          title={t('projectActions')}
+          open={projectActionsOpen}
+          onClose={() => setProjectActionsOpen(false)}
+          width={360}
+        >
+          <Space direction="vertical" size="middle" className="content-stack">
+            {selectedProject ? (
+              <Typography.Text type="secondary">
+                {selectedProject.projectId} / {selectedProject.fileName}
+              </Typography.Text>
+            ) : null}
+            <Button
+              block
+              type="primary"
+              onClick={() => {
+                setInspectDialogOpen(true);
+              }}
+            >
+              {t('inspectProject')}
+            </Button>
+          </Space>
+        </Drawer>
+        <Modal
+          title={t('inspectProject')}
+          open={inspectDialogOpen}
+          onCancel={() => {
+            setInspectDialogOpen(false);
+            inspectForm.resetFields();
+          }}
+          onOk={() => void inspectForm.submit()}
+          okText={t('inspectProject')}
+          confirmLoading={inspectLoading}
+        >
+          <Form form={inspectForm} layout="vertical" onFinish={(values) => void handleInspectProject(values)}>
+            <Form.Item name="password" label={t('password')} rules={[{ required: true, message: t('passwordRequired') }]}>
+              <Input.Password autoComplete="current-password" />
+            </Form.Item>
+          </Form>
+        </Modal>
+        <Drawer
+          title={t('projectDetails')}
+          open={inspectResultOpen}
+          onClose={() => setInspectResultOpen(false)}
+          width={540}
+        >
+          {inspectResult ? (
+            <Descriptions column={1} bordered size="small">
+              <Descriptions.Item label={t('projectId')}>{inspectResult.projectId}</Descriptions.Item>
+              <Descriptions.Item label={t('projectName')}>{inspectResult.rootName}</Descriptions.Item>
+              <Descriptions.Item label={t('rootFolderId')}>{inspectResult.rootFolderId}</Descriptions.Item>
+              <Descriptions.Item label={t('rootName')}>{inspectResult.rootName}</Descriptions.Item>
+              <Descriptions.Item label={t('formatVersion')}>{inspectResult.formatVersion}</Descriptions.Item>
+              <Descriptions.Item label={t('schemaVersion')}>{inspectResult.schemaVersion}</Descriptions.Item>
+              <Descriptions.Item label={t('databaseType')}>{inspectResult.databaseType}</Descriptions.Item>
+              <Descriptions.Item label={t('itemCount')}>{inspectResult.items}</Descriptions.Item>
+              <Descriptions.Item label={t('folderCount')}>{inspectResult.folders}</Descriptions.Item>
+              <Descriptions.Item label={t('fileCount')}>{inspectResult.files}</Descriptions.Item>
+              <Descriptions.Item label={t('partCount')}>{inspectResult.parts}</Descriptions.Item>
+              <Descriptions.Item label={t('storageObjects')}>{inspectResult.storageObjects}</Descriptions.Item>
+            </Descriptions>
+          ) : null}
+        </Drawer>
       </AntApp>
     </ConfigProvider>
   );

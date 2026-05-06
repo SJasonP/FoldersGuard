@@ -9,8 +9,11 @@ type HomeViewProps = {
   projects: LocalProjectRow[];
   projectSearch: string;
   projectsError: string | null;
+  selectedProjectId: string | null;
   onProjectSearchChange: (value: string) => void;
   onRefresh: () => void;
+  onSelectProject: (projectId: string | null) => void;
+  onOpenProjectActions: () => void;
   t: (key: string) => string;
 };
 
@@ -20,8 +23,11 @@ export function HomeView({
   projects,
   projectSearch,
   projectsError,
+  selectedProjectId,
   onProjectSearchChange,
   onRefresh,
+  onSelectProject,
+  onOpenProjectActions,
   t,
 }: HomeViewProps) {
   return (
@@ -29,6 +35,9 @@ export function HomeView({
       <Flex justify="space-between" align="center" gap={16}>
         <Typography.Title level={2}>{t('localProjects')}</Typography.Title>
         <Space>
+          <Button onClick={onOpenProjectActions} disabled={!selectedProjectId}>
+            {t('viewProjectActions')}
+          </Button>
           <Input.Search
             placeholder={t('searchProjects')}
             value={projectSearch}
@@ -44,6 +53,15 @@ export function HomeView({
         columns={columns}
         dataSource={projects}
         loading={loading}
+        rowSelection={{
+          type: 'radio',
+          selectedRowKeys: selectedProjectId ? [selectedProjectId] : [],
+          onChange: (selectedRowKeys) => onSelectProject((selectedRowKeys[0] as string | undefined) ?? null),
+        }}
+        onRow={(record) => ({
+          onClick: () => onSelectProject(record.projectId),
+          onDoubleClick: onOpenProjectActions,
+        })}
         locale={{ emptyText: <Empty description={t('noProjects')} /> }}
         pagination={false}
       />

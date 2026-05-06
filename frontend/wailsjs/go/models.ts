@@ -24,6 +24,52 @@ export namespace main {
 	        this.cliShortAlias = source["cliShortAlias"];
 	    }
 	}
+	export class InspectProjectRequest {
+	    projectId: string;
+	    password: string;
+
+	    static createFrom(source: any = {}) {
+	        return new InspectProjectRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.password = source["password"];
+	    }
+	}
+	export class InspectProjectResult {
+	    projectId: string;
+	    databaseType: string;
+	    rootFolderId: string;
+	    rootName: string;
+	    formatVersion: string;
+	    schemaVersion: string;
+	    items: number;
+	    folders: number;
+	    files: number;
+	    parts: number;
+	    storageObjects: number;
+
+	    static createFrom(source: any = {}) {
+	        return new InspectProjectResult(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.databaseType = source["databaseType"];
+	        this.rootFolderId = source["rootFolderId"];
+	        this.rootName = source["rootName"];
+	        this.formatVersion = source["formatVersion"];
+	        this.schemaVersion = source["schemaVersion"];
+	        this.items = source["items"];
+	        this.folders = source["folders"];
+	        this.files = source["files"];
+	        this.parts = source["parts"];
+	        this.storageObjects = source["storageObjects"];
+	    }
+	}
 	export class LocalProjectSummary {
 	    projectId: string;
 	    fileName: string;
