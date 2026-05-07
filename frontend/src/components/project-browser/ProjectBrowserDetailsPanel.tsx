@@ -6,10 +6,11 @@ import { displayNameForItem } from './projectBrowserView';
 type ProjectBrowserDetailsPanelProps = {
   item: ProjectBrowserItemModel | null;
   pendingByID: Map<string, PendingRename>;
+  pendingStateByID: Map<string, string>;
   t: (key: string) => string;
 };
 
-export function ProjectBrowserDetailsPanel({ item, pendingByID, t }: ProjectBrowserDetailsPanelProps) {
+export function ProjectBrowserDetailsPanel({ item, pendingByID, pendingStateByID, t }: ProjectBrowserDetailsPanelProps) {
   return (
     <div className="project-browser-details">
       <Typography.Title level={5}>{t('itemDetails')}</Typography.Title>
@@ -29,9 +30,7 @@ export function ProjectBrowserDetailsPanel({ item, pendingByID, t }: ProjectBrow
           <Descriptions.Item label={t('contentStatus')}>
             {item.contentAvailable ? t('available') : t('unavailable')}
           </Descriptions.Item>
-          <Descriptions.Item label={t('pendingState')}>
-            {pendingByID.has(item.id) ? t('pendingRename') : ''}
-          </Descriptions.Item>
+          <Descriptions.Item label={t('pendingState')}>{pendingStateByID.get(item.id) ?? ''}</Descriptions.Item>
         </Descriptions>
       ) : (
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('noItemSelected')} />

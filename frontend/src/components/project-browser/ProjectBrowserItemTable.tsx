@@ -7,6 +7,7 @@ import { displayNameForItem } from './projectBrowserView';
 type ProjectBrowserItemTableProps = {
   items: ProjectBrowserItemModel[];
   pendingByID: Map<string, PendingRename>;
+  pendingStateByID: Map<string, string>;
   selectedItem: ProjectBrowserItemModel | null;
   rootFolderID: string;
   searchQuery: string;
@@ -15,6 +16,8 @@ type ProjectBrowserItemTableProps = {
   onSearchChange: (value: string) => void;
   onSelectItem: (item: ProjectBrowserItemModel | null) => void;
   onOpenRename: () => void;
+  onOpenMove: () => void;
+  onRemove: () => void;
   onDiscardAll: () => void;
   onApply: () => void;
   t: (key: string) => string;
@@ -23,6 +26,7 @@ type ProjectBrowserItemTableProps = {
 export function ProjectBrowserItemTable({
   items,
   pendingByID,
+  pendingStateByID,
   selectedItem,
   rootFolderID,
   searchQuery,
@@ -31,6 +35,8 @@ export function ProjectBrowserItemTable({
   onSearchChange,
   onSelectItem,
   onOpenRename,
+  onOpenMove,
+  onRemove,
   onDiscardAll,
   onApply,
   t,
@@ -57,17 +63,24 @@ export function ProjectBrowserItemTable({
       title: t('pendingState'),
       key: 'pendingState',
       width: 150,
-      render: (_, item) => (pendingByID.has(item.id) ? t('pendingRename') : ''),
+      render: (_, item) => pendingStateByID.get(item.id) ?? '',
     },
   ];
+  const selectedIsRoot = !selectedItem || selectedItem.id === rootFolderID;
 
   return (
     <div className="project-browser-items">
       <Flex justify="space-between" align="center" gap={12} wrap>
         <Typography.Title level={5}>{t('currentFolderItems')}</Typography.Title>
         <Space>
-          <Button onClick={onOpenRename} disabled={!selectedItem || selectedItem.id === rootFolderID}>
+          <Button onClick={onOpenRename} disabled={selectedIsRoot}>
             {t('renameItem')}
+          </Button>
+          <Button onClick={onOpenMove} disabled={selectedIsRoot}>
+            {t('moveItem')}
+          </Button>
+          <Button danger onClick={onRemove} disabled={selectedIsRoot}>
+            {t('removeItem')}
           </Button>
           <Button onClick={onDiscardAll} disabled={pendingCount === 0}>
             {t('discardChanges')}

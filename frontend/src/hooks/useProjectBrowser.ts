@@ -11,6 +11,17 @@ export type PendingRename = {
   newName: string;
 };
 
+export type PendingMove = {
+  itemId: string;
+  itemPath: string;
+  targetFolderPath: string;
+};
+
+export type PendingRemove = {
+  itemId: string;
+  itemPath: string;
+};
+
 type UseProjectBrowserArgs = {
   messageApi: MessageInstance;
   t: (key: string) => string;
@@ -26,6 +37,8 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
   const [browserPassword, setBrowserPassword] = useState('');
   const [browserEncryptedPath, setBrowserEncryptedPath] = useState('');
   const [pendingRenames, setPendingRenames] = useState<PendingRename[]>([]);
+  const [pendingMoves, setPendingMoves] = useState<PendingMove[]>([]);
+  const [pendingRemoves, setPendingRemoves] = useState<PendingRemove[]>([]);
 
   const handleOpenProjectBrowser = async (values: { password: string; encryptedPath: string }) => {
     if (!selectedProjectId) {
@@ -44,6 +57,8 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
       setBrowserPassword(values.password);
       setBrowserEncryptedPath(values.encryptedPath);
       setPendingRenames([]);
+      setPendingMoves([]);
+      setPendingRemoves([]);
       messageApi.success(t('openProjectSucceeded'));
     } catch {
       messageApi.error(t('openProjectFailed'));
@@ -53,15 +68,37 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
   };
 
   const addPendingRename = (rename: PendingRename) => {
+    setPendingRemoves((current) => current.filter((item) => item.itemId !== rename.itemId));
     setPendingRenames((current) => [...current.filter((item) => item.itemId !== rename.itemId), rename]);
+  };
+
+  const addPendingMove = (move: PendingMove) => {
+    setPendingRemoves((current) => current.filter((item) => item.itemId !== move.itemId));
+    setPendingMoves((current) => [...current.filter((item) => item.itemId !== move.itemId), move]);
+  };
+
+  const addPendingRemove = (remove: PendingRemove) => {
+    setPendingRenames((current) => current.filter((item) => item.itemId !== remove.itemId));
+    setPendingMoves((current) => current.filter((item) => item.itemId !== remove.itemId));
+    setPendingRemoves((current) => [...current.filter((item) => item.itemId !== remove.itemId), remove]);
   };
 
   const discardPendingRename = (itemId: string) => {
     setPendingRenames((current) => current.filter((item) => item.itemId !== itemId));
   };
 
+  const discardPendingMove = (itemId: string) => {
+    setPendingMoves((current) => current.filter((item) => item.itemId !== itemId));
+  };
+
+  const discardPendingRemove = (itemId: string) => {
+    setPendingRemoves((current) => current.filter((item) => item.itemId !== itemId));
+  };
+
   const discardAllPendingChanges = () => {
     setPendingRenames([]);
+    setPendingMoves([]);
+    setPendingRemoves([]);
   };
 
   const handleApplyProjectChanges = async () => {
@@ -78,10 +115,22 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
           itemPath: rename.itemPath,
           newName: rename.newName,
         })),
+        moveChanges: pendingMoves.map((move) => ({
+          itemPath: move.itemPath,
+          targetFolderPath: move.targetFolderPath,
+        })),
+        removeChanges: pendingRemoves.map((remove) => ({
+          itemPath: remove.itemPath,
+        })),
       }));
       setBrowserState(result.browserState);
       setPendingRenames([]);
+      setPendingMoves([]);
+      setPendingRemoves([]);
       messageApi.success(t('applyChangesSucceeded'));
+      if (result.operationGuidePath) {
+        messageApi.info(`${t('operationGuidePath')}: ${result.operationGuidePath}`);
+      }
     } catch {
       messageApi.error(t('applyChangesFailed'));
     } finally {
@@ -95,6 +144,8 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
     setBrowserPassword('');
     setBrowserEncryptedPath('');
     setPendingRenames([]);
+    setPendingMoves([]);
+    setPendingRemoves([]);
   };
 
   return {
@@ -104,10 +155,16 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
     browserState,
     browserOpen,
     pendingRenames,
+    pendingMoves,
+    pendingRemoves,
     setOpenProjectDialogOpen,
     setBrowserOpen,
     addPendingRename,
+    addPendingMove,
+    addPendingRemove,
     discardPendingRename,
+    discardPendingMove,
+    discardPendingRemove,
     discardAllPendingChanges,
     handleApplyProjectChanges,
     handleOpenProjectBrowser,

@@ -1,21 +1,35 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Breadcrumb, Descriptions, Drawer, Flex, Tree, Typography } from 'antd';
+import { Breadcrumb, Descriptions, Drawer, Flex, Modal, Tree, Typography } from 'antd';
 import type { ProjectBrowserItemModel, ProjectBrowserStateModel } from '../../types';
+import { MoveItemModal } from './MoveItemModal';
 import { ProjectBrowserDetailsPanel } from './ProjectBrowserDetailsPanel';
 import { ProjectBrowserItemTable } from './ProjectBrowserItemTable';
 import { ProjectBrowserPendingChanges } from './ProjectBrowserPendingChanges';
 import { RenameItemModal } from './RenameItemModal';
-import type { PendingRename } from '../../hooks/useProjectBrowser';
-import { buildFolderTree, filteredFolderItems, folderBreadcrumbItems, pendingRenameMap } from './projectBrowserView';
+import type { PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
+import {
+  buildFolderTree,
+  buildSelectableFolderTree,
+  descendantFolderIDs,
+  filteredFolderItems,
+  folderBreadcrumbItems,
+  pendingRenameMap,
+} from './projectBrowserView';
 
 type ProjectBrowserDrawerProps = {
   open: boolean;
   state: ProjectBrowserStateModel | null;
   pendingRenames: PendingRename[];
+  pendingMoves: PendingMove[];
+  pendingRemoves: PendingRemove[];
   applyLoading: boolean;
   onClose: () => void;
   onRename: (rename: PendingRename) => void;
+  onMove: (move: PendingMove) => void;
+  onRemove: (remove: PendingRemove) => void;
   onDiscardRename: (itemId: string) => void;
+  onDiscardMove: (itemId: string) => void;
+  onDiscardRemove: (itemId: string) => void;
   onDiscardAll: () => void;
   onApply: () => void;
   t: (key: string) => string;
@@ -25,10 +39,16 @@ export function ProjectBrowserDrawer({
   open,
   state,
   pendingRenames,
+  pendingMoves,
+  pendingRemoves,
   applyLoading,
   onClose,
   onRename,
+  onMove,
+  onRemove,
   onDiscardRename,
+  onDiscardMove,
+  onDiscardRemove,
   onDiscardAll,
   onApply,
   t,
@@ -37,11 +57,36 @@ export function ProjectBrowserDrawer({
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<ProjectBrowserItemModel | null>(null);
   const [renameOpen, setRenameOpen] = useState(false);
+  const [moveOpen, setMoveOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const activeFolderId = selectedFolderId ?? root?.id ?? '';
   const pendingByID = useMemo(() => pendingRenameMap(pendingRenames), [pendingRenames]);
+  const itemsByID = useMemo(() => new Map((state?.items ?? []).map((item) => [item.id, item])), [state?.items]);
+  const pendingStateByID = useMemo(() => {
+    const next = new Map<string, string>();
+    for (const rename of pendingRenames) {
+      next.set(rename.itemId, t('pendingRename'));
+    }
+    for (const move of pendingMoves) {
+      next.set(move.itemId, t('pendingMove'));
+    }
+    for (const remove of pendingRemoves) {
+      next.set(remove.itemId, t('pendingRemove'));
+    }
+    return next;
+  }, [pendingMoves, pendingRemoves, pendingRenames, t]);
 
   const treeData = useMemo(() => buildFolderTree(state?.items ?? [], root?.id ?? '', pendingByID), [pendingByID, root?.id, state?.items]);
+  const selectableFolderTreeData = useMemo(
+    () => {
+      const disabledIDs = selectedItem ? descendantFolderIDs(state?.items ?? [], selectedItem.id) : new Set<string>();
+      if (selectedItem?.parentId) {
+        disabledIDs.add(selectedItem.parentId);
+      }
+      return buildSelectableFolderTree(state?.items ?? [], root?.id ?? '', pendingByID, disabledIDs);
+    },
+    [pendingByID, root?.id, selectedItem, state?.items],
+  );
   const breadcrumbs = useMemo(
     () => folderBreadcrumbItems(state?.items ?? [], activeFolderId, pendingByID),
     [activeFolderId, pendingByID, state?.items],
@@ -100,21 +145,43 @@ export function ProjectBrowserDrawer({
             <ProjectBrowserItemTable
               items={currentItems}
               pendingByID={pendingByID}
+              pendingStateByID={pendingStateByID}
               selectedItem={selectedItem}
               rootFolderID={state.rootFolderId}
               searchQuery={searchQuery}
               applyLoading={applyLoading}
-              pendingCount={pendingRenames.length}
+              pendingCount={pendingRenames.length + pendingMoves.length + pendingRemoves.length}
               onSearchChange={setSearchQuery}
               onSelectItem={setSelectedItem}
               onOpenRename={() => setRenameOpen(true)}
+              onOpenMove={() => setMoveOpen(true)}
+              onRemove={() => {
+                if (!selectedItem) {
+                  return;
+                }
+                Modal.confirm({
+                  title: t('removeItem'),
+                  content: selectedItem.path,
+                  okText: t('removeItem'),
+                  okButtonProps: { danger: true },
+                  onOk: () => onRemove({ itemId: selectedItem.id, itemPath: selectedItem.path }),
+                });
+              }}
               onDiscardAll={onDiscardAll}
               onApply={onApply}
               t={t}
             />
-            <ProjectBrowserDetailsPanel item={selectedItem} pendingByID={pendingByID} t={t} />
+            <ProjectBrowserDetailsPanel item={selectedItem} pendingByID={pendingByID} pendingStateByID={pendingStateByID} t={t} />
           </div>
-          <ProjectBrowserPendingChanges pendingRenames={pendingRenames} onDiscardRename={onDiscardRename} t={t} />
+          <ProjectBrowserPendingChanges
+            pendingRenames={pendingRenames}
+            pendingMoves={pendingMoves}
+            pendingRemoves={pendingRemoves}
+            onDiscardRename={onDiscardRename}
+            onDiscardMove={onDiscardMove}
+            onDiscardRemove={onDiscardRemove}
+            t={t}
+          />
           <RenameItemModal
             open={renameOpen}
             item={selectedItem}
@@ -129,6 +196,24 @@ export function ProjectBrowserDrawer({
                 });
               }
               setRenameOpen(false);
+            }}
+            t={t}
+          />
+          <MoveItemModal
+            open={moveOpen}
+            item={selectedItem}
+            treeData={selectableFolderTreeData}
+            onCancel={() => setMoveOpen(false)}
+            onSubmit={(targetFolderId) => {
+              const targetFolder = itemsByID.get(targetFolderId);
+              if (selectedItem && targetFolder) {
+                onMove({
+                  itemId: selectedItem.id,
+                  itemPath: selectedItem.path,
+                  targetFolderPath: targetFolder.path,
+                });
+              }
+              setMoveOpen(false);
             }}
             t={t}
           />
