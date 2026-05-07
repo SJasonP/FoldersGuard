@@ -1,4 +1,4 @@
-import { Button, Form, InputNumber, Select, Space, Switch, Typography } from 'antd';
+import { Button, Form, InputNumber, Modal, Select, Space, Switch, Typography } from 'antd';
 import type { SettingsModel } from '../types';
 
 type SettingsViewProps = {
@@ -24,6 +24,15 @@ export function SettingsView({
     form.setFieldsValue(settings);
   }
 
+  const confirmSave = (values: SettingsModel) => {
+    Modal.confirm({
+      title: t('saveSettings'),
+      content: t('saveSettingsConfirm'),
+      okText: t('saveSettings'),
+      onOk: () => onSave(values),
+    });
+  };
+
   return (
     <Space direction="vertical" size="large" className="content-stack">
       <Typography.Title level={2}>{t('settings')}</Typography.Title>
@@ -32,7 +41,7 @@ export function SettingsView({
         layout="vertical"
         initialValues={settings ?? undefined}
         disabled={loading}
-        onFinish={onSave}
+        onFinish={confirmSave}
       >
         <div className="settings-grid">
           <Form.Item name="operationGuideFormat" label={t('operationGuideFormat')} rules={[{ required: true }]}>

@@ -169,6 +169,7 @@ const enUS = {
   removeItem: 'Remove Item',
   restoredFolders: 'Restored Folders',
   saveSettings: 'Save Settings',
+  saveSettingsConfirm: 'Save these settings changes?',
   schemaVersion: 'Schema Version',
   searchItems: 'Search items',
   searchProjects: 'Search projects',
