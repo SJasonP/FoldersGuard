@@ -6,6 +6,10 @@ export function AppInfo() {
   return window['go']['main']['App']['AppInfo']();
 }
 
+export function ApplyProjectChanges(arg1) {
+  return window['go']['main']['App']['ApplyProjectChanges'](arg1);
+}
+
 export function ClearRecentPaths() {
   return window['go']['main']['App']['ClearRecentPaths']();
 }

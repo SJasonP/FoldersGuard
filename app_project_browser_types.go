@@ -34,3 +34,21 @@ type ProjectBrowserState struct {
 	EncryptedPath    string               `json:"encryptedPath"`
 	Items            []ProjectBrowserItem `json:"items"`
 }
+
+type ProjectRenameChange struct {
+	ItemPath string `json:"itemPath"`
+	NewName  string `json:"newName"`
+}
+
+type ApplyProjectChangesRequest struct {
+	ProjectID     string                `json:"projectId"`
+	Password      string                `json:"password"`
+	EncryptedPath string                `json:"encryptedPath"`
+	RenameChanges []ProjectRenameChange `json:"renameChanges"`
+}
+
+type ApplyProjectChangesResult struct {
+	ProjectID      string              `json:"projectId"`
+	AppliedRenames int                 `json:"appliedRenames"`
+	BrowserState   ProjectBrowserState `json:"browserState"`
+}

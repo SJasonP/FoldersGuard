@@ -4,6 +4,8 @@ import {main} from '../models';
 
 export function AppInfo():Promise<main.AppInfo>;
 
+export function ApplyProjectChanges(arg1:main.ApplyProjectChangesRequest):Promise<main.ApplyProjectChangesResult>;
+
 export function ClearRecentPaths():Promise<main.Settings>;
 
 export function CreateProject(arg1:main.CreateProjectRequest):Promise<main.CreateProjectResult>;

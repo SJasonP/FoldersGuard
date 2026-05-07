@@ -199,11 +199,17 @@ function App() {
 
   const {
     openProjectDialogOpen,
+    applyLoading,
     browserLoading,
     browserState,
     browserOpen,
+    pendingRenames,
     setOpenProjectDialogOpen,
     handleOpenProjectBrowser,
+    addPendingRename,
+    discardPendingRename,
+    discardAllPendingChanges,
+    handleApplyProjectChanges,
     closeBrowser,
   } = useProjectBrowser({
     messageApi: antApp.message,
@@ -339,11 +345,17 @@ function App() {
         <ProjectBrowserLayer
           openProjectDialogOpen={openProjectDialogOpen}
           browserLoading={browserLoading}
+          applyLoading={applyLoading}
           browserOpen={browserOpen}
           browserState={browserState}
+          pendingRenames={pendingRenames}
           onCloseOpenProject={() => setOpenProjectDialogOpen(false)}
           onOpenProject={(values) => void handleOpenProjectBrowser(values)}
           onCloseBrowser={closeBrowser}
+          onRename={addPendingRename}
+          onDiscardRename={discardPendingRename}
+          onDiscardAll={discardAllPendingChanges}
+          onApply={() => void handleApplyProjectChanges()}
           t={t}
         />
         <LoadShareModal

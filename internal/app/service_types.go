@@ -222,3 +222,21 @@ type ProjectBrowserState struct {
 	EncryptedRoot    string
 	Items            []ProjectBrowserItem
 }
+
+type ProjectRenameChange struct {
+	ItemPath string
+	NewName  string
+}
+
+type ApplyProjectChangesInput struct {
+	ProjectID     string
+	Password      string
+	EncryptedRoot string
+	RenameChanges []ProjectRenameChange
+}
+
+type ApplyProjectChangesResult struct {
+	ProjectID      string
+	AppliedRenames int
+	BrowserState   ProjectBrowserState
+}

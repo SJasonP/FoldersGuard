@@ -24,6 +24,174 @@ export namespace main {
 	        this.cliShortAlias = source["cliShortAlias"];
 	    }
 	}
+	export class ProjectRenameChange {
+	    itemPath: string;
+	    newName: string;
+
+	    static createFrom(source: any = {}) {
+	        return new ProjectRenameChange(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.itemPath = source["itemPath"];
+	        this.newName = source["newName"];
+	    }
+	}
+	export class ApplyProjectChangesRequest {
+	    projectId: string;
+	    password: string;
+	    encryptedPath: string;
+	    renameChanges: ProjectRenameChange[];
+
+	    static createFrom(source: any = {}) {
+	        return new ApplyProjectChangesRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.password = source["password"];
+	        this.encryptedPath = source["encryptedPath"];
+	        this.renameChanges = this.convertValues(source["renameChanges"], ProjectRenameChange);
+	    }
+
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ProjectBrowserItem {
+	    id: string;
+	    parentId: string;
+	    path: string;
+	    parentPath: string;
+	    name: string;
+	    type: string;
+	    size: number;
+	    childCount: number;
+	    modifiedAt: string;
+	    metadataCaptured: boolean;
+	    contentAvailable: boolean;
+
+	    static createFrom(source: any = {}) {
+	        return new ProjectBrowserItem(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.parentId = source["parentId"];
+	        this.path = source["path"];
+	        this.parentPath = source["parentPath"];
+	        this.name = source["name"];
+	        this.type = source["type"];
+	        this.size = source["size"];
+	        this.childCount = source["childCount"];
+	        this.modifiedAt = source["modifiedAt"];
+	        this.metadataCaptured = source["metadataCaptured"];
+	        this.contentAvailable = source["contentAvailable"];
+	    }
+	}
+	export class ProjectBrowserState {
+	    projectId: string;
+	    projectName: string;
+	    rootFolderId: string;
+	    rootFolderName: string;
+	    createdAt: string;
+	    updatedAt: string;
+	    files: number;
+	    folders: number;
+	    parts: number;
+	    contentConnected: boolean;
+	    encryptedPath: string;
+	    items: ProjectBrowserItem[];
+
+	    static createFrom(source: any = {}) {
+	        return new ProjectBrowserState(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.projectName = source["projectName"];
+	        this.rootFolderId = source["rootFolderId"];
+	        this.rootFolderName = source["rootFolderName"];
+	        this.createdAt = source["createdAt"];
+	        this.updatedAt = source["updatedAt"];
+	        this.files = source["files"];
+	        this.folders = source["folders"];
+	        this.parts = source["parts"];
+	        this.contentConnected = source["contentConnected"];
+	        this.encryptedPath = source["encryptedPath"];
+	        this.items = this.convertValues(source["items"], ProjectBrowserItem);
+	    }
+
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ApplyProjectChangesResult {
+	    projectId: string;
+	    appliedRenames: number;
+	    browserState: ProjectBrowserState;
+
+	    static createFrom(source: any = {}) {
+	        return new ApplyProjectChangesResult(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.appliedRenames = source["appliedRenames"];
+	        this.browserState = this.convertValues(source["browserState"], ProjectBrowserState);
+	    }
+
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class CreateProjectRequest {
 	    sourcePath: string;
 	    contentOutput: string;
@@ -448,90 +616,9 @@ export namespace main {
 	        this.encryptedPath = source["encryptedPath"];
 	    }
 	}
-	export class ProjectBrowserItem {
-	    id: string;
-	    parentId: string;
-	    path: string;
-	    parentPath: string;
-	    name: string;
-	    type: string;
-	    size: number;
-	    childCount: number;
-	    modifiedAt: string;
-	    metadataCaptured: boolean;
-	    contentAvailable: boolean;
 
-	    static createFrom(source: any = {}) {
-	        return new ProjectBrowserItem(source);
-	    }
 
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.parentId = source["parentId"];
-	        this.path = source["path"];
-	        this.parentPath = source["parentPath"];
-	        this.name = source["name"];
-	        this.type = source["type"];
-	        this.size = source["size"];
-	        this.childCount = source["childCount"];
-	        this.modifiedAt = source["modifiedAt"];
-	        this.metadataCaptured = source["metadataCaptured"];
-	        this.contentAvailable = source["contentAvailable"];
-	    }
-	}
-	export class ProjectBrowserState {
-	    projectId: string;
-	    projectName: string;
-	    rootFolderId: string;
-	    rootFolderName: string;
-	    createdAt: string;
-	    updatedAt: string;
-	    files: number;
-	    folders: number;
-	    parts: number;
-	    contentConnected: boolean;
-	    encryptedPath: string;
-	    items: ProjectBrowserItem[];
 
-	    static createFrom(source: any = {}) {
-	        return new ProjectBrowserState(source);
-	    }
-
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.projectId = source["projectId"];
-	        this.projectName = source["projectName"];
-	        this.rootFolderId = source["rootFolderId"];
-	        this.rootFolderName = source["rootFolderName"];
-	        this.createdAt = source["createdAt"];
-	        this.updatedAt = source["updatedAt"];
-	        this.files = source["files"];
-	        this.folders = source["folders"];
-	        this.parts = source["parts"];
-	        this.contentConnected = source["contentConnected"];
-	        this.encryptedPath = source["encryptedPath"];
-	        this.items = this.convertValues(source["items"], ProjectBrowserItem);
-	    }
-
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
 	export class Settings {
 	    operationGuideFormat: string;
 	    defaultMaxPartSize: number;

@@ -15,7 +15,34 @@ func (a *App) OpenProjectBrowser(request OpenProjectBrowserRequest) (ProjectBrow
 	if err != nil {
 		return ProjectBrowserState{}, err
 	}
+	return projectBrowserStateFromApp(state), nil
+}
 
+func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProjectChangesResult, error) {
+	renames := make([]app.ProjectRenameChange, 0, len(request.RenameChanges))
+	for _, change := range request.RenameChanges {
+		renames = append(renames, app.ProjectRenameChange{
+			ItemPath: change.ItemPath,
+			NewName:  change.NewName,
+		})
+	}
+	result, err := a.service.ApplyProjectChanges(a.ctx, app.ApplyProjectChangesInput{
+		ProjectID:     request.ProjectID,
+		Password:      request.Password,
+		EncryptedRoot: request.EncryptedPath,
+		RenameChanges: renames,
+	})
+	if err != nil {
+		return ApplyProjectChangesResult{}, err
+	}
+	return ApplyProjectChangesResult{
+		ProjectID:      result.ProjectID,
+		AppliedRenames: result.AppliedRenames,
+		BrowserState:   projectBrowserStateFromApp(result.BrowserState),
+	}, nil
+}
+
+func projectBrowserStateFromApp(state app.ProjectBrowserState) ProjectBrowserState {
 	items := make([]ProjectBrowserItem, 0, len(state.Items))
 	for _, item := range state.Items {
 		modifiedAt := ""
@@ -58,5 +85,5 @@ func (a *App) OpenProjectBrowser(request OpenProjectBrowserRequest) (ProjectBrow
 		ContentConnected: state.ContentConnected,
 		EncryptedPath:    state.EncryptedRoot,
 		Items:            items,
-	}, nil
+	}
 }
