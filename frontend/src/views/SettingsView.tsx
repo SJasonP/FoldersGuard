@@ -6,7 +6,6 @@ type SettingsViewProps = {
   loading: boolean;
   saving: boolean;
   onSave: (values: SettingsModel) => void;
-  onClearRecentPaths: () => void;
   t: (key: string) => string;
 };
 
@@ -15,7 +14,6 @@ export function SettingsView({
   loading,
   saving,
   onSave,
-  onClearRecentPaths,
   t,
 }: SettingsViewProps) {
   const [form] = Form.useForm<SettingsModel>();
@@ -84,9 +82,6 @@ export function SettingsView({
           </Form.Item>
         </div>
         <div className="settings-switches">
-          <Form.Item name="rememberRecentPaths" label={t('rememberRecentPaths')} valuePropName="checked">
-            <Switch />
-          </Form.Item>
           <Form.Item name="windowStatePersistence" label={t('windowStatePersistence')} valuePropName="checked">
             <Switch />
           </Form.Item>
@@ -95,16 +90,8 @@ export function SettingsView({
           <Button type="primary" htmlType="submit" loading={saving}>
             {t('saveSettings')}
           </Button>
-          <Button onClick={onClearRecentPaths} disabled={loading || saving}>
-            {t('clearRecentPaths')}
-          </Button>
         </Space>
       </Form>
-      {settings ? (
-        <Typography.Text type="secondary">
-          {t('recentPathCount')}: {settings.recentPaths.length}
-        </Typography.Text>
-      ) : null}
     </Space>
   );
 }

@@ -31,7 +31,6 @@ func TestSaveSettingsPersistsNormalizedValues(t *testing.T) {
 		OperationGuideFormat:   GuideFormatMD,
 		DefaultMaxPartSize:     4096,
 		SourceCleanupMode:      SourceCleanupKeep,
-		RememberRecentPaths:    false,
 		WindowStatePersistence: false,
 		Theme:                  ThemeDark,
 		Language:               LanguageZHCN,
@@ -49,34 +48,5 @@ func TestSaveSettingsPersistsNormalizedValues(t *testing.T) {
 	}
 	if !reflect.DeepEqual(read, saved) {
 		t.Fatalf("read settings = %+v, want %+v", read, saved)
-	}
-}
-
-func TestClearRecentPaths(t *testing.T) {
-	service, err := NewService(filepath.Join(t.TempDir(), "data"))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	_, err = service.SaveSettings(Settings{
-		OperationGuideFormat:   GuideFormatTXT,
-		DefaultMaxPartSize:     0,
-		SourceCleanupMode:      SourceCleanupAsk,
-		RememberRecentPaths:    true,
-		RecentPaths:            []string{"a", "b"},
-		WindowStatePersistence: true,
-		Theme:                  ThemeSystem,
-		Language:               LanguageSystem,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	cleared, err := service.ClearRecentPaths()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(cleared.RecentPaths) != 0 {
-		t.Fatalf("recent paths = %v, want empty", cleared.RecentPaths)
 	}
 }

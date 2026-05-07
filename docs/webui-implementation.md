@@ -89,17 +89,16 @@ Rules:
 - The frontend does not display password-derived information.
 - Go services must clear password-derived temporary state as soon as the operation allows.
 
-## Job Model
+## Operation Progress Model
 
-Long-running operations run as Go-owned jobs.
+Long-running operations run through Go application services.
 
-Job rules:
+Progress rules:
 
-- Each job has an id.
-- Each job reports progress events.
-- Each job reports completion, failure, or cancellation.
-- Cancellable jobs expose a cancel action.
-- The frontend renders progress from job events and does not infer completion by scanning files directly.
+- Each long-running operation shows a visible running state.
+- Operations show progress feedback while work is active.
+- Progress may be determinate when totals are known or indeterminate when exact progress is not available.
+- The frontend does not infer completion by scanning files directly.
 
 Long-running operations include:
 

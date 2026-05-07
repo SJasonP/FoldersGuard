@@ -61,7 +61,6 @@ function App() {
     settingsLoading,
     settingsSaving,
     handleSaveSettings,
-    handleClearRecentPaths,
   } = useAppSettings({
     messageApi: antApp.message,
     t,
@@ -306,7 +305,6 @@ function App() {
               loading={settingsLoading}
               saving={settingsSaving}
               onSave={(values) => void handleSaveSettings(values)}
-              onClearRecentPaths={() => void handleClearRecentPaths()}
               t={t}
             />
           )}

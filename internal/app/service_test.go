@@ -250,8 +250,6 @@ func TestServiceCreateProject(t *testing.T) {
 		OperationGuideFormat:   GuideFormatTXT,
 		DefaultMaxPartSize:     0,
 		SourceCleanupMode:      SourceCleanupDelete,
-		RememberRecentPaths:    true,
-		RecentPaths:            []string{},
 		WindowStatePersistence: true,
 		Theme:                  ThemeSystem,
 		Language:               LanguageSystem,

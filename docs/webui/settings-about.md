@@ -9,8 +9,6 @@ Supported settings:
 - Operation guide format: `txt` or `md`.
 - Default maximum part size.
 - Source cleanup mode: ask every time, keep source files, or delete each file after successful processing.
-- Remember recently used paths.
-- Clear recently used paths.
 - Window state persistence.
 - Theme: system, light, or dark.
 - Language: system, English (United States), or Simplified Chinese.
@@ -22,13 +20,11 @@ Default settings:
 - Default maximum part size defaults to no limit.
 - Theme defaults to system.
 - Language defaults to system.
-- Recently used paths are remembered.
 
 Settings behavior:
 
 - Settings changes require confirmation before saving.
-- Settings that affect running jobs apply only to future operations.
-- Clearing recently used paths does not affect projects, encrypted content, or FG databases.
+- Settings that affect running operations apply only to future operations.
 
 ## Localization
 
@@ -87,7 +83,7 @@ Error display rules:
 
 - User-actionable errors are shown near the relevant field or operation.
 - Blocking errors use a modal dialog.
-- Background job errors are shown in the job result.
+- Background operation errors are shown in the operation result.
 - Technical details can be expanded when useful for debugging.
 - Passwords, internal keys, database keys, and decrypted key material are never shown.
 
@@ -101,7 +97,6 @@ Common error categories:
 - Output conflict.
 - Encrypted content missing.
 - Encrypted content authentication failure.
-- Job cancellation.
 
 Unsupported filesystem entries are ignored silently during normal scanning and are not reported as errors.
 
@@ -113,7 +108,7 @@ Keyboard behavior:
 
 - Tab moves through interactive controls in visual order.
 - Enter activates the primary action in forms and dialogs.
-- Escape cancels dismissible dialogs or returns focus to the previous safe state.
+- Escape dismisses dismissible dialogs or returns focus to the previous safe state.
 - Destructive actions require explicit confirmation and are not triggered by a single accidental keypress.
 
 Accessibility behavior:

@@ -776,8 +776,6 @@ export namespace main {
 	    operationGuideFormat: string;
 	    defaultMaxPartSize: number;
 	    sourceCleanupMode: string;
-	    rememberRecentPaths: boolean;
-	    recentPaths: string[];
 	    windowStatePersistence: boolean;
 	    theme: string;
 	    language: string;
@@ -791,8 +789,6 @@ export namespace main {
 	        this.operationGuideFormat = source["operationGuideFormat"];
 	        this.defaultMaxPartSize = source["defaultMaxPartSize"];
 	        this.sourceCleanupMode = source["sourceCleanupMode"];
-	        this.rememberRecentPaths = source["rememberRecentPaths"];
-	        this.recentPaths = source["recentPaths"];
 	        this.windowStatePersistence = source["windowStatePersistence"];
 	        this.theme = source["theme"];
 	        this.language = source["language"];

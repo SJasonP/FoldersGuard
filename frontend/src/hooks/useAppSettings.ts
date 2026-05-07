@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
-import { ClearRecentPaths, ReadSettings, SaveSettings } from '../../wailsjs/go/main/App';
+import { ReadSettings, SaveSettings } from '../../wailsjs/go/main/App';
 import type { SettingsModel } from '../types';
 import type { ThemeMode } from '../theme';
 
@@ -70,24 +70,10 @@ export function useAppSettings({ messageApi, t, setLanguage, setThemeMode }: Use
     }
   };
 
-  const handleClearRecentPaths = async () => {
-    setSettingsSaving(true);
-    try {
-      const cleared = await ClearRecentPaths();
-      applySettings(cleared);
-      messageApi.success(t('settingsSaved'));
-    } catch {
-      messageApi.error(t('errorSavingSettings'));
-    } finally {
-      setSettingsSaving(false);
-    }
-  };
-
   return {
     settings,
     settingsLoading,
     settingsSaving,
     handleSaveSettings,
-    handleClearRecentPaths,
   };
 }

@@ -10,10 +10,6 @@ export function ApplyProjectChanges(arg1) {
   return window['go']['main']['App']['ApplyProjectChanges'](arg1);
 }
 
-export function ClearRecentPaths() {
-  return window['go']['main']['App']['ClearRecentPaths']();
-}
-
 export function CreateProject(arg1) {
   return window['go']['main']['App']['CreateProject'](arg1);
 }

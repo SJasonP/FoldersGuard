@@ -25,14 +25,12 @@ const (
 )
 
 type Settings struct {
-	OperationGuideFormat   string   `json:"operationGuideFormat"`
-	DefaultMaxPartSize     int64    `json:"defaultMaxPartSize"`
-	SourceCleanupMode      string   `json:"sourceCleanupMode"`
-	RememberRecentPaths    bool     `json:"rememberRecentPaths"`
-	RecentPaths            []string `json:"recentPaths"`
-	WindowStatePersistence bool     `json:"windowStatePersistence"`
-	Theme                  string   `json:"theme"`
-	Language               string   `json:"language"`
+	OperationGuideFormat   string `json:"operationGuideFormat"`
+	DefaultMaxPartSize     int64  `json:"defaultMaxPartSize"`
+	SourceCleanupMode      string `json:"sourceCleanupMode"`
+	WindowStatePersistence bool   `json:"windowStatePersistence"`
+	Theme                  string `json:"theme"`
+	Language               string `json:"language"`
 }
 
 func DefaultSettings() Settings {
@@ -40,8 +38,6 @@ func DefaultSettings() Settings {
 		OperationGuideFormat:   GuideFormatTXT,
 		DefaultMaxPartSize:     0,
 		SourceCleanupMode:      SourceCleanupAsk,
-		RememberRecentPaths:    true,
-		RecentPaths:            []string{},
 		WindowStatePersistence: true,
 		Theme:                  ThemeSystem,
 		Language:               LanguageSystem,
@@ -94,24 +90,6 @@ func (s Service) SaveSettings(settings Settings) (Settings, error) {
 	return normalized, nil
 }
 
-func (s Service) ClearRecentPaths() (Settings, error) {
-	settings, err := s.ReadSettings()
-	if err != nil {
-		return Settings{}, err
-	}
-	settings.RecentPaths = []string{}
-
-	data, err := json.MarshalIndent(settings, "", "  ")
-	if err != nil {
-		return Settings{}, fmt.Errorf("encode settings: %w", err)
-	}
-	data = append(data, '\n')
-	if err := os.WriteFile(s.SettingsPath(), data, 0o600); err != nil {
-		return Settings{}, fmt.Errorf("write settings: %w", err)
-	}
-	return settings, nil
-}
-
 func normalizeSettings(settings Settings) (Settings, error) {
 	switch settings.OperationGuideFormat {
 	case "", GuideFormatTXT:
@@ -149,8 +127,5 @@ func normalizeSettings(settings Settings) (Settings, error) {
 		return Settings{}, fmt.Errorf("unsupported language %q", settings.Language)
 	}
 
-	if settings.RecentPaths == nil {
-		settings.RecentPaths = []string{}
-	}
 	return settings, nil
 }

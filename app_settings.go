@@ -15,8 +15,6 @@ func (a *App) SaveSettings(settings Settings) (Settings, error) {
 		OperationGuideFormat:   settings.OperationGuideFormat,
 		DefaultMaxPartSize:     settings.DefaultMaxPartSize,
 		SourceCleanupMode:      settings.SourceCleanupMode,
-		RememberRecentPaths:    settings.RememberRecentPaths,
-		RecentPaths:            append([]string(nil), settings.RecentPaths...),
 		WindowStatePersistence: settings.WindowStatePersistence,
 		Theme:                  settings.Theme,
 		Language:               settings.Language,
@@ -27,21 +25,11 @@ func (a *App) SaveSettings(settings Settings) (Settings, error) {
 	return mapSettings(saved), nil
 }
 
-func (a *App) ClearRecentPaths() (Settings, error) {
-	settings, err := a.service.ClearRecentPaths()
-	if err != nil {
-		return Settings{}, err
-	}
-	return mapSettings(settings), nil
-}
-
 func mapSettings(settings app.Settings) Settings {
 	return Settings{
 		OperationGuideFormat:   settings.OperationGuideFormat,
 		DefaultMaxPartSize:     settings.DefaultMaxPartSize,
 		SourceCleanupMode:      settings.SourceCleanupMode,
-		RememberRecentPaths:    settings.RememberRecentPaths,
-		RecentPaths:            append([]string(nil), settings.RecentPaths...),
 		WindowStatePersistence: settings.WindowStatePersistence,
 		Theme:                  settings.Theme,
 		Language:               settings.Language,

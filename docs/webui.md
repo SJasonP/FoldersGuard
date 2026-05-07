@@ -17,15 +17,15 @@ Rules:
 - The Go core is responsible for filesystem access, encryption, decryption, database access, validation, and storage operations.
 - The frontend is responsible for display, navigation, local user interaction, and collecting explicit user choices.
 - The frontend must not implement cryptography, parse FG databases directly, or manipulate encrypted content directly.
-- Long-running work runs as cancellable background jobs owned by the Go core.
-- Job progress is streamed to the WebUI.
+- Long-running work is owned by the Go core.
+- The WebUI shows a running status and progress feedback while long-running work is active.
 - Passwords, internal file keys, folder keys, database keys, and decrypted key material must never be shown in the WebUI.
 
 ## Document Index
 
 General behavior:
 
-- [Application shell, first launch, start screen, project menu, passwords, paths, confirmations, and jobs](webui/general.md).
+- [Application shell, first launch, start screen, project menu, passwords, paths, confirmations, and operation status](webui/general.md).
 
 Project lifecycle:
 

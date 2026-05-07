@@ -22,7 +22,7 @@ Shell areas:
 
 - Top navigation area.
 - Main content area.
-- Job status area.
+- Operation status area.
 - Modal area for password prompts, confirmations, and blocking errors.
 
 Global navigation actions:
@@ -33,8 +33,9 @@ Global navigation actions:
 
 Window behavior:
 
-- If no long-running job is active, closing the window exits the WebUI.
-- If a long-running job is active, closing the window asks for confirmation.
+- If no long-running operation is active, closing the window exits the WebUI.
+- If a long-running operation is active, normal window close is blocked.
+- If the user forcibly terminates the application or the host system terminates it, any resulting incomplete work is outside FG's control.
 - If a project modification session has unapplied changes, leaving the session asks the user to apply, discard, or stay.
 
 ## First Launch
@@ -102,7 +103,7 @@ The menu displays available non-secret project identity before password verifica
 
 ## Password Prompts
 
-Password prompts are modal and block the protected workflow until completed or cancelled.
+Password prompts are modal and block the protected workflow until completed or dismissed.
 
 Rules:
 
@@ -115,13 +116,13 @@ Rules:
 - Empty password-protected share passwords are rejected.
 - Existing project or share unlock prompts do not require confirmation.
 - Unprotected shares open without a password prompt.
-- Cancelling a password prompt returns to the previous safe screen.
+- Dismissing a password prompt returns to the previous safe screen.
 
 Password failure behavior:
 
 - Incorrect passwords show a generic authentication failure.
 - Authentication failure must not reveal whether metadata, keys, or content authentication failed internally.
-- Retry remains available until the user cancels the workflow.
+- Retry remains available until the user dismisses the workflow.
 
 ## Path Selection
 
@@ -136,15 +137,9 @@ Path selection rules:
 - The WebUI never creates plaintext output outside the user-selected output directory.
 - Restored paths must not escape the requested output directory.
 
-Recently used paths:
-
-- The WebUI may remember recently used paths according to Settings.
-- Recently used paths are convenience data only.
-- Recently used paths are never used silently for destructive operations.
-
 ## Confirmation Dialogs
 
-Confirmation dialogs summarize the exact operation before it starts.
+Confirmation dialogs prevent accidental actions by summarizing the operation before it starts.
 
 Required confirmations:
 
@@ -158,7 +153,6 @@ Required confirmations:
 - Write operation guide.
 - Delete source files after successful processing.
 - Overwrite existing output.
-- Cancel a running destructive job.
 
 Confirmation content:
 
@@ -170,20 +164,18 @@ Confirmation content:
 - Whether existing output may be overwritten.
 - Expected item counts when available.
 
-## Job Status
+## Operation Status
 
-Long-running operations run as jobs.
+Long-running operations show status while work is active.
 
-Job states:
+Operation states:
 
 - Pending.
 - Running.
-- Cancelling.
 - Completed.
 - Failed.
-- Cancelled.
 
-Job display:
+Status display:
 
 - Operation name.
 - Current phase.
@@ -194,11 +186,9 @@ Job display:
 - Current path or item name when safe to display.
 - Error summary when failed.
 
-Job rules:
+Status rules:
 
-- Jobs that can stop safely expose Cancel.
-- Cancellation is best effort.
 - Files that fail authentication or fail to decrypt are not deleted.
 - Files that fail to encrypt are not deleted from the cleartext source.
-- Completed jobs show a result summary.
-- Failed jobs show recoverable details and keep sensitive values hidden.
+- Completed operations show a result summary.
+- Failed operations show recoverable details and keep sensitive values hidden.

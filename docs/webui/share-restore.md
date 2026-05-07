@@ -27,9 +27,9 @@ Output path rules:
 - Existing output must follow FG overwrite rules.
 - Restored paths must not escape the requested output directory.
 
-Before decrypting, the WebUI validates that the selected encrypted content path can be matched to encrypted content known by the project metadata.
+Before decrypting, the WebUI shows a summary and asks for confirmation.
 
-After validation, the WebUI shows a summary and asks for confirmation.
+When decryption starts, FG validates that the selected encrypted content path can be matched to encrypted content known by the project metadata.
 
 Decrypt behavior:
 
@@ -187,7 +187,7 @@ Path rules:
 - The output directory must not be inside the encrypted content path.
 - Restored paths must not escape the requested output directory.
 
-After validation, the WebUI shows a summary and asks for confirmation before decrypting.
+Before decrypting, the WebUI shows a summary and asks for confirmation.
 
 Share decryption behavior:
 
