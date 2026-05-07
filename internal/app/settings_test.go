@@ -28,12 +28,11 @@ func TestSaveSettingsPersistsNormalizedValues(t *testing.T) {
 	}
 
 	saved, err := service.SaveSettings(Settings{
-		OperationGuideFormat:   GuideFormatMD,
-		DefaultMaxPartSize:     4096,
-		SourceCleanupMode:      SourceCleanupKeep,
-		WindowStatePersistence: false,
-		Theme:                  ThemeDark,
-		Language:               LanguageZHCN,
+		OperationGuideFormat: GuideFormatMD,
+		DefaultMaxPartSize:   4096,
+		SourceCleanupMode:    SourceCleanupKeep,
+		Theme:                ThemeDark,
+		Language:             LanguageZHCN,
 	})
 	if err != nil {
 		t.Fatal(err)

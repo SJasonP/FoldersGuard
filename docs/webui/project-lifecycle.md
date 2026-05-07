@@ -96,7 +96,7 @@ Import rules:
 - The input path is required.
 - The input must be a `.fg` database.
 - The imported database becomes an active local project only after validation.
-- If an active project with the same project id already exists, overwrite confirmation is required.
+- If an active project with the same project id already exists, FG either overwrites it when the user explicitly allows overwrite or stops the import without changing it.
 - Import does not require encrypted content to be present.
 - Import does not decrypt file content.
 

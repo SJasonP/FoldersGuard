@@ -25,22 +25,20 @@ const (
 )
 
 type Settings struct {
-	OperationGuideFormat   string `json:"operationGuideFormat"`
-	DefaultMaxPartSize     int64  `json:"defaultMaxPartSize"`
-	SourceCleanupMode      string `json:"sourceCleanupMode"`
-	WindowStatePersistence bool   `json:"windowStatePersistence"`
-	Theme                  string `json:"theme"`
-	Language               string `json:"language"`
+	OperationGuideFormat string `json:"operationGuideFormat"`
+	DefaultMaxPartSize   int64  `json:"defaultMaxPartSize"`
+	SourceCleanupMode    string `json:"sourceCleanupMode"`
+	Theme                string `json:"theme"`
+	Language             string `json:"language"`
 }
 
 func DefaultSettings() Settings {
 	return Settings{
-		OperationGuideFormat:   GuideFormatTXT,
-		DefaultMaxPartSize:     0,
-		SourceCleanupMode:      SourceCleanupAsk,
-		WindowStatePersistence: true,
-		Theme:                  ThemeSystem,
-		Language:               LanguageSystem,
+		OperationGuideFormat: GuideFormatTXT,
+		DefaultMaxPartSize:   0,
+		SourceCleanupMode:    SourceCleanupAsk,
+		Theme:                ThemeSystem,
+		Language:             LanguageSystem,
 	}
 }
 

@@ -247,12 +247,11 @@ func TestServiceCreateProject(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := service.SaveSettings(Settings{
-		OperationGuideFormat:   GuideFormatTXT,
-		DefaultMaxPartSize:     0,
-		SourceCleanupMode:      SourceCleanupDelete,
-		WindowStatePersistence: true,
-		Theme:                  ThemeSystem,
-		Language:               LanguageSystem,
+		OperationGuideFormat: GuideFormatTXT,
+		DefaultMaxPartSize:   0,
+		SourceCleanupMode:    SourceCleanupDelete,
+		Theme:                ThemeSystem,
+		Language:             LanguageSystem,
 	}); err != nil {
 		t.Fatal(err)
 	}

@@ -1,4 +1,4 @@
-import { Button, Form, InputNumber, Modal, Select, Space, Switch, Typography } from 'antd';
+import { Button, Form, InputNumber, Modal, Select, Space, Typography } from 'antd';
 import type { SettingsModel } from '../types';
 
 type SettingsViewProps = {
@@ -79,11 +79,6 @@ export function SettingsView({
                 { value: 'zh-CN', label: t('languageSimplifiedChinese') },
               ]}
             />
-          </Form.Item>
-        </div>
-        <div className="settings-switches">
-          <Form.Item name="windowStatePersistence" label={t('windowStatePersistence')} valuePropName="checked">
-            <Switch />
           </Form.Item>
         </div>
         <Space wrap>

@@ -776,7 +776,6 @@ export namespace main {
 	    operationGuideFormat: string;
 	    defaultMaxPartSize: number;
 	    sourceCleanupMode: string;
-	    windowStatePersistence: boolean;
 	    theme: string;
 	    language: string;
 
@@ -789,7 +788,6 @@ export namespace main {
 	        this.operationGuideFormat = source["operationGuideFormat"];
 	        this.defaultMaxPartSize = source["defaultMaxPartSize"];
 	        this.sourceCleanupMode = source["sourceCleanupMode"];
-	        this.windowStatePersistence = source["windowStatePersistence"];
 	        this.theme = source["theme"];
 	        this.language = source["language"];
 	    }

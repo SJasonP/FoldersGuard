@@ -9,7 +9,6 @@ Supported settings:
 - Operation guide format: `txt` or `md`.
 - Default maximum part size.
 - Source cleanup mode: ask every time, keep source files, or delete each file after successful processing.
-- Window state persistence.
 - Theme: system, light, or dark.
 - Language: system, English (United States), or Simplified Chinese.
 

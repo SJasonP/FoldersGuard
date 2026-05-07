@@ -220,7 +220,6 @@ const enUS = {
   discardAndClose: 'Discard and Close',
   warningManualContentOperations: 'This apply will require manual encrypted-content operations because no encrypted content path is connected.',
   warningStagedEncryptedContent: 'This apply will write staged encrypted content into the FG data directory.',
-  windowStatePersistence: 'Window State Persistence',
 } as const;
 
 export default enUS;

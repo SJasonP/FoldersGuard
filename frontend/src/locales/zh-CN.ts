@@ -220,7 +220,6 @@ const zhCN = {
   discardAndClose: '丢弃并关闭',
   warningManualContentOperations: '由于未连接加密内容路径，本次应用将需要手动执行加密内容操作。',
   warningStagedEncryptedContent: '本次应用会将暂存的加密内容写入 FG 数据目录。',
-  windowStatePersistence: '窗口状态持久化',
 } as const;
 
 export default zhCN;
