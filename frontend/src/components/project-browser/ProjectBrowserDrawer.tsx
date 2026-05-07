@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Breadcrumb, Descriptions, Drawer, Flex, Modal, Tree, Typography } from 'antd';
 import type { ProjectBrowserItemModel, ProjectBrowserStateModel } from '../../types';
+import { ProjectBrowserCloseGuardModal } from './ProjectBrowserCloseGuardModal';
 import { ProjectBrowserDetailsPanel } from './ProjectBrowserDetailsPanel';
 import { ProjectBrowserItemTable } from './ProjectBrowserItemTable';
 import { ProjectBrowserModals } from './ProjectBrowserModals';
@@ -71,6 +72,7 @@ export function ProjectBrowserDrawer({
   const [addOpen, setAddOpen] = useState(false);
   const [createFolderOpen, setCreateFolderOpen] = useState(false);
   const [applyConfirmOpen, setApplyConfirmOpen] = useState(false);
+  const [closeGuardOpen, setCloseGuardOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
   const [moveOpen, setMoveOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -131,6 +133,22 @@ export function ProjectBrowserDrawer({
     setSelectedItem(null);
     setSearchQuery('');
   };
+  const closeOrConfirm = () => {
+    if (pendingCount === 0) {
+      onClose();
+      return;
+    }
+    setCloseGuardOpen(true);
+  };
+  const discardAndClose = () => {
+    onDiscardAll();
+    setCloseGuardOpen(false);
+    onClose();
+  };
+  const confirmApplyBeforeClose = () => {
+    setCloseGuardOpen(false);
+    setApplyConfirmOpen(true);
+  };
 
   useEffect(() => {
     setSelectedFolderId(root?.id ?? null);
@@ -139,7 +157,7 @@ export function ProjectBrowserDrawer({
   }, [root?.id]);
 
   return (
-    <Drawer title={t('modifyProject')} open={open} onClose={onClose} width={1120}>
+    <Drawer title={t('modifyProject')} open={open} onClose={closeOrConfirm} width={1120}>
       {state ? (
         <Flex vertical gap={18}>
           <Descriptions column={4} bordered size="small">
@@ -251,6 +269,15 @@ export function ProjectBrowserDrawer({
             onCreateFolder={onCreateFolder}
             onMove={onMove}
             onRename={onRename}
+            t={t}
+          />
+          <ProjectBrowserCloseGuardModal
+            open={closeGuardOpen}
+            applyBlocked={pendingValidation.blockingConflicts.length > 0}
+            applyLoading={applyLoading}
+            onApply={confirmApplyBeforeClose}
+            onCancel={() => setCloseGuardOpen(false)}
+            onDiscard={discardAndClose}
             t={t}
           />
         </Flex>
