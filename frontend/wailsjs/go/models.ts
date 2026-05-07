@@ -24,6 +24,32 @@ export namespace main {
 	        this.cliShortAlias = source["cliShortAlias"];
 	    }
 	}
+	export class ProjectRemoveChange {
+	    itemPath: string;
+
+	    static createFrom(source: any = {}) {
+	        return new ProjectRemoveChange(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.itemPath = source["itemPath"];
+	    }
+	}
+	export class ProjectMoveChange {
+	    itemPath: string;
+	    targetFolderPath: string;
+
+	    static createFrom(source: any = {}) {
+	        return new ProjectMoveChange(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.itemPath = source["itemPath"];
+	        this.targetFolderPath = source["targetFolderPath"];
+	    }
+	}
 	export class ProjectRenameChange {
 	    itemPath: string;
 	    newName: string;
@@ -43,6 +69,8 @@ export namespace main {
 	    password: string;
 	    encryptedPath: string;
 	    renameChanges: ProjectRenameChange[];
+	    moveChanges: ProjectMoveChange[];
+	    removeChanges: ProjectRemoveChange[];
 
 	    static createFrom(source: any = {}) {
 	        return new ApplyProjectChangesRequest(source);
@@ -54,6 +82,8 @@ export namespace main {
 	        this.password = source["password"];
 	        this.encryptedPath = source["encryptedPath"];
 	        this.renameChanges = this.convertValues(source["renameChanges"], ProjectRenameChange);
+	        this.moveChanges = this.convertValues(source["moveChanges"], ProjectMoveChange);
+	        this.removeChanges = this.convertValues(source["removeChanges"], ProjectRemoveChange);
 	    }
 
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -158,9 +188,30 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class ProjectContentOperation {
+	    type: string;
+	    sourcePath: string;
+	    targetPath: string;
+
+	    static createFrom(source: any = {}) {
+	        return new ProjectContentOperation(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.type = source["type"];
+	        this.sourcePath = source["sourcePath"];
+	        this.targetPath = source["targetPath"];
+	    }
+	}
 	export class ApplyProjectChangesResult {
 	    projectId: string;
 	    appliedRenames: number;
+	    appliedMoves: number;
+	    appliedRemoves: number;
+	    operationGuidePath: string;
+	    contentOperations: ProjectContentOperation[];
+	    appliedContentChanges: ProjectContentOperation[];
 	    browserState: ProjectBrowserState;
 
 	    static createFrom(source: any = {}) {
@@ -171,6 +222,11 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
 	        this.appliedRenames = source["appliedRenames"];
+	        this.appliedMoves = source["appliedMoves"];
+	        this.appliedRemoves = source["appliedRemoves"];
+	        this.operationGuidePath = source["operationGuidePath"];
+	        this.contentOperations = this.convertValues(source["contentOperations"], ProjectContentOperation);
+	        this.appliedContentChanges = this.convertValues(source["appliedContentChanges"], ProjectContentOperation);
 	        this.browserState = this.convertValues(source["browserState"], ProjectBrowserState);
 	    }
 
@@ -616,6 +672,9 @@ export namespace main {
 	        this.encryptedPath = source["encryptedPath"];
 	    }
 	}
+
+
+
 
 
 

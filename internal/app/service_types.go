@@ -228,15 +228,37 @@ type ProjectRenameChange struct {
 	NewName  string
 }
 
+type ProjectMoveChange struct {
+	ItemPath         string
+	TargetFolderPath string
+}
+
+type ProjectRemoveChange struct {
+	ItemPath string
+}
+
+type ProjectContentOperation struct {
+	Type       string
+	SourcePath string
+	TargetPath string
+}
+
 type ApplyProjectChangesInput struct {
 	ProjectID     string
 	Password      string
 	EncryptedRoot string
 	RenameChanges []ProjectRenameChange
+	MoveChanges   []ProjectMoveChange
+	RemoveChanges []ProjectRemoveChange
 }
 
 type ApplyProjectChangesResult struct {
-	ProjectID      string
-	AppliedRenames int
-	BrowserState   ProjectBrowserState
+	ProjectID             string
+	AppliedRenames        int
+	AppliedMoves          int
+	AppliedRemoves        int
+	OperationGuidePath    string
+	ContentOperations     []ProjectContentOperation
+	AppliedContentChanges []ProjectContentOperation
+	BrowserState          ProjectBrowserState
 }

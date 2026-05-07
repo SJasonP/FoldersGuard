@@ -20,6 +20,28 @@ type AppliedContentOperation struct {
 	TargetPath string
 }
 
+func ValidateStorageContentOperations(operations []storage.ContentOperation, options ContentOperationApplyOptions) error {
+	for _, operation := range operations {
+		switch operation.Type {
+		case "upload":
+			if err := validateUploadContent(options.StagingRoot, options.ContentRoot, operation); err != nil {
+				return err
+			}
+		case "move":
+			if err := validateMoveContent(options.ContentRoot, operation); err != nil {
+				return err
+			}
+		case "delete":
+			if err := validateDeleteContent(options.ContentRoot, operation); err != nil {
+				return err
+			}
+		default:
+			return fmt.Errorf("unsupported content operation %q", operation.Type)
+		}
+	}
+	return nil
+}
+
 func ApplyStorageContentOperations(operations []storage.ContentOperation, options ContentOperationApplyOptions) ([]AppliedContentOperation, error) {
 	applied := make([]AppliedContentOperation, 0, len(operations))
 	for _, operation := range operations {
@@ -46,6 +68,57 @@ func ApplyStorageContentOperations(operations []storage.ContentOperation, option
 		})
 	}
 	return applied, nil
+}
+
+func validateUploadContent(stagingRoot, contentRoot string, operation storage.ContentOperation) error {
+	source, err := content.SafeJoin(stagingRoot, operation.SourcePath)
+	if err != nil {
+		return fmt.Errorf("resolve upload source: %w", err)
+	}
+	if _, err := os.Stat(source); err != nil {
+		return fmt.Errorf("stat upload source: %w", err)
+	}
+	target, err := content.SafeJoin(contentRoot, operation.TargetPath)
+	if err != nil {
+		return fmt.Errorf("resolve upload target: %w", err)
+	}
+	if _, err := os.Stat(target); err == nil {
+		return fmt.Errorf("upload target already exists: %s", operation.TargetPath)
+	} else if !os.IsNotExist(err) {
+		return fmt.Errorf("stat upload target: %w", err)
+	}
+	return nil
+}
+
+func validateMoveContent(contentRoot string, operation storage.ContentOperation) error {
+	source, err := content.SafeJoin(contentRoot, operation.SourcePath)
+	if err != nil {
+		return fmt.Errorf("resolve move source: %w", err)
+	}
+	if _, err := os.Stat(source); err != nil {
+		return fmt.Errorf("stat move source: %w", err)
+	}
+	target, err := content.SafeJoin(contentRoot, operation.TargetPath)
+	if err != nil {
+		return fmt.Errorf("resolve move target: %w", err)
+	}
+	if _, err := os.Stat(target); err == nil {
+		return fmt.Errorf("move target already exists: %s", operation.TargetPath)
+	} else if !os.IsNotExist(err) {
+		return fmt.Errorf("stat move target: %w", err)
+	}
+	return nil
+}
+
+func validateDeleteContent(contentRoot string, operation storage.ContentOperation) error {
+	target, err := content.SafeJoin(contentRoot, operation.TargetPath)
+	if err != nil {
+		return fmt.Errorf("resolve delete target: %w", err)
+	}
+	if _, err := os.Stat(target); err != nil {
+		return fmt.Errorf("stat delete target: %w", err)
+	}
+	return nil
 }
 
 func uploadStagedContent(stagingRoot, contentRoot string, operation storage.ContentOperation) error {

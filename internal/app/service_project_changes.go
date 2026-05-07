@@ -12,7 +12,7 @@ import (
 )
 
 func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChangesInput) (ApplyProjectChangesResult, error) {
-	if len(input.RenameChanges) == 0 {
+	if len(input.RenameChanges) == 0 && len(input.MoveChanges) == 0 && len(input.RemoveChanges) == 0 {
 		state, err := s.OpenProjectBrowser(ctx, OpenProjectBrowserInput{
 			ProjectID:     input.ProjectID,
 			Password:      input.Password,
@@ -60,6 +60,110 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		}
 	}
 
+	contentConnected := input.EncryptedRoot != ""
+	if contentConnected {
+		if err := ValidateExistingDirectory(input.EncryptedRoot, "encrypted content"); err != nil {
+			return ApplyProjectChangesResult{}, err
+		}
+	}
+
+	contentOperations := make([]ProjectContentOperation, 0, len(input.MoveChanges)+len(input.RemoveChanges))
+	appliedContentChanges := make([]ProjectContentOperation, 0, len(input.MoveChanges)+len(input.RemoveChanges))
+
+	moveChanges := sortedMoveChanges(input.MoveChanges)
+	seenMoves := make(map[string]struct{}, len(moveChanges))
+	for _, change := range moveChanges {
+		if change.ItemPath == "" {
+			return ApplyProjectChangesResult{}, fmt.Errorf("move item path is required")
+		}
+		if change.TargetFolderPath == "" {
+			return ApplyProjectChangesResult{}, fmt.Errorf("move target folder path is required")
+		}
+		moveKey := change.ItemPath + "\x00" + change.TargetFolderPath
+		if _, ok := seenMoves[moveKey]; ok {
+			return ApplyProjectChangesResult{}, fmt.Errorf("duplicate move for %q", change.ItemPath)
+		}
+		seenMoves[moveKey] = struct{}{}
+
+		if contentConnected {
+			if _, operations, err := store.PlanMove(ctx, change.ItemPath, change.TargetFolderPath); err != nil {
+				return ApplyProjectChangesResult{}, err
+			} else if err := ValidateStorageContentOperations(operations, ContentOperationApplyOptions{
+				ContentRoot: input.EncryptedRoot,
+			}); err != nil {
+				return ApplyProjectChangesResult{}, err
+			}
+		}
+		result, err := store.MoveItem(ctx, change.ItemPath, change.TargetFolderPath, time.Now())
+		if err != nil {
+			return ApplyProjectChangesResult{}, err
+		}
+		contentOperations = append(contentOperations, projectContentOperations(result.Operations)...)
+		if contentConnected {
+			applied, err := ApplyStorageContentOperations(result.Operations, ContentOperationApplyOptions{
+				ContentRoot: input.EncryptedRoot,
+			})
+			if err != nil {
+				return ApplyProjectChangesResult{}, err
+			}
+			appliedContentChanges = append(appliedContentChanges, appliedProjectContentOperations(applied)...)
+		}
+	}
+
+	removeChanges := sortedRemoveChanges(input.RemoveChanges)
+	seenRemoves := make(map[string]struct{}, len(removeChanges))
+	for _, change := range removeChanges {
+		if change.ItemPath == "" {
+			return ApplyProjectChangesResult{}, fmt.Errorf("remove item path is required")
+		}
+		if _, ok := seenRemoves[change.ItemPath]; ok {
+			return ApplyProjectChangesResult{}, fmt.Errorf("duplicate remove for %q", change.ItemPath)
+		}
+		seenRemoves[change.ItemPath] = struct{}{}
+
+		if contentConnected {
+			if _, operations, err := store.PlanRemove(ctx, change.ItemPath); err != nil {
+				return ApplyProjectChangesResult{}, err
+			} else if err := ValidateStorageContentOperations(operations, ContentOperationApplyOptions{
+				ContentRoot: input.EncryptedRoot,
+			}); err != nil {
+				return ApplyProjectChangesResult{}, err
+			}
+		}
+		result, err := store.RemoveItem(ctx, change.ItemPath, time.Now())
+		if err != nil {
+			return ApplyProjectChangesResult{}, err
+		}
+		contentOperations = append(contentOperations, projectContentOperations(result.Operations)...)
+		if contentConnected {
+			applied, err := ApplyStorageContentOperations(result.Operations, ContentOperationApplyOptions{
+				ContentRoot: input.EncryptedRoot,
+			})
+			if err != nil {
+				return ApplyProjectChangesResult{}, err
+			}
+			appliedContentChanges = append(appliedContentChanges, appliedProjectContentOperations(applied)...)
+		}
+	}
+
+	operationGuidePath := ""
+	if !contentConnected && len(contentOperations) > 0 {
+		settings, err := s.ReadSettings()
+		if err != nil {
+			return ApplyProjectChangesResult{}, err
+		}
+		path, err := s.WriteOperationGuide(OperationGuideInput{
+			ProjectID:  input.ProjectID,
+			Operations: contentOperations,
+			CreatedAt:  time.Now(),
+			Format:     settings.OperationGuideFormat,
+		})
+		if err != nil {
+			return ApplyProjectChangesResult{}, err
+		}
+		operationGuidePath = path
+	}
+
 	state, err := s.OpenProjectBrowser(ctx, OpenProjectBrowserInput{
 		ProjectID:     input.ProjectID,
 		Password:      input.Password,
@@ -69,9 +173,14 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		return ApplyProjectChangesResult{}, err
 	}
 	return ApplyProjectChangesResult{
-		ProjectID:      state.ProjectID,
-		AppliedRenames: len(changes),
-		BrowserState:   state,
+		ProjectID:             state.ProjectID,
+		AppliedRenames:        len(changes),
+		AppliedMoves:          len(moveChanges),
+		AppliedRemoves:        len(removeChanges),
+		OperationGuidePath:    operationGuidePath,
+		ContentOperations:     contentOperations,
+		AppliedContentChanges: appliedContentChanges,
+		BrowserState:          state,
 	}, nil
 }
 
@@ -83,9 +192,49 @@ func sortedRenameChanges(changes []ProjectRenameChange) []ProjectRenameChange {
 	return sorted
 }
 
+func sortedMoveChanges(changes []ProjectMoveChange) []ProjectMoveChange {
+	sorted := append([]ProjectMoveChange(nil), changes...)
+	sort.SliceStable(sorted, func(i, j int) bool {
+		return pathDepthForApply(sorted[i].ItemPath) > pathDepthForApply(sorted[j].ItemPath)
+	})
+	return sorted
+}
+
+func sortedRemoveChanges(changes []ProjectRemoveChange) []ProjectRemoveChange {
+	sorted := append([]ProjectRemoveChange(nil), changes...)
+	sort.SliceStable(sorted, func(i, j int) bool {
+		return pathDepthForApply(sorted[i].ItemPath) > pathDepthForApply(sorted[j].ItemPath)
+	})
+	return sorted
+}
+
 func pathDepthForApply(path string) int {
 	if path == "" {
 		return 0
 	}
 	return strings.Count(path, "/") + 1
+}
+
+func projectContentOperations(operations []storage.ContentOperation) []ProjectContentOperation {
+	converted := make([]ProjectContentOperation, 0, len(operations))
+	for _, operation := range operations {
+		converted = append(converted, ProjectContentOperation{
+			Type:       operation.Type,
+			SourcePath: operation.SourcePath,
+			TargetPath: operation.TargetPath,
+		})
+	}
+	return converted
+}
+
+func appliedProjectContentOperations(operations []AppliedContentOperation) []ProjectContentOperation {
+	converted := make([]ProjectContentOperation, 0, len(operations))
+	for _, operation := range operations {
+		converted = append(converted, ProjectContentOperation{
+			Type:       operation.Type,
+			SourcePath: operation.SourcePath,
+			TargetPath: operation.TargetPath,
+		})
+	}
+	return converted
 }

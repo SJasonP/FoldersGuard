@@ -38,6 +38,10 @@ func (s Service) ProjectsDir() string {
 	return filepath.Join(s.DataDir, "projects")
 }
 
+func (s Service) OperationGuidesDir() string {
+	return filepath.Join(s.DataDir, "operation-guides")
+}
+
 func (s Service) EnsureDataDir() error {
 	if err := os.MkdirAll(s.ProjectsDir(), 0o755); err != nil {
 		return fmt.Errorf("create data directory: %w", err)

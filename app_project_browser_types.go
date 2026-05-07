@@ -40,15 +40,37 @@ type ProjectRenameChange struct {
 	NewName  string `json:"newName"`
 }
 
+type ProjectMoveChange struct {
+	ItemPath         string `json:"itemPath"`
+	TargetFolderPath string `json:"targetFolderPath"`
+}
+
+type ProjectRemoveChange struct {
+	ItemPath string `json:"itemPath"`
+}
+
+type ProjectContentOperation struct {
+	Type       string `json:"type"`
+	SourcePath string `json:"sourcePath"`
+	TargetPath string `json:"targetPath"`
+}
+
 type ApplyProjectChangesRequest struct {
 	ProjectID     string                `json:"projectId"`
 	Password      string                `json:"password"`
 	EncryptedPath string                `json:"encryptedPath"`
 	RenameChanges []ProjectRenameChange `json:"renameChanges"`
+	MoveChanges   []ProjectMoveChange   `json:"moveChanges"`
+	RemoveChanges []ProjectRemoveChange `json:"removeChanges"`
 }
 
 type ApplyProjectChangesResult struct {
-	ProjectID      string              `json:"projectId"`
-	AppliedRenames int                 `json:"appliedRenames"`
-	BrowserState   ProjectBrowserState `json:"browserState"`
+	ProjectID             string                    `json:"projectId"`
+	AppliedRenames        int                       `json:"appliedRenames"`
+	AppliedMoves          int                       `json:"appliedMoves"`
+	AppliedRemoves        int                       `json:"appliedRemoves"`
+	OperationGuidePath    string                    `json:"operationGuidePath"`
+	ContentOperations     []ProjectContentOperation `json:"contentOperations"`
+	AppliedContentChanges []ProjectContentOperation `json:"appliedContentChanges"`
+	BrowserState          ProjectBrowserState       `json:"browserState"`
 }

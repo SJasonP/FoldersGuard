@@ -26,20 +26,52 @@ func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProj
 			NewName:  change.NewName,
 		})
 	}
+	moves := make([]app.ProjectMoveChange, 0, len(request.MoveChanges))
+	for _, change := range request.MoveChanges {
+		moves = append(moves, app.ProjectMoveChange{
+			ItemPath:         change.ItemPath,
+			TargetFolderPath: change.TargetFolderPath,
+		})
+	}
+	removes := make([]app.ProjectRemoveChange, 0, len(request.RemoveChanges))
+	for _, change := range request.RemoveChanges {
+		removes = append(removes, app.ProjectRemoveChange{
+			ItemPath: change.ItemPath,
+		})
+	}
 	result, err := a.service.ApplyProjectChanges(a.ctx, app.ApplyProjectChangesInput{
 		ProjectID:     request.ProjectID,
 		Password:      request.Password,
 		EncryptedRoot: request.EncryptedPath,
 		RenameChanges: renames,
+		MoveChanges:   moves,
+		RemoveChanges: removes,
 	})
 	if err != nil {
 		return ApplyProjectChangesResult{}, err
 	}
 	return ApplyProjectChangesResult{
-		ProjectID:      result.ProjectID,
-		AppliedRenames: result.AppliedRenames,
-		BrowserState:   projectBrowserStateFromApp(result.BrowserState),
+		ProjectID:             result.ProjectID,
+		AppliedRenames:        result.AppliedRenames,
+		AppliedMoves:          result.AppliedMoves,
+		AppliedRemoves:        result.AppliedRemoves,
+		OperationGuidePath:    result.OperationGuidePath,
+		ContentOperations:     projectContentOperationsFromApp(result.ContentOperations),
+		AppliedContentChanges: projectContentOperationsFromApp(result.AppliedContentChanges),
+		BrowserState:          projectBrowserStateFromApp(result.BrowserState),
 	}, nil
+}
+
+func projectContentOperationsFromApp(operations []app.ProjectContentOperation) []ProjectContentOperation {
+	converted := make([]ProjectContentOperation, 0, len(operations))
+	for _, operation := range operations {
+		converted = append(converted, ProjectContentOperation{
+			Type:       operation.Type,
+			SourcePath: operation.SourcePath,
+			TargetPath: operation.TargetPath,
+		})
+	}
+	return converted
 }
 
 func projectBrowserStateFromApp(state app.ProjectBrowserState) ProjectBrowserState {
