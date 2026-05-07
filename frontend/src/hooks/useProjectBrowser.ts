@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
 import { ApplyProjectChanges, OpenProjectBrowser } from '../../wailsjs/go/main/App';
 import { main } from '../../wailsjs/go/models';
-import type { ProjectBrowserStateModel } from '../types';
+import type { ApplyProjectChangesResultModel, ProjectBrowserStateModel } from '../types';
 
 export type PendingRename = {
   itemId: string;
@@ -34,6 +34,8 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
   const [applyLoading, setApplyLoading] = useState(false);
   const [browserState, setBrowserState] = useState<ProjectBrowserStateModel | null>(null);
   const [browserOpen, setBrowserOpen] = useState(false);
+  const [applyResult, setApplyResult] = useState<ApplyProjectChangesResultModel | null>(null);
+  const [applyResultOpen, setApplyResultOpen] = useState(false);
   const [browserPassword, setBrowserPassword] = useState('');
   const [browserEncryptedPath, setBrowserEncryptedPath] = useState('');
   const [pendingRenames, setPendingRenames] = useState<PendingRename[]>([]);
@@ -56,6 +58,8 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
       setBrowserOpen(true);
       setBrowserPassword(values.password);
       setBrowserEncryptedPath(values.encryptedPath);
+      setApplyResult(null);
+      setApplyResultOpen(false);
       setPendingRenames([]);
       setPendingMoves([]);
       setPendingRemoves([]);
@@ -124,6 +128,8 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
         })),
       }));
       setBrowserState(result.browserState);
+      setApplyResult(result);
+      setApplyResultOpen(true);
       setPendingRenames([]);
       setPendingMoves([]);
       setPendingRemoves([]);
@@ -141,6 +147,8 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
   const closeBrowser = () => {
     setBrowserOpen(false);
     setBrowserState(null);
+    setApplyResult(null);
+    setApplyResultOpen(false);
     setBrowserPassword('');
     setBrowserEncryptedPath('');
     setPendingRenames([]);
@@ -154,11 +162,14 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
     browserLoading,
     browserState,
     browserOpen,
+    applyResult,
+    applyResultOpen,
     pendingRenames,
     pendingMoves,
     pendingRemoves,
     setOpenProjectDialogOpen,
     setBrowserOpen,
+    setApplyResultOpen,
     addPendingRename,
     addPendingMove,
     addPendingRemove,

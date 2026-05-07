@@ -1,6 +1,7 @@
+import { ApplyChangesResultDrawer } from './ApplyChangesResultDrawer';
 import { OpenProjectModal } from './OpenProjectModal';
 import { ProjectBrowserDrawer } from './ProjectBrowserDrawer';
-import type { ProjectBrowserStateModel } from '../../types';
+import type { ApplyProjectChangesResultModel, ProjectBrowserStateModel } from '../../types';
 import type { PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
 
 type ProjectBrowserLayerProps = {
@@ -9,12 +10,15 @@ type ProjectBrowserLayerProps = {
   applyLoading: boolean;
   browserOpen: boolean;
   browserState: ProjectBrowserStateModel | null;
+  applyResult: ApplyProjectChangesResultModel | null;
+  applyResultOpen: boolean;
   pendingRenames: PendingRename[];
   pendingMoves: PendingMove[];
   pendingRemoves: PendingRemove[];
   onCloseOpenProject: () => void;
   onOpenProject: (values: { password: string; encryptedPath: string }) => void;
   onCloseBrowser: () => void;
+  onCloseApplyResult: () => void;
   onRename: (rename: PendingRename) => void;
   onMove: (move: PendingMove) => void;
   onRemove: (remove: PendingRemove) => void;
@@ -32,12 +36,15 @@ export function ProjectBrowserLayer({
   applyLoading,
   browserOpen,
   browserState,
+  applyResult,
+  applyResultOpen,
   pendingRenames,
   pendingMoves,
   pendingRemoves,
   onCloseOpenProject,
   onOpenProject,
   onCloseBrowser,
+  onCloseApplyResult,
   onRename,
   onMove,
   onRemove,
@@ -75,6 +82,7 @@ export function ProjectBrowserLayer({
         onApply={onApply}
         t={t}
       />
+      <ApplyChangesResultDrawer open={applyResultOpen} result={applyResult} onClose={onCloseApplyResult} t={t} />
     </>
   );
 }

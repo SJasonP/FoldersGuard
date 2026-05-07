@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Breadcrumb, Descriptions, Drawer, Flex, Modal, Tree, Typography } from 'antd';
 import type { ProjectBrowserItemModel, ProjectBrowserStateModel } from '../../types';
+import { ApplyChangesModal } from './ApplyChangesModal';
 import { MoveItemModal } from './MoveItemModal';
 import { ProjectBrowserDetailsPanel } from './ProjectBrowserDetailsPanel';
 import { ProjectBrowserItemTable } from './ProjectBrowserItemTable';
@@ -56,6 +57,7 @@ export function ProjectBrowserDrawer({
   const root = state?.items.find((item) => item.id === state.rootFolderId) ?? null;
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<ProjectBrowserItemModel | null>(null);
+  const [applyConfirmOpen, setApplyConfirmOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
   const [moveOpen, setMoveOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,6 +97,7 @@ export function ProjectBrowserDrawer({
     () => filteredFolderItems(state?.items ?? [], activeFolderId, searchQuery, pendingByID),
     [activeFolderId, pendingByID, searchQuery, state?.items],
   );
+  const pendingCount = pendingRenames.length + pendingMoves.length + pendingRemoves.length;
   const selectFolder = (folderID: string) => {
     setSelectedFolderId(folderID);
     setSelectedItem(null);
@@ -150,7 +153,7 @@ export function ProjectBrowserDrawer({
               rootFolderID={state.rootFolderId}
               searchQuery={searchQuery}
               applyLoading={applyLoading}
-              pendingCount={pendingRenames.length + pendingMoves.length + pendingRemoves.length}
+              pendingCount={pendingCount}
               onSearchChange={setSearchQuery}
               onSelectItem={setSelectedItem}
               onOpenRename={() => setRenameOpen(true)}
@@ -168,7 +171,7 @@ export function ProjectBrowserDrawer({
                 });
               }}
               onDiscardAll={onDiscardAll}
-              onApply={onApply}
+              onApply={() => setApplyConfirmOpen(true)}
               t={t}
             />
             <ProjectBrowserDetailsPanel item={selectedItem} pendingByID={pendingByID} pendingStateByID={pendingStateByID} t={t} />
@@ -214,6 +217,20 @@ export function ProjectBrowserDrawer({
                 });
               }
               setMoveOpen(false);
+            }}
+            t={t}
+          />
+          <ApplyChangesModal
+            open={applyConfirmOpen}
+            loading={applyLoading}
+            renameCount={pendingRenames.length}
+            moveCount={pendingMoves.length}
+            removeCount={pendingRemoves.length}
+            contentConnected={state.contentConnected}
+            onCancel={() => setApplyConfirmOpen(false)}
+            onConfirm={() => {
+              setApplyConfirmOpen(false);
+              onApply();
             }}
             t={t}
           />

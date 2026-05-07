@@ -2,6 +2,7 @@ import { main } from '../wailsjs/go/models';
 
 export type NavigationKey = 'home' | 'settings' | 'about';
 export type AppInfoModel = main.AppInfo;
+export type ApplyProjectChangesResultModel = main.ApplyProjectChangesResult;
 export type CreateProjectRequestModel = main.CreateProjectRequest;
 export type CreateProjectResultModel = main.CreateProjectResult;
 export type CreateShareResultModel = main.CreateShareResult;
