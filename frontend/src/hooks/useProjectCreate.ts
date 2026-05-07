@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
+import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 import { CreateProject } from '../../wailsjs/go/main/App';
 import type { CreateProjectResultModel, SettingsModel } from '../types';
 import { formatNumber } from '../formatters';
+import { showOperationError } from '../components/common/operationError';
 
 type CreateProjectValues = {
   sourcePath: string;
@@ -17,12 +19,13 @@ type CreateProjectValues = {
 
 type UseProjectCreateArgs = {
   messageApi: MessageInstance;
+  modalApi: ModalHookAPI;
   t: (key: string) => string;
   settings: SettingsModel | null;
   reloadProjects: () => Promise<void>;
 };
 
-export function useProjectCreate({ messageApi, t, settings, reloadProjects }: UseProjectCreateArgs) {
+export function useProjectCreate({ messageApi, modalApi, t, settings, reloadProjects }: UseProjectCreateArgs) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
 
@@ -51,8 +54,8 @@ export function useProjectCreate({ messageApi, t, settings, reloadProjects }: Us
           `${t('createSummaryDeletedCleartextFiles')}: ${formatNumber(result.deletedCleartextFiles)}`,
         ].join(' | '),
       );
-    } catch {
-      messageApi.error(t('createProjectFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('createProjectFailed'), error, t);
     } finally {
       setCreateLoading(false);
     }

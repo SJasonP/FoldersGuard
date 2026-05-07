@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
+import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 import { ApplyProjectChanges, OpenProjectBrowser } from '../../wailsjs/go/main/App';
 import { main } from '../../wailsjs/go/models';
 import type { ApplyProjectChangesResultModel, ProjectBrowserStateModel } from '../types';
+import { showOperationError } from '../components/common/operationError';
 
 export type PendingRename = {
   itemId: string;
@@ -37,11 +39,12 @@ export type PendingCreateFolder = {
 
 type UseProjectBrowserArgs = {
   messageApi: MessageInstance;
+  modalApi: ModalHookAPI;
   t: (key: string, values?: Record<string, string | number>) => string;
   selectedProjectId: string | null;
 };
 
-export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProjectBrowserArgs) {
+export function useProjectBrowser({ messageApi, modalApi, t, selectedProjectId }: UseProjectBrowserArgs) {
   const [openProjectDialogOpen, setOpenProjectDialogOpen] = useState(false);
   const [browserLoading, setBrowserLoading] = useState(false);
   const [applyLoading, setApplyLoading] = useState(false);
@@ -81,8 +84,8 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
       setPendingAdds([]);
       setPendingCreateFolders([]);
       messageApi.success(t('openProjectSucceeded'));
-    } catch {
-      messageApi.error(t('openProjectFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('openProjectFailed'), error, t);
     } finally {
       setBrowserLoading(false);
     }
@@ -183,8 +186,8 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
       if (result.operationGuidePath) {
         messageApi.info(`${t('operationGuidePath')}: ${result.operationGuidePath}`);
       }
-    } catch {
-      messageApi.error(t('applyChangesFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('applyChangesFailed'), error, t);
     } finally {
       setApplyLoading(false);
     }

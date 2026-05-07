@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
+import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 import { DecryptProject, DeleteProject, ExportProject, InspectProject, VerifyProject } from '../../wailsjs/go/main/App';
 import type {
   DecryptProjectResultModel,
@@ -9,9 +10,11 @@ import type {
   LocalProjectSummary,
   VerifyProjectResultModel,
 } from '../types';
+import { showOperationError } from '../components/common/operationError';
 
 type UseProjectActionsArgs = {
   messageApi: MessageInstance;
+  modalApi: ModalHookAPI;
   t: (key: string) => string;
   selectedProjectId: string | null;
   selectedProject: LocalProjectSummary | null;
@@ -21,6 +24,7 @@ type UseProjectActionsArgs = {
 
 export function useProjectActions({
   messageApi,
+  modalApi,
   t,
   selectedProjectId,
   selectedProject,
@@ -66,8 +70,8 @@ export function useProjectActions({
       setProjectActionsOpen(false);
       setInspectResult(result);
       setInspectResultOpen(true);
-    } catch {
-      messageApi.error(t('inspectProjectFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('inspectProjectFailed'), error, t);
     } finally {
       setInspectLoading(false);
     }
@@ -88,8 +92,8 @@ export function useProjectActions({
       setExportDialogOpen(false);
       setProjectActionsOpen(false);
       messageApi.success(`${t('exportProjectSucceeded')}: ${result.outputPath}`);
-    } catch {
-      messageApi.error(t('exportProjectFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('exportProjectFailed'), error, t);
     } finally {
       setExportLoading(false);
     }
@@ -111,8 +115,8 @@ export function useProjectActions({
       setVerifyResult(result);
       setVerifyResultOpen(true);
       messageApi.success(t('verifyProjectSucceeded'));
-    } catch {
-      messageApi.error(t('verifyProjectFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('verifyProjectFailed'), error, t);
     } finally {
       setVerifyLoading(false);
     }
@@ -143,8 +147,8 @@ export function useProjectActions({
       setDecryptResult(result);
       setDecryptResultOpen(true);
       messageApi.success(t('decryptProjectSucceeded'));
-    } catch {
-      messageApi.error(t('decryptProjectFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('decryptProjectFailed'), error, t);
     } finally {
       setDecryptLoading(false);
     }
@@ -167,8 +171,8 @@ export function useProjectActions({
       clearSelectedProject();
       await reloadProjects();
       messageApi.success(`${t('deleteProjectSucceeded')}: ${result.projectId}`);
-    } catch {
-      messageApi.error(t('deleteProjectFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('deleteProjectFailed'), error, t);
     } finally {
       setDeleteLoading(false);
     }

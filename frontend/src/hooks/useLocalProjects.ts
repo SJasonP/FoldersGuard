@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 import { ListLocalProjects } from '../../wailsjs/go/main/App';
 import type { LocalProjectRow, LocalProjectSummary } from '../types';
 import { formatDateTime } from '../formatters';
+import { showOperationError } from '../components/common/operationError';
 
 type UseLocalProjectsArgs = {
   language: 'en-US' | 'zh-CN';
+  modalApi: ModalHookAPI;
   t: (key: string) => string;
 };
 
-export function useLocalProjects({ language, t }: UseLocalProjectsArgs) {
+export function useLocalProjects({ language, modalApi, t }: UseLocalProjectsArgs) {
   const [projectSearch, setProjectSearch] = useState('');
   const [projects, setProjects] = useState<LocalProjectSummary[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
@@ -21,9 +24,10 @@ export function useLocalProjects({ language, t }: UseLocalProjectsArgs) {
     try {
       const nextProjects = await ListLocalProjects();
       setProjects(nextProjects);
-    } catch {
+    } catch (error) {
       setProjects([]);
       setProjectsError(t('errorLoadingProjects'));
+      showOperationError(modalApi, t('errorLoadingProjects'), error, t);
     } finally {
       setProjectsLoading(false);
     }

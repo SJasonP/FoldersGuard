@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
+import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 import { DecryptShare, LoadShare, VerifyShare } from '../../wailsjs/go/main/App';
 import type { DecryptShareResultModel, ShareSummaryModel, VerifyProjectResultModel } from '../types';
+import { showOperationError } from '../components/common/operationError';
 
 type UseShareActionsArgs = {
   messageApi: MessageInstance;
+  modalApi: ModalHookAPI;
   t: (key: string) => string;
 };
 
-export function useShareActions({ messageApi, t }: UseShareActionsArgs) {
+export function useShareActions({ messageApi, modalApi, t }: UseShareActionsArgs) {
   const [loadShareDialogOpen, setLoadShareDialogOpen] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
   const [loadedShare, setLoadedShare] = useState<ShareSummaryModel | null>(null);
@@ -36,8 +39,8 @@ export function useShareActions({ messageApi, t }: UseShareActionsArgs) {
       setLoadShareDialogOpen(false);
       setShareActionsOpen(true);
       messageApi.success(t('loadShareSucceeded'));
-    } catch {
-      messageApi.error(t('loadShareFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('loadShareFailed'), error, t);
     } finally {
       setShareLoading(false);
     }
@@ -55,8 +58,8 @@ export function useShareActions({ messageApi, t }: UseShareActionsArgs) {
       setVerifyShareResult(result);
       setVerifyShareResultOpen(true);
       messageApi.success(t('verifyShareSucceeded'));
-    } catch {
-      messageApi.error(t('verifyShareFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('verifyShareFailed'), error, t);
     } finally {
       setVerifyShareLoading(false);
     }
@@ -83,8 +86,8 @@ export function useShareActions({ messageApi, t }: UseShareActionsArgs) {
       setDecryptShareResult(result);
       setDecryptShareResultOpen(true);
       messageApi.success(t('decryptShareSucceeded'));
-    } catch {
-      messageApi.error(t('decryptShareFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('decryptShareFailed'), error, t);
     } finally {
       setDecryptShareLoading(false);
     }

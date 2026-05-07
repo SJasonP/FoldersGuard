@@ -1,19 +1,22 @@
 import { useEffect, useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
+import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 import { ReadSettings, SaveSettings } from '../../wailsjs/go/main/App';
 import type { SettingsModel } from '../types';
 import type { ThemeMode } from '../theme';
 import { resolveLanguageSetting, type SupportedLanguage } from '../i18n';
+import { showOperationError } from '../components/common/operationError';
 
 type UseAppSettingsArgs = {
   messageApi: MessageInstance;
+  modalApi: ModalHookAPI;
   t: (key: string) => string;
   systemLanguage: SupportedLanguage;
   setLanguage: (language: SupportedLanguage) => void;
   setThemeMode: (mode: ThemeMode) => void;
 };
 
-export function useAppSettings({ messageApi, t, systemLanguage, setLanguage, setThemeMode }: UseAppSettingsArgs) {
+export function useAppSettings({ messageApi, modalApi, t, systemLanguage, setLanguage, setThemeMode }: UseAppSettingsArgs) {
   const [settings, setSettings] = useState<SettingsModel | null>(null);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsSaving, setSettingsSaving] = useState(false);
@@ -34,9 +37,9 @@ export function useAppSettings({ messageApi, t, systemLanguage, setLanguage, set
           return;
         }
         applySettings(nextSettings);
-      } catch {
+      } catch (error) {
         if (!cancelled) {
-          messageApi.error(t('errorLoadingSettings'));
+          showOperationError(modalApi, t('errorLoadingSettings'), error, t);
         }
       } finally {
         if (!cancelled) {
@@ -62,8 +65,8 @@ export function useAppSettings({ messageApi, t, systemLanguage, setLanguage, set
       const saved = await SaveSettings(values);
       applySettings(saved);
       messageApi.success(t('settingsSaved'));
-    } catch {
-      messageApi.error(t('errorSavingSettings'));
+    } catch (error) {
+      showOperationError(modalApi, t('errorSavingSettings'), error, t);
     } finally {
       setSettingsSaving(false);
     }

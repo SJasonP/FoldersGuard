@@ -70,6 +70,7 @@ function App() {
     handleSaveSettings,
   } = useAppSettings({
     messageApi: antApp.message,
+    modalApi: antApp.modal,
     t,
     systemLanguage,
     setLanguage,
@@ -88,6 +89,7 @@ function App() {
     loadProjects,
   } = useLocalProjects({
     language,
+    modalApi: antApp.modal,
     t,
   });
 
@@ -99,6 +101,7 @@ function App() {
     handleCreateProject,
   } = useProjectCreate({
     messageApi: antApp.message,
+    modalApi: antApp.modal,
     t,
     settings,
     reloadProjects: loadProjects,
@@ -111,6 +114,7 @@ function App() {
     handleImportProject,
   } = useProjectImport({
     messageApi: antApp.message,
+    modalApi: antApp.modal,
     t,
     reloadProjects: loadProjects,
   });
@@ -141,6 +145,7 @@ function App() {
     verifyShareResultOpen,
   } = useShareActions({
     messageApi: antApp.message,
+    modalApi: antApp.modal,
     t,
   });
 
@@ -179,6 +184,7 @@ function App() {
     handleVerifyProject,
   } = useProjectActions({
     messageApi: antApp.message,
+    modalApi: antApp.modal,
     t,
     selectedProjectId,
     selectedProject,
@@ -200,6 +206,7 @@ function App() {
     handleCreateShare,
   } = useProjectShare({
     messageApi: antApp.message,
+    modalApi: antApp.modal,
     t,
     selectedProjectId,
   });
@@ -235,6 +242,7 @@ function App() {
     closeBrowser,
   } = useProjectBrowser({
     messageApi: antApp.message,
+    modalApi: antApp.modal,
     t,
     selectedProjectId,
   });

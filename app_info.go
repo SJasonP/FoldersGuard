@@ -9,7 +9,7 @@ func (a *App) AppInfo() AppInfo {
 		NativeFormatVersion: format.NativeFormatVersion,
 		SchemaVersion:       format.SchemaVersion,
 		DataDir:             a.service.DataDir,
-		CLIExecutableName:   "foldersguard",
-		CLIShortAlias:       "fg",
+		CopyrightNotice:     "Copyright (c) 2026 SJasonP",
+		ProjectLink:         "https://github.com/SJasonP/FoldersGuard",
 	}
 }

@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
+import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 import { ImportProject } from '../../wailsjs/go/main/App';
 import type { ImportProjectResultModel } from '../types';
+import { showOperationError } from '../components/common/operationError';
 
 type UseProjectImportArgs = {
   messageApi: MessageInstance;
+  modalApi: ModalHookAPI;
   t: (key: string) => string;
   reloadProjects: () => Promise<void>;
 };
 
-export function useProjectImport({ messageApi, t, reloadProjects }: UseProjectImportArgs) {
+export function useProjectImport({ messageApi, modalApi, t, reloadProjects }: UseProjectImportArgs) {
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
 
@@ -24,8 +27,8 @@ export function useProjectImport({ messageApi, t, reloadProjects }: UseProjectIm
       setImportDialogOpen(false);
       await reloadProjects();
       messageApi.success(`${t('importProjectSucceeded')}: ${result.projectId}`);
-    } catch {
-      messageApi.error(t('importProjectFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('importProjectFailed'), error, t);
     } finally {
       setImportLoading(false);
     }

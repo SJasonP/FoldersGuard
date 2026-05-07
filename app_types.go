@@ -6,8 +6,8 @@ type AppInfo struct {
 	NativeFormatVersion string `json:"nativeFormatVersion"`
 	SchemaVersion       int    `json:"schemaVersion"`
 	DataDir             string `json:"dataDir"`
-	CLIExecutableName   string `json:"cliExecutableName"`
-	CLIShortAlias       string `json:"cliShortAlias"`
+	CopyrightNotice     string `json:"copyrightNotice"`
+	ProjectLink         string `json:"projectLink"`
 }
 
 type LocalProjectSummary struct {

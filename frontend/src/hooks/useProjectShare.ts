@@ -1,15 +1,18 @@
 import { useMemo, useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
+import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 import { CreateShare, ListShareableItems } from '../../wailsjs/go/main/App';
 import type { CreateShareResultModel, ShareableItemModel } from '../types';
+import { showOperationError } from '../components/common/operationError';
 
 type UseProjectShareArgs = {
   messageApi: MessageInstance;
+  modalApi: ModalHookAPI;
   t: (key: string) => string;
   selectedProjectId: string | null;
 };
 
-export function useProjectShare({ messageApi, t, selectedProjectId }: UseProjectShareArgs) {
+export function useProjectShare({ messageApi, modalApi, t, selectedProjectId }: UseProjectShareArgs) {
   const [sharePasswordDialogOpen, setSharePasswordDialogOpen] = useState(false);
   const [shareSelectionOpen, setShareSelectionOpen] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
@@ -41,8 +44,8 @@ export function useProjectShare({ messageApi, t, selectedProjectId }: UseProject
       setShareItems(items);
       setSharePasswordDialogOpen(false);
       setShareSelectionOpen(true);
-    } catch {
-      messageApi.error(t('loadShareableItemsFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('loadShareableItemsFailed'), error, t);
     } finally {
       setShareLoading(false);
     }
@@ -74,8 +77,8 @@ export function useProjectShare({ messageApi, t, selectedProjectId }: UseProject
       setCreateShareResult(result);
       setCreateShareResultOpen(true);
       messageApi.success(t('createShareSucceeded'));
-    } catch {
-      messageApi.error(t('createShareFailed'));
+    } catch (error) {
+      showOperationError(modalApi, t('createShareFailed'), error, t);
     } finally {
       setShareLoading(false);
     }

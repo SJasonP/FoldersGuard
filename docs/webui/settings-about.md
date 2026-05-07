@@ -70,9 +70,8 @@ About information:
 - Native format version.
 - Schema version.
 - Data directory path.
-- WebUI implementation stack.
-- CLI executable name.
-- Short CLI alias.
+- Copyright notice.
+- Project link.
 
 ## Error Handling
 

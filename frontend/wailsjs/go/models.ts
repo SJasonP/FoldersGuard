@@ -6,8 +6,8 @@ export namespace main {
 	    nativeFormatVersion: string;
 	    schemaVersion: number;
 	    dataDir: string;
-	    cliExecutableName: string;
-	    cliShortAlias: string;
+	    copyrightNotice: string;
+	    projectLink: string;
 
 	    static createFrom(source: any = {}) {
 	        return new AppInfo(source);
@@ -20,8 +20,8 @@ export namespace main {
 	        this.nativeFormatVersion = source["nativeFormatVersion"];
 	        this.schemaVersion = source["schemaVersion"];
 	        this.dataDir = source["dataDir"];
-	        this.cliExecutableName = source["cliExecutableName"];
-	        this.cliShortAlias = source["cliShortAlias"];
+	        this.copyrightNotice = source["copyrightNotice"];
+	        this.projectLink = source["projectLink"];
 	    }
 	}
 	export class ProjectCreateFolderChange {
