@@ -20,7 +20,9 @@ export function ApplyChangesResultDrawer({ open, result, onClose, t }: ApplyChan
             <Descriptions.Item label={t('appliedRenames')}>{result.appliedRenames}</Descriptions.Item>
             <Descriptions.Item label={t('appliedMoves')}>{result.appliedMoves}</Descriptions.Item>
             <Descriptions.Item label={t('appliedRemoves')}>{result.appliedRemoves}</Descriptions.Item>
+            <Descriptions.Item label={t('appliedAdds')}>{result.appliedAdds}</Descriptions.Item>
             <Descriptions.Item label={t('operationGuidePath')}>{result.operationGuidePath}</Descriptions.Item>
+            <Descriptions.Item label={t('stagedContentPath')}>{result.stagedContentPath}</Descriptions.Item>
             <Descriptions.Item label={t('contentOperations')}>{operations.length}</Descriptions.Item>
           </Descriptions>
           <Typography.Title level={5}>{t('contentOperations')}</Typography.Title>

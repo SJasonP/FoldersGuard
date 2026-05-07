@@ -24,6 +24,22 @@ export namespace main {
 	        this.cliShortAlias = source["cliShortAlias"];
 	    }
 	}
+	export class ProjectAddChange {
+	    sourcePath: string;
+	    targetFolderPath: string;
+	    maxPartSize: number;
+
+	    static createFrom(source: any = {}) {
+	        return new ProjectAddChange(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sourcePath = source["sourcePath"];
+	        this.targetFolderPath = source["targetFolderPath"];
+	        this.maxPartSize = source["maxPartSize"];
+	    }
+	}
 	export class ProjectRemoveChange {
 	    itemPath: string;
 
@@ -71,6 +87,7 @@ export namespace main {
 	    renameChanges: ProjectRenameChange[];
 	    moveChanges: ProjectMoveChange[];
 	    removeChanges: ProjectRemoveChange[];
+	    addChanges: ProjectAddChange[];
 
 	    static createFrom(source: any = {}) {
 	        return new ApplyProjectChangesRequest(source);
@@ -84,6 +101,7 @@ export namespace main {
 	        this.renameChanges = this.convertValues(source["renameChanges"], ProjectRenameChange);
 	        this.moveChanges = this.convertValues(source["moveChanges"], ProjectMoveChange);
 	        this.removeChanges = this.convertValues(source["removeChanges"], ProjectRemoveChange);
+	        this.addChanges = this.convertValues(source["addChanges"], ProjectAddChange);
 	    }
 
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -209,7 +227,9 @@ export namespace main {
 	    appliedRenames: number;
 	    appliedMoves: number;
 	    appliedRemoves: number;
+	    appliedAdds: number;
 	    operationGuidePath: string;
+	    stagedContentPath: string;
 	    contentOperations: ProjectContentOperation[];
 	    appliedContentChanges: ProjectContentOperation[];
 	    browserState: ProjectBrowserState;
@@ -224,7 +244,9 @@ export namespace main {
 	        this.appliedRenames = source["appliedRenames"];
 	        this.appliedMoves = source["appliedMoves"];
 	        this.appliedRemoves = source["appliedRemoves"];
+	        this.appliedAdds = source["appliedAdds"];
 	        this.operationGuidePath = source["operationGuidePath"];
+	        this.stagedContentPath = source["stagedContentPath"];
 	        this.contentOperations = this.convertValues(source["contentOperations"], ProjectContentOperation);
 	        this.appliedContentChanges = this.convertValues(source["appliedContentChanges"], ProjectContentOperation);
 	        this.browserState = this.convertValues(source["browserState"], ProjectBrowserState);
@@ -672,6 +694,7 @@ export namespace main {
 	        this.encryptedPath = source["encryptedPath"];
 	    }
 	}
+
 
 
 

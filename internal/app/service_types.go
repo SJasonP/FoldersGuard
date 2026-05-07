@@ -237,6 +237,12 @@ type ProjectRemoveChange struct {
 	ItemPath string
 }
 
+type ProjectAddChange struct {
+	SourcePath       string
+	TargetFolderPath string
+	MaxPartSize      int64
+}
+
 type ProjectContentOperation struct {
 	Type       string
 	SourcePath string
@@ -250,6 +256,7 @@ type ApplyProjectChangesInput struct {
 	RenameChanges []ProjectRenameChange
 	MoveChanges   []ProjectMoveChange
 	RemoveChanges []ProjectRemoveChange
+	AddChanges    []ProjectAddChange
 }
 
 type ApplyProjectChangesResult struct {
@@ -257,7 +264,9 @@ type ApplyProjectChangesResult struct {
 	AppliedRenames        int
 	AppliedMoves          int
 	AppliedRemoves        int
+	AppliedAdds           int
 	OperationGuidePath    string
+	StagedContentPath     string
 	ContentOperations     []ProjectContentOperation
 	AppliedContentChanges []ProjectContentOperation
 	BrowserState          ProjectBrowserState

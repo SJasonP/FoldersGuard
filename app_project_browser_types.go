@@ -49,6 +49,12 @@ type ProjectRemoveChange struct {
 	ItemPath string `json:"itemPath"`
 }
 
+type ProjectAddChange struct {
+	SourcePath       string `json:"sourcePath"`
+	TargetFolderPath string `json:"targetFolderPath"`
+	MaxPartSize      int64  `json:"maxPartSize"`
+}
+
 type ProjectContentOperation struct {
 	Type       string `json:"type"`
 	SourcePath string `json:"sourcePath"`
@@ -62,6 +68,7 @@ type ApplyProjectChangesRequest struct {
 	RenameChanges []ProjectRenameChange `json:"renameChanges"`
 	MoveChanges   []ProjectMoveChange   `json:"moveChanges"`
 	RemoveChanges []ProjectRemoveChange `json:"removeChanges"`
+	AddChanges    []ProjectAddChange    `json:"addChanges"`
 }
 
 type ApplyProjectChangesResult struct {
@@ -69,7 +76,9 @@ type ApplyProjectChangesResult struct {
 	AppliedRenames        int                       `json:"appliedRenames"`
 	AppliedMoves          int                       `json:"appliedMoves"`
 	AppliedRemoves        int                       `json:"appliedRemoves"`
+	AppliedAdds           int                       `json:"appliedAdds"`
 	OperationGuidePath    string                    `json:"operationGuidePath"`
+	StagedContentPath     string                    `json:"stagedContentPath"`
 	ContentOperations     []ProjectContentOperation `json:"contentOperations"`
 	AppliedContentChanges []ProjectContentOperation `json:"appliedContentChanges"`
 	BrowserState          ProjectBrowserState       `json:"browserState"`

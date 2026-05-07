@@ -12,7 +12,7 @@ import (
 )
 
 func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChangesInput) (ApplyProjectChangesResult, error) {
-	if len(input.RenameChanges) == 0 && len(input.MoveChanges) == 0 && len(input.RemoveChanges) == 0 {
+	if len(input.RenameChanges) == 0 && len(input.MoveChanges) == 0 && len(input.RemoveChanges) == 0 && len(input.AddChanges) == 0 {
 		state, err := s.OpenProjectBrowser(ctx, OpenProjectBrowserInput{
 			ProjectID:     input.ProjectID,
 			Password:      input.Password,
@@ -67,8 +67,8 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		}
 	}
 
-	contentOperations := make([]ProjectContentOperation, 0, len(input.MoveChanges)+len(input.RemoveChanges))
-	appliedContentChanges := make([]ProjectContentOperation, 0, len(input.MoveChanges)+len(input.RemoveChanges))
+	contentOperations := make([]ProjectContentOperation, 0, len(input.MoveChanges)+len(input.RemoveChanges)+len(input.AddChanges))
+	appliedContentChanges := make([]ProjectContentOperation, 0, len(input.MoveChanges)+len(input.RemoveChanges)+len(input.AddChanges))
 
 	moveChanges := sortedMoveChanges(input.MoveChanges)
 	seenMoves := make(map[string]struct{}, len(moveChanges))
@@ -146,6 +146,15 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		}
 	}
 
+	addResult, err := s.applyProjectAddChanges(ctx, store, input, contentConnected)
+	if err != nil {
+		return ApplyProjectChangesResult{}, err
+	}
+	if len(addResult.ContentOperations) > 0 {
+		contentOperations = append(contentOperations, addResult.ContentOperations...)
+		appliedContentChanges = append(appliedContentChanges, addResult.AppliedContentChanges...)
+	}
+
 	operationGuidePath := ""
 	if !contentConnected && len(contentOperations) > 0 {
 		settings, err := s.ReadSettings()
@@ -177,7 +186,9 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		AppliedRenames:        len(changes),
 		AppliedMoves:          len(moveChanges),
 		AppliedRemoves:        len(removeChanges),
+		AppliedAdds:           len(input.AddChanges),
 		OperationGuidePath:    operationGuidePath,
+		StagedContentPath:     addResult.StagedContentPath,
 		ContentOperations:     contentOperations,
 		AppliedContentChanges: appliedContentChanges,
 		BrowserState:          state,

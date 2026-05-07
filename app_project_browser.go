@@ -39,6 +39,14 @@ func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProj
 			ItemPath: change.ItemPath,
 		})
 	}
+	adds := make([]app.ProjectAddChange, 0, len(request.AddChanges))
+	for _, change := range request.AddChanges {
+		adds = append(adds, app.ProjectAddChange{
+			SourcePath:       change.SourcePath,
+			TargetFolderPath: change.TargetFolderPath,
+			MaxPartSize:      change.MaxPartSize,
+		})
+	}
 	result, err := a.service.ApplyProjectChanges(a.ctx, app.ApplyProjectChangesInput{
 		ProjectID:     request.ProjectID,
 		Password:      request.Password,
@@ -46,6 +54,7 @@ func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProj
 		RenameChanges: renames,
 		MoveChanges:   moves,
 		RemoveChanges: removes,
+		AddChanges:    adds,
 	})
 	if err != nil {
 		return ApplyProjectChangesResult{}, err
@@ -55,7 +64,9 @@ func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProj
 		AppliedRenames:        result.AppliedRenames,
 		AppliedMoves:          result.AppliedMoves,
 		AppliedRemoves:        result.AppliedRemoves,
+		AppliedAdds:           result.AppliedAdds,
 		OperationGuidePath:    result.OperationGuidePath,
+		StagedContentPath:     result.StagedContentPath,
 		ContentOperations:     projectContentOperationsFromApp(result.ContentOperations),
 		AppliedContentChanges: projectContentOperationsFromApp(result.AppliedContentChanges),
 		BrowserState:          projectBrowserStateFromApp(result.BrowserState),
