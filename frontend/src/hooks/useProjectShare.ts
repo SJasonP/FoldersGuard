@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
 import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
-import { CreateShare, ListShareableItems } from '../../wailsjs/go/main/App';
-import type { CreateShareResultModel, ShareableItemModel } from '../types';
+import { CreateShare, OpenProjectBrowser } from '../../wailsjs/go/main/App';
+import type { CreateShareResultModel, ProjectBrowserStateModel } from '../types';
 import { showOperationError } from '../components/common/operationError';
-import { displayItemType } from '../itemDisplay';
 
 type UseProjectShareArgs = {
   messageApi: MessageInstance;
@@ -15,21 +14,16 @@ type UseProjectShareArgs = {
 
 export function useProjectShare({ messageApi, modalApi, t, selectedProjectId }: UseProjectShareArgs) {
   const [sharePasswordDialogOpen, setSharePasswordDialogOpen] = useState(false);
+  const [shareBrowserOpen, setShareBrowserOpen] = useState(false);
   const [shareSelectionOpen, setShareSelectionOpen] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
-  const [shareItems, setShareItems] = useState<ShareableItemModel[]>([]);
+  const [shareBrowserState, setShareBrowserState] = useState<ProjectBrowserStateModel | null>(null);
+  const [selectedShareItemPaths, setSelectedShareItemPaths] = useState<string[]>([]);
   const [projectPassword, setProjectPassword] = useState('');
   const [createShareResult, setCreateShareResult] = useState<CreateShareResultModel | null>(null);
   const [createShareResultOpen, setCreateShareResultOpen] = useState(false);
 
-  const selectableItems = useMemo(
-    () =>
-      shareItems.map((item) => ({
-        value: item.path,
-        label: `${item.path} (${displayItemType(item.type, t)})`,
-      })),
-    [shareItems, t],
-  );
+  const selectedShareItemCount = useMemo(() => selectedShareItemPaths.length, [selectedShareItemPaths]);
 
   const handleOpenShareSelection = async (password: string) => {
     if (!selectedProjectId) {
@@ -37,14 +31,16 @@ export function useProjectShare({ messageApi, modalApi, t, selectedProjectId }: 
     }
     setShareLoading(true);
     try {
-      const items = await ListShareableItems({
+      const state = await OpenProjectBrowser({
         projectId: selectedProjectId,
         password,
+        encryptedPath: '',
       });
       setProjectPassword(password);
-      setShareItems(items);
+      setShareBrowserState(state);
+      setSelectedShareItemPaths([]);
       setSharePasswordDialogOpen(false);
-      setShareSelectionOpen(true);
+      setShareBrowserOpen(true);
     } catch (error) {
       showOperationError(modalApi, t('loadShareableItemsFailed'), error, t);
     } finally {
@@ -53,7 +49,6 @@ export function useProjectShare({ messageApi, modalApi, t, selectedProjectId }: 
   };
 
   const handleCreateShare = async (values: {
-    itemPaths: string[];
     outputPath: string;
     force: boolean;
     passwordProtected: boolean;
@@ -68,7 +63,7 @@ export function useProjectShare({ messageApi, modalApi, t, selectedProjectId }: 
       const result = await CreateShare({
         projectId: selectedProjectId,
         projectPassword,
-        itemPaths: values.itemPaths,
+        itemPaths: selectedShareItemPaths,
         outputPath: values.outputPath,
         force: values.force,
         passwordProtected: values.passwordProtected,
@@ -85,26 +80,37 @@ export function useProjectShare({ messageApi, modalApi, t, selectedProjectId }: 
     }
   };
 
+  const handleConfirmShareSelection = (itemPaths: string[]) => {
+    setSelectedShareItemPaths(itemPaths);
+    setShareBrowserOpen(false);
+    setShareSelectionOpen(true);
+  };
+
   const closeShareFlow = () => {
     setSharePasswordDialogOpen(false);
+    setShareBrowserOpen(false);
     setShareSelectionOpen(false);
-    setShareItems([]);
+    setShareBrowserState(null);
+    setSelectedShareItemPaths([]);
     setProjectPassword('');
   };
 
   return {
     sharePasswordDialogOpen,
+    shareBrowserOpen,
     shareSelectionOpen,
     shareLoading,
-    shareItems,
-    selectableItems,
+    shareBrowserState,
+    selectedShareItemCount,
     createShareResult,
     createShareResultOpen,
     setSharePasswordDialogOpen,
+    setShareBrowserOpen,
     setShareSelectionOpen,
     setCreateShareResultOpen,
     closeShareFlow,
     handleOpenShareSelection,
+    handleConfirmShareSelection,
     handleCreateShare,
   };
 }

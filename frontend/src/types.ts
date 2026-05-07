@@ -19,7 +19,6 @@ export type InspectProjectResultModel = main.InspectProjectResult;
 export type LocalProjectSummary = main.LocalProjectSummary;
 export type ProjectBrowserItemModel = main.ProjectBrowserItem;
 export type ProjectBrowserStateModel = main.ProjectBrowserState;
-export type ShareableItemModel = main.ShareableItem;
 export type SettingsModel = main.Settings;
 export type ShareSummaryModel = main.ShareSummary;
 export type VerifyProjectRequestModel = main.VerifyProjectRequest;

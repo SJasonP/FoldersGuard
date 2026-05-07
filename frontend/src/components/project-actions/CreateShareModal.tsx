@@ -1,9 +1,8 @@
-import { Checkbox, Form, Input, Modal, Select } from 'antd';
+import { Checkbox, Form, Input, Modal, Typography } from 'antd';
 import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
 
 type CreateShareValues = {
-  itemPaths: string[];
   outputPath: string;
   force: boolean;
   passwordProtected: boolean;
@@ -14,13 +13,13 @@ type CreateShareValues = {
 type CreateShareModalProps = {
   open: boolean;
   loading: boolean;
-  selectableItems: Array<{ value: string; label: string }>;
+  selectedItemCount: number;
   onCancel: () => void;
   onSubmit: (values: CreateShareValues) => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
-export function CreateShareModal({ open, loading, selectableItems, onCancel, onSubmit, t }: CreateShareModalProps) {
+export function CreateShareModal({ open, loading, selectedItemCount, onCancel, onSubmit, t }: CreateShareModalProps) {
   const [form] = Form.useForm<CreateShareValues>();
   const passwordProtected = Form.useWatch('passwordProtected', form) ?? true;
   const confirmSubmit = (values: CreateShareValues) => {
@@ -30,7 +29,7 @@ export function CreateShareModal({ open, loading, selectableItems, onCancel, onS
       okText: t('createShare'),
       danger: !values.passwordProtected,
       items: [
-        { label: t('shareSelectionItems'), value: values.itemPaths.length },
+        { label: t('shareSelectionItems'), value: selectedItemCount },
         { label: t('shareDatabaseOutputPath'), value: values.outputPath },
         {
           label: t('passwordProtected'),
@@ -68,18 +67,9 @@ export function CreateShareModal({ open, loading, selectableItems, onCancel, onS
         }}
         onFinish={confirmSubmit}
       >
-        <Form.Item
-          name="itemPaths"
-          label={t('shareSelectionItems')}
-          rules={[{ required: true, message: t('shareSelectionItems') }]}
-        >
-          <Select
-            mode="multiple"
-            options={selectableItems}
-            placeholder={t('shareSelectionPlaceholder')}
-            optionFilterProp="label"
-          />
-        </Form.Item>
+        <Typography.Paragraph>
+          {t('selectedShareItemCount', { count: selectedItemCount })}
+        </Typography.Paragraph>
         <Form.Item
           name="outputPath"
           label={t('shareDatabaseOutputPath')}

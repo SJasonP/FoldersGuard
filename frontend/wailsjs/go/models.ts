@@ -658,20 +658,6 @@ export namespace main {
 	        this.storageObjects = source["storageObjects"];
 	    }
 	}
-	export class ListShareableItemsRequest {
-	    projectId: string;
-	    password: string;
-
-	    static createFrom(source: any = {}) {
-	        return new ListShareableItemsRequest(source);
-	    }
-
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.projectId = source["projectId"];
-	        this.password = source["password"];
-	    }
-	}
 	export class LoadShareRequest {
 	    databasePath: string;
 	    password: string;
@@ -829,34 +815,6 @@ export namespace main {
 	        this.parts = source["parts"];
 	        this.storageObjects = source["storageObjects"];
 	        this.passwordProtected = source["passwordProtected"];
-	    }
-	}
-	export class ShareableItem {
-	    id: string;
-	    parentId: string;
-	    path: string;
-	    parentPath: string;
-	    name: string;
-	    type: string;
-	    size: number;
-	    childCount: number;
-	    modifiedAt: string;
-
-	    static createFrom(source: any = {}) {
-	        return new ShareableItem(source);
-	    }
-
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.parentId = source["parentId"];
-	        this.path = source["path"];
-	        this.parentPath = source["parentPath"];
-	        this.name = source["name"];
-	        this.type = source["type"];
-	        this.size = source["size"];
-	        this.childCount = source["childCount"];
-	        this.modifiedAt = source["modifiedAt"];
 	    }
 	}
 	export class VerifyProjectRequest {

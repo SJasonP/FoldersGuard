@@ -24,8 +24,6 @@ export function InspectProject(arg1:main.InspectProjectRequest):Promise<main.Ins
 
 export function ListLocalProjects():Promise<Array<main.LocalProjectSummary>>;
 
-export function ListShareableItems(arg1:main.ListShareableItemsRequest):Promise<Array<main.ShareableItem>>;
-
 export function LoadShare(arg1:main.LoadShareRequest):Promise<main.ShareSummary>;
 
 export function OpenProjectBrowser(arg1:main.OpenProjectBrowserRequest):Promise<main.ProjectBrowserState>;

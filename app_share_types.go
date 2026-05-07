@@ -1,22 +1,5 @@
 package main
 
-type ShareableItem struct {
-	ID         string `json:"id"`
-	ParentID   string `json:"parentId"`
-	Path       string `json:"path"`
-	ParentPath string `json:"parentPath"`
-	Name       string `json:"name"`
-	Type       string `json:"type"`
-	Size       int64  `json:"size"`
-	ChildCount int    `json:"childCount"`
-	ModifiedAt string `json:"modifiedAt"`
-}
-
-type ListShareableItemsRequest struct {
-	ProjectID string `json:"projectId"`
-	Password  string `json:"password"`
-}
-
 type CreateShareRequest struct {
 	ProjectID         string   `json:"projectId"`
 	ProjectPassword   string   `json:"projectPassword"`

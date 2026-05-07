@@ -46,10 +46,6 @@ export function ListLocalProjects() {
   return window['go']['main']['App']['ListLocalProjects']();
 }
 
-export function ListShareableItems(arg1) {
-  return window['go']['main']['App']['ListShareableItems'](arg1);
-}
-
 export function LoadShare(arg1) {
   return window['go']['main']['App']['LoadShare'](arg1);
 }

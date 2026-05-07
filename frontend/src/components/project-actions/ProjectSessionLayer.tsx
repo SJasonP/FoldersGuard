@@ -10,6 +10,7 @@ import { ImportProjectModal } from './ImportProjectModal';
 import { InspectProjectDrawer } from './InspectProjectDrawer';
 import { InspectProjectModal } from './InspectProjectModal';
 import { ProjectActionsDrawer } from './ProjectActionsDrawer';
+import { ShareSelectionDrawer } from './ShareSelectionDrawer';
 import { VerifyProjectDrawer } from './VerifyProjectDrawer';
 import { VerifyProjectModal } from './VerifyProjectModal';
 import type {
@@ -17,6 +18,7 @@ import type {
   DecryptProjectResultModel,
   InspectProjectResultModel,
   LocalProjectSummary,
+  ProjectBrowserStateModel,
   SettingsModel,
   VerifyProjectResultModel,
 } from '../../types';
@@ -80,16 +82,19 @@ type ProjectSessionLayerProps = {
   decryptResult: DecryptProjectResultModel | null;
   onCloseDecryptResult: () => void;
   createSharePasswordDialogOpen: boolean;
+  createShareBrowserOpen: boolean;
   createShareDialogOpen: boolean;
   createShareLoading: boolean;
-  selectableShareItems: Array<{ value: string; label: string }>;
+  createShareBrowserState: ProjectBrowserStateModel | null;
+  selectedShareItemCount: number;
   createShareResultOpen: boolean;
   createShareResult: CreateShareResultModel | null;
   onCloseCreateSharePassword: () => void;
   onLoadShareableItems: (password: string) => void;
+  onCloseShareSelectionBrowser: () => void;
+  onConfirmShareSelection: (itemPaths: string[]) => void;
   onCloseCreateShare: () => void;
   onCreateShare: (values: {
-    itemPaths: string[];
     outputPath: string;
     force: boolean;
     passwordProtected: boolean;
@@ -152,13 +157,17 @@ export function ProjectSessionLayer({
   decryptResult,
   onCloseDecryptResult,
   createSharePasswordDialogOpen,
+  createShareBrowserOpen,
   createShareDialogOpen,
   createShareLoading,
-  selectableShareItems,
+  createShareBrowserState,
+  selectedShareItemCount,
   createShareResultOpen,
   createShareResult,
   onCloseCreateSharePassword,
   onLoadShareableItems,
+  onCloseShareSelectionBrowser,
+  onConfirmShareSelection,
   onCloseCreateShare,
   onCreateShare,
   onCloseCreateShareResult,
@@ -217,10 +226,18 @@ export function ProjectSessionLayer({
         onSubmit={onLoadShareableItems}
         t={t}
       />
+      <ShareSelectionDrawer
+        open={createShareBrowserOpen}
+        loading={createShareLoading}
+        state={createShareBrowserState}
+        onCancel={onCloseShareSelectionBrowser}
+        onContinue={onConfirmShareSelection}
+        t={t}
+      />
       <CreateShareModal
         open={createShareDialogOpen}
         loading={createShareLoading}
-        selectableItems={selectableShareItems}
+        selectedItemCount={selectedShareItemCount}
         onCancel={onCloseCreateShare}
         onSubmit={onCreateShare}
         t={t}

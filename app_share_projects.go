@@ -1,40 +1,6 @@
 package main
 
-import (
-	"time"
-
-	"foldersguard/internal/app"
-)
-
-func (a *App) ListShareableItems(request ListShareableItemsRequest) ([]ShareableItem, error) {
-	items, err := a.service.ListShareableItems(a.ctx, app.DatabaseOpen{
-		ProjectRef: request.ProjectID,
-		Password:   request.Password,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	result := make([]ShareableItem, 0, len(items))
-	for _, item := range items {
-		modifiedAt := ""
-		if !item.ModifiedAt.IsZero() {
-			modifiedAt = item.ModifiedAt.Format(time.RFC3339)
-		}
-		result = append(result, ShareableItem{
-			ID:         item.ID,
-			ParentID:   item.ParentID,
-			Path:       item.Path,
-			ParentPath: item.ParentPath,
-			Name:       item.Name,
-			Type:       item.Type,
-			Size:       item.Size,
-			ChildCount: item.ChildCount,
-			ModifiedAt: modifiedAt,
-		})
-	}
-	return result, nil
-}
+import "foldersguard/internal/app"
 
 func (a *App) CreateShare(request CreateShareRequest) (CreateShareResult, error) {
 	result, err := a.service.CreateShare(a.ctx, app.CreateShareInput{

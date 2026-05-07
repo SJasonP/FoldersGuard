@@ -214,15 +214,19 @@ function App() {
 
   const {
     sharePasswordDialogOpen,
+    shareBrowserOpen,
     shareSelectionOpen,
     shareLoading: createShareLoading,
-    selectableItems: selectableShareItems,
+    shareBrowserState,
+    selectedShareItemCount,
     createShareResult,
     createShareResultOpen,
     setSharePasswordDialogOpen,
+    setShareBrowserOpen,
     setShareSelectionOpen,
     setCreateShareResultOpen,
     handleOpenShareSelection,
+    handleConfirmShareSelection,
     handleCreateShare,
   } = useProjectShare({
     messageApi: antApp.message,
@@ -440,13 +444,17 @@ function App() {
           decryptResult={decryptResult}
           onCloseDecryptResult={() => setDecryptResultOpen(false)}
           createSharePasswordDialogOpen={sharePasswordDialogOpen}
+          createShareBrowserOpen={shareBrowserOpen}
           createShareDialogOpen={shareSelectionOpen}
           createShareLoading={createShareLoading}
-          selectableShareItems={selectableShareItems}
+          createShareBrowserState={shareBrowserState}
+          selectedShareItemCount={selectedShareItemCount}
           createShareResultOpen={createShareResultOpen}
           createShareResult={createShareResult}
           onCloseCreateSharePassword={() => setSharePasswordDialogOpen(false)}
           onLoadShareableItems={(password) => void handleOpenShareSelection(password)}
+          onCloseShareSelectionBrowser={() => setShareBrowserOpen(false)}
+          onConfirmShareSelection={handleConfirmShareSelection}
           onCloseCreateShare={() => setShareSelectionOpen(false)}
           onCreateShare={(values) => void handleCreateShare(values)}
           onCloseCreateShareResult={() => setCreateShareResultOpen(false)}
