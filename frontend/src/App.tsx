@@ -231,6 +231,15 @@ function App() {
     selectedProjectId,
   });
 
+  const handleOpenProjectActionsFromHome = (projectId?: string) => {
+    if (projectId) {
+      setSelectedProjectId(projectId);
+      setProjectActionsOpen(true);
+      return;
+    }
+    openProjectActions();
+  };
+
   const {
     openProjectDialogOpen,
     applyLoading,
@@ -368,7 +377,7 @@ function App() {
               onProjectSearchChange={setProjectSearch}
               onRefresh={() => void loadProjects()}
               onSelectProject={setSelectedProjectId}
-              onOpenProjectActions={openProjectActions}
+              onOpenProjectActions={handleOpenProjectActionsFromHome}
               t={t}
             />
           )}

@@ -47,7 +47,7 @@ export function ImportProjectModal({ open, loading, onCancel, onSubmit, t }: Imp
           <PathInput
             dialogKind="open-file"
             dialogTitle={t('importInputPath')}
-            filters={[{ displayName: 'FoldersGuard Project (*.fg)', pattern: '*.fg' }]}
+            filters={[{ displayName: t('fgProjectFilter'), pattern: '*.fg' }]}
             placeholder="/path/to/project.fg"
             t={t}
           />

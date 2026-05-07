@@ -14,7 +14,7 @@ type HomeViewProps = {
   onProjectSearchChange: (value: string) => void;
   onRefresh: () => void;
   onSelectProject: (projectId: string | null) => void;
-  onOpenProjectActions: () => void;
+  onOpenProjectActions: (projectId?: string) => void;
   t: (key: string) => string;
 };
 
@@ -37,7 +37,7 @@ export function HomeView({
       <Flex justify="space-between" align="center" gap={16}>
         <Typography.Title level={2}>{t('localProjects')}</Typography.Title>
         <Space>
-          <Button onClick={onOpenProjectActions} disabled={disabled || !selectedProjectId}>
+          <Button onClick={() => onOpenProjectActions()} disabled={disabled || !selectedProjectId}>
             {t('viewProjectActions')}
           </Button>
           <Input.Search
@@ -65,11 +65,12 @@ export function HomeView({
           onClick: () => {
             if (!disabled) {
               onSelectProject(record.projectId);
+              onOpenProjectActions(record.projectId);
             }
           },
           onDoubleClick: () => {
             if (!disabled) {
-              onOpenProjectActions();
+              onOpenProjectActions(record.projectId);
             }
           },
         })}

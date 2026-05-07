@@ -4,6 +4,7 @@ import type { ProjectBrowserItemModel } from '../../types';
 import type { PendingRename } from '../../hooks/useProjectBrowser';
 import { displayNameForItem } from './projectBrowserView';
 import { formatDateTime, formatFileSize, formatNumber } from '../../formatters';
+import { displayItemType } from '../../itemDisplay';
 
 type ProjectBrowserItemTableProps = {
   items: ProjectBrowserItemModel[];
@@ -57,7 +58,7 @@ export function ProjectBrowserItemTable({
       key: 'name',
       render: (_name: string, item) => displayNameForItem(item, pendingByID),
     },
-    { title: t('itemType'), dataIndex: 'type', key: 'type', width: 110 },
+    { title: t('itemType'), dataIndex: 'type', key: 'type', width: 110, render: (value: string) => displayItemType(value, t) },
     { title: t('fileSize'), dataIndex: 'size', key: 'size', width: 130, render: (value: number) => formatFileSize(value) },
     { title: t('childCount'), dataIndex: 'childCount', key: 'childCount', width: 130, render: (value: number) => formatNumber(value) },
     { title: t('modifiedTime'), dataIndex: 'modifiedAt', key: 'modifiedAt', width: 180, render: (value: string) => formatDateTime(value) },

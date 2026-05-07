@@ -64,7 +64,7 @@ export function ExportProjectModal({ open, loading, onCancel, onSubmit, t }: Exp
             dialogKind="save-file"
             dialogTitle={t('exportOutputPath')}
             defaultFilename="project.fg"
-            filters={[{ displayName: 'FoldersGuard Project (*.fg)', pattern: '*.fg' }]}
+            filters={[{ displayName: t('fgProjectFilter'), pattern: '*.fg' }]}
             placeholder="/path/to/project.fg"
             t={t}
           />

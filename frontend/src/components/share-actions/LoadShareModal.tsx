@@ -46,7 +46,7 @@ export function LoadShareModal({ open, loading, onCancel, onSubmit, t }: LoadSha
           <PathInput
             dialogKind="open-file"
             dialogTitle={t('databasePath')}
-            filters={[{ displayName: 'FoldersGuard Share (*.fgs)', pattern: '*.fgs' }]}
+            filters={[{ displayName: t('fgShareFilter'), pattern: '*.fgs' }]}
             placeholder="/path/to/share.fgs"
             t={t}
           />

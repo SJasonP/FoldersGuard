@@ -89,7 +89,7 @@ export function CreateShareModal({ open, loading, selectableItems, onCancel, onS
             dialogKind="save-file"
             dialogTitle={t('shareDatabaseOutputPath')}
             defaultFilename="share.fgs"
-            filters={[{ displayName: 'FoldersGuard Share (*.fgs)', pattern: '*.fgs' }]}
+            filters={[{ displayName: t('fgShareFilter'), pattern: '*.fgs' }]}
             placeholder="/path/to/share.fgs"
             t={t}
           />

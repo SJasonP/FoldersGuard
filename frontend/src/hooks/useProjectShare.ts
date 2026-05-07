@@ -4,6 +4,7 @@ import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 import { CreateShare, ListShareableItems } from '../../wailsjs/go/main/App';
 import type { CreateShareResultModel, ShareableItemModel } from '../types';
 import { showOperationError } from '../components/common/operationError';
+import { displayItemType } from '../itemDisplay';
 
 type UseProjectShareArgs = {
   messageApi: MessageInstance;
@@ -25,9 +26,9 @@ export function useProjectShare({ messageApi, modalApi, t, selectedProjectId }: 
     () =>
       shareItems.map((item) => ({
         value: item.path,
-        label: `${item.path} (${item.type})`,
+        label: `${item.path} (${displayItemType(item.type, t)})`,
       })),
-    [shareItems],
+    [shareItems, t],
   );
 
   const handleOpenShareSelection = async (password: string) => {

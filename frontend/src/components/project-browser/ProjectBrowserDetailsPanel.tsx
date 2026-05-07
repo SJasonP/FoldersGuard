@@ -3,6 +3,7 @@ import type { ProjectBrowserItemModel } from '../../types';
 import type { PendingRename } from '../../hooks/useProjectBrowser';
 import { displayNameForItem } from './projectBrowserView';
 import { formatDateTime, formatFileSize, formatNumber } from '../../formatters';
+import { displayItemType } from '../../itemDisplay';
 
 type ProjectBrowserDetailsPanelProps = {
   item: ProjectBrowserItemModel | null;
@@ -18,7 +19,7 @@ export function ProjectBrowserDetailsPanel({ item, pendingByID, pendingStateByID
       {item ? (
         <Descriptions column={1} bordered size="small">
           <Descriptions.Item label={t('itemName')}>{displayNameForItem(item, pendingByID)}</Descriptions.Item>
-          <Descriptions.Item label={t('itemType')}>{item.type}</Descriptions.Item>
+          <Descriptions.Item label={t('itemType')}>{displayItemType(item.type, t)}</Descriptions.Item>
           <Descriptions.Item label={t('itemId')}>{item.id}</Descriptions.Item>
           <Descriptions.Item label={t('itemPath')}>{item.path}</Descriptions.Item>
           <Descriptions.Item label={t('parentPath')}>{item.parentPath}</Descriptions.Item>
