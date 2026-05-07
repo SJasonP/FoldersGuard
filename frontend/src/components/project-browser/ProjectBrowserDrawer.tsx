@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Descriptions, Drawer, Flex, List, Space, Table, Tree, Typography } from 'antd';
-import type { DataNode } from 'antd/es/tree';
-import type { ColumnsType } from 'antd/es/table';
+import { Breadcrumb, Descriptions, Drawer, Flex, Tree, Typography } from 'antd';
 import type { ProjectBrowserItemModel, ProjectBrowserStateModel } from '../../types';
+import { ProjectBrowserDetailsPanel } from './ProjectBrowserDetailsPanel';
+import { ProjectBrowserItemTable } from './ProjectBrowserItemTable';
+import { ProjectBrowserPendingChanges } from './ProjectBrowserPendingChanges';
 import { RenameItemModal } from './RenameItemModal';
 import type { PendingRename } from '../../hooks/useProjectBrowser';
+import { buildFolderTree, filteredFolderItems, folderBreadcrumbItems, pendingRenameMap } from './projectBrowserView';
 
 type ProjectBrowserDrawerProps = {
   open: boolean;
@@ -35,52 +37,29 @@ export function ProjectBrowserDrawer({
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<ProjectBrowserItemModel | null>(null);
   const [renameOpen, setRenameOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const activeFolderId = selectedFolderId ?? root?.id ?? '';
-  const pendingByID = useMemo(() => new Map(pendingRenames.map((rename) => [rename.itemId, rename])), [pendingRenames]);
+  const pendingByID = useMemo(() => pendingRenameMap(pendingRenames), [pendingRenames]);
 
-  const treeData = useMemo(() => buildFolderTree(state?.items ?? [], root?.id ?? ''), [root?.id, state?.items]);
-  const currentItems = useMemo(
-    () =>
-      (state?.items ?? [])
-        .filter((item) => item.parentId === activeFolderId)
-        .sort((left, right) => {
-          if (left.type !== right.type) {
-            return left.type === 'folder' ? -1 : 1;
-          }
-          return left.name.localeCompare(right.name);
-        }),
-    [activeFolderId, state?.items],
+  const treeData = useMemo(() => buildFolderTree(state?.items ?? [], root?.id ?? '', pendingByID), [pendingByID, root?.id, state?.items]);
+  const breadcrumbs = useMemo(
+    () => folderBreadcrumbItems(state?.items ?? [], activeFolderId, pendingByID),
+    [activeFolderId, pendingByID, state?.items],
   );
-
-  const columns: ColumnsType<ProjectBrowserItemModel> = [
-    {
-      title: t('itemName'),
-      dataIndex: 'name',
-      key: 'name',
-      render: (name: string, item) => pendingByID.get(item.id)?.newName ?? name,
-    },
-    { title: t('itemType'), dataIndex: 'type', key: 'type', width: 110 },
-    { title: t('fileSize'), dataIndex: 'size', key: 'size', width: 130 },
-    { title: t('childCount'), dataIndex: 'childCount', key: 'childCount', width: 130 },
-    { title: t('modifiedTime'), dataIndex: 'modifiedAt', key: 'modifiedAt', width: 180 },
-    {
-      title: t('contentStatus'),
-      dataIndex: 'contentAvailable',
-      key: 'contentAvailable',
-      width: 150,
-      render: (value: boolean) => (value ? t('available') : t('unavailable')),
-    },
-    {
-      title: t('pendingState'),
-      key: 'pendingState',
-      width: 150,
-      render: (_, item) => (pendingByID.has(item.id) ? t('pendingRename') : ''),
-    },
-  ];
+  const currentItems = useMemo(
+    () => filteredFolderItems(state?.items ?? [], activeFolderId, searchQuery, pendingByID),
+    [activeFolderId, pendingByID, searchQuery, state?.items],
+  );
+  const selectFolder = (folderID: string) => {
+    setSelectedFolderId(folderID);
+    setSelectedItem(null);
+    setSearchQuery('');
+  };
 
   useEffect(() => {
     setSelectedFolderId(root?.id ?? null);
     setSelectedItem(null);
+    setSearchQuery('');
   }, [root?.id]);
 
   return (
@@ -99,6 +78,15 @@ export function ProjectBrowserDrawer({
               {state.contentConnected ? t('passwordProtectedYes') : t('passwordProtectedNo')}
             </Descriptions.Item>
           </Descriptions>
+          <Breadcrumb
+            items={breadcrumbs.map((breadcrumb) => ({
+              title: (
+                <button className="project-browser-breadcrumb-button" type="button" onClick={() => selectFolder(breadcrumb.key)}>
+                  {breadcrumb.title}
+                </button>
+              ),
+            }))}
+          />
           <div className="project-browser-grid">
             <div className="project-browser-tree">
               <Typography.Title level={5}>{t('folderTree')}</Typography.Title>
@@ -106,67 +94,27 @@ export function ProjectBrowserDrawer({
                 treeData={treeData}
                 selectedKeys={activeFolderId ? [activeFolderId] : []}
                 defaultExpandAll
-                onSelect={(keys) => setSelectedFolderId((keys[0] as string | undefined) ?? root?.id ?? null)}
+                onSelect={(keys) => selectFolder((keys[0] as string | undefined) ?? root?.id ?? '')}
               />
             </div>
-            <div className="project-browser-items">
-              <Flex justify="space-between" align="center" gap={12}>
-                <Typography.Title level={5}>{t('currentFolderItems')}</Typography.Title>
-                <Space>
-                  <Button
-                    onClick={() => setRenameOpen(true)}
-                    disabled={!selectedItem || selectedItem.id === state.rootFolderId}
-                  >
-                    {t('renameItem')}
-                  </Button>
-                  <Button onClick={onDiscardAll} disabled={pendingRenames.length === 0}>
-                    {t('discardChanges')}
-                  </Button>
-                  <Button type="primary" loading={applyLoading} disabled={pendingRenames.length === 0} onClick={onApply}>
-                    {t('applyChanges')}
-                  </Button>
-                </Space>
-              </Flex>
-              <Table
-                rowKey="id"
-                columns={columns}
-                dataSource={currentItems}
-                pagination={false}
-                size="small"
-                scroll={{ x: 720 }}
-                rowSelection={{
-                  type: 'radio',
-                  selectedRowKeys: selectedItem ? [selectedItem.id] : [],
-                  onChange: (_, rows) => setSelectedItem(rows[0] ?? null),
-                }}
-                onRow={(item) => ({
-                  onClick: () => setSelectedItem(item),
-                  onDoubleClick: () => {
-                    if (item.id !== state.rootFolderId) {
-                      setSelectedItem(item);
-                      setRenameOpen(true);
-                    }
-                  },
-                })}
-              />
-            </div>
-          </div>
-          <div>
-            <Typography.Title level={5}>{t('pendingChanges')}</Typography.Title>
-            <List
-              size="small"
-              bordered
-              dataSource={pendingRenames}
-              locale={{ emptyText: t('noPendingChanges') }}
-              renderItem={(rename) => (
-                <List.Item actions={[<Button onClick={() => onDiscardRename(rename.itemId)}>{t('discard')}</Button>]}>
-                  <Typography.Text>
-                    {t('pendingRename')}: {rename.itemPath} -&gt; {rename.newName}
-                  </Typography.Text>
-                </List.Item>
-              )}
+            <ProjectBrowserItemTable
+              items={currentItems}
+              pendingByID={pendingByID}
+              selectedItem={selectedItem}
+              rootFolderID={state.rootFolderId}
+              searchQuery={searchQuery}
+              applyLoading={applyLoading}
+              pendingCount={pendingRenames.length}
+              onSearchChange={setSearchQuery}
+              onSelectItem={setSelectedItem}
+              onOpenRename={() => setRenameOpen(true)}
+              onDiscardAll={onDiscardAll}
+              onApply={onApply}
+              t={t}
             />
+            <ProjectBrowserDetailsPanel item={selectedItem} pendingByID={pendingByID} t={t} />
           </div>
+          <ProjectBrowserPendingChanges pendingRenames={pendingRenames} onDiscardRename={onDiscardRename} t={t} />
           <RenameItemModal
             open={renameOpen}
             item={selectedItem}
@@ -188,23 +136,4 @@ export function ProjectBrowserDrawer({
       ) : null}
     </Drawer>
   );
-}
-
-function buildFolderTree(items: ProjectBrowserItemModel[], rootID: string): DataNode[] {
-  const folders = items.filter((item) => item.type === 'folder');
-  const childrenByParent = new Map<string, ProjectBrowserItemModel[]>();
-  for (const folder of folders) {
-    const children = childrenByParent.get(folder.parentId) ?? [];
-    children.push(folder);
-    childrenByParent.set(folder.parentId, children);
-  }
-
-  const buildNode = (folder: ProjectBrowserItemModel): DataNode => ({
-    key: folder.id,
-    title: folder.name,
-    children: (childrenByParent.get(folder.id) ?? []).sort((left, right) => left.name.localeCompare(right.name)).map(buildNode),
-  });
-
-  const root = folders.find((folder) => folder.id === rootID);
-  return root ? [buildNode(root)] : [];
 }
