@@ -6,6 +6,7 @@ export namespace main {
 	    nativeFormatVersion: string;
 	    schemaVersion: number;
 	    dataDir: string;
+	    startupError: string;
 	    copyrightNotice: string;
 	    projectLink: string;
 
@@ -20,6 +21,7 @@ export namespace main {
 	        this.nativeFormatVersion = source["nativeFormatVersion"];
 	        this.schemaVersion = source["schemaVersion"];
 	        this.dataDir = source["dataDir"];
+	        this.startupError = source["startupError"];
 	        this.copyrightNotice = source["copyrightNotice"];
 	        this.projectLink = source["projectLink"];
 	    }

@@ -5,6 +5,7 @@ type SettingsViewProps = {
   settings: SettingsModel | null;
   loading: boolean;
   saving: boolean;
+  disabled: boolean;
   onSave: (values: SettingsModel) => void;
   t: (key: string) => string;
 };
@@ -13,6 +14,7 @@ export function SettingsView({
   settings,
   loading,
   saving,
+  disabled,
   onSave,
   t,
 }: SettingsViewProps) {
@@ -38,7 +40,7 @@ export function SettingsView({
         form={form}
         layout="vertical"
         initialValues={settings ?? undefined}
-        disabled={loading}
+        disabled={disabled || loading}
         onFinish={confirmSave}
       >
         <div className="settings-grid">
@@ -82,7 +84,7 @@ export function SettingsView({
           </Form.Item>
         </div>
         <Space wrap>
-          <Button type="primary" htmlType="submit" loading={saving}>
+          <Button type="primary" htmlType="submit" loading={saving} disabled={disabled}>
             {t('saveSettings')}
           </Button>
         </Space>

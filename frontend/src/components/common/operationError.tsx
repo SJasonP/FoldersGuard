@@ -1,4 +1,4 @@
-import { Collapse, Typography } from 'antd';
+import { Collapse, Space, Typography } from 'antd';
 import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 
 const secretPatterns = [
@@ -34,5 +34,40 @@ export function showOperationError(
         ]}
       />
     ) : undefined,
+  });
+}
+
+export function showStartupError(
+  modalApi: ModalHookAPI,
+  title: string,
+  dataDirectory: string,
+  error: unknown,
+  t: (key: string) => string,
+) {
+  const details = technicalErrorMessage(error);
+  modalApi.error({
+    title,
+    closable: false,
+    maskClosable: false,
+    content: (
+      <Space direction="vertical" size="middle">
+        <Space direction="vertical" size={4}>
+          <Typography.Text>{t('dataDirectory')}</Typography.Text>
+          <Typography.Text code>{dataDirectory}</Typography.Text>
+        </Space>
+        {details ? (
+          <Collapse
+            ghost
+            items={[
+              {
+                key: 'technical-details',
+                label: t('underlyingError'),
+                children: <Typography.Text code>{details}</Typography.Text>,
+              },
+            ]}
+          />
+        ) : null}
+      </Space>
+    ),
   });
 }

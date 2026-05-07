@@ -6,6 +6,7 @@ type AppInfo struct {
 	NativeFormatVersion string `json:"nativeFormatVersion"`
 	SchemaVersion       int    `json:"schemaVersion"`
 	DataDir             string `json:"dataDir"`
+	StartupError        string `json:"startupError"`
 	CopyrightNotice     string `json:"copyrightNotice"`
 	ProjectLink         string `json:"projectLink"`
 }

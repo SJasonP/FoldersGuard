@@ -10,6 +10,7 @@ type HomeViewProps = {
   projectSearch: string;
   projectsError: string | null;
   selectedProjectId: string | null;
+  disabled: boolean;
   onProjectSearchChange: (value: string) => void;
   onRefresh: () => void;
   onSelectProject: (projectId: string | null) => void;
@@ -24,6 +25,7 @@ export function HomeView({
   projectSearch,
   projectsError,
   selectedProjectId,
+  disabled,
   onProjectSearchChange,
   onRefresh,
   onSelectProject,
@@ -35,7 +37,7 @@ export function HomeView({
       <Flex justify="space-between" align="center" gap={16}>
         <Typography.Title level={2}>{t('localProjects')}</Typography.Title>
         <Space>
-          <Button onClick={onOpenProjectActions} disabled={!selectedProjectId}>
+          <Button onClick={onOpenProjectActions} disabled={disabled || !selectedProjectId}>
             {t('viewProjectActions')}
           </Button>
           <Input.Search
@@ -43,7 +45,7 @@ export function HomeView({
             value={projectSearch}
             onChange={(event) => onProjectSearchChange(event.target.value)}
           />
-          <Button icon={<ReloadOutlined />} onClick={onRefresh}>
+          <Button icon={<ReloadOutlined />} onClick={onRefresh} disabled={disabled}>
             {t('refresh')}
           </Button>
         </Space>
@@ -56,11 +58,20 @@ export function HomeView({
         rowSelection={{
           type: 'radio',
           selectedRowKeys: selectedProjectId ? [selectedProjectId] : [],
+          getCheckboxProps: () => ({ disabled }),
           onChange: (selectedRowKeys) => onSelectProject((selectedRowKeys[0] as string | undefined) ?? null),
         }}
         onRow={(record) => ({
-          onClick: () => onSelectProject(record.projectId),
-          onDoubleClick: onOpenProjectActions,
+          onClick: () => {
+            if (!disabled) {
+              onSelectProject(record.projectId);
+            }
+          },
+          onDoubleClick: () => {
+            if (!disabled) {
+              onOpenProjectActions();
+            }
+          },
         })}
         locale={{ emptyText: <Empty description={t('noProjects')} /> }}
         pagination={false}

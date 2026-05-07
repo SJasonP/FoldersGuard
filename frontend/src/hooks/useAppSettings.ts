@@ -8,6 +8,7 @@ import { resolveLanguageSetting, type SupportedLanguage } from '../i18n';
 import { showOperationError } from '../components/common/operationError';
 
 type UseAppSettingsArgs = {
+  enabled: boolean;
   messageApi: MessageInstance;
   modalApi: ModalHookAPI;
   t: (key: string) => string;
@@ -16,7 +17,15 @@ type UseAppSettingsArgs = {
   setThemeMode: (mode: ThemeMode) => void;
 };
 
-export function useAppSettings({ messageApi, modalApi, t, systemLanguage, setLanguage, setThemeMode }: UseAppSettingsArgs) {
+export function useAppSettings({
+  enabled,
+  messageApi,
+  modalApi,
+  t,
+  systemLanguage,
+  setLanguage,
+  setThemeMode,
+}: UseAppSettingsArgs) {
   const [settings, setSettings] = useState<SettingsModel | null>(null);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsSaving, setSettingsSaving] = useState(false);
@@ -29,6 +38,12 @@ export function useAppSettings({ messageApi, modalApi, t, systemLanguage, setLan
 
   useEffect(() => {
     let cancelled = false;
+    if (!enabled) {
+      setSettingsLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
     const loadSettings = async () => {
       setSettingsLoading(true);
       try {
@@ -51,7 +66,7 @@ export function useAppSettings({ messageApi, modalApi, t, systemLanguage, setLan
     return () => {
       cancelled = true;
     };
-  }, [messageApi, t]);
+  }, [enabled, messageApi, t]);
 
   useEffect(() => {
     if (settings?.language === 'system') {

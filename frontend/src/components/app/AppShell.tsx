@@ -16,6 +16,7 @@ type AppShellProps = {
   onImportProject: () => void;
   onLoadShare: () => void;
   activeOperationLabel: string | null;
+  actionsDisabled: boolean;
   children: React.ReactNode;
   t: (key: string) => string;
 };
@@ -27,10 +28,12 @@ export function AppShell({
   onImportProject,
   onLoadShare,
   activeOperationLabel,
+  actionsDisabled,
   children,
   t,
 }: AppShellProps) {
   const operationActive = activeOperationLabel !== null;
+  const disabled = actionsDisabled || operationActive;
 
   return (
     <Layout className="app-shell">
@@ -53,13 +56,13 @@ export function AppShell({
       <Layout>
         <Layout.Header className="app-header">
           <Space>
-            <Button icon={<FolderAddOutlined />} type="primary" onClick={onCreateProject} disabled={operationActive}>
+            <Button icon={<FolderAddOutlined />} type="primary" onClick={onCreateProject} disabled={disabled}>
               {t('createProject')}
             </Button>
-            <Button icon={<ImportOutlined />} onClick={onImportProject} disabled={operationActive}>
+            <Button icon={<ImportOutlined />} onClick={onImportProject} disabled={disabled}>
               {t('importProject')}
             </Button>
-            <Button icon={<ShareAltOutlined />} onClick={onLoadShare} disabled={operationActive}>
+            <Button icon={<ShareAltOutlined />} onClick={onLoadShare} disabled={disabled}>
               {t('loadShare')}
             </Button>
           </Space>

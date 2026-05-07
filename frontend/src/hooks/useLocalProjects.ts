@@ -6,12 +6,13 @@ import { formatDateTime } from '../formatters';
 import { showOperationError } from '../components/common/operationError';
 
 type UseLocalProjectsArgs = {
+  enabled: boolean;
   language: 'en-US' | 'zh-CN';
   modalApi: ModalHookAPI;
   t: (key: string) => string;
 };
 
-export function useLocalProjects({ language, modalApi, t }: UseLocalProjectsArgs) {
+export function useLocalProjects({ enabled, language, modalApi, t }: UseLocalProjectsArgs) {
   const [projectSearch, setProjectSearch] = useState('');
   const [projects, setProjects] = useState<LocalProjectSummary[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
@@ -19,6 +20,10 @@ export function useLocalProjects({ language, modalApi, t }: UseLocalProjectsArgs
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
 
   const loadProjects = async () => {
+    if (!enabled) {
+      setProjectsLoading(false);
+      return;
+    }
     setProjectsLoading(true);
     setProjectsError(null);
     try {
@@ -34,8 +39,15 @@ export function useLocalProjects({ language, modalApi, t }: UseLocalProjectsArgs
   };
 
   useEffect(() => {
+    if (!enabled) {
+      setProjects([]);
+      setProjectsError(null);
+      setProjectsLoading(false);
+      setSelectedProjectId(null);
+      return;
+    }
     void loadProjects();
-  }, []);
+  }, [enabled]);
 
   const visibleProjects = useMemo<LocalProjectRow[]>(
     () =>

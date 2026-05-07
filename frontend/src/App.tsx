@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { App as AntApp, ConfigProvider } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -25,6 +25,7 @@ import { ShareSessionLayer } from './components/share-actions/ShareSessionLayer'
 import { AppShell } from './components/app/AppShell';
 import { ProjectSessionLayer } from './components/project-actions/ProjectSessionLayer';
 import { ProjectBrowserLayer } from './components/project-browser/ProjectBrowserLayer';
+import { showStartupError } from './components/common/operationError';
 
 const antLocales: Record<SupportedLanguage, typeof enUS> = {
   'en-US': enUS,
@@ -40,9 +41,14 @@ function App() {
   const [themeMode, setThemeMode] = useState<ThemeMode>('system');
   const [resolvedTheme, setResolvedTheme] = useState(resolveTheme(themeMode));
   const [info, setInfo] = useState<AppInfoModel | null>(null);
+  const [infoLoaded, setInfoLoaded] = useState(false);
+  const shownStartupError = useRef<string | null>(null);
 
   useEffect(() => {
-    AppInfo().then(setInfo).catch(() => setInfo(null));
+    AppInfo()
+      .then(setInfo)
+      .catch(() => setInfo(null))
+      .finally(() => setInfoLoaded(true));
   }, []);
 
   useEffect(() => {
@@ -63,12 +69,25 @@ function App() {
     return () => media.removeEventListener('change', update);
   }, [themeMode]);
 
+  const startupError = info?.startupError ?? '';
+  const startupBlocked = startupError !== '';
+  const dataServicesEnabled = infoLoaded && !startupBlocked;
+
+  useEffect(() => {
+    if (!startupBlocked || shownStartupError.current === startupError) {
+      return;
+    }
+    shownStartupError.current = startupError;
+    showStartupError(antApp.modal, t('dataDirectoryUnavailable'), info?.dataDir ?? '', startupError, t);
+  }, [antApp.modal, info?.dataDir, startupBlocked, startupError, t]);
+
   const {
     settings,
     settingsLoading,
     settingsSaving,
     handleSaveSettings,
   } = useAppSettings({
+    enabled: dataServicesEnabled,
     messageApi: antApp.message,
     modalApi: antApp.modal,
     t,
@@ -88,6 +107,7 @@ function App() {
     visibleProjects,
     loadProjects,
   } = useLocalProjects({
+    enabled: dataServicesEnabled,
     language,
     modalApi: antApp.modal,
     t,
@@ -333,6 +353,7 @@ function App() {
           onImportProject={() => setImportDialogOpen(true)}
           onLoadShare={() => setLoadShareDialogOpen(true)}
           activeOperationLabel={activeOperationLabel}
+          actionsDisabled={!dataServicesEnabled}
           t={t}
         >
           {navigation === 'home' && (
@@ -343,6 +364,7 @@ function App() {
               projectSearch={projectSearch}
               projectsError={projectsError}
               selectedProjectId={selectedProjectId}
+              disabled={!dataServicesEnabled}
               onProjectSearchChange={setProjectSearch}
               onRefresh={() => void loadProjects()}
               onSelectProject={setSelectedProjectId}
@@ -355,6 +377,7 @@ function App() {
               settings={settings}
               loading={settingsLoading}
               saving={settingsSaving}
+              disabled={!dataServicesEnabled}
               onSave={(values) => void handleSaveSettings(values)}
               t={t}
             />

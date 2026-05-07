@@ -12,6 +12,7 @@ import (
 type App struct {
 	ctx                         context.Context
 	service                     app.Service
+	startupError                error
 	longRunningOperationActive  bool
 	longRunningOperationActiveM sync.RWMutex
 }
@@ -21,10 +22,11 @@ func NewApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+	fgApp := &App{service: service}
 	if err := service.EnsureDataDir(); err != nil {
-		return nil, err
+		fgApp.startupError = err
 	}
-	return &App{service: service}, nil
+	return fgApp, nil
 }
 
 func (a *App) startup(ctx context.Context) {
