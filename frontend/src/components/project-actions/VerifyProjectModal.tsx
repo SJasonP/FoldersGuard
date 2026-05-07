@@ -1,4 +1,5 @@
 import { Form, Input, Modal } from 'antd';
+import { PathInput } from '../common/PathInput';
 
 type VerifyProjectValues = {
   password: string;
@@ -45,7 +46,12 @@ export function VerifyProjectModal({ open, loading, onCancel, onSubmit, t }: Ver
           label={t('verifyEncryptedPath')}
           rules={[{ required: true, message: t('verifyEncryptedPath') }]}
         >
-          <Input placeholder="/path/to/encrypted-content" />
+          <PathInput
+            dialogKind="open-directory"
+            dialogTitle={t('verifyEncryptedPath')}
+            placeholder="/path/to/encrypted-content"
+            t={t}
+          />
         </Form.Item>
       </Form>
     </Modal>

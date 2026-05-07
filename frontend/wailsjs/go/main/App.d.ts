@@ -36,6 +36,8 @@ export function ReadSettings():Promise<main.Settings>;
 
 export function SaveSettings(arg1:main.Settings):Promise<main.Settings>;
 
+export function SelectPath(arg1:main.SelectPathRequest):Promise<string>;
+
 export function VerifyProject(arg1:main.VerifyProjectRequest):Promise<main.VerifyProjectResult>;
 
 export function VerifyShare(arg1:main.VerifyShareRequest):Promise<main.VerifyProjectResult>;

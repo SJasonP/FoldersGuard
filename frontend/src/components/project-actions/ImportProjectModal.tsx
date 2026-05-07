@@ -1,4 +1,5 @@
 import { Checkbox, Form, Input, Modal } from 'antd';
+import { PathInput } from '../common/PathInput';
 
 type ImportProjectValues = {
   inputPath: string;
@@ -43,7 +44,13 @@ export function ImportProjectModal({ open, loading, onCancel, onSubmit, t }: Imp
           label={t('importInputPath')}
           rules={[{ required: true, message: t('importInputPath') }]}
         >
-          <Input placeholder="/path/to/project.fg" />
+          <PathInput
+            dialogKind="open-file"
+            dialogTitle={t('importInputPath')}
+            filters={[{ displayName: 'FoldersGuard Project (*.fg)', pattern: '*.fg' }]}
+            placeholder="/path/to/project.fg"
+            t={t}
+          />
         </Form.Item>
         <Form.Item name="password" label={t('password')} rules={[{ required: true, message: t('passwordRequired') }]}>
           <Input.Password autoComplete="current-password" />

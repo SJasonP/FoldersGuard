@@ -1,4 +1,5 @@
 import { Checkbox, Form, Input, Modal } from 'antd';
+import { PathInput } from '../common/PathInput';
 
 type ExportProjectValues = {
   password: string;
@@ -46,7 +47,14 @@ export function ExportProjectModal({ open, loading, onCancel, onSubmit, t }: Exp
           label={t('exportOutputPath')}
           rules={[{ required: true, message: t('exportOutputPath') }]}
         >
-          <Input placeholder="/path/to/project.fg" />
+          <PathInput
+            dialogKind="save-file"
+            dialogTitle={t('exportOutputPath')}
+            defaultFilename="project.fg"
+            filters={[{ displayName: 'FoldersGuard Project (*.fg)', pattern: '*.fg' }]}
+            placeholder="/path/to/project.fg"
+            t={t}
+          />
         </Form.Item>
         <Form.Item name="force" valuePropName="checked">
           <Checkbox>{t('forceOverwrite')}</Checkbox>

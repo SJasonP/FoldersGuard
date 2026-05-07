@@ -70,6 +70,10 @@ export function SaveSettings(arg1) {
   return window['go']['main']['App']['SaveSettings'](arg1);
 }
 
+export function SelectPath(arg1) {
+  return window['go']['main']['App']['SelectPath'](arg1);
+}
+
 export function VerifyProject(arg1) {
   return window['go']['main']['App']['VerifyProject'](arg1);
 }

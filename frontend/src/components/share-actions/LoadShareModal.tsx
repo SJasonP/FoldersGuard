@@ -1,4 +1,5 @@
 import { Form, Input, Modal, Typography } from 'antd';
+import { PathInput } from '../common/PathInput';
 
 type LoadShareValues = {
   databasePath: string;
@@ -42,7 +43,13 @@ export function LoadShareModal({ open, loading, onCancel, onSubmit, t }: LoadSha
           label={t('databasePath')}
           rules={[{ required: true, message: t('databasePath') }]}
         >
-          <Input placeholder="/path/to/share.fgs" />
+          <PathInput
+            dialogKind="open-file"
+            dialogTitle={t('databasePath')}
+            filters={[{ displayName: 'FoldersGuard Share (*.fgs)', pattern: '*.fgs' }]}
+            placeholder="/path/to/share.fgs"
+            t={t}
+          />
         </Form.Item>
         <Form.Item name="password" label={t('password')}>
           <Input.Password autoComplete="current-password" />

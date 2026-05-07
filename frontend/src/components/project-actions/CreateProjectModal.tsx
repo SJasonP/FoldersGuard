@@ -1,5 +1,6 @@
 import { Checkbox, Form, Input, InputNumber, Modal, Select } from 'antd';
 import type { SettingsModel } from '../../types';
+import { PathInput } from '../common/PathInput';
 
 type CreateProjectValues = {
   sourcePath: string;
@@ -67,17 +68,34 @@ export function CreateProjectModal({
           label={t('createSourcePath')}
           rules={[{ required: true, message: t('createSourcePath') }]}
         >
-          <Input placeholder="/path/to/source-folder" />
+          <PathInput
+            dialogKind="open-directory"
+            dialogTitle={t('createSourcePath')}
+            placeholder="/path/to/source-folder"
+            t={t}
+          />
         </Form.Item>
         <Form.Item
           name="contentOutput"
           label={t('contentOutputPath')}
           rules={[{ required: true, message: t('contentOutputPath') }]}
         >
-          <Input placeholder="/path/to/encrypted-content" />
+          <PathInput
+            dialogKind="open-directory"
+            dialogTitle={t('contentOutputPath')}
+            placeholder="/path/to/encrypted-content"
+            t={t}
+          />
         </Form.Item>
         <Form.Item name="databaseExport" label={t('databaseExportPath')}>
-          <Input placeholder="/path/to/exported-project.fg" />
+          <PathInput
+            dialogKind="save-file"
+            dialogTitle={t('databaseExportPath')}
+            defaultFilename="project.fg"
+            filters={[{ displayName: 'FoldersGuard Project (*.fg)', pattern: '*.fg' }]}
+            placeholder="/path/to/exported-project.fg"
+            t={t}
+          />
         </Form.Item>
         <Form.Item name="password" label={t('password')} rules={[{ required: true, message: t('passwordRequired') }]}>
           <Input.Password autoComplete="new-password" />

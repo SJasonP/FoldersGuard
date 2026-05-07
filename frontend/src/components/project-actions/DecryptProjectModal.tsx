@@ -1,4 +1,5 @@
 import { Checkbox, Form, Input, Modal, Select } from 'antd';
+import { PathInput } from '../common/PathInput';
 
 type DecryptProjectValues = {
   password: string;
@@ -60,10 +61,20 @@ export function DecryptProjectModal({
           label={t('verifyEncryptedPath')}
           rules={[{ required: true, message: t('verifyEncryptedPath') }]}
         >
-          <Input placeholder="/path/to/encrypted-content" />
+          <PathInput
+            dialogKind="open-directory"
+            dialogTitle={t('verifyEncryptedPath')}
+            placeholder="/path/to/encrypted-content"
+            t={t}
+          />
         </Form.Item>
         <Form.Item name="outputPath" label={t('outputPath')} rules={[{ required: true, message: t('outputPath') }]}>
-          <Input placeholder="/path/to/restored-output" />
+          <PathInput
+            dialogKind="open-directory"
+            dialogTitle={t('outputPath')}
+            placeholder="/path/to/restored-output"
+            t={t}
+          />
         </Form.Item>
         <Form.Item name="sourceCleanup" label={t('sourceCleanupOperationMode')} rules={[{ required: true }]}>
           <Select

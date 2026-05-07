@@ -1,4 +1,5 @@
 import { Checkbox, Form, Input, Modal, Select } from 'antd';
+import { PathInput } from '../common/PathInput';
 
 type CreateShareValues = {
   itemPaths: string[];
@@ -65,7 +66,14 @@ export function CreateShareModal({ open, loading, selectableItems, onCancel, onS
           label={t('shareDatabaseOutputPath')}
           rules={[{ required: true, message: t('shareDatabaseOutputPath') }]}
         >
-          <Input placeholder="/path/to/share.fgs" />
+          <PathInput
+            dialogKind="save-file"
+            dialogTitle={t('shareDatabaseOutputPath')}
+            defaultFilename="share.fgs"
+            filters={[{ displayName: 'FoldersGuard Share (*.fgs)', pattern: '*.fgs' }]}
+            placeholder="/path/to/share.fgs"
+            t={t}
+          />
         </Form.Item>
         <Form.Item name="passwordProtected" valuePropName="checked">
           <Checkbox>{t('sharePasswordProtected')}</Checkbox>

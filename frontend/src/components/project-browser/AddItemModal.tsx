@@ -1,4 +1,5 @@
-import { Form, Input, InputNumber, Modal } from 'antd';
+import { Form, InputNumber, Modal } from 'antd';
+import { PathInput } from '../common/PathInput';
 
 type AddItemModalValues = {
   sourcePath: string;
@@ -38,7 +39,16 @@ export function AddItemModal({ open, loading, onCancel, onSubmit, t }: AddItemMo
         }}
       >
         <Form.Item name="sourcePath" label={t('sourcePath')} rules={[{ required: true, message: t('sourcePath') }]}>
-          <Input placeholder="/path/to/file-or-folder" />
+          <PathInput
+            dialogKind="open-file"
+            dialogTitle={t('sourcePath')}
+            buttonLabel={t('browseFile')}
+            secondaryDialogKind="open-directory"
+            secondaryDialogTitle={t('sourcePath')}
+            secondaryButtonLabel={t('browseFolder')}
+            placeholder="/path/to/file-or-folder"
+            t={t}
+          />
         </Form.Item>
         <Form.Item name="maxPartSize" label={t('defaultMaxPartSize')}>
           <InputNumber min={1} style={{ width: '100%' }} placeholder={t('createUseDefaultMaxPartSize')} />

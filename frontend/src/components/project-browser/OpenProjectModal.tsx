@@ -1,4 +1,5 @@
 import { Form, Input, Modal } from 'antd';
+import { PathInput } from '../common/PathInput';
 
 type OpenProjectValues = {
   password: string;
@@ -42,7 +43,12 @@ export function OpenProjectModal({ open, loading, onCancel, onSubmit, t }: OpenP
           <Input.Password autoComplete="current-password" />
         </Form.Item>
         <Form.Item name="encryptedPath" label={t('encryptedContentPath')}>
-          <Input placeholder="/path/to/encrypted-content" />
+          <PathInput
+            dialogKind="open-directory"
+            dialogTitle={t('encryptedContentPath')}
+            placeholder="/path/to/encrypted-content"
+            t={t}
+          />
         </Form.Item>
       </Form>
     </Modal>
