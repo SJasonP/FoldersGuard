@@ -1,4 +1,5 @@
 import { Checkbox, Form, Input, Modal } from 'antd';
+import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
 
 type ExportProjectValues = {
@@ -17,6 +18,21 @@ type ExportProjectModalProps = {
 
 export function ExportProjectModal({ open, loading, onCancel, onSubmit, t }: ExportProjectModalProps) {
   const [form] = Form.useForm<ExportProjectValues>();
+  const confirmSubmit = (values: ExportProjectValues) => {
+    showOperationConfirmation({
+      title: t('exportProject'),
+      message: t('exportProjectConfirm'),
+      okText: t('exportProject'),
+      items: [
+        { label: t('exportOutputPath'), value: values.outputPath },
+        { label: t('forceOverwrite'), value: values.force ? t('passwordProtectedYes') : t('passwordProtectedNo') },
+      ],
+      onConfirm: () => {
+        onSubmit(values);
+        form.resetFields();
+      },
+    });
+  };
 
   return (
     <Modal
@@ -34,10 +50,7 @@ export function ExportProjectModal({ open, loading, onCancel, onSubmit, t }: Exp
         form={form}
         layout="vertical"
         initialValues={{ force: false }}
-        onFinish={(values) => {
-          onSubmit(values);
-          form.resetFields();
-        }}
+        onFinish={confirmSubmit}
       >
         <Form.Item name="password" label={t('password')} rules={[{ required: true, message: t('passwordRequired') }]}>
           <Input.Password autoComplete="current-password" />

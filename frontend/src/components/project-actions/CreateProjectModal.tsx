@@ -1,5 +1,6 @@
 import { Checkbox, Form, Input, InputNumber, Modal, Select } from 'antd';
 import type { SettingsModel } from '../../types';
+import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
 
 type CreateProjectValues = {
@@ -36,6 +37,35 @@ export function CreateProjectModal({
   const [form] = Form.useForm<CreateProjectValues>();
   const useDefaultMaxPartSize = Form.useWatch('useDefaultMaxPartSize', form) ?? true;
   const effectiveDefaultMaxPartSize = settings?.defaultMaxPartSize ?? 0;
+  const sourceCleanupLabel = (value: string) => {
+    if (value === 'delete') {
+      return t('sourceCleanupDelete');
+    }
+    return t('sourceCleanupKeep');
+  };
+
+  const confirmSubmit = (values: CreateProjectValues) => {
+    showOperationConfirmation({
+      title: t('createProject'),
+      message: t('createProjectConfirm'),
+      okText: t('createProject'),
+      danger: values.sourceCleanup === 'delete',
+      items: [
+        { label: t('createSourcePath'), value: values.sourcePath },
+        { label: t('contentOutputPath'), value: values.contentOutput },
+        {
+          label: t('defaultMaxPartSize'),
+          value: values.useDefaultMaxPartSize ? t('createUseDefaultMaxPartSize') : values.maxPartSize,
+        },
+        { label: t('sourceCleanupOperationMode'), value: sourceCleanupLabel(values.sourceCleanup) },
+        { label: t('forceOverwrite'), value: values.force ? t('passwordProtectedYes') : t('passwordProtectedNo') },
+      ],
+      onConfirm: () => {
+        onSubmit(values);
+        form.resetFields();
+      },
+    });
+  };
 
   return (
     <Modal
@@ -58,10 +88,7 @@ export function CreateProjectModal({
           force: false,
           sourceCleanup: defaultSourceCleanup,
         }}
-        onFinish={(values) => {
-          onSubmit(values);
-          form.resetFields();
-        }}
+        onFinish={confirmSubmit}
       >
         <Form.Item
           name="sourcePath"

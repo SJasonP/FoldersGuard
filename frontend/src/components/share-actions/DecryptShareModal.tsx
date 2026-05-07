@@ -1,4 +1,5 @@
 import { Checkbox, Form, Input, Modal, Select } from 'antd';
+import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
 
 type DecryptShareValues = {
@@ -27,6 +28,31 @@ export function DecryptShareModal({
   t,
 }: DecryptShareModalProps) {
   const [form] = Form.useForm<DecryptShareValues>();
+  const sourceCleanupLabel = (value: string) => {
+    if (value === 'delete') {
+      return t('sourceCleanupDelete');
+    }
+    return t('sourceCleanupKeep');
+  };
+
+  const confirmSubmit = (values: DecryptShareValues) => {
+    showOperationConfirmation({
+      title: t('decryptShare'),
+      message: t('decryptShareConfirm'),
+      okText: t('decryptShare'),
+      danger: values.sourceCleanup === 'delete',
+      items: [
+        { label: t('verifyEncryptedPath'), value: values.encryptedPath },
+        { label: t('outputPath'), value: values.outputPath },
+        { label: t('sourceCleanupOperationMode'), value: sourceCleanupLabel(values.sourceCleanup) },
+        { label: t('forceOverwrite'), value: values.force ? t('passwordProtectedYes') : t('passwordProtectedNo') },
+      ],
+      onConfirm: () => {
+        onSubmit(values);
+        form.resetFields();
+      },
+    });
+  };
 
   return (
     <Modal
@@ -48,10 +74,7 @@ export function DecryptShareModal({
           force: false,
           sourceCleanup: defaultSourceCleanup,
         }}
-        onFinish={(values) => {
-          onSubmit(values);
-          form.resetFields();
-        }}
+        onFinish={confirmSubmit}
       >
         <Form.Item name="password" label={t('password')}>
           <Input.Password autoComplete="current-password" />

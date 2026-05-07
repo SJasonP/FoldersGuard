@@ -1,4 +1,5 @@
 import { Checkbox, Form, Input, Modal, Select } from 'antd';
+import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
 
 type CreateShareValues = {
@@ -22,6 +23,27 @@ type CreateShareModalProps = {
 export function CreateShareModal({ open, loading, selectableItems, onCancel, onSubmit, t }: CreateShareModalProps) {
   const [form] = Form.useForm<CreateShareValues>();
   const passwordProtected = Form.useWatch('passwordProtected', form) ?? true;
+  const confirmSubmit = (values: CreateShareValues) => {
+    showOperationConfirmation({
+      title: t('createShare'),
+      message: values.passwordProtected ? t('createShareConfirm') : t('createUnprotectedShareConfirm'),
+      okText: t('createShare'),
+      danger: !values.passwordProtected,
+      items: [
+        { label: t('shareSelectionItems'), value: values.itemPaths.length },
+        { label: t('shareDatabaseOutputPath'), value: values.outputPath },
+        {
+          label: t('passwordProtected'),
+          value: values.passwordProtected ? t('passwordProtectedYes') : t('passwordProtectedNo'),
+        },
+        { label: t('forceOverwrite'), value: values.force ? t('passwordProtectedYes') : t('passwordProtectedNo') },
+      ],
+      onConfirm: () => {
+        onSubmit(values);
+        form.resetFields();
+      },
+    });
+  };
 
   return (
     <Modal
@@ -44,10 +66,7 @@ export function CreateShareModal({ open, loading, selectableItems, onCancel, onS
           force: false,
           passwordProtected: true,
         }}
-        onFinish={(values) => {
-          onSubmit(values);
-          form.resetFields();
-        }}
+        onFinish={confirmSubmit}
       >
         <Form.Item
           name="itemPaths"
