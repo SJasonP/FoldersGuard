@@ -234,10 +234,31 @@ function App() {
 
   const columns = useMemo<ColumnsType<LocalProjectRow>>(
     () => [
-      { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },
-      { title: t('projectName'), dataIndex: 'fileName', key: 'fileName' },
-      { title: t('modifiedTime'), dataIndex: 'modifiedTime', key: 'modifiedTime' },
-      { title: t('availabilityStatus'), dataIndex: 'availabilityStatus', key: 'availabilityStatus' },
+      {
+        title: t('projectId'),
+        dataIndex: 'projectId',
+        key: 'projectId',
+        sorter: (left, right) => left.projectId.localeCompare(right.projectId),
+      },
+      {
+        title: t('projectName'),
+        dataIndex: 'fileName',
+        key: 'fileName',
+        sorter: (left, right) => left.fileName.localeCompare(right.fileName),
+      },
+      {
+        title: t('modifiedTime'),
+        dataIndex: 'modifiedTime',
+        key: 'modifiedTime',
+        defaultSortOrder: 'descend',
+        sorter: (left, right) => left.modifiedAtMs - right.modifiedAtMs,
+      },
+      {
+        title: t('availabilityStatus'),
+        dataIndex: 'availabilityStatus',
+        key: 'availabilityStatus',
+        sorter: (left, right) => left.availabilityStatus.localeCompare(right.availabilityStatus),
+      },
     ],
     [t],
   );

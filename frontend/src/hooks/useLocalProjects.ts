@@ -46,18 +46,22 @@ export function useLocalProjects({ language, t }: UseLocalProjectsArgs) {
             project.availabilityStatus.toLowerCase().includes(query)
           );
         })
-        .map((project) => ({
-          key: project.projectId,
-          projectId: project.projectId,
-          fileName: project.fileName,
-          modifiedTime: project.modifiedAt
-            ? new Intl.DateTimeFormat(language, {
-                dateStyle: 'medium',
-                timeStyle: 'short',
-              }).format(new Date(project.modifiedAt))
-            : '',
-          availabilityStatus: t(project.availabilityStatus),
-        })),
+        .map((project) => {
+          const modifiedAt = project.modifiedAt ? new Date(project.modifiedAt) : null;
+          return {
+            key: project.projectId,
+            projectId: project.projectId,
+            fileName: project.fileName,
+            modifiedTime: modifiedAt
+              ? new Intl.DateTimeFormat(language, {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                }).format(modifiedAt)
+              : '',
+            modifiedAtMs: modifiedAt?.getTime() ?? 0,
+            availabilityStatus: t(project.availabilityStatus),
+          };
+        }),
     [language, projectSearch, projects, t],
   );
 

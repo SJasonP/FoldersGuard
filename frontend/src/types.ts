@@ -30,5 +30,6 @@ export type LocalProjectRow = {
   projectId: string;
   fileName: string;
   modifiedTime: string;
+  modifiedAtMs: number;
   availabilityStatus: string;
 };
