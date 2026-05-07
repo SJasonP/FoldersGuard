@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
-import { DeleteProject, ExportProject, InspectProject, VerifyProject } from '../../wailsjs/go/main/App';
+import { DecryptProject, DeleteProject, ExportProject, InspectProject, VerifyProject } from '../../wailsjs/go/main/App';
 import type {
+  DecryptProjectResultModel,
   DeleteProjectResultModel,
   ExportProjectResultModel,
   InspectProjectResultModel,
@@ -35,6 +36,10 @@ export function useProjectActions({
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verifyResult, setVerifyResult] = useState<VerifyProjectResultModel | null>(null);
   const [verifyResultOpen, setVerifyResultOpen] = useState(false);
+  const [decryptDialogOpen, setDecryptDialogOpen] = useState(false);
+  const [decryptLoading, setDecryptLoading] = useState(false);
+  const [decryptResult, setDecryptResult] = useState<DecryptProjectResultModel | null>(null);
+  const [decryptResultOpen, setDecryptResultOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -113,6 +118,38 @@ export function useProjectActions({
     }
   };
 
+  const handleDecryptProject = async (values: {
+    password: string;
+    encryptedPath: string;
+    outputPath: string;
+    force: boolean;
+    sourceCleanup: string;
+  }) => {
+    if (!selectedProjectId) {
+      return;
+    }
+    setDecryptLoading(true);
+    try {
+      const result: DecryptProjectResultModel = await DecryptProject({
+        projectId: selectedProjectId,
+        password: values.password,
+        encryptedPath: values.encryptedPath,
+        outputPath: values.outputPath,
+        force: values.force,
+        sourceCleanup: values.sourceCleanup,
+      });
+      setDecryptDialogOpen(false);
+      setProjectActionsOpen(false);
+      setDecryptResult(result);
+      setDecryptResultOpen(true);
+      messageApi.success(t('decryptProjectSucceeded'));
+    } catch {
+      messageApi.error(t('decryptProjectFailed'));
+    } finally {
+      setDecryptLoading(false);
+    }
+  };
+
   const handleDeleteProject = async (password: string) => {
     if (!selectedProjectId) {
       return;
@@ -138,6 +175,10 @@ export function useProjectActions({
   };
 
   return {
+    decryptDialogOpen,
+    decryptLoading,
+    decryptResult,
+    decryptResultOpen,
     deleteDialogOpen,
     deleteLoading,
     exportDialogOpen,
@@ -153,6 +194,8 @@ export function useProjectActions({
     verifyResult,
     verifyResultOpen,
     setDeleteDialogOpen,
+    setDecryptDialogOpen,
+    setDecryptResultOpen,
     setExportDialogOpen,
     setInspectDialogOpen,
     setInspectResultOpen,
@@ -160,6 +203,7 @@ export function useProjectActions({
     setVerifyDialogOpen,
     setVerifyResultOpen,
     openProjectActions,
+    handleDecryptProject,
     handleDeleteProject,
     handleExportProject,
     handleInspectProject,

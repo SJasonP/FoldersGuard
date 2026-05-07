@@ -1,19 +1,19 @@
 import { Descriptions, Drawer } from 'antd';
-import type { DecryptShareResultModel } from '../../types';
+import type { DecryptProjectResultModel } from '../../types';
 
-type DecryptShareDrawerProps = {
+type DecryptProjectDrawerProps = {
   open: boolean;
-  result: DecryptShareResultModel | null;
+  result: DecryptProjectResultModel | null;
   onClose: () => void;
   t: (key: string) => string;
 };
 
-export function DecryptShareDrawer({ open, result, onClose, t }: DecryptShareDrawerProps) {
+export function DecryptProjectDrawer({ open, result, onClose, t }: DecryptProjectDrawerProps) {
   return (
-    <Drawer title={t('decryptShare')} open={open} onClose={onClose} width={540}>
+    <Drawer title={t('decryptProject')} open={open} onClose={onClose} width={540}>
       {result ? (
         <Descriptions column={1} bordered size="small">
-          <Descriptions.Item label={t('shareId')}>{result.shareId}</Descriptions.Item>
+          <Descriptions.Item label={t('projectId')}>{result.projectId}</Descriptions.Item>
           <Descriptions.Item label={t('outputPath')}>{result.outputPath}</Descriptions.Item>
           <Descriptions.Item label={t('decryptedFiles')}>{result.decryptedFiles}</Descriptions.Item>
           <Descriptions.Item label={t('restoredFolders')}>{result.restoredFolders}</Descriptions.Item>

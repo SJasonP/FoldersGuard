@@ -135,6 +135,10 @@ function App() {
   });
 
   const {
+    decryptDialogOpen,
+    decryptLoading,
+    decryptResult,
+    decryptResultOpen,
     deleteDialogOpen,
     deleteLoading,
     exportDialogOpen,
@@ -149,6 +153,8 @@ function App() {
     verifyResult,
     verifyResultOpen,
     setDeleteDialogOpen,
+    setDecryptDialogOpen,
+    setDecryptResultOpen,
     setExportDialogOpen,
     setInspectDialogOpen,
     setInspectResultOpen,
@@ -156,6 +162,7 @@ function App() {
     setVerifyDialogOpen,
     setVerifyResultOpen,
     openProjectActions,
+    handleDecryptProject,
     handleDeleteProject,
     handleExportProject,
     handleInspectProject,
@@ -244,6 +251,7 @@ function App() {
           onCloseProjectActions={() => setProjectActionsOpen(false)}
           onOpenInspect={() => setInspectDialogOpen(true)}
           onOpenVerify={() => setVerifyDialogOpen(true)}
+          onOpenDecrypt={() => setDecryptDialogOpen(true)}
           onOpenExport={() => setExportDialogOpen(true)}
           onOpenDelete={() => setDeleteDialogOpen(true)}
           inspectDialogOpen={inspectDialogOpen}
@@ -260,6 +268,13 @@ function App() {
           verifyResultOpen={verifyResultOpen}
           verifyResult={verifyResult}
           onCloseVerifyResult={() => setVerifyResultOpen(false)}
+          decryptDialogOpen={decryptDialogOpen}
+          decryptLoading={decryptLoading}
+          onCloseDecrypt={() => setDecryptDialogOpen(false)}
+          onDecryptProject={(values) => void handleDecryptProject(values)}
+          decryptResultOpen={decryptResultOpen}
+          decryptResult={decryptResult}
+          onCloseDecryptResult={() => setDecryptResultOpen(false)}
           exportDialogOpen={exportDialogOpen}
           exportLoading={exportLoading}
           onCloseExport={() => setExportDialogOpen(false)}

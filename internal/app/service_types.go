@@ -28,6 +28,26 @@ type DecryptShareResult struct {
 	OutputRoot            string
 	DecryptedFiles        int
 	RestoredFolders       int
+	SkippedFolders        int
+	DeletedEncryptedFiles int
+	FailedEncryptedFiles  int
+}
+
+type DecryptProjectInput struct {
+	ProjectID     string
+	Password      string
+	EncryptedRoot string
+	OutputRoot    string
+	Force         bool
+	SourceCleanup string
+}
+
+type DecryptProjectResult struct {
+	ProjectID             string
+	OutputRoot            string
+	DecryptedFiles        int
+	RestoredFolders       int
+	SkippedFolders        int
 	DeletedEncryptedFiles int
 	FailedEncryptedFiles  int
 }

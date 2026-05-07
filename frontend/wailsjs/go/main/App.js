@@ -14,6 +14,10 @@ export function CreateProject(arg1) {
   return window['go']['main']['App']['CreateProject'](arg1);
 }
 
+export function DecryptProject(arg1) {
+  return window['go']['main']['App']['DecryptProject'](arg1);
+}
+
 export function DecryptShare(arg1) {
   return window['go']['main']['App']['DecryptShare'](arg1);
 }

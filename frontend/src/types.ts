@@ -4,6 +4,7 @@ export type NavigationKey = 'home' | 'settings' | 'about';
 export type AppInfoModel = main.AppInfo;
 export type CreateProjectRequestModel = main.CreateProjectRequest;
 export type CreateProjectResultModel = main.CreateProjectResult;
+export type DecryptProjectResultModel = main.DecryptProjectResult;
 export type DecryptShareResultModel = main.DecryptShareResult;
 export type DeleteProjectRequestModel = main.DeleteProjectRequest;
 export type DeleteProjectResultModel = main.DeleteProjectResult;

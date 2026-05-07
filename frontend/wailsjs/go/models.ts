@@ -78,6 +78,52 @@ export namespace main {
 	        this.failedFiles = source["failedFiles"];
 	    }
 	}
+	export class DecryptProjectRequest {
+	    projectId: string;
+	    password: string;
+	    encryptedPath: string;
+	    outputPath: string;
+	    force: boolean;
+	    sourceCleanup: string;
+
+	    static createFrom(source: any = {}) {
+	        return new DecryptProjectRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.password = source["password"];
+	        this.encryptedPath = source["encryptedPath"];
+	        this.outputPath = source["outputPath"];
+	        this.force = source["force"];
+	        this.sourceCleanup = source["sourceCleanup"];
+	    }
+	}
+	export class DecryptProjectResult {
+	    projectId: string;
+	    outputPath: string;
+	    decryptedFiles: number;
+	    restoredFolders: number;
+	    skippedFolders: number;
+	    deletedEncryptedFiles: number;
+	    failedEncryptedFiles: number;
+
+	    static createFrom(source: any = {}) {
+	        return new DecryptProjectResult(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.outputPath = source["outputPath"];
+	        this.decryptedFiles = source["decryptedFiles"];
+	        this.restoredFolders = source["restoredFolders"];
+	        this.skippedFolders = source["skippedFolders"];
+	        this.deletedEncryptedFiles = source["deletedEncryptedFiles"];
+	        this.failedEncryptedFiles = source["failedEncryptedFiles"];
+	    }
+	}
 	export class DecryptShareRequest {
 	    databasePath: string;
 	    password: string;
@@ -105,6 +151,7 @@ export namespace main {
 	    outputPath: string;
 	    decryptedFiles: number;
 	    restoredFolders: number;
+	    skippedFolders: number;
 	    deletedEncryptedFiles: number;
 	    failedEncryptedFiles: number;
 
@@ -118,6 +165,7 @@ export namespace main {
 	        this.outputPath = source["outputPath"];
 	        this.decryptedFiles = source["decryptedFiles"];
 	        this.restoredFolders = source["restoredFolders"];
+	        this.skippedFolders = source["skippedFolders"];
 	        this.deletedEncryptedFiles = source["deletedEncryptedFiles"];
 	        this.failedEncryptedFiles = source["failedEncryptedFiles"];
 	    }

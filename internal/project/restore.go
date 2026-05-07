@@ -20,94 +20,127 @@ type Restorer struct {
 }
 
 type RestoredFile struct {
-	File           model.File
-	EncryptedPaths []string
+	File                   model.File
+	EncryptedPaths         []string
+	EncryptedAbsolutePaths []string
+}
+
+type RestoreReport struct {
+	DecryptedFiles  int
+	RestoredFolders int
+	SkippedFolders  int
 }
 
 func (r Restorer) RestoreContent(ctx context.Context, plan model.PlannedProject) error {
+	_, err := r.RestoreContentReport(ctx, plan)
+	return err
+}
+
+func (r Restorer) RestoreContentReport(ctx context.Context, plan model.PlannedProject) (RestoreReport, error) {
 	if r.EncryptedRoot == "" {
-		return fmt.Errorf("encrypted root is required")
+		return RestoreReport{}, fmt.Errorf("encrypted root is required")
 	}
 	if r.OutputRoot == "" {
-		return fmt.Errorf("output root is required")
+		return RestoreReport{}, fmt.Errorf("output root is required")
 	}
 
 	logicalPaths, err := logicalRealPaths(plan)
 	if err != nil {
-		return err
+		return RestoreReport{}, err
 	}
 	visiblePaths := visiblePathsByItem(plan)
 	partsByFile := partsByFileID(plan.Parts)
 
 	itemByID := itemsByID(plan)
-
-	if err := r.createFolders(ctx, plan, logicalPaths); err != nil {
-		return err
+	selection, err := r.selectAvailableContent(ctx, plan, itemByID)
+	if err != nil {
+		return RestoreReport{}, err
 	}
 
+	if err := r.createFolders(ctx, plan, logicalPaths, selection.folderIDs); err != nil {
+		return RestoreReport{}, err
+	}
+
+	report := RestoreReport{
+		RestoredFolders: len(selection.folderIDs),
+		SkippedFolders:  CountRestorableFolders(plan) - len(selection.folderIDs),
+	}
 	for _, file := range plan.Files {
+		if _, ok := selection.fileIDs[file.ID.String()]; !ok {
+			continue
+		}
 		if err := ctx.Err(); err != nil {
-			return err
+			return report, err
 		}
 		var restoredEncryptedPaths []string
+		var restoredEncryptedAbsolutePaths []string
 		realPath, ok := logicalPaths[file.ID.String()]
 		if !ok {
-			return fmt.Errorf("missing logical path for file %s", file.ID)
+			return report, fmt.Errorf("missing logical path for file %s", file.ID)
 		}
 		outputPath, err := content.SafeJoin(r.OutputRoot, realPath)
 		if err != nil {
-			return fmt.Errorf("resolve output path for file %s: %w", file.ID, err)
+			return report, fmt.Errorf("resolve output path for file %s: %w", file.ID, err)
 		}
 
 		switch file.StorageKind {
 		case model.StorageKindSingle:
 			visiblePath, ok := visiblePaths[file.ID.String()]
 			if !ok {
-				return fmt.Errorf("missing visible path for file %s", file.ID)
+				return report, fmt.Errorf("missing visible path for file %s", file.ID)
 			}
-			if err := r.restoreSingle(ctx, file, visiblePath, outputPath); err != nil {
-				return err
+			sourcePath, ok := selection.sourcePaths[visiblePath]
+			if !ok {
+				return report, fmt.Errorf("missing selected encrypted path for file %s", file.ID)
+			}
+			if err := r.restoreSingle(ctx, file, sourcePath, outputPath); err != nil {
+				return report, err
 			}
 			restoredEncryptedPaths = []string{visiblePath}
+			restoredEncryptedAbsolutePaths = []string{sourcePath}
 		case model.StorageKindSplit:
 			visiblePath := visiblePaths[file.ID.String()]
 			parts := partsByFile[file.ID.String()]
-			if err := r.restoreSplit(ctx, file, visiblePath, parts, outputPath); err != nil {
-				return err
+			sourcePaths, err := selectedPartPaths(visiblePath, parts, selection.sourcePaths)
+			if err != nil {
+				return report, err
+			}
+			if err := r.restoreSplit(ctx, file, sourcePaths, parts, outputPath); err != nil {
+				return report, err
 			}
 			restoredEncryptedPaths = encryptedPartPaths(visiblePath, parts)
+			restoredEncryptedAbsolutePaths = absolutePartPaths(parts, selection.sourcePaths)
 		default:
-			return fmt.Errorf("unsupported storage kind %q", file.StorageKind)
+			return report, fmt.Errorf("unsupported storage kind %q", file.StorageKind)
 		}
 		item, ok := itemByID[file.ID.String()]
 		if !ok {
-			return fmt.Errorf("missing item for file %s", file.ID)
+			return report, fmt.Errorf("missing item for file %s", file.ID)
 		}
 		if err := fsmeta.Apply(outputPath, metadataFromItem(item)); err != nil {
-			return fmt.Errorf("restore metadata for file %s: %w", file.ID, err)
+			return report, fmt.Errorf("restore metadata for file %s: %w", file.ID, err)
 		}
 		if r.AfterFile != nil {
-			if err := r.AfterFile(RestoredFile{File: file, EncryptedPaths: restoredEncryptedPaths}); err != nil {
-				return fmt.Errorf("post-restore file %s: %w", file.ID, err)
+			restoredFile := RestoredFile{
+				File:                   file,
+				EncryptedPaths:         restoredEncryptedPaths,
+				EncryptedAbsolutePaths: restoredEncryptedAbsolutePaths,
+			}
+			if err := r.AfterFile(restoredFile); err != nil {
+				return report, fmt.Errorf("post-restore file %s: %w", file.ID, err)
 			}
 		}
+		report.DecryptedFiles++
 	}
-	if err := r.restoreFolderMetadata(ctx, plan, logicalPaths, itemByID); err != nil {
-		return err
+	if err := r.restoreFolderMetadata(ctx, plan, logicalPaths, itemByID, selection.folderIDs); err != nil {
+		return report, err
 	}
-	return nil
+	return report, nil
 }
 
-func (r Restorer) createFolders(ctx context.Context, plan model.PlannedProject, logicalPaths map[string]string) error {
+func (r Restorer) createFolders(ctx context.Context, plan model.PlannedProject, logicalPaths map[string]string, selected map[string]struct{}) error {
 	ids := make([]string, 0, len(logicalPaths))
-	folderIDs := make(map[string]struct{})
-	if !isVirtualRoot(plan) {
-		folderIDs[plan.RootFolder.ID.String()] = struct{}{}
-	}
-	for _, folder := range plan.Folders {
-		folderIDs[folder.ID.String()] = struct{}{}
-	}
-	for id := range folderIDs {
+	for id := range selected {
 		ids = append(ids, id)
 	}
 	sort.Slice(ids, func(i, j int) bool {
@@ -133,16 +166,9 @@ func (r Restorer) createFolders(ctx context.Context, plan model.PlannedProject, 
 	return nil
 }
 
-func (r Restorer) restoreFolderMetadata(ctx context.Context, plan model.PlannedProject, logicalPaths map[string]string, itemByID map[string]model.Item) error {
+func (r Restorer) restoreFolderMetadata(ctx context.Context, plan model.PlannedProject, logicalPaths map[string]string, itemByID map[string]model.Item, selected map[string]struct{}) error {
 	ids := make([]string, 0, len(logicalPaths))
-	folderIDs := make(map[string]struct{})
-	if !isVirtualRoot(plan) {
-		folderIDs[plan.RootFolder.ID.String()] = struct{}{}
-	}
-	for _, folder := range plan.Folders {
-		folderIDs[folder.ID.String()] = struct{}{}
-	}
-	for id := range folderIDs {
+	for id := range selected {
 		ids = append(ids, id)
 	}
 	sort.Slice(ids, func(i, j int) bool {
@@ -172,11 +198,7 @@ func (r Restorer) restoreFolderMetadata(ctx context.Context, plan model.PlannedP
 	return nil
 }
 
-func (r Restorer) restoreSingle(ctx context.Context, file model.File, visiblePath, outputPath string) error {
-	encryptedPath, err := SafeEncryptedPath(r.EncryptedRoot, visiblePath)
-	if err != nil {
-		return fmt.Errorf("resolve encrypted file %s: %w", file.ID, err)
-	}
+func (r Restorer) restoreSingle(ctx context.Context, file model.File, encryptedPath, outputPath string) error {
 	ad := []byte("fg-content-v1:file:" + file.ID.String())
 	if err := content.OpenObjectFile(ctx, file.Key, encryptedPath, outputPath, ad); err != nil {
 		return fmt.Errorf("restore file %s: %w", file.ID, err)
@@ -184,10 +206,7 @@ func (r Restorer) restoreSingle(ctx context.Context, file model.File, visiblePat
 	return nil
 }
 
-func (r Restorer) restoreSplit(ctx context.Context, file model.File, visiblePath string, parts []model.Part, outputPath string) error {
-	if visiblePath == "" {
-		return fmt.Errorf("missing visible path for split file %s", file.ID)
-	}
+func (r Restorer) restoreSplit(ctx context.Context, file model.File, sourcePaths map[string]string, parts []model.Part, outputPath string) error {
 	if len(parts) == 0 {
 		return fmt.Errorf("split file %s has no parts", file.ID)
 	}
@@ -215,11 +234,7 @@ func (r Restorer) restoreSplit(ctx context.Context, file model.File, visiblePath
 			_ = temp.Close()
 			return err
 		}
-		partPath, err := SafeEncryptedPath(r.EncryptedRoot, visiblePath+"/"+part.VisibleName.String())
-		if err != nil {
-			_ = temp.Close()
-			return fmt.Errorf("resolve encrypted part %s: %w", part.ID, err)
-		}
+		partPath := sourcePaths[part.ID.String()]
 		ad := []byte(fmt.Sprintf("fg-content-v1:part:%s:%d:%d:%d", file.ID.String(), part.Index, part.Offset, part.Size))
 		partPlaintext, err := content.OpenObjectFromFile(ctx, file.Key, partPath, ad)
 		if err != nil {

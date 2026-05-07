@@ -1,4 +1,6 @@
 import { CreateProjectModal } from './CreateProjectModal';
+import { DecryptProjectDrawer } from './DecryptProjectDrawer';
+import { DecryptProjectModal } from './DecryptProjectModal';
 import { DeleteProjectModal } from './DeleteProjectModal';
 import { ExportProjectModal } from './ExportProjectModal';
 import { ImportProjectModal } from './ImportProjectModal';
@@ -7,7 +9,13 @@ import { InspectProjectModal } from './InspectProjectModal';
 import { ProjectActionsDrawer } from './ProjectActionsDrawer';
 import { VerifyProjectDrawer } from './VerifyProjectDrawer';
 import { VerifyProjectModal } from './VerifyProjectModal';
-import type { InspectProjectResultModel, LocalProjectSummary, SettingsModel, VerifyProjectResultModel } from '../../types';
+import type {
+  DecryptProjectResultModel,
+  InspectProjectResultModel,
+  LocalProjectSummary,
+  SettingsModel,
+  VerifyProjectResultModel,
+} from '../../types';
 
 type ProjectSessionLayerProps = {
   createDialogOpen: boolean;
@@ -35,6 +43,7 @@ type ProjectSessionLayerProps = {
   onCloseProjectActions: () => void;
   onOpenInspect: () => void;
   onOpenVerify: () => void;
+  onOpenDecrypt: () => void;
   onOpenExport: () => void;
   onOpenDelete: () => void;
   inspectDialogOpen: boolean;
@@ -51,6 +60,19 @@ type ProjectSessionLayerProps = {
   verifyResultOpen: boolean;
   verifyResult: VerifyProjectResultModel | null;
   onCloseVerifyResult: () => void;
+  decryptDialogOpen: boolean;
+  decryptLoading: boolean;
+  onCloseDecrypt: () => void;
+  onDecryptProject: (values: {
+    password: string;
+    encryptedPath: string;
+    outputPath: string;
+    force: boolean;
+    sourceCleanup: string;
+  }) => void;
+  decryptResultOpen: boolean;
+  decryptResult: DecryptProjectResultModel | null;
+  onCloseDecryptResult: () => void;
   exportDialogOpen: boolean;
   exportLoading: boolean;
   onCloseExport: () => void;
@@ -78,6 +100,7 @@ export function ProjectSessionLayer({
   onCloseProjectActions,
   onOpenInspect,
   onOpenVerify,
+  onOpenDecrypt,
   onOpenExport,
   onOpenDelete,
   inspectDialogOpen,
@@ -94,6 +117,13 @@ export function ProjectSessionLayer({
   verifyResultOpen,
   verifyResult,
   onCloseVerifyResult,
+  decryptDialogOpen,
+  decryptLoading,
+  onCloseDecrypt,
+  onDecryptProject,
+  decryptResultOpen,
+  decryptResult,
+  onCloseDecryptResult,
   exportDialogOpen,
   exportLoading,
   onCloseExport,
@@ -112,6 +142,7 @@ export function ProjectSessionLayer({
         onClose={onCloseProjectActions}
         onInspect={onOpenInspect}
         onVerify={onOpenVerify}
+        onDecrypt={onOpenDecrypt}
         onExport={onOpenExport}
         onDelete={onOpenDelete}
         t={t}
@@ -130,6 +161,15 @@ export function ProjectSessionLayer({
       <InspectProjectDrawer open={inspectResultOpen} result={inspectResult} onClose={onCloseInspectResult} t={t} />
       <VerifyProjectModal open={verifyDialogOpen} loading={verifyLoading} onCancel={onCloseVerify} onSubmit={onVerifyProject} t={t} />
       <VerifyProjectDrawer open={verifyResultOpen} result={verifyResult} onClose={onCloseVerifyResult} t={t} />
+      <DecryptProjectModal
+        open={decryptDialogOpen}
+        loading={decryptLoading}
+        defaultSourceCleanup={defaultSourceCleanup}
+        onCancel={onCloseDecrypt}
+        onSubmit={onDecryptProject}
+        t={t}
+      />
+      <DecryptProjectDrawer open={decryptResultOpen} result={decryptResult} onClose={onCloseDecryptResult} t={t} />
       <ExportProjectModal open={exportDialogOpen} loading={exportLoading} onCancel={onCloseExport} onSubmit={onExportProject} t={t} />
       <DeleteProjectModal open={deleteDialogOpen} loading={deleteLoading} onCancel={onCloseDelete} onSubmit={onDeleteProject} t={t} />
     </>

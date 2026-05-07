@@ -1,5 +1,5 @@
 import { Button, Drawer, Space, Typography } from 'antd';
-import { DeleteOutlined, ExportOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
+import { DeleteOutlined, ExportOutlined, SafetyCertificateOutlined, UnlockOutlined } from '@ant-design/icons';
 import type { LocalProjectSummary } from '../../types';
 
 type ProjectActionsDrawerProps = {
@@ -8,6 +8,7 @@ type ProjectActionsDrawerProps = {
   onClose: () => void;
   onInspect: () => void;
   onVerify: () => void;
+  onDecrypt: () => void;
   onExport: () => void;
   onDelete: () => void;
   t: (key: string) => string;
@@ -19,6 +20,7 @@ export function ProjectActionsDrawer({
   onClose,
   onInspect,
   onVerify,
+  onDecrypt,
   onExport,
   onDelete,
   t,
@@ -36,6 +38,9 @@ export function ProjectActionsDrawer({
         </Button>
         <Button block icon={<SafetyCertificateOutlined />} onClick={onVerify}>
           {t('verifyProject')}
+        </Button>
+        <Button block icon={<UnlockOutlined />} onClick={onDecrypt}>
+          {t('decryptProject')}
         </Button>
         <Button block icon={<ExportOutlined />} onClick={onExport}>
           {t('exportProject')}

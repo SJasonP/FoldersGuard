@@ -96,6 +96,42 @@ func TestRestorerRestoreContent(t *testing.T) {
 	assertMetadata(t, filepath.Join(restored, filepath.Base(source), "dir"), 0, wantDirTime)
 }
 
+func TestRestorerRestoresRecognizedSubset(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	encrypted := filepath.Join(root, "encrypted")
+	restored := filepath.Join(root, "restored")
+	mustMkdir(t, filepath.Join(source, "docs"))
+	mustWrite(t, filepath.Join(source, "docs", "note.txt"), []byte("note"))
+	mustWrite(t, filepath.Join(source, "other.txt"), []byte("other"))
+
+	scan, err := fswalk.ScanTopFolder(source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := Planner{MaxPartSize: 1024}.Plan(scan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := (Executor{OutputRoot: encrypted}).EncryptContent(context.Background(), plan); err != nil {
+		t.Fatal(err)
+	}
+
+	subsetRoot := encryptedPathForRealPath(t, encrypted, plan, "source/docs")
+	report, err := (Restorer{EncryptedRoot: subsetRoot, OutputRoot: restored}).RestoreContentReport(context.Background(), plan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if report.DecryptedFiles != 1 || report.RestoredFolders != 2 || report.SkippedFolders != 0 {
+		t.Fatalf("restore report = %+v", report)
+	}
+	assertFile(t, filepath.Join(restored, filepath.Base(source), "docs", "note.txt"), []byte("note"))
+	if _, err := os.Stat(filepath.Join(restored, filepath.Base(source), "other.txt")); !os.IsNotExist(err) {
+		t.Fatalf("other file stat error = %v, want not exist", err)
+	}
+}
+
 func TestRestorerRejectsTamperedContent(t *testing.T) {
 	root := t.TempDir()
 	source := filepath.Join(root, "source")
@@ -138,6 +174,27 @@ func TestRestorerRejectsTamperedContent(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(restored, filepath.Base(source), "file.txt")); err == nil {
 		t.Fatal("tampered file was restored")
 	}
+}
+
+func encryptedPathForRealPath(t *testing.T, encryptedRoot string, plan model.PlannedProject, realPath string) string {
+	t.Helper()
+	logicalPaths, err := logicalRealPaths(plan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	visiblePaths := visiblePathsByItem(plan)
+	for itemID, logicalPath := range logicalPaths {
+		if logicalPath != realPath {
+			continue
+		}
+		visiblePath := visiblePaths[itemID]
+		if visiblePath == "" {
+			t.Fatalf("visible path not found for %s", realPath)
+		}
+		return filepath.Join(encryptedRoot, filepath.FromSlash(visiblePath))
+	}
+	t.Fatalf("real path %s not found", realPath)
+	return ""
 }
 
 func TestRestorerRejectsPathLikeRealName(t *testing.T) {

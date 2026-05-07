@@ -79,11 +79,7 @@ func (s Service) DecryptShare(ctx context.Context, input DecryptShareInput) (Dec
 		if sourceCleanup != SourceCleanupDelete {
 			return nil
 		}
-		for _, visiblePath := range restored.EncryptedPaths {
-			path, err := project.SafeEncryptedPath(input.EncryptedRoot, visiblePath)
-			if err != nil {
-				return err
-			}
+		for _, path := range restored.EncryptedAbsolutePaths {
 			if err := os.Remove(path); err != nil {
 				return fmt.Errorf("delete encrypted file: %w", err)
 			}
@@ -92,19 +88,21 @@ func (s Service) DecryptShare(ctx context.Context, input DecryptShareInput) (Dec
 		return nil
 	}
 
-	if err := (project.Restorer{
+	report, err := (project.Restorer{
 		EncryptedRoot: input.EncryptedRoot,
 		OutputRoot:    input.OutputRoot,
 		AfterFile:     afterFile,
-	}).RestoreContent(ctx, plan); err != nil {
+	}).RestoreContentReport(ctx, plan)
+	if err != nil {
 		return DecryptShareResult{}, err
 	}
 
 	return DecryptShareResult{
 		ShareID:               plan.Project.ID.String(),
 		OutputRoot:            input.OutputRoot,
-		DecryptedFiles:        len(plan.Files),
-		RestoredFolders:       CountFolders(plan),
+		DecryptedFiles:        report.DecryptedFiles,
+		RestoredFolders:       report.RestoredFolders,
+		SkippedFolders:        report.SkippedFolders,
 		DeletedEncryptedFiles: deletedEncryptedFiles,
 		FailedEncryptedFiles:  0,
 	}, nil

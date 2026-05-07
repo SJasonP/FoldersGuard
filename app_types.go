@@ -75,6 +75,25 @@ type VerifyProjectResult struct {
 	Status          string `json:"status"`
 }
 
+type DecryptProjectRequest struct {
+	ProjectID     string `json:"projectId"`
+	Password      string `json:"password"`
+	EncryptedPath string `json:"encryptedPath"`
+	OutputPath    string `json:"outputPath"`
+	Force         bool   `json:"force"`
+	SourceCleanup string `json:"sourceCleanup"`
+}
+
+type DecryptProjectResult struct {
+	ProjectID             string `json:"projectId"`
+	OutputPath            string `json:"outputPath"`
+	DecryptedFiles        int    `json:"decryptedFiles"`
+	RestoredFolders       int    `json:"restoredFolders"`
+	SkippedFolders        int    `json:"skippedFolders"`
+	DeletedEncryptedFiles int    `json:"deletedEncryptedFiles"`
+	FailedEncryptedFiles  int    `json:"failedEncryptedFiles"`
+}
+
 type LoadShareRequest struct {
 	DatabasePath string `json:"databasePath"`
 	Password     string `json:"password"`
@@ -100,6 +119,7 @@ type DecryptShareResult struct {
 	OutputPath            string `json:"outputPath"`
 	DecryptedFiles        int    `json:"decryptedFiles"`
 	RestoredFolders       int    `json:"restoredFolders"`
+	SkippedFolders        int    `json:"skippedFolders"`
 	DeletedEncryptedFiles int    `json:"deletedEncryptedFiles"`
 	FailedEncryptedFiles  int    `json:"failedEncryptedFiles"`
 }

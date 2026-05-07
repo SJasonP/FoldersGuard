@@ -69,6 +69,29 @@ func (a *App) VerifyProject(request VerifyProjectRequest) (VerifyProjectResult, 
 	}, nil
 }
 
+func (a *App) DecryptProject(request DecryptProjectRequest) (DecryptProjectResult, error) {
+	result, err := a.service.DecryptProject(a.ctx, app.DecryptProjectInput{
+		ProjectID:     request.ProjectID,
+		Password:      request.Password,
+		EncryptedRoot: request.EncryptedPath,
+		OutputRoot:    request.OutputPath,
+		Force:         request.Force,
+		SourceCleanup: request.SourceCleanup,
+	})
+	if err != nil {
+		return DecryptProjectResult{}, err
+	}
+	return DecryptProjectResult{
+		ProjectID:             result.ProjectID,
+		OutputPath:            result.OutputRoot,
+		DecryptedFiles:        result.DecryptedFiles,
+		RestoredFolders:       result.RestoredFolders,
+		SkippedFolders:        result.SkippedFolders,
+		DeletedEncryptedFiles: result.DeletedEncryptedFiles,
+		FailedEncryptedFiles:  result.FailedEncryptedFiles,
+	}, nil
+}
+
 func (a *App) LoadShare(request LoadShareRequest) (ShareSummary, error) {
 	result, err := a.service.InspectShare(a.ctx, app.ShareOpen{
 		DatabasePath: request.DatabasePath,
@@ -126,6 +149,7 @@ func (a *App) DecryptShare(request DecryptShareRequest) (DecryptShareResult, err
 		OutputPath:            result.OutputRoot,
 		DecryptedFiles:        result.DecryptedFiles,
 		RestoredFolders:       result.RestoredFolders,
+		SkippedFolders:        result.SkippedFolders,
 		DeletedEncryptedFiles: result.DeletedEncryptedFiles,
 		FailedEncryptedFiles:  result.FailedEncryptedFiles,
 	}, nil
