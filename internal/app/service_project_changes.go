@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -12,7 +13,7 @@ import (
 )
 
 func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChangesInput) (ApplyProjectChangesResult, error) {
-	if len(input.RenameChanges) == 0 && len(input.MoveChanges) == 0 && len(input.RemoveChanges) == 0 && len(input.AddChanges) == 0 {
+	if len(input.RenameChanges) == 0 && len(input.MoveChanges) == 0 && len(input.RemoveChanges) == 0 && len(input.AddChanges) == 0 && len(input.CreateFolderChanges) == 0 {
 		state, err := s.OpenProjectBrowser(ctx, OpenProjectBrowserInput{
 			ProjectID:     input.ProjectID,
 			Password:      input.Password,
@@ -67,8 +68,8 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		}
 	}
 
-	contentOperations := make([]ProjectContentOperation, 0, len(input.MoveChanges)+len(input.RemoveChanges)+len(input.AddChanges))
-	appliedContentChanges := make([]ProjectContentOperation, 0, len(input.MoveChanges)+len(input.RemoveChanges)+len(input.AddChanges))
+	contentOperations := make([]ProjectContentOperation, 0, len(input.MoveChanges)+len(input.RemoveChanges)+len(input.AddChanges)+len(input.CreateFolderChanges))
+	appliedContentChanges := make([]ProjectContentOperation, 0, len(input.MoveChanges)+len(input.RemoveChanges)+len(input.AddChanges)+len(input.CreateFolderChanges))
 
 	moveChanges := sortedMoveChanges(input.MoveChanges)
 	seenMoves := make(map[string]struct{}, len(moveChanges))
@@ -146,13 +147,39 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		}
 	}
 
-	addResult, err := s.applyProjectAddChanges(ctx, store, input, contentConnected)
+	stagedContentPath := ""
+	if len(input.AddChanges) > 0 || len(input.CreateFolderChanges) > 0 {
+		stagedContentPath, err = s.prepareProjectChangeStaging(input.ProjectID)
+		if err != nil {
+			return ApplyProjectChangesResult{}, err
+		}
+	}
+
+	addResult, err := s.applyProjectAddChanges(ctx, store, input, stagedContentPath, contentConnected)
 	if err != nil {
 		return ApplyProjectChangesResult{}, err
 	}
 	if len(addResult.ContentOperations) > 0 {
 		contentOperations = append(contentOperations, addResult.ContentOperations...)
 		appliedContentChanges = append(appliedContentChanges, addResult.AppliedContentChanges...)
+	}
+
+	createFolderResult, err := s.applyProjectCreateFolderChanges(ctx, store, input, stagedContentPath, contentConnected)
+	if err != nil {
+		return ApplyProjectChangesResult{}, err
+	}
+	createFolderChanges := sortedCreateFolderChanges(input.CreateFolderChanges)
+	if len(createFolderResult.ContentOperations) > 0 {
+		contentOperations = append(contentOperations, createFolderResult.ContentOperations...)
+		appliedContentChanges = append(appliedContentChanges, createFolderResult.AppliedContentChanges...)
+	}
+
+	resultStagedContentPath := stagedContentPath
+	if contentConnected && stagedContentPath != "" {
+		if err := os.RemoveAll(stagedContentPath); err != nil {
+			return ApplyProjectChangesResult{}, fmt.Errorf("remove uploaded staging content: %w", err)
+		}
+		resultStagedContentPath = ""
 	}
 
 	operationGuidePath := ""
@@ -187,8 +214,9 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		AppliedMoves:          len(moveChanges),
 		AppliedRemoves:        len(removeChanges),
 		AppliedAdds:           len(input.AddChanges),
+		AppliedCreatedFolders: len(createFolderChanges),
 		OperationGuidePath:    operationGuidePath,
-		StagedContentPath:     addResult.StagedContentPath,
+		StagedContentPath:     resultStagedContentPath,
 		ContentOperations:     contentOperations,
 		AppliedContentChanges: appliedContentChanges,
 		BrowserState:          state,
@@ -215,6 +243,14 @@ func sortedRemoveChanges(changes []ProjectRemoveChange) []ProjectRemoveChange {
 	sorted := append([]ProjectRemoveChange(nil), changes...)
 	sort.SliceStable(sorted, func(i, j int) bool {
 		return pathDepthForApply(sorted[i].ItemPath) > pathDepthForApply(sorted[j].ItemPath)
+	})
+	return sorted
+}
+
+func sortedCreateFolderChanges(changes []ProjectCreateFolderChange) []ProjectCreateFolderChange {
+	sorted := append([]ProjectCreateFolderChange(nil), changes...)
+	sort.SliceStable(sorted, func(i, j int) bool {
+		return pathDepthForApply(sorted[i].TargetFolderPath) < pathDepthForApply(sorted[j].TargetFolderPath)
 	})
 	return sorted
 }

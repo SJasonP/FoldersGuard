@@ -1,8 +1,9 @@
 import type { TreeSelectProps } from 'antd';
 import type { ProjectBrowserItemModel } from '../../types';
-import type { PendingAdd, PendingMove, PendingRename } from '../../hooks/useProjectBrowser';
+import type { PendingAdd, PendingCreateFolder, PendingMove, PendingRename } from '../../hooks/useProjectBrowser';
 import { AddItemModal } from './AddItemModal';
 import { ApplyChangesModal } from './ApplyChangesModal';
+import { CreateFolderModal } from './CreateFolderModal';
 import { MoveItemModal } from './MoveItemModal';
 import { RenameItemModal } from './RenameItemModal';
 
@@ -11,8 +12,10 @@ type ProjectBrowserModalsProps = {
   applyConfirmOpen: boolean;
   applyLoading: boolean;
   contentConnected: boolean;
+  createFolderOpen: boolean;
   moveOpen: boolean;
   pendingAddCount: number;
+  pendingCreateFolderCount: number;
   pendingMoveCount: number;
   pendingRemoveCount: number;
   pendingRenameCount: number;
@@ -25,8 +28,10 @@ type ProjectBrowserModalsProps = {
   onApply: () => void;
   onCloseAdd: () => void;
   onCloseApplyConfirm: () => void;
+  onCloseCreateFolder: () => void;
   onCloseMove: () => void;
   onCloseRename: () => void;
+  onCreateFolder: (createFolder: PendingCreateFolder) => void;
   onMove: (move: PendingMove) => void;
   onRename: (rename: PendingRename) => void;
   t: (key: string) => string;
@@ -37,8 +42,10 @@ export function ProjectBrowserModals({
   applyConfirmOpen,
   applyLoading,
   contentConnected,
+  createFolderOpen,
   moveOpen,
   pendingAddCount,
+  pendingCreateFolderCount,
   pendingMoveCount,
   pendingRemoveCount,
   pendingRenameCount,
@@ -51,8 +58,10 @@ export function ProjectBrowserModals({
   onApply,
   onCloseAdd,
   onCloseApplyConfirm,
+  onCloseCreateFolder,
   onCloseMove,
   onCloseRename,
+  onCreateFolder,
   onMove,
   onRename,
   t,
@@ -93,6 +102,22 @@ export function ProjectBrowserModals({
         }}
         t={t}
       />
+      <CreateFolderModal
+        open={createFolderOpen}
+        loading={applyLoading}
+        onCancel={onCloseCreateFolder}
+        onSubmit={(values) => {
+          if (targetFolder) {
+            onCreateFolder({
+              itemId: crypto.randomUUID(),
+              targetFolderPath: targetFolder.path,
+              name: values.name,
+            });
+          }
+          onCloseCreateFolder();
+        }}
+        t={t}
+      />
       <MoveItemModal
         open={moveOpen}
         item={selectedItem}
@@ -118,6 +143,7 @@ export function ProjectBrowserModals({
         moveCount={pendingMoveCount}
         removeCount={pendingRemoveCount}
         addCount={pendingAddCount}
+        createFolderCount={pendingCreateFolderCount}
         contentConnected={contentConnected}
         onCancel={onCloseApplyConfirm}
         onConfirm={() => {

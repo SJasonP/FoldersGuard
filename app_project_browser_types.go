@@ -55,6 +55,11 @@ type ProjectAddChange struct {
 	MaxPartSize      int64  `json:"maxPartSize"`
 }
 
+type ProjectCreateFolderChange struct {
+	TargetFolderPath string `json:"targetFolderPath"`
+	Name             string `json:"name"`
+}
+
 type ProjectContentOperation struct {
 	Type       string `json:"type"`
 	SourcePath string `json:"sourcePath"`
@@ -62,13 +67,14 @@ type ProjectContentOperation struct {
 }
 
 type ApplyProjectChangesRequest struct {
-	ProjectID     string                `json:"projectId"`
-	Password      string                `json:"password"`
-	EncryptedPath string                `json:"encryptedPath"`
-	RenameChanges []ProjectRenameChange `json:"renameChanges"`
-	MoveChanges   []ProjectMoveChange   `json:"moveChanges"`
-	RemoveChanges []ProjectRemoveChange `json:"removeChanges"`
-	AddChanges    []ProjectAddChange    `json:"addChanges"`
+	ProjectID           string                      `json:"projectId"`
+	Password            string                      `json:"password"`
+	EncryptedPath       string                      `json:"encryptedPath"`
+	RenameChanges       []ProjectRenameChange       `json:"renameChanges"`
+	MoveChanges         []ProjectMoveChange         `json:"moveChanges"`
+	RemoveChanges       []ProjectRemoveChange       `json:"removeChanges"`
+	AddChanges          []ProjectAddChange          `json:"addChanges"`
+	CreateFolderChanges []ProjectCreateFolderChange `json:"createFolderChanges"`
 }
 
 type ApplyProjectChangesResult struct {
@@ -77,6 +83,7 @@ type ApplyProjectChangesResult struct {
 	AppliedMoves          int                       `json:"appliedMoves"`
 	AppliedRemoves        int                       `json:"appliedRemoves"`
 	AppliedAdds           int                       `json:"appliedAdds"`
+	AppliedCreatedFolders int                       `json:"appliedCreatedFolders"`
 	OperationGuidePath    string                    `json:"operationGuidePath"`
 	StagedContentPath     string                    `json:"stagedContentPath"`
 	ContentOperations     []ProjectContentOperation `json:"contentOperations"`

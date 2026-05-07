@@ -24,6 +24,20 @@ export namespace main {
 	        this.cliShortAlias = source["cliShortAlias"];
 	    }
 	}
+	export class ProjectCreateFolderChange {
+	    targetFolderPath: string;
+	    name: string;
+
+	    static createFrom(source: any = {}) {
+	        return new ProjectCreateFolderChange(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.targetFolderPath = source["targetFolderPath"];
+	        this.name = source["name"];
+	    }
+	}
 	export class ProjectAddChange {
 	    sourcePath: string;
 	    targetFolderPath: string;
@@ -88,6 +102,7 @@ export namespace main {
 	    moveChanges: ProjectMoveChange[];
 	    removeChanges: ProjectRemoveChange[];
 	    addChanges: ProjectAddChange[];
+	    createFolderChanges: ProjectCreateFolderChange[];
 
 	    static createFrom(source: any = {}) {
 	        return new ApplyProjectChangesRequest(source);
@@ -102,6 +117,7 @@ export namespace main {
 	        this.moveChanges = this.convertValues(source["moveChanges"], ProjectMoveChange);
 	        this.removeChanges = this.convertValues(source["removeChanges"], ProjectRemoveChange);
 	        this.addChanges = this.convertValues(source["addChanges"], ProjectAddChange);
+	        this.createFolderChanges = this.convertValues(source["createFolderChanges"], ProjectCreateFolderChange);
 	    }
 
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -228,6 +244,7 @@ export namespace main {
 	    appliedMoves: number;
 	    appliedRemoves: number;
 	    appliedAdds: number;
+	    appliedCreatedFolders: number;
 	    operationGuidePath: string;
 	    stagedContentPath: string;
 	    contentOperations: ProjectContentOperation[];
@@ -245,6 +262,7 @@ export namespace main {
 	        this.appliedMoves = source["appliedMoves"];
 	        this.appliedRemoves = source["appliedRemoves"];
 	        this.appliedAdds = source["appliedAdds"];
+	        this.appliedCreatedFolders = source["appliedCreatedFolders"];
 	        this.operationGuidePath = source["operationGuidePath"];
 	        this.stagedContentPath = source["stagedContentPath"];
 	        this.contentOperations = this.convertValues(source["contentOperations"], ProjectContentOperation);
@@ -694,6 +712,7 @@ export namespace main {
 	        this.encryptedPath = source["encryptedPath"];
 	    }
 	}
+
 
 
 

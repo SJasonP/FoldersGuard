@@ -2,7 +2,7 @@ import { ApplyChangesResultDrawer } from './ApplyChangesResultDrawer';
 import { OpenProjectModal } from './OpenProjectModal';
 import { ProjectBrowserDrawer } from './ProjectBrowserDrawer';
 import type { ApplyProjectChangesResultModel, ProjectBrowserStateModel } from '../../types';
-import type { PendingAdd, PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
+import type { PendingAdd, PendingCreateFolder, PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
 
 type ProjectBrowserLayerProps = {
   openProjectDialogOpen: boolean;
@@ -16,11 +16,13 @@ type ProjectBrowserLayerProps = {
   pendingMoves: PendingMove[];
   pendingRemoves: PendingRemove[];
   pendingAdds: PendingAdd[];
+  pendingCreateFolders: PendingCreateFolder[];
   onCloseOpenProject: () => void;
   onOpenProject: (values: { password: string; encryptedPath: string }) => void;
   onCloseBrowser: () => void;
   onCloseApplyResult: () => void;
   onAdd: (add: PendingAdd) => void;
+  onCreateFolder: (createFolder: PendingCreateFolder) => void;
   onRename: (rename: PendingRename) => void;
   onMove: (move: PendingMove) => void;
   onRemove: (remove: PendingRemove) => void;
@@ -28,6 +30,7 @@ type ProjectBrowserLayerProps = {
   onDiscardMove: (itemId: string) => void;
   onDiscardRemove: (itemId: string) => void;
   onDiscardAdd: (itemId: string) => void;
+  onDiscardCreateFolder: (itemId: string) => void;
   onDiscardAll: () => void;
   onApply: () => void;
   t: (key: string) => string;
@@ -45,11 +48,13 @@ export function ProjectBrowserLayer({
   pendingMoves,
   pendingRemoves,
   pendingAdds,
+  pendingCreateFolders,
   onCloseOpenProject,
   onOpenProject,
   onCloseBrowser,
   onCloseApplyResult,
   onAdd,
+  onCreateFolder,
   onRename,
   onMove,
   onRemove,
@@ -57,6 +62,7 @@ export function ProjectBrowserLayer({
   onDiscardMove,
   onDiscardRemove,
   onDiscardAdd,
+  onDiscardCreateFolder,
   onDiscardAll,
   onApply,
   t,
@@ -77,9 +83,11 @@ export function ProjectBrowserLayer({
         pendingMoves={pendingMoves}
         pendingRemoves={pendingRemoves}
         pendingAdds={pendingAdds}
+        pendingCreateFolders={pendingCreateFolders}
         applyLoading={applyLoading}
         onClose={onCloseBrowser}
         onAdd={onAdd}
+        onCreateFolder={onCreateFolder}
         onRename={onRename}
         onMove={onMove}
         onRemove={onRemove}
@@ -87,6 +95,7 @@ export function ProjectBrowserLayer({
         onDiscardMove={onDiscardMove}
         onDiscardRemove={onDiscardRemove}
         onDiscardAdd={onDiscardAdd}
+        onDiscardCreateFolder={onDiscardCreateFolder}
         onDiscardAll={onDiscardAll}
         onApply={onApply}
         t={t}

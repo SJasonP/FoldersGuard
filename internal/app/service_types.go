@@ -243,6 +243,11 @@ type ProjectAddChange struct {
 	MaxPartSize      int64
 }
 
+type ProjectCreateFolderChange struct {
+	TargetFolderPath string
+	Name             string
+}
+
 type ProjectContentOperation struct {
 	Type       string
 	SourcePath string
@@ -250,13 +255,14 @@ type ProjectContentOperation struct {
 }
 
 type ApplyProjectChangesInput struct {
-	ProjectID     string
-	Password      string
-	EncryptedRoot string
-	RenameChanges []ProjectRenameChange
-	MoveChanges   []ProjectMoveChange
-	RemoveChanges []ProjectRemoveChange
-	AddChanges    []ProjectAddChange
+	ProjectID           string
+	Password            string
+	EncryptedRoot       string
+	RenameChanges       []ProjectRenameChange
+	MoveChanges         []ProjectMoveChange
+	RemoveChanges       []ProjectRemoveChange
+	AddChanges          []ProjectAddChange
+	CreateFolderChanges []ProjectCreateFolderChange
 }
 
 type ApplyProjectChangesResult struct {
@@ -265,6 +271,7 @@ type ApplyProjectChangesResult struct {
 	AppliedMoves          int
 	AppliedRemoves        int
 	AppliedAdds           int
+	AppliedCreatedFolders int
 	OperationGuidePath    string
 	StagedContentPath     string
 	ContentOperations     []ProjectContentOperation

@@ -267,6 +267,105 @@ func TestServiceApplyProjectRemoveConnectedContentMissingBlocksMetadataChange(t 
 	}
 }
 
+func TestServiceApplyProjectCreateFolderChange(t *testing.T) {
+	ctx := context.Background()
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	encrypted := filepath.Join(root, "encrypted")
+	dataDir := filepath.Join(root, "data")
+	password := "project-password"
+
+	if err := os.MkdirAll(filepath.Join(source, "docs"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "docs", "note.txt"), []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	service, err := NewService(dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	created, err := service.CreateProject(ctx, CreateProjectInput{
+		SourcePath:    source,
+		ContentOutput: encrypted,
+		Password:      password,
+		SourceCleanup: SourceCleanupKeep,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := service.ApplyProjectChanges(ctx, ApplyProjectChangesInput{
+		ProjectID: created.ProjectID,
+		Password:  password,
+		CreateFolderChanges: []ProjectCreateFolderChange{{
+			TargetFolderPath: "source/docs",
+			Name:             "empty",
+		}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.AppliedCreatedFolders != 1 || result.OperationGuidePath == "" || result.StagedContentPath == "" || len(result.ContentOperations) != 1 {
+		t.Fatalf("apply result = %+v", result)
+	}
+	if !browserHasPath(result.BrowserState, "source/docs/empty") {
+		t.Fatalf("browser state missing created folder: %+v", result.BrowserState.Items)
+	}
+	assertExists(t, filepath.Join(result.StagedContentPath, filepath.FromSlash(result.ContentOperations[0].SourcePath)))
+}
+
+func TestServiceApplyProjectCreateFolderUploadsConnectedContent(t *testing.T) {
+	ctx := context.Background()
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	encrypted := filepath.Join(root, "encrypted")
+	dataDir := filepath.Join(root, "data")
+	password := "project-password"
+
+	if err := os.MkdirAll(source, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "note.txt"), []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	service, err := NewService(dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	created, err := service.CreateProject(ctx, CreateProjectInput{
+		SourcePath:    source,
+		ContentOutput: encrypted,
+		Password:      password,
+		SourceCleanup: SourceCleanupKeep,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := service.ApplyProjectChanges(ctx, ApplyProjectChangesInput{
+		ProjectID:     created.ProjectID,
+		Password:      password,
+		EncryptedRoot: encrypted,
+		CreateFolderChanges: []ProjectCreateFolderChange{{
+			TargetFolderPath: "source",
+			Name:             "empty",
+		}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.AppliedCreatedFolders != 1 || result.OperationGuidePath != "" || result.StagedContentPath != "" || len(result.AppliedContentChanges) != 1 {
+		t.Fatalf("apply result = %+v", result)
+	}
+	if !browserHasPath(result.BrowserState, "source/empty") {
+		t.Fatalf("browser state missing created folder: %+v", result.BrowserState.Items)
+	}
+	assertExists(t, filepath.Join(encrypted, filepath.FromSlash(result.AppliedContentChanges[0].TargetPath)))
+}
+
 func browserHasPath(state ProjectBrowserState, path string) bool {
 	for _, item := range state.Items {
 		if item.Path == path {

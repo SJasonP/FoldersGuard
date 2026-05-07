@@ -5,7 +5,7 @@ import { ProjectBrowserDetailsPanel } from './ProjectBrowserDetailsPanel';
 import { ProjectBrowserItemTable } from './ProjectBrowserItemTable';
 import { ProjectBrowserModals } from './ProjectBrowserModals';
 import { ProjectBrowserPendingChanges } from './ProjectBrowserPendingChanges';
-import type { PendingAdd, PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
+import type { PendingAdd, PendingCreateFolder, PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
 import {
   buildFolderTree,
   buildSelectableFolderTree,
@@ -22,9 +22,11 @@ type ProjectBrowserDrawerProps = {
   pendingMoves: PendingMove[];
   pendingRemoves: PendingRemove[];
   pendingAdds: PendingAdd[];
+  pendingCreateFolders: PendingCreateFolder[];
   applyLoading: boolean;
   onClose: () => void;
   onAdd: (add: PendingAdd) => void;
+  onCreateFolder: (createFolder: PendingCreateFolder) => void;
   onRename: (rename: PendingRename) => void;
   onMove: (move: PendingMove) => void;
   onRemove: (remove: PendingRemove) => void;
@@ -32,6 +34,7 @@ type ProjectBrowserDrawerProps = {
   onDiscardMove: (itemId: string) => void;
   onDiscardRemove: (itemId: string) => void;
   onDiscardAdd: (itemId: string) => void;
+  onDiscardCreateFolder: (itemId: string) => void;
   onDiscardAll: () => void;
   onApply: () => void;
   t: (key: string) => string;
@@ -44,9 +47,11 @@ export function ProjectBrowserDrawer({
   pendingMoves,
   pendingRemoves,
   pendingAdds,
+  pendingCreateFolders,
   applyLoading,
   onClose,
   onAdd,
+  onCreateFolder,
   onRename,
   onMove,
   onRemove,
@@ -54,6 +59,7 @@ export function ProjectBrowserDrawer({
   onDiscardMove,
   onDiscardRemove,
   onDiscardAdd,
+  onDiscardCreateFolder,
   onDiscardAll,
   onApply,
   t,
@@ -62,6 +68,7 @@ export function ProjectBrowserDrawer({
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<ProjectBrowserItemModel | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [createFolderOpen, setCreateFolderOpen] = useState(false);
   const [applyConfirmOpen, setApplyConfirmOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
   const [moveOpen, setMoveOpen] = useState(false);
@@ -102,7 +109,7 @@ export function ProjectBrowserDrawer({
     () => filteredFolderItems(state?.items ?? [], activeFolderId, searchQuery, pendingByID),
     [activeFolderId, pendingByID, searchQuery, state?.items],
   );
-  const pendingCount = pendingRenames.length + pendingMoves.length + pendingRemoves.length + pendingAdds.length;
+  const pendingCount = pendingRenames.length + pendingMoves.length + pendingRemoves.length + pendingAdds.length + pendingCreateFolders.length;
   const selectFolder = (folderID: string) => {
     setSelectedFolderId(folderID);
     setSelectedItem(null);
@@ -162,6 +169,7 @@ export function ProjectBrowserDrawer({
               onSearchChange={setSearchQuery}
               onSelectItem={setSelectedItem}
               onOpenAdd={() => setAddOpen(true)}
+              onOpenCreateFolder={() => setCreateFolderOpen(true)}
               onOpenRename={() => setRenameOpen(true)}
               onOpenMove={() => setMoveOpen(true)}
               onRemove={() => {
@@ -187,10 +195,12 @@ export function ProjectBrowserDrawer({
             pendingMoves={pendingMoves}
             pendingRemoves={pendingRemoves}
             pendingAdds={pendingAdds}
+            pendingCreateFolders={pendingCreateFolders}
             onDiscardRename={onDiscardRename}
             onDiscardMove={onDiscardMove}
             onDiscardRemove={onDiscardRemove}
             onDiscardAdd={onDiscardAdd}
+            onDiscardCreateFolder={onDiscardCreateFolder}
             t={t}
           />
           <ProjectBrowserModals
@@ -198,8 +208,10 @@ export function ProjectBrowserDrawer({
             applyConfirmOpen={applyConfirmOpen}
             applyLoading={applyLoading}
             contentConnected={state.contentConnected}
+            createFolderOpen={createFolderOpen}
             moveOpen={moveOpen}
             pendingAddCount={pendingAdds.length}
+            pendingCreateFolderCount={pendingCreateFolders.length}
             pendingMoveCount={pendingMoves.length}
             pendingRemoveCount={pendingRemoves.length}
             pendingRenameCount={pendingRenames.length}
@@ -210,10 +222,12 @@ export function ProjectBrowserDrawer({
             targetFolder={itemsByID.get(activeFolderId) ?? null}
             onAdd={onAdd}
             onApply={onApply}
+            onCloseCreateFolder={() => setCreateFolderOpen(false)}
             onCloseAdd={() => setAddOpen(false)}
             onCloseApplyConfirm={() => setApplyConfirmOpen(false)}
             onCloseMove={() => setMoveOpen(false)}
             onCloseRename={() => setRenameOpen(false)}
+            onCreateFolder={onCreateFolder}
             onMove={onMove}
             onRename={onRename}
             t={t}

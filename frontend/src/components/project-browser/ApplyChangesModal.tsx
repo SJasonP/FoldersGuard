@@ -7,6 +7,7 @@ type ApplyChangesModalProps = {
   moveCount: number;
   removeCount: number;
   addCount: number;
+  createFolderCount: number;
   contentConnected: boolean;
   onCancel: () => void;
   onConfirm: () => void;
@@ -20,6 +21,7 @@ export function ApplyChangesModal({
   moveCount,
   removeCount,
   addCount,
+  createFolderCount,
   contentConnected,
   onCancel,
   onConfirm,
@@ -40,6 +42,7 @@ export function ApplyChangesModal({
         <Descriptions.Item label={t('pendingMove')}>{moveCount}</Descriptions.Item>
         <Descriptions.Item label={t('pendingRemove')}>{removeCount}</Descriptions.Item>
         <Descriptions.Item label={t('pendingAdd')}>{addCount}</Descriptions.Item>
+        <Descriptions.Item label={t('pendingCreateFolder')}>{createFolderCount}</Descriptions.Item>
         <Descriptions.Item label={t('contentConnected')}>
           {contentConnected ? t('passwordProtectedYes') : t('passwordProtectedNo')}
         </Descriptions.Item>

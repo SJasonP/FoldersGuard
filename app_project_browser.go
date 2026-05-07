@@ -47,14 +47,22 @@ func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProj
 			MaxPartSize:      change.MaxPartSize,
 		})
 	}
+	createFolders := make([]app.ProjectCreateFolderChange, 0, len(request.CreateFolderChanges))
+	for _, change := range request.CreateFolderChanges {
+		createFolders = append(createFolders, app.ProjectCreateFolderChange{
+			TargetFolderPath: change.TargetFolderPath,
+			Name:             change.Name,
+		})
+	}
 	result, err := a.service.ApplyProjectChanges(a.ctx, app.ApplyProjectChangesInput{
-		ProjectID:     request.ProjectID,
-		Password:      request.Password,
-		EncryptedRoot: request.EncryptedPath,
-		RenameChanges: renames,
-		MoveChanges:   moves,
-		RemoveChanges: removes,
-		AddChanges:    adds,
+		ProjectID:           request.ProjectID,
+		Password:            request.Password,
+		EncryptedRoot:       request.EncryptedPath,
+		RenameChanges:       renames,
+		MoveChanges:         moves,
+		RemoveChanges:       removes,
+		AddChanges:          adds,
+		CreateFolderChanges: createFolders,
 	})
 	if err != nil {
 		return ApplyProjectChangesResult{}, err
@@ -65,6 +73,7 @@ func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProj
 		AppliedMoves:          result.AppliedMoves,
 		AppliedRemoves:        result.AppliedRemoves,
 		AppliedAdds:           result.AppliedAdds,
+		AppliedCreatedFolders: result.AppliedCreatedFolders,
 		OperationGuidePath:    result.OperationGuidePath,
 		StagedContentPath:     result.StagedContentPath,
 		ContentOperations:     projectContentOperationsFromApp(result.ContentOperations),

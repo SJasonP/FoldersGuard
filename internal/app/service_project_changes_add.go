@@ -15,21 +15,15 @@ import (
 )
 
 type projectAddApplyResult struct {
-	StagedContentPath     string
 	ContentOperations     []ProjectContentOperation
 	AppliedContentChanges []ProjectContentOperation
 }
 
-func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Store, input ApplyProjectChangesInput, contentConnected bool) (projectAddApplyResult, error) {
+func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Store, input ApplyProjectChangesInput, stagedContentPath string, contentConnected bool) (projectAddApplyResult, error) {
 	if len(input.AddChanges) == 0 {
 		return projectAddApplyResult{}, nil
 	}
-
-	stagedContentPath, err := s.prepareProjectChangeStaging(input.ProjectID)
-	if err != nil {
-		return projectAddApplyResult{}, err
-	}
-	result := projectAddApplyResult{StagedContentPath: stagedContentPath}
+	result := projectAddApplyResult{}
 
 	seenAdds := make(map[string]struct{}, len(input.AddChanges))
 	for _, change := range input.AddChanges {
@@ -53,12 +47,6 @@ func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Stor
 		result.AppliedContentChanges = append(result.AppliedContentChanges, operations.AppliedContentChanges...)
 	}
 
-	if contentConnected {
-		if err := os.RemoveAll(stagedContentPath); err != nil {
-			return projectAddApplyResult{}, fmt.Errorf("remove uploaded staging content: %w", err)
-		}
-		result.StagedContentPath = ""
-	}
 	return result, nil
 }
 

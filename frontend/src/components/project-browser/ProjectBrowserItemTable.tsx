@@ -16,6 +16,7 @@ type ProjectBrowserItemTableProps = {
   onSearchChange: (value: string) => void;
   onSelectItem: (item: ProjectBrowserItemModel | null) => void;
   onOpenAdd: () => void;
+  onOpenCreateFolder: () => void;
   onOpenRename: () => void;
   onOpenMove: () => void;
   onRemove: () => void;
@@ -36,6 +37,7 @@ export function ProjectBrowserItemTable({
   onSearchChange,
   onSelectItem,
   onOpenAdd,
+  onOpenCreateFolder,
   onOpenRename,
   onOpenMove,
   onRemove,
@@ -77,6 +79,9 @@ export function ProjectBrowserItemTable({
         <Space>
           <Button onClick={onOpenAdd}>
             {t('addItem')}
+          </Button>
+          <Button onClick={onOpenCreateFolder}>
+            {t('createFolder')}
           </Button>
           <Button onClick={onOpenRename} disabled={selectedIsRoot}>
             {t('renameItem')}

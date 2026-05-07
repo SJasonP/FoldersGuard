@@ -29,6 +29,12 @@ export type PendingAdd = {
   maxPartSize: number;
 };
 
+export type PendingCreateFolder = {
+  itemId: string;
+  targetFolderPath: string;
+  name: string;
+};
+
 type UseProjectBrowserArgs = {
   messageApi: MessageInstance;
   t: (key: string) => string;
@@ -49,6 +55,7 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
   const [pendingMoves, setPendingMoves] = useState<PendingMove[]>([]);
   const [pendingRemoves, setPendingRemoves] = useState<PendingRemove[]>([]);
   const [pendingAdds, setPendingAdds] = useState<PendingAdd[]>([]);
+  const [pendingCreateFolders, setPendingCreateFolders] = useState<PendingCreateFolder[]>([]);
 
   const handleOpenProjectBrowser = async (values: { password: string; encryptedPath: string }) => {
     if (!selectedProjectId) {
@@ -72,6 +79,7 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
       setPendingMoves([]);
       setPendingRemoves([]);
       setPendingAdds([]);
+      setPendingCreateFolders([]);
       messageApi.success(t('openProjectSucceeded'));
     } catch {
       messageApi.error(t('openProjectFailed'));
@@ -100,6 +108,10 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
     setPendingAdds((current) => [...current.filter((item) => item.itemId !== add.itemId), add]);
   };
 
+  const addPendingCreateFolder = (createFolder: PendingCreateFolder) => {
+    setPendingCreateFolders((current) => [...current.filter((item) => item.itemId !== createFolder.itemId), createFolder]);
+  };
+
   const discardPendingRename = (itemId: string) => {
     setPendingRenames((current) => current.filter((item) => item.itemId !== itemId));
   };
@@ -116,11 +128,16 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
     setPendingAdds((current) => current.filter((item) => item.itemId !== itemId));
   };
 
+  const discardPendingCreateFolder = (itemId: string) => {
+    setPendingCreateFolders((current) => current.filter((item) => item.itemId !== itemId));
+  };
+
   const discardAllPendingChanges = () => {
     setPendingRenames([]);
     setPendingMoves([]);
     setPendingRemoves([]);
     setPendingAdds([]);
+    setPendingCreateFolders([]);
   };
 
   const handleApplyProjectChanges = async () => {
@@ -149,6 +166,10 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
           targetFolderPath: add.targetFolderPath,
           maxPartSize: add.maxPartSize,
         })),
+        createFolderChanges: pendingCreateFolders.map((createFolder) => ({
+          targetFolderPath: createFolder.targetFolderPath,
+          name: createFolder.name,
+        })),
       }));
       setBrowserState(result.browserState);
       setApplyResult(result);
@@ -157,6 +178,7 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
       setPendingMoves([]);
       setPendingRemoves([]);
       setPendingAdds([]);
+      setPendingCreateFolders([]);
       messageApi.success(t('applyChangesSucceeded'));
       if (result.operationGuidePath) {
         messageApi.info(`${t('operationGuidePath')}: ${result.operationGuidePath}`);
@@ -179,6 +201,7 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
     setPendingMoves([]);
     setPendingRemoves([]);
     setPendingAdds([]);
+    setPendingCreateFolders([]);
   };
 
   return {
@@ -193,6 +216,7 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
     pendingMoves,
     pendingRemoves,
     pendingAdds,
+    pendingCreateFolders,
     setOpenProjectDialogOpen,
     setBrowserOpen,
     setApplyResultOpen,
@@ -200,10 +224,12 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
     addPendingMove,
     addPendingRemove,
     addPendingAdd,
+    addPendingCreateFolder,
     discardPendingRename,
     discardPendingMove,
     discardPendingRemove,
     discardPendingAdd,
+    discardPendingCreateFolder,
     discardAllPendingChanges,
     handleApplyProjectChanges,
     handleOpenProjectBrowser,

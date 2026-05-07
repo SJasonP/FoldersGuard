@@ -1,15 +1,17 @@
 import { Button, List, Typography } from 'antd';
-import type { PendingAdd, PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
+import type { PendingAdd, PendingCreateFolder, PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
 
 type ProjectBrowserPendingChangesProps = {
   pendingRenames: PendingRename[];
   pendingMoves: PendingMove[];
   pendingRemoves: PendingRemove[];
   pendingAdds: PendingAdd[];
+  pendingCreateFolders: PendingCreateFolder[];
   onDiscardRename: (itemId: string) => void;
   onDiscardMove: (itemId: string) => void;
   onDiscardRemove: (itemId: string) => void;
   onDiscardAdd: (itemId: string) => void;
+  onDiscardCreateFolder: (itemId: string) => void;
   t: (key: string) => string;
 };
 
@@ -25,10 +27,12 @@ export function ProjectBrowserPendingChanges({
   pendingMoves,
   pendingRemoves,
   pendingAdds,
+  pendingCreateFolders,
   onDiscardRename,
   onDiscardMove,
   onDiscardRemove,
   onDiscardAdd,
+  onDiscardCreateFolder,
   t,
 }: ProjectBrowserPendingChangesProps) {
   const rows: PendingChangeRow[] = [
@@ -37,6 +41,12 @@ export function ProjectBrowserPendingChanges({
       itemId: add.itemId,
       label: `${t('pendingAdd')}: ${add.sourcePath} -> ${add.targetFolderPath}`,
       onDiscard: onDiscardAdd,
+    })),
+    ...pendingCreateFolders.map((createFolder) => ({
+      key: `create-folder:${createFolder.itemId}`,
+      itemId: createFolder.itemId,
+      label: `${t('pendingCreateFolder')}: ${createFolder.targetFolderPath} -> ${createFolder.name}`,
+      onDiscard: onDiscardCreateFolder,
     })),
     ...pendingRenames.map((rename) => ({
       key: `rename:${rename.itemId}`,
