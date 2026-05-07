@@ -1,16 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { App as AntApp, Button, ConfigProvider, Layout, Menu, Space, Typography } from 'antd';
+import { App as AntApp, ConfigProvider } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import {
-  FolderAddOutlined,
-  HomeOutlined,
-  ImportOutlined,
-  InfoCircleOutlined,
-  ReloadOutlined,
-  SettingOutlined,
-  ShareAltOutlined,
-} from '@ant-design/icons';
 import enUS from 'antd/locale/en_US';
 import zhCN from 'antd/locale/zh_CN';
 import { AppInfo } from '../wailsjs/go/main/App';
@@ -27,17 +18,10 @@ import { useShareActions } from './hooks/useShareActions';
 import { HomeView } from './views/HomeView';
 import { SettingsView } from './views/SettingsView';
 import { AboutView } from './views/AboutView';
-import { CreateProjectModal } from './components/project-actions/CreateProjectModal';
-import { ImportProjectModal } from './components/project-actions/ImportProjectModal';
-import { ProjectActionsDrawer } from './components/project-actions/ProjectActionsDrawer';
-import { InspectProjectModal } from './components/project-actions/InspectProjectModal';
-import { InspectProjectDrawer } from './components/project-actions/InspectProjectDrawer';
-import { VerifyProjectModal } from './components/project-actions/VerifyProjectModal';
-import { VerifyProjectDrawer } from './components/project-actions/VerifyProjectDrawer';
-import { ExportProjectModal } from './components/project-actions/ExportProjectModal';
-import { DeleteProjectModal } from './components/project-actions/DeleteProjectModal';
 import { LoadShareModal } from './components/share-actions/LoadShareModal';
 import { ShareSessionLayer } from './components/share-actions/ShareSessionLayer';
+import { AppShell } from './components/app/AppShell';
+import { ProjectSessionLayer } from './components/project-actions/ProjectSessionLayer';
 
 const antLocales: Record<SupportedLanguage, typeof enUS> = {
   'en-US': enUS,
@@ -207,96 +191,83 @@ function App() {
       }}
     >
       <AntApp>
-        <Layout className="app-shell">
-          <Layout.Sider width={236} className="app-sidebar">
-            <div className="app-brand">
-              <Typography.Title level={4}>{t('foldersGuard')}</Typography.Title>
-              <Typography.Text type="secondary">{t('startSubtitle')}</Typography.Text>
-            </div>
-            <Menu
-              mode="inline"
-              selectedKeys={[navigation]}
-              onClick={({ key }) => setNavigation(key as NavigationKey)}
-              items={[
-                { key: 'home', icon: <HomeOutlined />, label: t('home') },
-                { key: 'settings', icon: <SettingOutlined />, label: t('settings') },
-                { key: 'about', icon: <InfoCircleOutlined />, label: t('about') },
-              ]}
-            />
-          </Layout.Sider>
-          <Layout>
-            <Layout.Header className="app-header">
-              <Space>
-                <Button icon={<FolderAddOutlined />} type="primary" onClick={() => setCreateDialogOpen(true)}>
-                  {t('createProject')}
-                </Button>
-                <Button icon={<ImportOutlined />} onClick={() => setImportDialogOpen(true)}>
-                  {t('importProject')}
-                </Button>
-                <Button icon={<ShareAltOutlined />} onClick={() => setLoadShareDialogOpen(true)}>
-                  {t('loadShare')}
-                </Button>
-              </Space>
-              <Space>
-                <Button onClick={() => setLanguage(language === 'en-US' ? 'zh-CN' : 'en-US')}>
-                  {language}
-                </Button>
-              </Space>
-            </Layout.Header>
-            <Layout.Content className="app-content">
-              {navigation === 'home' && (
-                <HomeView
-                  columns={columns}
-                  loading={projectsLoading}
-                  projects={visibleProjects}
-                  projectSearch={projectSearch}
-                  projectsError={projectsError}
-                  selectedProjectId={selectedProjectId}
-                  onProjectSearchChange={setProjectSearch}
-                  onRefresh={() => void loadProjects()}
-                  onSelectProject={setSelectedProjectId}
-                  onOpenProjectActions={openProjectActions}
-                  t={t}
-                />
-              )}
-              {navigation === 'settings' && (
-                <SettingsView
-                  settings={settings}
-                  loading={settingsLoading}
-                  saving={settingsSaving}
-                  onSave={(values) => void handleSaveSettings(values)}
-                  onClearRecentPaths={() => void handleClearRecentPaths()}
-                  t={t}
-                />
-              )}
-              {navigation === 'about' && <AboutView info={info} t={t} />}
-            </Layout.Content>
-          </Layout>
-        </Layout>
-        <ProjectActionsDrawer
-          open={projectActionsOpen}
-          project={selectedProject}
-          onClose={() => setProjectActionsOpen(false)}
-          onInspect={() => setInspectDialogOpen(true)}
-          onVerify={() => setVerifyDialogOpen(true)}
-          onExport={() => setExportDialogOpen(true)}
-          onDelete={() => setDeleteDialogOpen(true)}
+        <AppShell
+          navigation={navigation}
+          onNavigationChange={setNavigation}
+          onCreateProject={() => setCreateDialogOpen(true)}
+          onImportProject={() => setImportDialogOpen(true)}
+          onLoadShare={() => setLoadShareDialogOpen(true)}
+          language={language}
+          onToggleLanguage={() => setLanguage(language === 'en-US' ? 'zh-CN' : 'en-US')}
           t={t}
-        />
-        <CreateProjectModal
-          open={createDialogOpen}
-          loading={createLoading}
+        >
+          {navigation === 'home' && (
+            <HomeView
+              columns={columns}
+              loading={projectsLoading}
+              projects={visibleProjects}
+              projectSearch={projectSearch}
+              projectsError={projectsError}
+              selectedProjectId={selectedProjectId}
+              onProjectSearchChange={setProjectSearch}
+              onRefresh={() => void loadProjects()}
+              onSelectProject={setSelectedProjectId}
+              onOpenProjectActions={openProjectActions}
+              t={t}
+            />
+          )}
+          {navigation === 'settings' && (
+            <SettingsView
+              settings={settings}
+              loading={settingsLoading}
+              saving={settingsSaving}
+              onSave={(values) => void handleSaveSettings(values)}
+              onClearRecentPaths={() => void handleClearRecentPaths()}
+              t={t}
+            />
+          )}
+          {navigation === 'about' && <AboutView info={info} t={t} />}
+        </AppShell>
+        <ProjectSessionLayer
+          createDialogOpen={createDialogOpen}
+          createLoading={createLoading}
           settings={settings}
           defaultSourceCleanup={defaultSourceCleanup}
-          onCancel={() => setCreateDialogOpen(false)}
-          onSubmit={(values) => void handleCreateProject(values)}
-          t={t}
-        />
-        <ImportProjectModal
-          open={importDialogOpen}
-          loading={importLoading}
-          onCancel={() => setImportDialogOpen(false)}
-          onSubmit={(values) => void handleImportProject(values)}
+          onCloseCreate={() => setCreateDialogOpen(false)}
+          onCreateProject={(values) => void handleCreateProject(values)}
+          importDialogOpen={importDialogOpen}
+          importLoading={importLoading}
+          onCloseImport={() => setImportDialogOpen(false)}
+          onImportProject={(values) => void handleImportProject(values)}
+          projectActionsOpen={projectActionsOpen}
+          selectedProject={selectedProject}
+          onCloseProjectActions={() => setProjectActionsOpen(false)}
+          onOpenInspect={() => setInspectDialogOpen(true)}
+          onOpenVerify={() => setVerifyDialogOpen(true)}
+          onOpenExport={() => setExportDialogOpen(true)}
+          onOpenDelete={() => setDeleteDialogOpen(true)}
+          inspectDialogOpen={inspectDialogOpen}
+          inspectLoading={inspectLoading}
+          onCloseInspect={() => setInspectDialogOpen(false)}
+          onInspectProject={(password) => void handleInspectProject(password)}
+          inspectResultOpen={inspectResultOpen}
+          inspectResult={inspectResult}
+          onCloseInspectResult={() => setInspectResultOpen(false)}
+          verifyDialogOpen={verifyDialogOpen}
+          verifyLoading={verifyLoading}
+          onCloseVerify={() => setVerifyDialogOpen(false)}
+          onVerifyProject={(values) => void handleVerifyProject(values)}
+          verifyResultOpen={verifyResultOpen}
+          verifyResult={verifyResult}
+          onCloseVerifyResult={() => setVerifyResultOpen(false)}
+          exportDialogOpen={exportDialogOpen}
+          exportLoading={exportLoading}
+          onCloseExport={() => setExportDialogOpen(false)}
+          onExportProject={(values) => void handleExportProject(values)}
+          deleteDialogOpen={deleteDialogOpen}
+          deleteLoading={deleteLoading}
+          onCloseDelete={() => setDeleteDialogOpen(false)}
+          onDeleteProject={(password) => void handleDeleteProject(password)}
           t={t}
         />
         <LoadShareModal
@@ -304,46 +275,6 @@ function App() {
           loading={shareLoading}
           onCancel={() => setLoadShareDialogOpen(false)}
           onSubmit={(values) => void handleLoadShare(values)}
-          t={t}
-        />
-        <InspectProjectModal
-          open={inspectDialogOpen}
-          loading={inspectLoading}
-          onCancel={() => setInspectDialogOpen(false)}
-          onSubmit={(password) => void handleInspectProject(password)}
-          t={t}
-        />
-        <InspectProjectDrawer
-          open={inspectResultOpen}
-          result={inspectResult}
-          onClose={() => setInspectResultOpen(false)}
-          t={t}
-        />
-        <VerifyProjectModal
-          open={verifyDialogOpen}
-          loading={verifyLoading}
-          onCancel={() => setVerifyDialogOpen(false)}
-          onSubmit={(values) => void handleVerifyProject(values)}
-          t={t}
-        />
-        <VerifyProjectDrawer
-          open={verifyResultOpen}
-          result={verifyResult}
-          onClose={() => setVerifyResultOpen(false)}
-          t={t}
-        />
-        <ExportProjectModal
-          open={exportDialogOpen}
-          loading={exportLoading}
-          onCancel={() => setExportDialogOpen(false)}
-          onSubmit={(values) => void handleExportProject(values)}
-          t={t}
-        />
-        <DeleteProjectModal
-          open={deleteDialogOpen}
-          loading={deleteLoading}
-          onCancel={() => setDeleteDialogOpen(false)}
-          onSubmit={(password) => void handleDeleteProject(password)}
           t={t}
         />
         <ShareSessionLayer
