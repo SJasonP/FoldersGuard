@@ -22,7 +22,7 @@ Default settings:
 
 Settings behavior:
 
-- Settings changes require confirmation before saving.
+- Settings are saved when the user clicks Save Settings.
 - Settings that affect running operations apply only to future operations.
 
 ## Localization

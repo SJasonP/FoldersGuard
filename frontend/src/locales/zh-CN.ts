@@ -183,7 +183,6 @@ const zhCN = {
   removeItem: '删除条目',
   restoredFolders: '已还原目录数',
   saveSettings: '保存设置',
-  saveSettingsConfirm: '保存这些设置更改？',
   schemaVersion: 'Schema 版本',
   searchItems: '搜索条目',
   searchProjects: '搜索项目',

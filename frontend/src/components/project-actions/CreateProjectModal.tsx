@@ -1,4 +1,4 @@
-import { Checkbox, Form, Input, InputNumber, Modal, Select } from 'antd';
+import { App as AntApp, Checkbox, Form, Input, InputNumber, Modal, Select } from 'antd';
 import type { SettingsModel } from '../../types';
 import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
@@ -33,6 +33,7 @@ export function CreateProjectModal({
   onSubmit,
   t,
 }: CreateProjectModalProps) {
+  const { modal } = AntApp.useApp();
   const [form] = Form.useForm<CreateProjectValues>();
   const useDefaultMaxPartSize = Form.useWatch('useDefaultMaxPartSize', form) ?? true;
   const effectiveDefaultMaxPartSize = settings?.defaultMaxPartSize ?? 0;
@@ -45,6 +46,7 @@ export function CreateProjectModal({
 
   const confirmSubmit = (values: CreateProjectValues) => {
     showOperationConfirmation({
+      modalApi: modal,
       title: t('createProject'),
       message: t('createProjectConfirm'),
       okText: t('createProject'),

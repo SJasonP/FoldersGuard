@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Breadcrumb, Descriptions, Drawer, Flex, Modal, Tree, Typography } from 'antd';
+import { App as AntApp, Breadcrumb, Descriptions, Drawer, Flex, Tree, Typography } from 'antd';
 import type { ProjectBrowserItemModel, ProjectBrowserStateModel } from '../../types';
 import { ProjectBrowserCloseGuardModal } from './ProjectBrowserCloseGuardModal';
 import { ProjectBrowserDetailsPanel } from './ProjectBrowserDetailsPanel';
@@ -67,6 +67,7 @@ export function ProjectBrowserDrawer({
   onApply,
   t,
 }: ProjectBrowserDrawerProps) {
+  const { modal } = AntApp.useApp();
   const root = state?.items.find((item) => item.id === state.rootFolderId) ?? null;
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<ProjectBrowserItemModel | null>(null);
@@ -242,7 +243,7 @@ export function ProjectBrowserDrawer({
                 if (selectedActionItems.length === 0) {
                   return;
                 }
-                Modal.confirm({
+                modal.confirm({
                   title: t('removeItem'),
                   content: selectedActionItems.map((item) => item.path).join('\n'),
                   okText: t('removeItem'),

@@ -1,4 +1,4 @@
-import { Checkbox, Form, Input, Modal, Typography } from 'antd';
+import { App as AntApp, Checkbox, Form, Input, Modal, Typography } from 'antd';
 import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
 
@@ -20,10 +20,12 @@ type CreateShareModalProps = {
 };
 
 export function CreateShareModal({ open, loading, selectedItemCount, onCancel, onSubmit, t }: CreateShareModalProps) {
+  const { modal } = AntApp.useApp();
   const [form] = Form.useForm<CreateShareValues>();
   const passwordProtected = Form.useWatch('passwordProtected', form) ?? true;
   const confirmSubmit = (values: CreateShareValues) => {
     showOperationConfirmation({
+      modalApi: modal,
       title: t('createShare'),
       message: values.passwordProtected ? t('createShareConfirm') : t('createUnprotectedShareConfirm'),
       okText: t('createShare'),

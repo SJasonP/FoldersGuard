@@ -1,4 +1,4 @@
-import { Checkbox, Form, Input, Modal, Select } from 'antd';
+import { App as AntApp, Checkbox, Form, Input, Modal, Select } from 'antd';
 import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
 
@@ -27,6 +27,7 @@ export function DecryptShareModal({
   onSubmit,
   t,
 }: DecryptShareModalProps) {
+  const { modal } = AntApp.useApp();
   const [form] = Form.useForm<DecryptShareValues>();
   const sourceCleanupLabel = (value: string) => {
     if (value === 'delete') {
@@ -37,6 +38,7 @@ export function DecryptShareModal({
 
   const confirmSubmit = (values: DecryptShareValues) => {
     showOperationConfirmation({
+      modalApi: modal,
       title: t('decryptShare'),
       message: t('decryptShareConfirm'),
       okText: t('decryptShare'),

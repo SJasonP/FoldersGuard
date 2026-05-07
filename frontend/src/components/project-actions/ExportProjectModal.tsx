@@ -1,4 +1,4 @@
-import { Checkbox, Form, Input, Modal } from 'antd';
+import { App as AntApp, Checkbox, Form, Input, Modal } from 'antd';
 import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
 
@@ -17,9 +17,11 @@ type ExportProjectModalProps = {
 };
 
 export function ExportProjectModal({ open, loading, onCancel, onSubmit, t }: ExportProjectModalProps) {
+  const { modal } = AntApp.useApp();
   const [form] = Form.useForm<ExportProjectValues>();
   const confirmSubmit = (values: ExportProjectValues) => {
     showOperationConfirmation({
+      modalApi: modal,
       title: t('exportProject'),
       message: t('exportProjectConfirm'),
       okText: t('exportProject'),

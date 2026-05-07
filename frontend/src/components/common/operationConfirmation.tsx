@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { Descriptions, Modal, Space, Typography } from 'antd';
+import { Descriptions, Space, Typography } from 'antd';
+import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 
 type ConfirmationItem = {
   label: ReactNode;
@@ -7,6 +8,7 @@ type ConfirmationItem = {
 };
 
 type ShowOperationConfirmationArgs = {
+  modalApi: ModalHookAPI;
   title: string;
   message: ReactNode;
   okText: string;
@@ -16,6 +18,7 @@ type ShowOperationConfirmationArgs = {
 };
 
 export function showOperationConfirmation({
+  modalApi,
   title,
   message,
   okText,
@@ -23,7 +26,7 @@ export function showOperationConfirmation({
   danger = false,
   onConfirm,
 }: ShowOperationConfirmationArgs) {
-  Modal.confirm({
+  modalApi.confirm({
     title,
     okText,
     okButtonProps: danger ? { danger: true } : undefined,

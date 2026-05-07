@@ -17,6 +17,7 @@ type AppShellProps = {
   onLoadShare: () => void;
   activeOperationLabel: string | null;
   actionsDisabled: boolean;
+  resolvedTheme: 'light' | 'dark';
   children: React.ReactNode;
   t: (key: string) => string;
 };
@@ -29,6 +30,7 @@ export function AppShell({
   onLoadShare,
   activeOperationLabel,
   actionsDisabled,
+  resolvedTheme,
   children,
   t,
 }: AppShellProps) {
@@ -36,7 +38,7 @@ export function AppShell({
   const disabled = actionsDisabled || operationActive;
 
   return (
-    <Layout className="app-shell">
+    <Layout className={`app-shell app-shell-${resolvedTheme}`}>
       <Layout.Sider width={236} className="app-sidebar">
         <div className="app-brand">
           <Typography.Title level={4}>{t('foldersGuard')}</Typography.Title>

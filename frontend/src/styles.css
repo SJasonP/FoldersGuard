@@ -20,10 +20,37 @@ body {
 
 .app-shell {
   min-height: 100vh;
+  color: var(--fg-color-text);
+  background: var(--fg-bg-layout);
+}
+
+.app-shell-light {
+  --fg-bg-layout: #f5f7fb;
+  --fg-bg-container: #ffffff;
+  --fg-bg-subtle: #fafafa;
+  --fg-color-text: rgba(0, 0, 0, 0.88);
+  --fg-border: rgba(5, 5, 5, 0.12);
+}
+
+.app-shell-dark {
+  --fg-bg-layout: #000000;
+  --fg-bg-container: #141414;
+  --fg-bg-subtle: #1f1f1f;
+  --fg-color-text: rgba(255, 255, 255, 0.85);
+  --fg-border: rgba(253, 253, 253, 0.12);
 }
 
 .app-sidebar {
-  border-right: 1px solid rgba(127, 127, 127, 0.18);
+  border-right: 1px solid var(--fg-border);
+  background: var(--fg-bg-container);
+}
+
+.app-sidebar .ant-layout-sider-children {
+  background: var(--fg-bg-container);
+}
+
+.app-sidebar .ant-menu {
+  background: var(--fg-bg-container);
 }
 
 .app-brand {
@@ -46,12 +73,13 @@ body {
   gap: 16px;
   height: 64px;
   padding: 0 24px;
-  border-bottom: 1px solid rgba(127, 127, 127, 0.18);
-  background: transparent;
+  border-bottom: 1px solid var(--fg-border);
+  background: var(--fg-bg-container);
 }
 
 .app-content {
   padding: 24px;
+  background: var(--fg-bg-layout);
 }
 
 .operation-status {
@@ -112,7 +140,7 @@ body {
 }
 
 .project-browser-tree {
-  border-right: 1px solid rgba(127, 127, 127, 0.18);
+  border-right: 1px solid var(--fg-border);
   padding-right: 18px;
 }
 
@@ -123,7 +151,7 @@ body {
 }
 
 .project-browser-details {
-  border-left: 1px solid rgba(127, 127, 127, 0.18);
+  border-left: 1px solid var(--fg-border);
   padding-left: 18px;
 }
 

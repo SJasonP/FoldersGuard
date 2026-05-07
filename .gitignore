@@ -1,6 +1,6 @@
 .DS_Store
 .idea
-bin/
-frontend/node_modules/
-frontend/dist/*
-!frontend/dist/.gitkeep
+build
+bin
+dist
+node_modules

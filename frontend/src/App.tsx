@@ -367,6 +367,7 @@ function App() {
           onLoadShare={() => setLoadShareDialogOpen(true)}
           activeOperationLabel={activeOperationLabel}
           actionsDisabled={!dataServicesEnabled}
+          resolvedTheme={resolvedTheme}
           t={t}
         >
           {navigation === 'home' && (

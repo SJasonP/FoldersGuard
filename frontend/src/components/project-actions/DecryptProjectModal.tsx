@@ -1,4 +1,4 @@
-import { Checkbox, Form, Input, Modal, Select } from 'antd';
+import { App as AntApp, Checkbox, Form, Input, Modal, Select } from 'antd';
 import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
 
@@ -27,6 +27,7 @@ export function DecryptProjectModal({
   onSubmit,
   t,
 }: DecryptProjectModalProps) {
+  const { modal } = AntApp.useApp();
   const [form] = Form.useForm<DecryptProjectValues>();
   const sourceCleanupLabel = (value: string) => {
     if (value === 'delete') {
@@ -37,6 +38,7 @@ export function DecryptProjectModal({
 
   const confirmSubmit = (values: DecryptProjectValues) => {
     showOperationConfirmation({
+      modalApi: modal,
       title: t('decryptProject'),
       message: t('decryptProjectConfirm'),
       okText: t('decryptProject'),

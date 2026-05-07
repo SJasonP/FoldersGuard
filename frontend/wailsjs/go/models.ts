@@ -1,5 +1,5 @@
 export namespace main {
-
+	
 	export class AppInfo {
 	    productName: string;
 	    appId: string;
@@ -9,11 +9,11 @@ export namespace main {
 	    startupError: string;
 	    copyrightNotice: string;
 	    projectLink: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new AppInfo(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.productName = source["productName"];
@@ -29,11 +29,11 @@ export namespace main {
 	export class ProjectCreateFolderChange {
 	    targetFolderPath: string;
 	    name: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ProjectCreateFolderChange(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.targetFolderPath = source["targetFolderPath"];
@@ -44,11 +44,11 @@ export namespace main {
 	    sourcePath: string;
 	    targetFolderPath: string;
 	    maxPartSize: number;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ProjectAddChange(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.sourcePath = source["sourcePath"];
@@ -58,11 +58,11 @@ export namespace main {
 	}
 	export class ProjectRemoveChange {
 	    itemPath: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ProjectRemoveChange(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.itemPath = source["itemPath"];
@@ -71,11 +71,11 @@ export namespace main {
 	export class ProjectMoveChange {
 	    itemPath: string;
 	    targetFolderPath: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ProjectMoveChange(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.itemPath = source["itemPath"];
@@ -85,11 +85,11 @@ export namespace main {
 	export class ProjectRenameChange {
 	    itemPath: string;
 	    newName: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ProjectRenameChange(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.itemPath = source["itemPath"];
@@ -105,11 +105,11 @@ export namespace main {
 	    removeChanges: ProjectRemoveChange[];
 	    addChanges: ProjectAddChange[];
 	    createFolderChanges: ProjectCreateFolderChange[];
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ApplyProjectChangesRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -121,7 +121,7 @@ export namespace main {
 	        this.addChanges = this.convertValues(source["addChanges"], ProjectAddChange);
 	        this.createFolderChanges = this.convertValues(source["createFolderChanges"], ProjectCreateFolderChange);
 	    }
-
+	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
@@ -152,11 +152,11 @@ export namespace main {
 	    modifiedAt: string;
 	    metadataCaptured: boolean;
 	    contentAvailable: boolean;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ProjectBrowserItem(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
@@ -185,11 +185,11 @@ export namespace main {
 	    contentConnected: boolean;
 	    encryptedPath: string;
 	    items: ProjectBrowserItem[];
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ProjectBrowserState(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -205,7 +205,7 @@ export namespace main {
 	        this.encryptedPath = source["encryptedPath"];
 	        this.items = this.convertValues(source["items"], ProjectBrowserItem);
 	    }
-
+	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
@@ -228,11 +228,11 @@ export namespace main {
 	    type: string;
 	    sourcePath: string;
 	    targetPath: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ProjectContentOperation(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.type = source["type"];
@@ -252,11 +252,11 @@ export namespace main {
 	    contentOperations: ProjectContentOperation[];
 	    appliedContentChanges: ProjectContentOperation[];
 	    browserState: ProjectBrowserState;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ApplyProjectChangesResult(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -271,7 +271,7 @@ export namespace main {
 	        this.appliedContentChanges = this.convertValues(source["appliedContentChanges"], ProjectContentOperation);
 	        this.browserState = this.convertValues(source["browserState"], ProjectBrowserState);
 	    }
-
+	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
@@ -298,11 +298,11 @@ export namespace main {
 	    force: boolean;
 	    sourceCleanup: string;
 	    databaseExport: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new CreateProjectRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.sourcePath = source["sourcePath"];
@@ -325,11 +325,11 @@ export namespace main {
 	    deletedCleartextFiles: number;
 	    deletedCleartextFolders: number;
 	    failedFiles: number;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new CreateProjectResult(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -352,11 +352,11 @@ export namespace main {
 	    force: boolean;
 	    passwordProtected: boolean;
 	    sharePassword: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new CreateShareRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -371,11 +371,11 @@ export namespace main {
 	export class ShareContentLocation {
 	    sourcePath: string;
 	    targetPath: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ShareContentLocation(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.sourcePath = source["sourcePath"];
@@ -392,11 +392,11 @@ export namespace main {
 	    parts: number;
 	    passwordProtected: boolean;
 	    contentLocations: ShareContentLocation[];
-
+	
 	    static createFrom(source: any = {}) {
 	        return new CreateShareResult(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -409,7 +409,7 @@ export namespace main {
 	        this.passwordProtected = source["passwordProtected"];
 	        this.contentLocations = this.convertValues(source["contentLocations"], ShareContentLocation);
 	    }
-
+	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
@@ -435,11 +435,11 @@ export namespace main {
 	    outputPath: string;
 	    force: boolean;
 	    sourceCleanup: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new DecryptProjectRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -458,11 +458,11 @@ export namespace main {
 	    skippedFolders: number;
 	    deletedEncryptedFiles: number;
 	    failedEncryptedFiles: number;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new DecryptProjectResult(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -481,11 +481,11 @@ export namespace main {
 	    outputPath: string;
 	    force: boolean;
 	    sourceCleanup: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new DecryptShareRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.databasePath = source["databasePath"];
@@ -504,11 +504,11 @@ export namespace main {
 	    skippedFolders: number;
 	    deletedEncryptedFiles: number;
 	    failedEncryptedFiles: number;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new DecryptShareResult(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.shareId = source["shareId"];
@@ -523,11 +523,11 @@ export namespace main {
 	export class DeleteProjectRequest {
 	    projectId: string;
 	    password: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new DeleteProjectRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -536,11 +536,11 @@ export namespace main {
 	}
 	export class DeleteProjectResult {
 	    projectId: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new DeleteProjectResult(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -551,11 +551,11 @@ export namespace main {
 	    password: string;
 	    outputPath: string;
 	    force: boolean;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ExportProjectRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -567,11 +567,11 @@ export namespace main {
 	export class ExportProjectResult {
 	    projectId: string;
 	    outputPath: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ExportProjectResult(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -582,11 +582,11 @@ export namespace main {
 	    inputPath: string;
 	    password: string;
 	    force: boolean;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ImportProjectRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.inputPath = source["inputPath"];
@@ -596,11 +596,11 @@ export namespace main {
 	}
 	export class ImportProjectResult {
 	    projectId: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ImportProjectResult(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -609,11 +609,11 @@ export namespace main {
 	export class InspectProjectRequest {
 	    projectId: string;
 	    password: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new InspectProjectRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -635,11 +635,11 @@ export namespace main {
 	    files: number;
 	    parts: number;
 	    storageObjects: number;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new InspectProjectResult(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -661,11 +661,11 @@ export namespace main {
 	export class LoadShareRequest {
 	    databasePath: string;
 	    password: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new LoadShareRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.databasePath = source["databasePath"];
@@ -677,11 +677,11 @@ export namespace main {
 	    fileName: string;
 	    modifiedAt: string;
 	    availabilityStatus: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new LocalProjectSummary(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -694,11 +694,11 @@ export namespace main {
 	    projectId: string;
 	    password: string;
 	    encryptedPath: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new OpenProjectBrowserRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -709,36 +709,36 @@ export namespace main {
 	export class PathDialogFilter {
 	    displayName: string;
 	    pattern: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new PathDialogFilter(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.displayName = source["displayName"];
 	        this.pattern = source["pattern"];
 	    }
 	}
-
-
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
+	
+	
 	export class SelectPathRequest {
 	    kind: string;
 	    title: string;
 	    defaultDirectory: string;
 	    defaultFilename: string;
 	    filters: PathDialogFilter[];
-
+	
 	    static createFrom(source: any = {}) {
 	        return new SelectPathRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.kind = source["kind"];
@@ -747,7 +747,7 @@ export namespace main {
 	        this.defaultFilename = source["defaultFilename"];
 	        this.filters = this.convertValues(source["filters"], PathDialogFilter);
 	    }
-
+	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
@@ -772,11 +772,11 @@ export namespace main {
 	    sourceCleanupMode: string;
 	    theme: string;
 	    language: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.operationGuideFormat = source["operationGuideFormat"];
@@ -786,7 +786,7 @@ export namespace main {
 	        this.language = source["language"];
 	    }
 	}
-
+	
 	export class ShareSummary {
 	    shareId: string;
 	    databaseType: string;
@@ -798,11 +798,11 @@ export namespace main {
 	    parts: number;
 	    storageObjects: number;
 	    passwordProtected: boolean;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new ShareSummary(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.shareId = source["shareId"];
@@ -821,11 +821,11 @@ export namespace main {
 	    projectId: string;
 	    password: string;
 	    encryptedPath: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new VerifyProjectRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -840,11 +840,11 @@ export namespace main {
 	    tamperedObjects: number;
 	    extraObjects: number;
 	    status: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new VerifyProjectResult(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
@@ -859,11 +859,11 @@ export namespace main {
 	    databasePath: string;
 	    password: string;
 	    encryptedPath: string;
-
+	
 	    static createFrom(source: any = {}) {
 	        return new VerifyShareRequest(source);
 	    }
-
+	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.databasePath = source["databasePath"];
@@ -873,3 +873,4 @@ export namespace main {
 	}
 
 }
+
