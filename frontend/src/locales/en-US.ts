@@ -140,6 +140,8 @@ const enUS = {
   newName: 'New Name',
   operationGuideFormat: 'Operation Guide Format',
   operationGuidePath: 'Operation Guide Path',
+  operationGuideWillBeWritten: 'Will be written when encrypted content is not connected.',
+  operationRunning: 'Running',
   openProject: 'Open Project',
   openProjectFailed: 'Failed to open project.',
   openProjectSucceeded: 'Project opened.',

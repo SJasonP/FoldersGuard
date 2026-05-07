@@ -22,6 +22,7 @@ type ProjectBrowserModalsProps = {
   renameOpen: boolean;
   blockingConflicts: string[];
   warnings: string[];
+  willWriteOperationGuide: boolean;
   itemsByID: Map<string, ProjectBrowserItemModel>;
   selectedItem: ProjectBrowserItemModel | null;
   selectableFolderTreeData: TreeSelectProps['treeData'];
@@ -54,6 +55,7 @@ export function ProjectBrowserModals({
   renameOpen,
   blockingConflicts,
   warnings,
+  willWriteOperationGuide,
   itemsByID,
   selectedItem,
   selectableFolderTreeData,
@@ -149,6 +151,7 @@ export function ProjectBrowserModals({
         addCount={pendingAddCount}
         createFolderCount={pendingCreateFolderCount}
         contentConnected={contentConnected}
+        willWriteOperationGuide={willWriteOperationGuide}
         blockingConflicts={blockingConflicts}
         warnings={warnings}
         onCancel={onCloseApplyConfirm}

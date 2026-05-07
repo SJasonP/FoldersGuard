@@ -54,6 +54,22 @@ body {
   padding: 24px;
 }
 
+.operation-status {
+  min-width: 0;
+  max-width: 420px;
+}
+
+.operation-progress {
+  width: 96px;
+  flex: 0 0 96px;
+}
+
+.operation-status .ant-typography {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .content-stack {
   width: 100%;
 }

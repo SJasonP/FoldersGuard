@@ -36,6 +36,8 @@ export function SaveSettings(arg1:main.Settings):Promise<main.Settings>;
 
 export function SelectPath(arg1:main.SelectPathRequest):Promise<string>;
 
+export function SetLongRunningOperationActive(arg1:boolean):Promise<void>;
+
 export function VerifyProject(arg1:main.VerifyProjectRequest):Promise<main.VerifyProjectResult>;
 
 export function VerifyShare(arg1:main.VerifyShareRequest):Promise<main.VerifyProjectResult>;

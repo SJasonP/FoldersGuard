@@ -113,6 +113,9 @@ export function ProjectBrowserDrawer({
     [activeFolderId, pendingByID, searchQuery, state?.items],
   );
   const pendingCount = pendingRenames.length + pendingMoves.length + pendingRemoves.length + pendingAdds.length + pendingCreateFolders.length;
+  const willWriteOperationGuide =
+    !state?.contentConnected &&
+    pendingMoves.length + pendingRemoves.length + pendingAdds.length + pendingCreateFolders.length > 0;
   const pendingValidation = useMemo(
     () =>
       state
@@ -255,6 +258,7 @@ export function ProjectBrowserDrawer({
             renameOpen={renameOpen}
             blockingConflicts={pendingValidation.blockingConflicts}
             warnings={pendingValidation.warnings}
+            willWriteOperationGuide={willWriteOperationGuide}
             itemsByID={itemsByID}
             selectedItem={selectedItem}
             selectableFolderTreeData={selectableFolderTreeData}

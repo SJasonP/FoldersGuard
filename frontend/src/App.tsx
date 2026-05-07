@@ -4,7 +4,7 @@ import { App as AntApp, ConfigProvider } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import enUS from 'antd/locale/en_US';
 import zhCN from 'antd/locale/zh_CN';
-import { AppInfo } from '../wailsjs/go/main/App';
+import { AppInfo, SetLongRunningOperationActive } from '../wailsjs/go/main/App';
 import type { SupportedLanguage } from './i18n';
 import i18n from './i18n';
 import { resolveTheme, themeAlgorithm, type ThemeMode } from './theme';
@@ -262,6 +262,42 @@ function App() {
     [t],
   );
 
+  const activeOperationLabel = useMemo(() => {
+    const operations = [
+      { active: createLoading, label: t('createProject') },
+      { active: importLoading, label: t('importProject') },
+      { active: shareLoading, label: t('loadShare') },
+      { active: createShareLoading, label: t('createShare') },
+      { active: decryptShareLoading, label: t('decryptShare') },
+      { active: verifyShareLoading, label: t('verifyShare') },
+      { active: browserLoading, label: t('openProject') },
+      { active: applyLoading, label: t('applyChanges') },
+      { active: decryptLoading, label: t('decryptProject') },
+      { active: verifyLoading, label: t('verifyProject') },
+      { active: exportLoading, label: t('exportProject') },
+      { active: deleteLoading, label: t('deleteProject') },
+    ];
+    return operations.find((operation) => operation.active)?.label ?? null;
+  }, [
+    applyLoading,
+    browserLoading,
+    createLoading,
+    createShareLoading,
+    decryptLoading,
+    decryptShareLoading,
+    deleteLoading,
+    exportLoading,
+    importLoading,
+    shareLoading,
+    t,
+    verifyLoading,
+    verifyShareLoading,
+  ]);
+
+  useEffect(() => {
+    void SetLongRunningOperationActive(activeOperationLabel !== null);
+  }, [activeOperationLabel]);
+
   return (
     <ConfigProvider
       locale={antLocales[language]}
@@ -282,6 +318,7 @@ function App() {
           onLoadShare={() => setLoadShareDialogOpen(true)}
           language={language}
           onToggleLanguage={() => setLanguage(language === 'en-US' ? 'zh-CN' : 'en-US')}
+          activeOperationLabel={activeOperationLabel}
           t={t}
         >
           {navigation === 'home' && (
