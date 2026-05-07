@@ -103,6 +103,8 @@ export function ShareSessionLayer({
         open={verifyShareResultOpen}
         result={verifyShareResult}
         onClose={onCloseVerifyShareResult}
+        title={t('verifyShare')}
+        identityLabel={t('shareId')}
         t={t}
       />
     </>

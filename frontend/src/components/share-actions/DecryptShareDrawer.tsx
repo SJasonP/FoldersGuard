@@ -18,7 +18,6 @@ export function DecryptShareDrawer({ open, result, onClose, t }: DecryptShareDra
           <Descriptions.Item label={t('outputPath')}>{result.outputPath}</Descriptions.Item>
           <Descriptions.Item label={t('decryptedFiles')}>{formatNumber(result.decryptedFiles)}</Descriptions.Item>
           <Descriptions.Item label={t('restoredFolders')}>{formatNumber(result.restoredFolders)}</Descriptions.Item>
-          <Descriptions.Item label={t('skippedFolders')}>{formatNumber(result.skippedFolders)}</Descriptions.Item>
           <Descriptions.Item label={t('deletedEncryptedFiles')}>{formatNumber(result.deletedEncryptedFiles)}</Descriptions.Item>
           <Descriptions.Item label={t('failedEncryptedFiles')}>{formatNumber(result.failedEncryptedFiles)}</Descriptions.Item>
         </Descriptions>

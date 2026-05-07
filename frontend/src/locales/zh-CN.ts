@@ -52,6 +52,7 @@ const zhCN = {
   createSummaryEncryptedFiles: '已加密文件数',
   createSummaryEncryptedFolders: '已加密目录数',
   createSummaryEncryptedParts: '已加密分片数',
+  createSummaryFailedFiles: '失败文件数',
   createSummaryProjectId: '项目 ID',
   createSummaryProjectName: '项目名称',
   createUseDefaultMaxPartSize: '使用默认最大分片大小',

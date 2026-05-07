@@ -52,6 +52,7 @@ const enUS = {
   createSummaryEncryptedFiles: 'Encrypted Files',
   createSummaryEncryptedFolders: 'Encrypted Folders',
   createSummaryEncryptedParts: 'Encrypted Parts',
+  createSummaryFailedFiles: 'Failed Files',
   createSummaryProjectId: 'Project ID',
   createSummaryProjectName: 'Project Name',
   createUseDefaultMaxPartSize: 'Use default maximum part size',
