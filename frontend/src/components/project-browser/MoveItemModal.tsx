@@ -9,7 +9,7 @@ type MoveItemModalProps = {
   treeData: TreeSelectProps['treeData'];
   onCancel: () => void;
   onSubmit: (targetFolderId: string) => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 export function MoveItemModal({ open, item, treeData, onCancel, onSubmit, t }: MoveItemModalProps) {

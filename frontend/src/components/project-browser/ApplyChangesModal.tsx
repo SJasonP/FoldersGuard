@@ -1,4 +1,4 @@
-import { Descriptions, Modal, Typography } from 'antd';
+import { Alert, Descriptions, List, Modal, Typography } from 'antd';
 
 type ApplyChangesModalProps = {
   open: boolean;
@@ -9,9 +9,11 @@ type ApplyChangesModalProps = {
   addCount: number;
   createFolderCount: number;
   contentConnected: boolean;
+  blockingConflicts: string[];
+  warnings: string[];
   onCancel: () => void;
   onConfirm: () => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 export function ApplyChangesModal({
@@ -23,6 +25,8 @@ export function ApplyChangesModal({
   addCount,
   createFolderCount,
   contentConnected,
+  blockingConflicts,
+  warnings,
   onCancel,
   onConfirm,
   t,
@@ -37,6 +41,36 @@ export function ApplyChangesModal({
       okText={t('applyChanges')}
     >
       <Typography.Paragraph>{t('applyChangesConfirm')}</Typography.Paragraph>
+      {blockingConflicts.length > 0 ? (
+        <Alert
+          type="error"
+          showIcon
+          message={t('blockingConflicts')}
+          description={
+            <List
+              size="small"
+              dataSource={blockingConflicts}
+              renderItem={(conflict) => <List.Item>{conflict}</List.Item>}
+            />
+          }
+          style={{ marginBottom: 12 }}
+        />
+      ) : null}
+      {warnings.length > 0 ? (
+        <Alert
+          type="warning"
+          showIcon
+          message={t('applyWarnings')}
+          description={
+            <List
+              size="small"
+              dataSource={warnings}
+              renderItem={(warning) => <List.Item>{warning}</List.Item>}
+            />
+          }
+          style={{ marginBottom: 12 }}
+        />
+      ) : null}
       <Descriptions column={1} bordered size="small">
         <Descriptions.Item label={t('pendingRename')}>{renameCount}</Descriptions.Item>
         <Descriptions.Item label={t('pendingMove')}>{moveCount}</Descriptions.Item>

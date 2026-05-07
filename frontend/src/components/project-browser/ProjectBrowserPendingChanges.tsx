@@ -1,4 +1,4 @@
-import { Button, List, Typography } from 'antd';
+import { Alert, Button, List, Typography } from 'antd';
 import type { PendingAdd, PendingCreateFolder, PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
 
 type ProjectBrowserPendingChangesProps = {
@@ -7,12 +7,14 @@ type ProjectBrowserPendingChangesProps = {
   pendingRemoves: PendingRemove[];
   pendingAdds: PendingAdd[];
   pendingCreateFolders: PendingCreateFolder[];
+  blockingConflicts: string[];
+  warnings: string[];
   onDiscardRename: (itemId: string) => void;
   onDiscardMove: (itemId: string) => void;
   onDiscardRemove: (itemId: string) => void;
   onDiscardAdd: (itemId: string) => void;
   onDiscardCreateFolder: (itemId: string) => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 type PendingChangeRow = {
@@ -28,6 +30,8 @@ export function ProjectBrowserPendingChanges({
   pendingRemoves,
   pendingAdds,
   pendingCreateFolders,
+  blockingConflicts,
+  warnings,
   onDiscardRename,
   onDiscardMove,
   onDiscardRemove,
@@ -71,6 +75,36 @@ export function ProjectBrowserPendingChanges({
   return (
     <div>
       <Typography.Title level={5}>{t('pendingChanges')}</Typography.Title>
+      {blockingConflicts.length > 0 ? (
+        <Alert
+          type="error"
+          showIcon
+          message={t('blockingConflicts')}
+          description={
+            <List
+              size="small"
+              dataSource={blockingConflicts}
+              renderItem={(conflict) => <List.Item>{conflict}</List.Item>}
+            />
+          }
+          style={{ marginBottom: 12 }}
+        />
+      ) : null}
+      {warnings.length > 0 ? (
+        <Alert
+          type="warning"
+          showIcon
+          message={t('applyWarnings')}
+          description={
+            <List
+              size="small"
+              dataSource={warnings}
+              renderItem={(warning) => <List.Item>{warning}</List.Item>}
+            />
+          }
+          style={{ marginBottom: 12 }}
+        />
+      ) : null}
       <List
         size="small"
         bordered

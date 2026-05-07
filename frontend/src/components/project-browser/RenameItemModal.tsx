@@ -7,7 +7,7 @@ type RenameItemModalProps = {
   item: ProjectBrowserItemModel | null;
   onCancel: () => void;
   onSubmit: (newName: string) => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 export function RenameItemModal({ open, item, onCancel, onSubmit, t }: RenameItemModalProps) {

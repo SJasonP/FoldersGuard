@@ -37,7 +37,7 @@ export type PendingCreateFolder = {
 
 type UseProjectBrowserArgs = {
   messageApi: MessageInstance;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
   selectedProjectId: string | null;
 };
 

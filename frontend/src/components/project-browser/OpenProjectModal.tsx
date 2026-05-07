@@ -10,7 +10,7 @@ type OpenProjectModalProps = {
   loading: boolean;
   onCancel: () => void;
   onSubmit: (values: OpenProjectValues) => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 export function OpenProjectModal({ open, loading, onCancel, onSubmit, t }: OpenProjectModalProps) {

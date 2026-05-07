@@ -14,6 +14,7 @@ import {
   folderBreadcrumbItems,
   pendingRenameMap,
 } from './projectBrowserView';
+import { validatePendingProjectChanges } from './projectBrowserPendingValidation';
 
 type ProjectBrowserDrawerProps = {
   open: boolean;
@@ -37,7 +38,7 @@ type ProjectBrowserDrawerProps = {
   onDiscardCreateFolder: (itemId: string) => void;
   onDiscardAll: () => void;
   onApply: () => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 export function ProjectBrowserDrawer({
@@ -110,6 +111,21 @@ export function ProjectBrowserDrawer({
     [activeFolderId, pendingByID, searchQuery, state?.items],
   );
   const pendingCount = pendingRenames.length + pendingMoves.length + pendingRemoves.length + pendingAdds.length + pendingCreateFolders.length;
+  const pendingValidation = useMemo(
+    () =>
+      state
+        ? validatePendingProjectChanges({
+            state,
+            pendingRenames,
+            pendingMoves,
+            pendingRemoves,
+            pendingAdds,
+            pendingCreateFolders,
+            t,
+          })
+        : { blockingConflicts: [], warnings: [] },
+    [pendingAdds, pendingCreateFolders, pendingMoves, pendingRemoves, pendingRenames, state, t],
+  );
   const selectFolder = (folderID: string) => {
     setSelectedFolderId(folderID);
     setSelectedItem(null);
@@ -166,6 +182,7 @@ export function ProjectBrowserDrawer({
               searchQuery={searchQuery}
               applyLoading={applyLoading}
               pendingCount={pendingCount}
+              applyBlocked={pendingValidation.blockingConflicts.length > 0}
               onSearchChange={setSearchQuery}
               onSelectItem={setSelectedItem}
               onOpenAdd={() => setAddOpen(true)}
@@ -196,6 +213,8 @@ export function ProjectBrowserDrawer({
             pendingRemoves={pendingRemoves}
             pendingAdds={pendingAdds}
             pendingCreateFolders={pendingCreateFolders}
+            blockingConflicts={pendingValidation.blockingConflicts}
+            warnings={pendingValidation.warnings}
             onDiscardRename={onDiscardRename}
             onDiscardMove={onDiscardMove}
             onDiscardRemove={onDiscardRemove}
@@ -216,6 +235,8 @@ export function ProjectBrowserDrawer({
             pendingRemoveCount={pendingRemoves.length}
             pendingRenameCount={pendingRenames.length}
             renameOpen={renameOpen}
+            blockingConflicts={pendingValidation.blockingConflicts}
+            warnings={pendingValidation.warnings}
             itemsByID={itemsByID}
             selectedItem={selectedItem}
             selectableFolderTreeData={selectableFolderTreeData}

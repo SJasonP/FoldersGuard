@@ -13,6 +13,7 @@ type ProjectBrowserItemTableProps = {
   searchQuery: string;
   applyLoading: boolean;
   pendingCount: number;
+  applyBlocked: boolean;
   onSearchChange: (value: string) => void;
   onSelectItem: (item: ProjectBrowserItemModel | null) => void;
   onOpenAdd: () => void;
@@ -22,7 +23,7 @@ type ProjectBrowserItemTableProps = {
   onRemove: () => void;
   onDiscardAll: () => void;
   onApply: () => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 export function ProjectBrowserItemTable({
@@ -34,6 +35,7 @@ export function ProjectBrowserItemTable({
   searchQuery,
   applyLoading,
   pendingCount,
+  applyBlocked,
   onSearchChange,
   onSelectItem,
   onOpenAdd,
@@ -95,7 +97,7 @@ export function ProjectBrowserItemTable({
           <Button onClick={onDiscardAll} disabled={pendingCount === 0}>
             {t('discardChanges')}
           </Button>
-          <Button type="primary" loading={applyLoading} disabled={pendingCount === 0} onClick={onApply}>
+          <Button type="primary" loading={applyLoading} disabled={pendingCount === 0 || applyBlocked} onClick={onApply}>
             {t('applyChanges')}
           </Button>
         </Space>

@@ -33,7 +33,7 @@ type ProjectBrowserLayerProps = {
   onDiscardCreateFolder: (itemId: string) => void;
   onDiscardAll: () => void;
   onApply: () => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 export function ProjectBrowserLayer({

@@ -20,6 +20,8 @@ type ProjectBrowserModalsProps = {
   pendingRemoveCount: number;
   pendingRenameCount: number;
   renameOpen: boolean;
+  blockingConflicts: string[];
+  warnings: string[];
   itemsByID: Map<string, ProjectBrowserItemModel>;
   selectedItem: ProjectBrowserItemModel | null;
   selectableFolderTreeData: TreeSelectProps['treeData'];
@@ -34,7 +36,7 @@ type ProjectBrowserModalsProps = {
   onCreateFolder: (createFolder: PendingCreateFolder) => void;
   onMove: (move: PendingMove) => void;
   onRename: (rename: PendingRename) => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 export function ProjectBrowserModals({
@@ -50,6 +52,8 @@ export function ProjectBrowserModals({
   pendingRemoveCount,
   pendingRenameCount,
   renameOpen,
+  blockingConflicts,
+  warnings,
   itemsByID,
   selectedItem,
   selectableFolderTreeData,
@@ -145,6 +149,8 @@ export function ProjectBrowserModals({
         addCount={pendingAddCount}
         createFolderCount={pendingCreateFolderCount}
         contentConnected={contentConnected}
+        blockingConflicts={blockingConflicts}
+        warnings={warnings}
         onCancel={onCloseApplyConfirm}
         onConfirm={() => {
           onCloseApplyConfirm();

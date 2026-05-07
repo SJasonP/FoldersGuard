@@ -5,7 +5,7 @@ type ApplyChangesResultDrawerProps = {
   open: boolean;
   result: ApplyProjectChangesResultModel | null;
   onClose: () => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 export function ApplyChangesResultDrawer({ open, result, onClose, t }: ApplyChangesResultDrawerProps) {

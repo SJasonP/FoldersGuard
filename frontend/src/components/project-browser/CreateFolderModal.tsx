@@ -9,7 +9,7 @@ type CreateFolderModalProps = {
   loading: boolean;
   onCancel: () => void;
   onSubmit: (values: CreateFolderModalValues) => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 export function CreateFolderModal({ open, loading, onCancel, onSubmit, t }: CreateFolderModalProps) {

@@ -10,7 +10,7 @@ type AddItemModalProps = {
   loading: boolean;
   onCancel: () => void;
   onSubmit: (values: AddItemModalValues) => void;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 export function AddItemModal({ open, loading, onCancel, onSubmit, t }: AddItemModalProps) {

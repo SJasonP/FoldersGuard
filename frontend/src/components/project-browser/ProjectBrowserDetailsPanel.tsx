@@ -7,7 +7,7 @@ type ProjectBrowserDetailsPanelProps = {
   item: ProjectBrowserItemModel | null;
   pendingByID: Map<string, PendingRename>;
   pendingStateByID: Map<string, string>;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 export function ProjectBrowserDetailsPanel({ item, pendingByID, pendingStateByID, t }: ProjectBrowserDetailsPanelProps) {
