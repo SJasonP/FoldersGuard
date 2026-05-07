@@ -15,6 +15,7 @@ type ProjectBrowserItemTableProps = {
   pendingCount: number;
   onSearchChange: (value: string) => void;
   onSelectItem: (item: ProjectBrowserItemModel | null) => void;
+  onOpenAdd: () => void;
   onOpenRename: () => void;
   onOpenMove: () => void;
   onRemove: () => void;
@@ -34,6 +35,7 @@ export function ProjectBrowserItemTable({
   pendingCount,
   onSearchChange,
   onSelectItem,
+  onOpenAdd,
   onOpenRename,
   onOpenMove,
   onRemove,
@@ -73,6 +75,9 @@ export function ProjectBrowserItemTable({
       <Flex justify="space-between" align="center" gap={12} wrap>
         <Typography.Title level={5}>{t('currentFolderItems')}</Typography.Title>
         <Space>
+          <Button onClick={onOpenAdd}>
+            {t('addItem')}
+          </Button>
           <Button onClick={onOpenRename} disabled={selectedIsRoot}>
             {t('renameItem')}
           </Button>

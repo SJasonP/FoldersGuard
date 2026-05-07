@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Breadcrumb, Descriptions, Drawer, Flex, Modal, Tree, Typography } from 'antd';
 import type { ProjectBrowserItemModel, ProjectBrowserStateModel } from '../../types';
-import { ApplyChangesModal } from './ApplyChangesModal';
-import { MoveItemModal } from './MoveItemModal';
 import { ProjectBrowserDetailsPanel } from './ProjectBrowserDetailsPanel';
 import { ProjectBrowserItemTable } from './ProjectBrowserItemTable';
+import { ProjectBrowserModals } from './ProjectBrowserModals';
 import { ProjectBrowserPendingChanges } from './ProjectBrowserPendingChanges';
-import { RenameItemModal } from './RenameItemModal';
-import type { PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
+import type { PendingAdd, PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
 import {
   buildFolderTree,
   buildSelectableFolderTree,
@@ -23,14 +21,17 @@ type ProjectBrowserDrawerProps = {
   pendingRenames: PendingRename[];
   pendingMoves: PendingMove[];
   pendingRemoves: PendingRemove[];
+  pendingAdds: PendingAdd[];
   applyLoading: boolean;
   onClose: () => void;
+  onAdd: (add: PendingAdd) => void;
   onRename: (rename: PendingRename) => void;
   onMove: (move: PendingMove) => void;
   onRemove: (remove: PendingRemove) => void;
   onDiscardRename: (itemId: string) => void;
   onDiscardMove: (itemId: string) => void;
   onDiscardRemove: (itemId: string) => void;
+  onDiscardAdd: (itemId: string) => void;
   onDiscardAll: () => void;
   onApply: () => void;
   t: (key: string) => string;
@@ -42,14 +43,17 @@ export function ProjectBrowserDrawer({
   pendingRenames,
   pendingMoves,
   pendingRemoves,
+  pendingAdds,
   applyLoading,
   onClose,
+  onAdd,
   onRename,
   onMove,
   onRemove,
   onDiscardRename,
   onDiscardMove,
   onDiscardRemove,
+  onDiscardAdd,
   onDiscardAll,
   onApply,
   t,
@@ -57,6 +61,7 @@ export function ProjectBrowserDrawer({
   const root = state?.items.find((item) => item.id === state.rootFolderId) ?? null;
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<ProjectBrowserItemModel | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
   const [applyConfirmOpen, setApplyConfirmOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
   const [moveOpen, setMoveOpen] = useState(false);
@@ -97,7 +102,7 @@ export function ProjectBrowserDrawer({
     () => filteredFolderItems(state?.items ?? [], activeFolderId, searchQuery, pendingByID),
     [activeFolderId, pendingByID, searchQuery, state?.items],
   );
-  const pendingCount = pendingRenames.length + pendingMoves.length + pendingRemoves.length;
+  const pendingCount = pendingRenames.length + pendingMoves.length + pendingRemoves.length + pendingAdds.length;
   const selectFolder = (folderID: string) => {
     setSelectedFolderId(folderID);
     setSelectedItem(null);
@@ -156,6 +161,7 @@ export function ProjectBrowserDrawer({
               pendingCount={pendingCount}
               onSearchChange={setSearchQuery}
               onSelectItem={setSelectedItem}
+              onOpenAdd={() => setAddOpen(true)}
               onOpenRename={() => setRenameOpen(true)}
               onOpenMove={() => setMoveOpen(true)}
               onRemove={() => {
@@ -180,58 +186,36 @@ export function ProjectBrowserDrawer({
             pendingRenames={pendingRenames}
             pendingMoves={pendingMoves}
             pendingRemoves={pendingRemoves}
+            pendingAdds={pendingAdds}
             onDiscardRename={onDiscardRename}
             onDiscardMove={onDiscardMove}
             onDiscardRemove={onDiscardRemove}
+            onDiscardAdd={onDiscardAdd}
             t={t}
           />
-          <RenameItemModal
-            open={renameOpen}
-            item={selectedItem}
-            onCancel={() => setRenameOpen(false)}
-            onSubmit={(newName) => {
-              if (selectedItem) {
-                onRename({
-                  itemId: selectedItem.id,
-                  itemPath: selectedItem.path,
-                  oldName: selectedItem.name,
-                  newName,
-                });
-              }
-              setRenameOpen(false);
-            }}
-            t={t}
-          />
-          <MoveItemModal
-            open={moveOpen}
-            item={selectedItem}
-            treeData={selectableFolderTreeData}
-            onCancel={() => setMoveOpen(false)}
-            onSubmit={(targetFolderId) => {
-              const targetFolder = itemsByID.get(targetFolderId);
-              if (selectedItem && targetFolder) {
-                onMove({
-                  itemId: selectedItem.id,
-                  itemPath: selectedItem.path,
-                  targetFolderPath: targetFolder.path,
-                });
-              }
-              setMoveOpen(false);
-            }}
-            t={t}
-          />
-          <ApplyChangesModal
-            open={applyConfirmOpen}
-            loading={applyLoading}
-            renameCount={pendingRenames.length}
-            moveCount={pendingMoves.length}
-            removeCount={pendingRemoves.length}
+          <ProjectBrowserModals
+            addOpen={addOpen}
+            applyConfirmOpen={applyConfirmOpen}
+            applyLoading={applyLoading}
             contentConnected={state.contentConnected}
-            onCancel={() => setApplyConfirmOpen(false)}
-            onConfirm={() => {
-              setApplyConfirmOpen(false);
-              onApply();
-            }}
+            moveOpen={moveOpen}
+            pendingAddCount={pendingAdds.length}
+            pendingMoveCount={pendingMoves.length}
+            pendingRemoveCount={pendingRemoves.length}
+            pendingRenameCount={pendingRenames.length}
+            renameOpen={renameOpen}
+            itemsByID={itemsByID}
+            selectedItem={selectedItem}
+            selectableFolderTreeData={selectableFolderTreeData}
+            targetFolder={itemsByID.get(activeFolderId) ?? null}
+            onAdd={onAdd}
+            onApply={onApply}
+            onCloseAdd={() => setAddOpen(false)}
+            onCloseApplyConfirm={() => setApplyConfirmOpen(false)}
+            onCloseMove={() => setMoveOpen(false)}
+            onCloseRename={() => setRenameOpen(false)}
+            onMove={onMove}
+            onRename={onRename}
             t={t}
           />
         </Flex>

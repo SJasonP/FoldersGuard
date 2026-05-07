@@ -1,5 +1,6 @@
 const zhCN = {
   about: '关于',
+  addItem: '添加条目',
   appId: 'App ID',
   applyChanges: '应用更改',
   applyChangesConfirm: '应用这些待处理的项目更改？',
@@ -130,6 +131,7 @@ const zhCN = {
   passwordProtected: '受密码保护',
   passwordRequired: '必须输入密码。',
   pendingChanges: '待处理更改',
+  pendingAdd: '待添加',
   pendingMove: '待移动',
   pendingRename: '待重命名',
   pendingRemove: '待删除',
@@ -176,6 +178,7 @@ const zhCN = {
   sourceCleanupKeep: '保留源文件',
   sourceCleanupMode: '源文件清理模式',
   sourceCleanupOperationMode: '本次操作的源文件清理方式',
+  sourcePath: '源路径',
   stagedContentPath: '暂存内容路径',
   startSubtitle: '使用加密元数据和加密内容对象保护文件夹内容。',
   theme: '主题',

@@ -1,5 +1,6 @@
 const enUS = {
   about: 'About',
+  addItem: 'Add Item',
   appId: 'App ID',
   applyChanges: 'Apply Changes',
   applyChangesConfirm: 'Apply these pending project changes?',
@@ -130,6 +131,7 @@ const enUS = {
   passwordProtected: 'Password Protected',
   passwordRequired: 'Password is required.',
   pendingChanges: 'Pending Changes',
+  pendingAdd: 'Pending Add',
   pendingMove: 'Pending Move',
   pendingRename: 'Pending Rename',
   pendingRemove: 'Pending Remove',
@@ -176,6 +178,7 @@ const enUS = {
   sourceCleanupKeep: 'Keep Source Files',
   sourceCleanupMode: 'Source Cleanup Mode',
   sourceCleanupOperationMode: 'Source Cleanup For This Operation',
+  sourcePath: 'Source Path',
   stagedContentPath: 'Staged Content Path',
   startSubtitle: 'Protect folder contents with encrypted metadata and content objects.',
   theme: 'Theme',

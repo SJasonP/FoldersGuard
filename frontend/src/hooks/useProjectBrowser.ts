@@ -22,6 +22,13 @@ export type PendingRemove = {
   itemPath: string;
 };
 
+export type PendingAdd = {
+  itemId: string;
+  sourcePath: string;
+  targetFolderPath: string;
+  maxPartSize: number;
+};
+
 type UseProjectBrowserArgs = {
   messageApi: MessageInstance;
   t: (key: string) => string;
@@ -41,6 +48,7 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
   const [pendingRenames, setPendingRenames] = useState<PendingRename[]>([]);
   const [pendingMoves, setPendingMoves] = useState<PendingMove[]>([]);
   const [pendingRemoves, setPendingRemoves] = useState<PendingRemove[]>([]);
+  const [pendingAdds, setPendingAdds] = useState<PendingAdd[]>([]);
 
   const handleOpenProjectBrowser = async (values: { password: string; encryptedPath: string }) => {
     if (!selectedProjectId) {
@@ -63,6 +71,7 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
       setPendingRenames([]);
       setPendingMoves([]);
       setPendingRemoves([]);
+      setPendingAdds([]);
       messageApi.success(t('openProjectSucceeded'));
     } catch {
       messageApi.error(t('openProjectFailed'));
@@ -87,6 +96,10 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
     setPendingRemoves((current) => [...current.filter((item) => item.itemId !== remove.itemId), remove]);
   };
 
+  const addPendingAdd = (add: PendingAdd) => {
+    setPendingAdds((current) => [...current.filter((item) => item.itemId !== add.itemId), add]);
+  };
+
   const discardPendingRename = (itemId: string) => {
     setPendingRenames((current) => current.filter((item) => item.itemId !== itemId));
   };
@@ -99,10 +112,15 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
     setPendingRemoves((current) => current.filter((item) => item.itemId !== itemId));
   };
 
+  const discardPendingAdd = (itemId: string) => {
+    setPendingAdds((current) => current.filter((item) => item.itemId !== itemId));
+  };
+
   const discardAllPendingChanges = () => {
     setPendingRenames([]);
     setPendingMoves([]);
     setPendingRemoves([]);
+    setPendingAdds([]);
   };
 
   const handleApplyProjectChanges = async () => {
@@ -126,6 +144,11 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
         removeChanges: pendingRemoves.map((remove) => ({
           itemPath: remove.itemPath,
         })),
+        addChanges: pendingAdds.map((add) => ({
+          sourcePath: add.sourcePath,
+          targetFolderPath: add.targetFolderPath,
+          maxPartSize: add.maxPartSize,
+        })),
       }));
       setBrowserState(result.browserState);
       setApplyResult(result);
@@ -133,6 +156,7 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
       setPendingRenames([]);
       setPendingMoves([]);
       setPendingRemoves([]);
+      setPendingAdds([]);
       messageApi.success(t('applyChangesSucceeded'));
       if (result.operationGuidePath) {
         messageApi.info(`${t('operationGuidePath')}: ${result.operationGuidePath}`);
@@ -154,6 +178,7 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
     setPendingRenames([]);
     setPendingMoves([]);
     setPendingRemoves([]);
+    setPendingAdds([]);
   };
 
   return {
@@ -167,15 +192,18 @@ export function useProjectBrowser({ messageApi, t, selectedProjectId }: UseProje
     pendingRenames,
     pendingMoves,
     pendingRemoves,
+    pendingAdds,
     setOpenProjectDialogOpen,
     setBrowserOpen,
     setApplyResultOpen,
     addPendingRename,
     addPendingMove,
     addPendingRemove,
+    addPendingAdd,
     discardPendingRename,
     discardPendingMove,
     discardPendingRemove,
+    discardPendingAdd,
     discardAllPendingChanges,
     handleApplyProjectChanges,
     handleOpenProjectBrowser,

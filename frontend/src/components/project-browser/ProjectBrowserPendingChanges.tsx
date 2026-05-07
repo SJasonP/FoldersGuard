@@ -1,13 +1,15 @@
 import { Button, List, Typography } from 'antd';
-import type { PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
+import type { PendingAdd, PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
 
 type ProjectBrowserPendingChangesProps = {
   pendingRenames: PendingRename[];
   pendingMoves: PendingMove[];
   pendingRemoves: PendingRemove[];
+  pendingAdds: PendingAdd[];
   onDiscardRename: (itemId: string) => void;
   onDiscardMove: (itemId: string) => void;
   onDiscardRemove: (itemId: string) => void;
+  onDiscardAdd: (itemId: string) => void;
   t: (key: string) => string;
 };
 
@@ -22,12 +24,20 @@ export function ProjectBrowserPendingChanges({
   pendingRenames,
   pendingMoves,
   pendingRemoves,
+  pendingAdds,
   onDiscardRename,
   onDiscardMove,
   onDiscardRemove,
+  onDiscardAdd,
   t,
 }: ProjectBrowserPendingChangesProps) {
   const rows: PendingChangeRow[] = [
+    ...pendingAdds.map((add) => ({
+      key: `add:${add.itemId}`,
+      itemId: add.itemId,
+      label: `${t('pendingAdd')}: ${add.sourcePath} -> ${add.targetFolderPath}`,
+      onDiscard: onDiscardAdd,
+    })),
     ...pendingRenames.map((rename) => ({
       key: `rename:${rename.itemId}`,
       itemId: rename.itemId,

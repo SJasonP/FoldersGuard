@@ -208,15 +208,18 @@ function App() {
     pendingRenames,
     pendingMoves,
     pendingRemoves,
+    pendingAdds,
     setOpenProjectDialogOpen,
     setApplyResultOpen,
     handleOpenProjectBrowser,
+    addPendingAdd,
     addPendingRename,
     addPendingMove,
     addPendingRemove,
     discardPendingRename,
     discardPendingMove,
     discardPendingRemove,
+    discardPendingAdd,
     discardAllPendingChanges,
     handleApplyProjectChanges,
     closeBrowser,
@@ -362,16 +365,19 @@ function App() {
           pendingRenames={pendingRenames}
           pendingMoves={pendingMoves}
           pendingRemoves={pendingRemoves}
+          pendingAdds={pendingAdds}
           onCloseOpenProject={() => setOpenProjectDialogOpen(false)}
           onOpenProject={(values) => void handleOpenProjectBrowser(values)}
           onCloseBrowser={closeBrowser}
           onCloseApplyResult={() => setApplyResultOpen(false)}
+          onAdd={addPendingAdd}
           onRename={addPendingRename}
           onMove={addPendingMove}
           onRemove={addPendingRemove}
           onDiscardRename={discardPendingRename}
           onDiscardMove={discardPendingMove}
           onDiscardRemove={discardPendingRemove}
+          onDiscardAdd={discardPendingAdd}
           onDiscardAll={discardAllPendingChanges}
           onApply={() => void handleApplyProjectChanges()}
           t={t}
