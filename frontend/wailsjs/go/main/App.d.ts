@@ -8,6 +8,8 @@ export function ClearRecentPaths():Promise<main.Settings>;
 
 export function CreateProject(arg1:main.CreateProjectRequest):Promise<main.CreateProjectResult>;
 
+export function DecryptShare(arg1:main.DecryptShareRequest):Promise<main.DecryptShareResult>;
+
 export function DeleteProject(arg1:main.DeleteProjectRequest):Promise<main.DeleteProjectResult>;
 
 export function ExportProject(arg1:main.ExportProjectRequest):Promise<main.ExportProjectResult>;

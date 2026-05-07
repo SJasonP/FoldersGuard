@@ -7,11 +7,12 @@ type ShareActionsDrawerProps = {
   share: ShareSummaryModel | null;
   onClose: () => void;
   onInspect: () => void;
+  onDecrypt: () => void;
   onVerify: () => void;
   t: (key: string) => string;
 };
 
-export function ShareActionsDrawer({ open, share, onClose, onInspect, onVerify, t }: ShareActionsDrawerProps) {
+export function ShareActionsDrawer({ open, share, onClose, onInspect, onDecrypt, onVerify, t }: ShareActionsDrawerProps) {
   return (
     <Drawer title={t('shareActions')} open={open} onClose={onClose} width={360}>
       <Space direction="vertical" size="middle" className="content-stack">
@@ -22,6 +23,9 @@ export function ShareActionsDrawer({ open, share, onClose, onInspect, onVerify, 
         ) : null}
         <Button block type="primary" onClick={onInspect}>
           {t('inspectShare')}
+        </Button>
+        <Button block onClick={onDecrypt}>
+          {t('decryptShare')}
         </Button>
         <Button block icon={<SafetyCertificateOutlined />} onClick={onVerify}>
           {t('verifyShare')}

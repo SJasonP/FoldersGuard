@@ -109,6 +109,28 @@ func (a *App) VerifyShare(request VerifyShareRequest) (VerifyProjectResult, erro
 	}, nil
 }
 
+func (a *App) DecryptShare(request DecryptShareRequest) (DecryptShareResult, error) {
+	result, err := a.service.DecryptShare(a.ctx, app.DecryptShareInput{
+		DatabasePath:  request.DatabasePath,
+		Password:      request.Password,
+		EncryptedRoot: request.EncryptedPath,
+		OutputRoot:    request.OutputPath,
+		Force:         request.Force,
+		SourceCleanup: request.SourceCleanup,
+	})
+	if err != nil {
+		return DecryptShareResult{}, err
+	}
+	return DecryptShareResult{
+		ShareID:               result.ShareID,
+		OutputPath:            result.OutputRoot,
+		DecryptedFiles:        result.DecryptedFiles,
+		RestoredFolders:       result.RestoredFolders,
+		DeletedEncryptedFiles: result.DeletedEncryptedFiles,
+		FailedEncryptedFiles:  result.FailedEncryptedFiles,
+	}, nil
+}
+
 func (a *App) ExportProject(request ExportProjectRequest) (ExportProjectResult, error) {
 	result, err := a.service.ExportProject(a.ctx, app.ExportProjectInput{
 		ProjectID:  request.ProjectID,

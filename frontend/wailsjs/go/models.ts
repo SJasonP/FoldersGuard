@@ -78,6 +78,50 @@ export namespace main {
 	        this.failedFiles = source["failedFiles"];
 	    }
 	}
+	export class DecryptShareRequest {
+	    databasePath: string;
+	    password: string;
+	    encryptedPath: string;
+	    outputPath: string;
+	    force: boolean;
+	    sourceCleanup: string;
+
+	    static createFrom(source: any = {}) {
+	        return new DecryptShareRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.databasePath = source["databasePath"];
+	        this.password = source["password"];
+	        this.encryptedPath = source["encryptedPath"];
+	        this.outputPath = source["outputPath"];
+	        this.force = source["force"];
+	        this.sourceCleanup = source["sourceCleanup"];
+	    }
+	}
+	export class DecryptShareResult {
+	    shareId: string;
+	    outputPath: string;
+	    decryptedFiles: number;
+	    restoredFolders: number;
+	    deletedEncryptedFiles: number;
+	    failedEncryptedFiles: number;
+
+	    static createFrom(source: any = {}) {
+	        return new DecryptShareResult(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.shareId = source["shareId"];
+	        this.outputPath = source["outputPath"];
+	        this.decryptedFiles = source["decryptedFiles"];
+	        this.restoredFolders = source["restoredFolders"];
+	        this.deletedEncryptedFiles = source["deletedEncryptedFiles"];
+	        this.failedEncryptedFiles = source["failedEncryptedFiles"];
+	    }
+	}
 	export class DeleteProjectRequest {
 	    projectId: string;
 	    password: string;

@@ -86,6 +86,24 @@ type VerifyShareRequest struct {
 	EncryptedPath string `json:"encryptedPath"`
 }
 
+type DecryptShareRequest struct {
+	DatabasePath  string `json:"databasePath"`
+	Password      string `json:"password"`
+	EncryptedPath string `json:"encryptedPath"`
+	OutputPath    string `json:"outputPath"`
+	Force         bool   `json:"force"`
+	SourceCleanup string `json:"sourceCleanup"`
+}
+
+type DecryptShareResult struct {
+	ShareID               string `json:"shareId"`
+	OutputPath            string `json:"outputPath"`
+	DecryptedFiles        int    `json:"decryptedFiles"`
+	RestoredFolders       int    `json:"restoredFolders"`
+	DeletedEncryptedFiles int    `json:"deletedEncryptedFiles"`
+	FailedEncryptedFiles  int    `json:"failedEncryptedFiles"`
+}
+
 type ExportProjectRequest struct {
 	ProjectID  string `json:"projectId"`
 	Password   string `json:"password"`

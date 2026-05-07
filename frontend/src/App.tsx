@@ -123,12 +123,19 @@ function App() {
 
   const {
     closeShareSession,
+    decryptShareDialogOpen,
+    decryptShareLoading,
+    decryptShareResult,
+    decryptShareResultOpen,
+    handleDecryptShare,
     handleLoadShare,
     handleVerifyShare,
     inspectShareOpen,
     loadShareDialogOpen,
     loadedShare,
     setLoadShareDialogOpen,
+    setDecryptShareDialogOpen,
+    setDecryptShareResultOpen,
     setInspectShareOpen,
     setVerifyShareDialogOpen,
     setVerifyShareResultOpen,
@@ -340,6 +347,11 @@ function App() {
           t={t}
         />
         <ShareSessionLayer
+          decryptShareDialogOpen={decryptShareDialogOpen}
+          decryptShareLoading={decryptShareLoading}
+          decryptShareResult={decryptShareResult}
+          decryptShareResultOpen={decryptShareResultOpen}
+          defaultSourceCleanup={defaultSourceCleanup}
           shareActionsOpen={shareActionsOpen}
           verifyShareDialogOpen={verifyShareDialogOpen}
           verifyShareLoading={verifyShareLoading}
@@ -348,8 +360,12 @@ function App() {
           loadedShare={loadedShare}
           inspectShareOpen={inspectShareOpen}
           onCloseShareSession={closeShareSession}
+          onOpenDecryptShare={() => setDecryptShareDialogOpen(true)}
           onOpenInspectShare={() => setInspectShareOpen(true)}
           onCloseInspectShare={() => setInspectShareOpen(false)}
+          onCloseDecryptShare={() => setDecryptShareDialogOpen(false)}
+          onDecryptShare={(values) => void handleDecryptShare(values)}
+          onCloseDecryptShareResult={() => setDecryptShareResultOpen(false)}
           onOpenVerifyShare={() => setVerifyShareDialogOpen(true)}
           onCloseVerifyShare={() => setVerifyShareDialogOpen(false)}
           onVerifyShare={(values) => void handleVerifyShare(values)}

@@ -398,6 +398,24 @@ func TestServiceInspectAndVerifyShare(t *testing.T) {
 	if verify.Status != "ok" || verify.MissingObjects != 0 || verify.TamperedObjects != 0 || verify.ExtraObjects != 0 {
 		t.Fatalf("verify share result = %+v", verify)
 	}
+
+	restored := filepath.Join(root, "restored")
+	decrypted, err := service.DecryptShare(ctx, DecryptShareInput{
+		DatabasePath:  sharePath,
+		Password:      sharePassword,
+		EncryptedRoot: shareContent,
+		OutputRoot:    restored,
+		SourceCleanup: SourceCleanupKeep,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if decrypted.DecryptedFiles != 1 || decrypted.RestoredFolders != 1 || decrypted.OutputRoot != restored {
+		t.Fatalf("decrypt share result = %+v", decrypted)
+	}
+	if data, err := os.ReadFile(filepath.Join(restored, "docs", "note.txt")); err != nil || string(data) != "hello" {
+		t.Fatalf("restored file data = %q, err = %v", data, err)
+	}
 }
 
 func copyPathForTest(t *testing.T, source, target string) {

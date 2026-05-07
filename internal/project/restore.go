@@ -16,6 +16,12 @@ import (
 type Restorer struct {
 	EncryptedRoot string
 	OutputRoot    string
+	AfterFile     func(RestoredFile) error
+}
+
+type RestoredFile struct {
+	File           model.File
+	EncryptedPaths []string
 }
 
 func (r Restorer) RestoreContent(ctx context.Context, plan model.PlannedProject) error {
@@ -43,6 +49,7 @@ func (r Restorer) RestoreContent(ctx context.Context, plan model.PlannedProject)
 		if err := ctx.Err(); err != nil {
 			return err
 		}
+		var restoredEncryptedPaths []string
 		realPath, ok := logicalPaths[file.ID.String()]
 		if !ok {
 			return fmt.Errorf("missing logical path for file %s", file.ID)
@@ -61,10 +68,14 @@ func (r Restorer) RestoreContent(ctx context.Context, plan model.PlannedProject)
 			if err := r.restoreSingle(ctx, file, visiblePath, outputPath); err != nil {
 				return err
 			}
+			restoredEncryptedPaths = []string{visiblePath}
 		case model.StorageKindSplit:
-			if err := r.restoreSplit(ctx, file, visiblePaths[file.ID.String()], partsByFile[file.ID.String()], outputPath); err != nil {
+			visiblePath := visiblePaths[file.ID.String()]
+			parts := partsByFile[file.ID.String()]
+			if err := r.restoreSplit(ctx, file, visiblePath, parts, outputPath); err != nil {
 				return err
 			}
+			restoredEncryptedPaths = encryptedPartPaths(visiblePath, parts)
 		default:
 			return fmt.Errorf("unsupported storage kind %q", file.StorageKind)
 		}
@@ -74,6 +85,11 @@ func (r Restorer) RestoreContent(ctx context.Context, plan model.PlannedProject)
 		}
 		if err := fsmeta.Apply(outputPath, metadataFromItem(item)); err != nil {
 			return fmt.Errorf("restore metadata for file %s: %w", file.ID, err)
+		}
+		if r.AfterFile != nil {
+			if err := r.AfterFile(RestoredFile{File: file, EncryptedPaths: restoredEncryptedPaths}); err != nil {
+				return fmt.Errorf("post-restore file %s: %w", file.ID, err)
+			}
 		}
 	}
 	if err := r.restoreFolderMetadata(ctx, plan, logicalPaths, itemByID); err != nil {
@@ -157,7 +173,7 @@ func (r Restorer) restoreFolderMetadata(ctx context.Context, plan model.PlannedP
 }
 
 func (r Restorer) restoreSingle(ctx context.Context, file model.File, visiblePath, outputPath string) error {
-	encryptedPath, err := content.SafeJoin(r.EncryptedRoot, visiblePath)
+	encryptedPath, err := SafeEncryptedPath(r.EncryptedRoot, visiblePath)
 	if err != nil {
 		return fmt.Errorf("resolve encrypted file %s: %w", file.ID, err)
 	}
@@ -199,7 +215,7 @@ func (r Restorer) restoreSplit(ctx context.Context, file model.File, visiblePath
 			_ = temp.Close()
 			return err
 		}
-		partPath, err := content.SafeJoin(r.EncryptedRoot, visiblePath+"/"+part.VisibleName.String())
+		partPath, err := SafeEncryptedPath(r.EncryptedRoot, visiblePath+"/"+part.VisibleName.String())
 		if err != nil {
 			_ = temp.Close()
 			return fmt.Errorf("resolve encrypted part %s: %w", part.ID, err)
@@ -227,6 +243,18 @@ func (r Restorer) restoreSplit(ctx context.Context, file model.File, visiblePath
 	}
 	committed = true
 	return nil
+}
+
+func SafeEncryptedPath(root, visiblePath string) (string, error) {
+	return content.SafeJoin(root, visiblePath)
+}
+
+func encryptedPartPaths(visiblePath string, parts []model.Part) []string {
+	paths := make([]string, 0, len(parts))
+	for _, part := range parts {
+		paths = append(paths, visiblePath+"/"+part.VisibleName.String())
+	}
+	return paths
 }
 
 func logicalRealPaths(plan model.PlannedProject) (map[string]string, error) {

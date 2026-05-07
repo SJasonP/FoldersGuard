@@ -14,6 +14,24 @@ type ShareOpen struct {
 	Password     string
 }
 
+type DecryptShareInput struct {
+	DatabasePath  string
+	Password      string
+	EncryptedRoot string
+	OutputRoot    string
+	Force         bool
+	SourceCleanup string
+}
+
+type DecryptShareResult struct {
+	ShareID               string
+	OutputRoot            string
+	DecryptedFiles        int
+	RestoredFolders       int
+	DeletedEncryptedFiles int
+	FailedEncryptedFiles  int
+}
+
 type InspectResult struct {
 	ProjectID      string
 	DatabaseType   string
