@@ -54,6 +54,10 @@ export function LoadShare(arg1) {
   return window['go']['main']['App']['LoadShare'](arg1);
 }
 
+export function OpenProjectBrowser(arg1) {
+  return window['go']['main']['App']['OpenProjectBrowser'](arg1);
+}
+
 export function ReadSettings() {
   return window['go']['main']['App']['ReadSettings']();
 }

@@ -15,6 +15,7 @@ import { useProjectCreate } from './hooks/useProjectCreate';
 import { useProjectImport } from './hooks/useProjectImport';
 import { useProjectActions } from './hooks/useProjectActions';
 import { useProjectShare } from './hooks/useProjectShare';
+import { useProjectBrowser } from './hooks/useProjectBrowser';
 import { useShareActions } from './hooks/useShareActions';
 import { HomeView } from './views/HomeView';
 import { SettingsView } from './views/SettingsView';
@@ -23,6 +24,7 @@ import { LoadShareModal } from './components/share-actions/LoadShareModal';
 import { ShareSessionLayer } from './components/share-actions/ShareSessionLayer';
 import { AppShell } from './components/app/AppShell';
 import { ProjectSessionLayer } from './components/project-actions/ProjectSessionLayer';
+import { ProjectBrowserLayer } from './components/project-browser/ProjectBrowserLayer';
 
 const antLocales: Record<SupportedLanguage, typeof enUS> = {
   'en-US': enUS,
@@ -195,6 +197,20 @@ function App() {
     selectedProjectId,
   });
 
+  const {
+    openProjectDialogOpen,
+    browserLoading,
+    browserState,
+    browserOpen,
+    setOpenProjectDialogOpen,
+    handleOpenProjectBrowser,
+    closeBrowser,
+  } = useProjectBrowser({
+    messageApi: antApp.message,
+    t,
+    selectedProjectId,
+  });
+
   const columns = useMemo<ColumnsType<LocalProjectRow>>(
     () => [
       { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },
@@ -269,6 +285,10 @@ function App() {
           selectedProject={selectedProject}
           onCloseProjectActions={() => setProjectActionsOpen(false)}
           onOpenInspect={() => setInspectDialogOpen(true)}
+          onOpenModify={() => {
+            setProjectActionsOpen(false);
+            setOpenProjectDialogOpen(true);
+          }}
           onOpenVerify={() => setVerifyDialogOpen(true)}
           onOpenDecrypt={() => setDecryptDialogOpen(true)}
           onOpenCreateShare={() => setSharePasswordDialogOpen(true)}
@@ -314,6 +334,16 @@ function App() {
           deleteLoading={deleteLoading}
           onCloseDelete={() => setDeleteDialogOpen(false)}
           onDeleteProject={(password) => void handleDeleteProject(password)}
+          t={t}
+        />
+        <ProjectBrowserLayer
+          openProjectDialogOpen={openProjectDialogOpen}
+          browserLoading={browserLoading}
+          browserOpen={browserOpen}
+          browserState={browserState}
+          onCloseOpenProject={() => setOpenProjectDialogOpen(false)}
+          onOpenProject={(values) => void handleOpenProjectBrowser(values)}
+          onCloseBrowser={closeBrowser}
           t={t}
         />
         <LoadShareModal

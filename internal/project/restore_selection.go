@@ -16,6 +16,10 @@ type restoreSelection struct {
 }
 
 func (r Restorer) selectAvailableContent(ctx context.Context, plan model.PlannedProject, itemByID map[string]model.Item) (restoreSelection, error) {
+	return matchAvailableContent(ctx, r.EncryptedRoot, plan, itemByID)
+}
+
+func matchAvailableContent(ctx context.Context, encryptedRoot string, plan model.PlannedProject, itemByID map[string]model.Item) (restoreSelection, error) {
 	objectsByLeaf := make(map[string][]model.StorageObject)
 	for _, object := range plan.StorageObjects {
 		objectsByLeaf[pathLeaf(object.VisiblePath)] = append(objectsByLeaf[pathLeaf(object.VisiblePath)], object)
@@ -26,18 +30,18 @@ func (r Restorer) selectAvailableContent(ctx context.Context, plan model.Planned
 		folderIDs:   make(map[string]struct{}),
 		sourcePaths: make(map[string]string),
 	}
-	if err := r.selectRootPath(plan, objectsByLeaf, itemByID, &selection); err != nil {
+	if err := selectRootPath(encryptedRoot, plan, objectsByLeaf, itemByID, &selection); err != nil {
 		return restoreSelection{}, err
 	}
 
-	err := filepath.WalkDir(r.EncryptedRoot, func(path string, entry os.DirEntry, walkErr error) error {
+	err := filepath.WalkDir(encryptedRoot, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		if path == r.EncryptedRoot {
+		if path == encryptedRoot {
 			return nil
 		}
 		selection.addObjectMatches(path, entry.IsDir(), objectsByLeaf, itemByID)
@@ -55,12 +59,12 @@ func (r Restorer) selectAvailableContent(ctx context.Context, plan model.Planned
 	return selection, nil
 }
 
-func (r Restorer) selectRootPath(plan model.PlannedProject, objectsByLeaf map[string][]model.StorageObject, itemByID map[string]model.Item, selection *restoreSelection) error {
-	info, err := os.Stat(r.EncryptedRoot)
+func selectRootPath(encryptedRoot string, plan model.PlannedProject, objectsByLeaf map[string][]model.StorageObject, itemByID map[string]model.Item, selection *restoreSelection) error {
+	info, err := os.Stat(encryptedRoot)
 	if err != nil {
 		return err
 	}
-	selection.addObjectMatches(r.EncryptedRoot, info.IsDir(), objectsByLeaf, itemByID)
+	selection.addObjectMatches(encryptedRoot, info.IsDir(), objectsByLeaf, itemByID)
 	if !isVirtualRoot(plan) {
 		selection.folderIDs[plan.RootFolder.ID.String()] = struct{}{}
 	}

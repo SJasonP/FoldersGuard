@@ -46,6 +46,7 @@ type ProjectSessionLayerProps = {
   selectedProject: LocalProjectSummary | null;
   onCloseProjectActions: () => void;
   onOpenInspect: () => void;
+  onOpenModify: () => void;
   onOpenVerify: () => void;
   onOpenDecrypt: () => void;
   onOpenCreateShare: () => void;
@@ -122,6 +123,7 @@ export function ProjectSessionLayer({
   selectedProject,
   onCloseProjectActions,
   onOpenInspect,
+  onOpenModify,
   onOpenVerify,
   onOpenDecrypt,
   onOpenCreateShare,
@@ -176,6 +178,7 @@ export function ProjectSessionLayer({
         project={selectedProject}
         onClose={onCloseProjectActions}
         onInspect={onOpenInspect}
+        onModify={onOpenModify}
         onVerify={onOpenVerify}
         onDecrypt={onOpenDecrypt}
         onCreateShare={onOpenCreateShare}

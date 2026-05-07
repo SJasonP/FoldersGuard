@@ -28,6 +28,8 @@ export function ListShareableItems(arg1:main.ListShareableItemsRequest):Promise<
 
 export function LoadShare(arg1:main.LoadShareRequest):Promise<main.ShareSummary>;
 
+export function OpenProjectBrowser(arg1:main.OpenProjectBrowserRequest):Promise<main.ProjectBrowserState>;
+
 export function ReadSettings():Promise<main.Settings>;
 
 export function SaveSettings(arg1:main.Settings):Promise<main.Settings>;

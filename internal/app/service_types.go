@@ -187,3 +187,38 @@ type CreateShareResult struct {
 	PasswordProtected bool
 	ContentLocations  []ShareContentLocation
 }
+
+type OpenProjectBrowserInput struct {
+	ProjectID     string
+	Password      string
+	EncryptedRoot string
+}
+
+type ProjectBrowserItem struct {
+	ID               string
+	ParentID         string
+	Path             string
+	ParentPath       string
+	Name             string
+	Type             string
+	Size             int64
+	ChildCount       int
+	ModifiedAt       time.Time
+	MetadataCaptured bool
+	ContentAvailable bool
+}
+
+type ProjectBrowserState struct {
+	ProjectID        string
+	ProjectName      string
+	RootFolderID     string
+	RootFolderName   string
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	Files            int
+	Folders          int
+	Parts            int
+	ContentConnected bool
+	EncryptedRoot    string
+	Items            []ProjectBrowserItem
+}
