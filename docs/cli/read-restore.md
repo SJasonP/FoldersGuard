@@ -61,7 +61,7 @@ Behavior:
 - Opens the active project database from FG's data directory or opens a `.fgs` share database directly.
 - Unprotected `.fgs` share databases can be opened without a password flag.
 - Exported `.fg` databases must be imported before use.
-- Prints project id, database type, root item, format version, schema version, item counts, file counts, folder counts, and part counts.
+- Prints project id, database type, project name, root item, format version, schema version, created time, updated time, item counts, file counts, folder counts, and part counts.
 - Does not require encrypted content to be present.
 - Does not decrypt file content.
 
@@ -70,10 +70,13 @@ Output:
 ```text
 project_id=<uuid>
 database_type=<project|share>
+project_name=<name>
 root_folder_id=<uuid>
 root_name=<name>
 format_version=<version>
 schema_version=<number>
+created_at=<timestamp>
+updated_at=<timestamp>
 items=<count>
 folders=<count>
 files=<count>

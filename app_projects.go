@@ -39,10 +39,13 @@ func (a *App) InspectProject(request InspectProjectRequest) (InspectProjectResul
 	return InspectProjectResult{
 		ProjectID:      result.ProjectID,
 		DatabaseType:   result.DatabaseType,
+		ProjectName:    result.ProjectName,
 		RootFolderID:   result.RootFolderID,
 		RootName:       result.RootName,
 		FormatVersion:  result.FormatVersion,
 		SchemaVersion:  result.SchemaVersion,
+		CreatedAt:      result.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      result.UpdatedAt.Format(time.RFC3339),
 		Items:          result.Items,
 		Folders:        result.Folders,
 		Files:          result.Files,

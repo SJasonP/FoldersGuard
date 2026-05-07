@@ -25,6 +25,7 @@ type ProjectBrowserModalsProps = {
   willWriteOperationGuide: boolean;
   itemsByID: Map<string, ProjectBrowserItemModel>;
   selectedItem: ProjectBrowserItemModel | null;
+  selectedItems: ProjectBrowserItemModel[];
   selectableFolderTreeData: TreeSelectProps['treeData'];
   targetFolder: ProjectBrowserItemModel | null;
   onAdd: (add: PendingAdd) => void;
@@ -58,6 +59,7 @@ export function ProjectBrowserModals({
   willWriteOperationGuide,
   itemsByID,
   selectedItem,
+  selectedItems,
   selectableFolderTreeData,
   targetFolder,
   onAdd,
@@ -126,17 +128,19 @@ export function ProjectBrowserModals({
       />
       <MoveItemModal
         open={moveOpen}
-        item={selectedItem}
+        items={selectedItems}
         treeData={selectableFolderTreeData}
         onCancel={onCloseMove}
         onSubmit={(targetFolderId) => {
           const moveTarget = itemsByID.get(targetFolderId);
-          if (selectedItem && moveTarget) {
-            onMove({
-              itemId: selectedItem.id,
-              itemPath: selectedItem.path,
-              targetFolderPath: moveTarget.path,
-            });
+          if (moveTarget) {
+            for (const item of selectedItems) {
+              onMove({
+                itemId: item.id,
+                itemPath: item.path,
+                targetFolderPath: moveTarget.path,
+              });
+            }
           }
           onCloseMove();
         }}

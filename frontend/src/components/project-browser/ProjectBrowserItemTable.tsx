@@ -9,7 +9,7 @@ type ProjectBrowserItemTableProps = {
   items: ProjectBrowserItemModel[];
   pendingByID: Map<string, PendingRename>;
   pendingStateByID: Map<string, string>;
-  selectedItem: ProjectBrowserItemModel | null;
+  selectedItemIds: string[];
   rootFolderID: string;
   searchQuery: string;
   applyLoading: boolean;
@@ -17,6 +17,7 @@ type ProjectBrowserItemTableProps = {
   applyBlocked: boolean;
   onSearchChange: (value: string) => void;
   onSelectItem: (item: ProjectBrowserItemModel | null) => void;
+  onSelectItems: (items: ProjectBrowserItemModel[]) => void;
   onOpenAdd: () => void;
   onOpenCreateFolder: () => void;
   onOpenRename: () => void;
@@ -31,7 +32,7 @@ export function ProjectBrowserItemTable({
   items,
   pendingByID,
   pendingStateByID,
-  selectedItem,
+  selectedItemIds,
   rootFolderID,
   searchQuery,
   applyLoading,
@@ -39,6 +40,7 @@ export function ProjectBrowserItemTable({
   applyBlocked,
   onSearchChange,
   onSelectItem,
+  onSelectItems,
   onOpenAdd,
   onOpenCreateFolder,
   onOpenRename,
@@ -60,6 +62,13 @@ export function ProjectBrowserItemTable({
     { title: t('childCount'), dataIndex: 'childCount', key: 'childCount', width: 130, render: (value: number) => formatNumber(value) },
     { title: t('modifiedTime'), dataIndex: 'modifiedAt', key: 'modifiedAt', width: 180, render: (value: string) => formatDateTime(value) },
     {
+      title: t('metadataCaptured'),
+      dataIndex: 'metadataCaptured',
+      key: 'metadataCaptured',
+      width: 150,
+      render: (value: boolean) => (value ? t('passwordProtectedYes') : t('passwordProtectedNo')),
+    },
+    {
       title: t('contentStatus'),
       dataIndex: 'contentAvailable',
       key: 'contentAvailable',
@@ -73,7 +82,9 @@ export function ProjectBrowserItemTable({
       render: (_, item) => pendingStateByID.get(item.id) ?? '',
     },
   ];
-  const selectedIsRoot = !selectedItem || selectedItem.id === rootFolderID;
+  const selectedItems = items.filter((item) => selectedItemIds.includes(item.id));
+  const noEditableSelection = selectedItems.length === 0 || selectedItems.some((item) => item.id === rootFolderID);
+  const renameDisabled = selectedItems.length !== 1 || selectedItems[0]?.id === rootFolderID;
 
   return (
     <div className="project-browser-items">
@@ -86,13 +97,13 @@ export function ProjectBrowserItemTable({
           <Button onClick={onOpenCreateFolder}>
             {t('createFolder')}
           </Button>
-          <Button onClick={onOpenRename} disabled={selectedIsRoot}>
+          <Button onClick={onOpenRename} disabled={renameDisabled}>
             {t('renameItem')}
           </Button>
-          <Button onClick={onOpenMove} disabled={selectedIsRoot}>
+          <Button onClick={onOpenMove} disabled={noEditableSelection}>
             {t('moveItem')}
           </Button>
-          <Button danger onClick={onRemove} disabled={selectedIsRoot}>
+          <Button danger onClick={onRemove} disabled={noEditableSelection}>
             {t('removeItem')}
           </Button>
           <Button onClick={onDiscardAll} disabled={pendingCount === 0}>
@@ -117,12 +128,18 @@ export function ProjectBrowserItemTable({
         size="small"
         scroll={{ x: 720 }}
         rowSelection={{
-          type: 'radio',
-          selectedRowKeys: selectedItem ? [selectedItem.id] : [],
-          onChange: (_, rows) => onSelectItem(rows[0] ?? null),
+          type: 'checkbox',
+          selectedRowKeys: selectedItemIds,
+          onChange: (_, rows) => {
+            onSelectItems(rows);
+            onSelectItem(rows[0] ?? null);
+          },
         }}
         onRow={(item) => ({
-          onClick: () => onSelectItem(item),
+          onClick: () => {
+            onSelectItem(item);
+            onSelectItems([item]);
+          },
           onDoubleClick: () => {
             if (item.id !== rootFolderID) {
               onSelectItem(item);

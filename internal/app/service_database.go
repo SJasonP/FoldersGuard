@@ -109,10 +109,13 @@ func inspectResult(plan model.PlannedProject, meta map[string]string) InspectRes
 	return InspectResult{
 		ProjectID:      plan.Project.ID.String(),
 		DatabaseType:   meta["database_type"],
+		ProjectName:    plan.RootItem.RealName,
 		RootFolderID:   plan.Project.RootFolderID.String(),
 		RootName:       plan.RootItem.RealName,
 		FormatVersion:  meta["format_version"],
 		SchemaVersion:  meta["schema_version"],
+		CreatedAt:      plan.Project.CreatedAt.UTC(),
+		UpdatedAt:      plan.Project.UpdatedAt.UTC(),
 		Items:          len(plan.Items) + 1,
 		Folders:        CountFolders(plan),
 		Files:          len(plan.Files),

@@ -46,10 +46,13 @@ type InspectProjectRequest struct {
 type InspectProjectResult struct {
 	ProjectID      string `json:"projectId"`
 	DatabaseType   string `json:"databaseType"`
+	ProjectName    string `json:"projectName"`
 	RootFolderID   string `json:"rootFolderId"`
 	RootName       string `json:"rootName"`
 	FormatVersion  string `json:"formatVersion"`
 	SchemaVersion  string `json:"schemaVersion"`
+	CreatedAt      string `json:"createdAt"`
+	UpdatedAt      string `json:"updatedAt"`
 	Items          int    `json:"items"`
 	Folders        int    `json:"folders"`
 	Files          int    `json:"files"`

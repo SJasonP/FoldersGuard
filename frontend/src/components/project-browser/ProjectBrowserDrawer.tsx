@@ -77,9 +77,28 @@ export function ProjectBrowserDrawer({
   const [renameOpen, setRenameOpen] = useState(false);
   const [moveOpen, setMoveOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
   const activeFolderId = selectedFolderId ?? root?.id ?? '';
   const pendingByID = useMemo(() => pendingRenameMap(pendingRenames), [pendingRenames]);
   const itemsByID = useMemo(() => new Map((state?.items ?? []).map((item) => [item.id, item])), [state?.items]);
+  const selectedItems = useMemo(
+    () =>
+      selectedItemIds
+        .map((itemId) => itemsByID.get(itemId))
+        .filter((item): item is ProjectBrowserItemModel => Boolean(item)),
+    [itemsByID, selectedItemIds],
+  );
+  const selectedActionItems = useMemo(() => {
+    const selectedIDs = new Set(selectedItemIds);
+    return selectedItems.filter((item) => {
+      for (let parentID = item.parentId; parentID; parentID = itemsByID.get(parentID)?.parentId ?? '') {
+        if (selectedIDs.has(parentID)) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [itemsByID, selectedItemIds, selectedItems]);
   const pendingStateByID = useMemo(() => {
     const next = new Map<string, string>();
     for (const rename of pendingRenames) {
@@ -97,13 +116,15 @@ export function ProjectBrowserDrawer({
   const treeData = useMemo(() => buildFolderTree(state?.items ?? [], root?.id ?? '', pendingByID), [pendingByID, root?.id, state?.items]);
   const selectableFolderTreeData = useMemo(
     () => {
-      const disabledIDs = selectedItem ? descendantFolderIDs(state?.items ?? [], selectedItem.id) : new Set<string>();
-      if (selectedItem?.parentId) {
-        disabledIDs.add(selectedItem.parentId);
+      const disabledIDs = new Set<string>();
+      for (const item of selectedItems) {
+        for (const disabledID of descendantFolderIDs(state?.items ?? [], item.id)) {
+          disabledIDs.add(disabledID);
+        }
       }
       return buildSelectableFolderTree(state?.items ?? [], root?.id ?? '', pendingByID, disabledIDs);
     },
-    [pendingByID, root?.id, selectedItem, state?.items],
+    [pendingByID, root?.id, selectedItems, state?.items],
   );
   const breadcrumbs = useMemo(
     () => folderBreadcrumbItems(state?.items ?? [], activeFolderId, pendingByID),
@@ -135,6 +156,7 @@ export function ProjectBrowserDrawer({
   const selectFolder = (folderID: string) => {
     setSelectedFolderId(folderID);
     setSelectedItem(null);
+    setSelectedItemIds([]);
     setSearchQuery('');
   };
   const closeOrConfirm = () => {
@@ -157,6 +179,7 @@ export function ProjectBrowserDrawer({
   useEffect(() => {
     setSelectedFolderId(root?.id ?? null);
     setSelectedItem(null);
+    setSelectedItemIds([]);
     setSearchQuery('');
   }, [root?.id]);
 
@@ -199,7 +222,7 @@ export function ProjectBrowserDrawer({
               items={currentItems}
               pendingByID={pendingByID}
               pendingStateByID={pendingStateByID}
-              selectedItem={selectedItem}
+              selectedItemIds={selectedItemIds}
               rootFolderID={state.rootFolderId}
               searchQuery={searchQuery}
               applyLoading={applyLoading}
@@ -207,20 +230,25 @@ export function ProjectBrowserDrawer({
               applyBlocked={pendingValidation.blockingConflicts.length > 0}
               onSearchChange={setSearchQuery}
               onSelectItem={setSelectedItem}
+              onSelectItems={(items) => setSelectedItemIds(items.map((item) => item.id))}
               onOpenAdd={() => setAddOpen(true)}
               onOpenCreateFolder={() => setCreateFolderOpen(true)}
               onOpenRename={() => setRenameOpen(true)}
               onOpenMove={() => setMoveOpen(true)}
               onRemove={() => {
-                if (!selectedItem) {
+                if (selectedActionItems.length === 0) {
                   return;
                 }
                 Modal.confirm({
                   title: t('removeItem'),
-                  content: selectedItem.path,
+                  content: selectedActionItems.map((item) => item.path).join('\n'),
                   okText: t('removeItem'),
                   okButtonProps: { danger: true },
-                  onOk: () => onRemove({ itemId: selectedItem.id, itemPath: selectedItem.path }),
+                  onOk: () => {
+                    for (const item of selectedActionItems) {
+                      onRemove({ itemId: item.id, itemPath: item.path });
+                    }
+                  },
                 });
               }}
               onDiscardAll={onDiscardAll}
@@ -262,6 +290,7 @@ export function ProjectBrowserDrawer({
             willWriteOperationGuide={willWriteOperationGuide}
             itemsByID={itemsByID}
             selectedItem={selectedItem}
+            selectedItems={selectedActionItems}
             selectableFolderTreeData={selectableFolderTreeData}
             targetFolder={itemsByID.get(activeFolderId) ?? null}
             onAdd={onAdd}

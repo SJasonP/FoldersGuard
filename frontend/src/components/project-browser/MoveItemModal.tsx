@@ -5,14 +5,14 @@ import type { ProjectBrowserItemModel } from '../../types';
 
 type MoveItemModalProps = {
   open: boolean;
-  item: ProjectBrowserItemModel | null;
+  items: ProjectBrowserItemModel[];
   treeData: TreeSelectProps['treeData'];
   onCancel: () => void;
   onSubmit: (targetFolderId: string) => void;
   t: (key: string, values?: Record<string, string | number>) => string;
 };
 
-export function MoveItemModal({ open, item, treeData, onCancel, onSubmit, t }: MoveItemModalProps) {
+export function MoveItemModal({ open, items, treeData, onCancel, onSubmit, t }: MoveItemModalProps) {
   const [form] = Form.useForm<{ targetFolderId: string }>();
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export function MoveItemModal({ open, item, treeData, onCancel, onSubmit, t }: M
           <TreeSelect
             treeData={treeData}
             treeDefaultExpandAll
-            disabled={!item}
+            disabled={items.length === 0}
             placeholder={t('targetFolder')}
             showSearch
             treeNodeFilterProp="title"

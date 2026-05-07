@@ -621,10 +621,13 @@ export namespace main {
 	export class InspectProjectResult {
 	    projectId: string;
 	    databaseType: string;
+	    projectName: string;
 	    rootFolderId: string;
 	    rootName: string;
 	    formatVersion: string;
 	    schemaVersion: string;
+	    createdAt: string;
+	    updatedAt: string;
 	    items: number;
 	    folders: number;
 	    files: number;
@@ -639,10 +642,13 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
 	        this.databaseType = source["databaseType"];
+	        this.projectName = source["projectName"];
 	        this.rootFolderId = source["rootFolderId"];
 	        this.rootName = source["rootName"];
 	        this.formatVersion = source["formatVersion"];
 	        this.schemaVersion = source["schemaVersion"];
+	        this.createdAt = source["createdAt"];
+	        this.updatedAt = source["updatedAt"];
 	        this.items = source["items"];
 	        this.folders = source["folders"];
 	        this.files = source["files"];

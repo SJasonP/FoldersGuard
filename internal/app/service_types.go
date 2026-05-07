@@ -55,10 +55,13 @@ type DecryptProjectResult struct {
 type InspectResult struct {
 	ProjectID      string
 	DatabaseType   string
+	ProjectName    string
 	RootFolderID   string
 	RootName       string
 	FormatVersion  string
 	SchemaVersion  string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 	Items          int
 	Folders        int
 	Files          int
