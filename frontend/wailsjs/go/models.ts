@@ -78,6 +78,90 @@ export namespace main {
 	        this.failedFiles = source["failedFiles"];
 	    }
 	}
+	export class CreateShareRequest {
+	    projectId: string;
+	    projectPassword: string;
+	    itemPaths: string[];
+	    outputPath: string;
+	    force: boolean;
+	    passwordProtected: boolean;
+	    sharePassword: string;
+
+	    static createFrom(source: any = {}) {
+	        return new CreateShareRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.projectPassword = source["projectPassword"];
+	        this.itemPaths = source["itemPaths"];
+	        this.outputPath = source["outputPath"];
+	        this.force = source["force"];
+	        this.passwordProtected = source["passwordProtected"];
+	        this.sharePassword = source["sharePassword"];
+	    }
+	}
+	export class ShareContentLocation {
+	    sourcePath: string;
+	    targetPath: string;
+
+	    static createFrom(source: any = {}) {
+	        return new ShareContentLocation(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sourcePath = source["sourcePath"];
+	        this.targetPath = source["targetPath"];
+	    }
+	}
+	export class CreateShareResult {
+	    projectId: string;
+	    shareId: string;
+	    outputPath: string;
+	    topLevelItems: number;
+	    files: number;
+	    folders: number;
+	    parts: number;
+	    passwordProtected: boolean;
+	    contentLocations: ShareContentLocation[];
+
+	    static createFrom(source: any = {}) {
+	        return new CreateShareResult(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.shareId = source["shareId"];
+	        this.outputPath = source["outputPath"];
+	        this.topLevelItems = source["topLevelItems"];
+	        this.files = source["files"];
+	        this.folders = source["folders"];
+	        this.parts = source["parts"];
+	        this.passwordProtected = source["passwordProtected"];
+	        this.contentLocations = this.convertValues(source["contentLocations"], ShareContentLocation);
+	    }
+
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class DecryptProjectRequest {
 	    projectId: string;
 	    password: string;
@@ -302,6 +386,20 @@ export namespace main {
 	        this.storageObjects = source["storageObjects"];
 	    }
 	}
+	export class ListShareableItemsRequest {
+	    projectId: string;
+	    password: string;
+
+	    static createFrom(source: any = {}) {
+	        return new ListShareableItemsRequest(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.password = source["password"];
+	    }
+	}
 	export class LoadShareRequest {
 	    databasePath: string;
 	    password: string;
@@ -360,6 +458,7 @@ export namespace main {
 	        this.language = source["language"];
 	    }
 	}
+
 	export class ShareSummary {
 	    shareId: string;
 	    databaseType: string;
@@ -388,6 +487,34 @@ export namespace main {
 	        this.parts = source["parts"];
 	        this.storageObjects = source["storageObjects"];
 	        this.passwordProtected = source["passwordProtected"];
+	    }
+	}
+	export class ShareableItem {
+	    id: string;
+	    parentId: string;
+	    path: string;
+	    parentPath: string;
+	    name: string;
+	    type: string;
+	    size: number;
+	    childCount: number;
+	    modifiedAt: string;
+
+	    static createFrom(source: any = {}) {
+	        return new ShareableItem(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.parentId = source["parentId"];
+	        this.path = source["path"];
+	        this.parentPath = source["parentPath"];
+	        this.name = source["name"];
+	        this.type = source["type"];
+	        this.size = source["size"];
+	        this.childCount = source["childCount"];
+	        this.modifiedAt = source["modifiedAt"];
 	    }
 	}
 	export class VerifyProjectRequest {

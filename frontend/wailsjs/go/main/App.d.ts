@@ -8,6 +8,8 @@ export function ClearRecentPaths():Promise<main.Settings>;
 
 export function CreateProject(arg1:main.CreateProjectRequest):Promise<main.CreateProjectResult>;
 
+export function CreateShare(arg1:main.CreateShareRequest):Promise<main.CreateShareResult>;
+
 export function DecryptProject(arg1:main.DecryptProjectRequest):Promise<main.DecryptProjectResult>;
 
 export function DecryptShare(arg1:main.DecryptShareRequest):Promise<main.DecryptShareResult>;
@@ -21,6 +23,8 @@ export function ImportProject(arg1:main.ImportProjectRequest):Promise<main.Impor
 export function InspectProject(arg1:main.InspectProjectRequest):Promise<main.InspectProjectResult>;
 
 export function ListLocalProjects():Promise<Array<main.LocalProjectSummary>>;
+
+export function ListShareableItems(arg1:main.ListShareableItemsRequest):Promise<Array<main.ShareableItem>>;
 
 export function LoadShare(arg1:main.LoadShareRequest):Promise<main.ShareSummary>;
 

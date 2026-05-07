@@ -1,4 +1,7 @@
 import { CreateProjectModal } from './CreateProjectModal';
+import { CreateShareModal } from './CreateShareModal';
+import { CreateSharePasswordModal } from './CreateSharePasswordModal';
+import { CreateShareResultDrawer } from './CreateShareResultDrawer';
 import { DecryptProjectDrawer } from './DecryptProjectDrawer';
 import { DecryptProjectModal } from './DecryptProjectModal';
 import { DeleteProjectModal } from './DeleteProjectModal';
@@ -10,6 +13,7 @@ import { ProjectActionsDrawer } from './ProjectActionsDrawer';
 import { VerifyProjectDrawer } from './VerifyProjectDrawer';
 import { VerifyProjectModal } from './VerifyProjectModal';
 import type {
+  CreateShareResultModel,
   DecryptProjectResultModel,
   InspectProjectResultModel,
   LocalProjectSummary,
@@ -44,6 +48,7 @@ type ProjectSessionLayerProps = {
   onOpenInspect: () => void;
   onOpenVerify: () => void;
   onOpenDecrypt: () => void;
+  onOpenCreateShare: () => void;
   onOpenExport: () => void;
   onOpenDelete: () => void;
   inspectDialogOpen: boolean;
@@ -73,6 +78,24 @@ type ProjectSessionLayerProps = {
   decryptResultOpen: boolean;
   decryptResult: DecryptProjectResultModel | null;
   onCloseDecryptResult: () => void;
+  createSharePasswordDialogOpen: boolean;
+  createShareDialogOpen: boolean;
+  createShareLoading: boolean;
+  selectableShareItems: Array<{ value: string; label: string }>;
+  createShareResultOpen: boolean;
+  createShareResult: CreateShareResultModel | null;
+  onCloseCreateSharePassword: () => void;
+  onLoadShareableItems: (password: string) => void;
+  onCloseCreateShare: () => void;
+  onCreateShare: (values: {
+    itemPaths: string[];
+    outputPath: string;
+    force: boolean;
+    passwordProtected: boolean;
+    sharePassword?: string;
+    sharePasswordConfirm?: string;
+  }) => void;
+  onCloseCreateShareResult: () => void;
   exportDialogOpen: boolean;
   exportLoading: boolean;
   onCloseExport: () => void;
@@ -101,6 +124,7 @@ export function ProjectSessionLayer({
   onOpenInspect,
   onOpenVerify,
   onOpenDecrypt,
+  onOpenCreateShare,
   onOpenExport,
   onOpenDelete,
   inspectDialogOpen,
@@ -124,6 +148,17 @@ export function ProjectSessionLayer({
   decryptResultOpen,
   decryptResult,
   onCloseDecryptResult,
+  createSharePasswordDialogOpen,
+  createShareDialogOpen,
+  createShareLoading,
+  selectableShareItems,
+  createShareResultOpen,
+  createShareResult,
+  onCloseCreateSharePassword,
+  onLoadShareableItems,
+  onCloseCreateShare,
+  onCreateShare,
+  onCloseCreateShareResult,
   exportDialogOpen,
   exportLoading,
   onCloseExport,
@@ -143,6 +178,7 @@ export function ProjectSessionLayer({
         onInspect={onOpenInspect}
         onVerify={onOpenVerify}
         onDecrypt={onOpenDecrypt}
+        onCreateShare={onOpenCreateShare}
         onExport={onOpenExport}
         onDelete={onOpenDelete}
         t={t}
@@ -170,6 +206,22 @@ export function ProjectSessionLayer({
         t={t}
       />
       <DecryptProjectDrawer open={decryptResultOpen} result={decryptResult} onClose={onCloseDecryptResult} t={t} />
+      <CreateSharePasswordModal
+        open={createSharePasswordDialogOpen}
+        loading={createShareLoading}
+        onCancel={onCloseCreateSharePassword}
+        onSubmit={onLoadShareableItems}
+        t={t}
+      />
+      <CreateShareModal
+        open={createShareDialogOpen}
+        loading={createShareLoading}
+        selectableItems={selectableShareItems}
+        onCancel={onCloseCreateShare}
+        onSubmit={onCreateShare}
+        t={t}
+      />
+      <CreateShareResultDrawer open={createShareResultOpen} result={createShareResult} onClose={onCloseCreateShareResult} t={t} />
       <ExportProjectModal open={exportDialogOpen} loading={exportLoading} onCancel={onCloseExport} onSubmit={onExportProject} t={t} />
       <DeleteProjectModal open={deleteDialogOpen} loading={deleteLoading} onCancel={onCloseDelete} onSubmit={onDeleteProject} t={t} />
     </>

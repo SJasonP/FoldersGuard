@@ -148,3 +148,42 @@ type ShareSummary struct {
 	StorageObjects    int
 	PasswordProtected bool
 }
+
+type ShareableItem struct {
+	ID         string
+	ParentID   string
+	Path       string
+	ParentPath string
+	Name       string
+	Type       string
+	Size       int64
+	ChildCount int
+	ModifiedAt time.Time
+}
+
+type CreateShareInput struct {
+	ProjectID         string
+	ProjectPassword   string
+	ItemPaths         []string
+	OutputPath        string
+	Force             bool
+	PasswordProtected bool
+	SharePassword     string
+}
+
+type ShareContentLocation struct {
+	SourcePath string
+	TargetPath string
+}
+
+type CreateShareResult struct {
+	ProjectID         string
+	ShareID           string
+	OutputPath        string
+	TopLevelItems     int
+	Files             int
+	Folders           int
+	Parts             int
+	PasswordProtected bool
+	ContentLocations  []ShareContentLocation
+}

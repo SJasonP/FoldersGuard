@@ -14,6 +14,7 @@ import { useLocalProjects } from './hooks/useLocalProjects';
 import { useProjectCreate } from './hooks/useProjectCreate';
 import { useProjectImport } from './hooks/useProjectImport';
 import { useProjectActions } from './hooks/useProjectActions';
+import { useProjectShare } from './hooks/useProjectShare';
 import { useShareActions } from './hooks/useShareActions';
 import { HomeView } from './views/HomeView';
 import { SettingsView } from './views/SettingsView';
@@ -176,6 +177,24 @@ function App() {
     clearSelectedProject: () => setSelectedProjectId(null),
   });
 
+  const {
+    sharePasswordDialogOpen,
+    shareSelectionOpen,
+    shareLoading: createShareLoading,
+    selectableItems: selectableShareItems,
+    createShareResult,
+    createShareResultOpen,
+    setSharePasswordDialogOpen,
+    setShareSelectionOpen,
+    setCreateShareResultOpen,
+    handleOpenShareSelection,
+    handleCreateShare,
+  } = useProjectShare({
+    messageApi: antApp.message,
+    t,
+    selectedProjectId,
+  });
+
   const columns = useMemo<ColumnsType<LocalProjectRow>>(
     () => [
       { title: t('projectId'), dataIndex: 'projectId', key: 'projectId' },
@@ -252,6 +271,7 @@ function App() {
           onOpenInspect={() => setInspectDialogOpen(true)}
           onOpenVerify={() => setVerifyDialogOpen(true)}
           onOpenDecrypt={() => setDecryptDialogOpen(true)}
+          onOpenCreateShare={() => setSharePasswordDialogOpen(true)}
           onOpenExport={() => setExportDialogOpen(true)}
           onOpenDelete={() => setDeleteDialogOpen(true)}
           inspectDialogOpen={inspectDialogOpen}
@@ -275,6 +295,17 @@ function App() {
           decryptResultOpen={decryptResultOpen}
           decryptResult={decryptResult}
           onCloseDecryptResult={() => setDecryptResultOpen(false)}
+          createSharePasswordDialogOpen={sharePasswordDialogOpen}
+          createShareDialogOpen={shareSelectionOpen}
+          createShareLoading={createShareLoading}
+          selectableShareItems={selectableShareItems}
+          createShareResultOpen={createShareResultOpen}
+          createShareResult={createShareResult}
+          onCloseCreateSharePassword={() => setSharePasswordDialogOpen(false)}
+          onLoadShareableItems={(password) => void handleOpenShareSelection(password)}
+          onCloseCreateShare={() => setShareSelectionOpen(false)}
+          onCreateShare={(values) => void handleCreateShare(values)}
+          onCloseCreateShareResult={() => setCreateShareResultOpen(false)}
           exportDialogOpen={exportDialogOpen}
           exportLoading={exportLoading}
           onCloseExport={() => setExportDialogOpen(false)}

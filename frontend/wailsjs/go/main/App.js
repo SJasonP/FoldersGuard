@@ -14,6 +14,10 @@ export function CreateProject(arg1) {
   return window['go']['main']['App']['CreateProject'](arg1);
 }
 
+export function CreateShare(arg1) {
+  return window['go']['main']['App']['CreateShare'](arg1);
+}
+
 export function DecryptProject(arg1) {
   return window['go']['main']['App']['DecryptProject'](arg1);
 }
@@ -40,6 +44,10 @@ export function InspectProject(arg1) {
 
 export function ListLocalProjects() {
   return window['go']['main']['App']['ListLocalProjects']();
+}
+
+export function ListShareableItems(arg1) {
+  return window['go']['main']['App']['ListShareableItems'](arg1);
 }
 
 export function LoadShare(arg1) {
