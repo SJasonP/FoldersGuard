@@ -3,13 +3,11 @@ package cli
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
 
-	"foldersguard/internal/content"
+	"foldersguard/internal/app"
 	"foldersguard/internal/db"
 	"foldersguard/internal/fswalk"
 	"foldersguard/internal/project"
@@ -232,17 +230,10 @@ func (c cli) runRemove(options removeOptions) error {
 		return err
 	}
 	if options.contentRoot != "" {
-		for _, operation := range result.Operations {
-			if operation.Type != "delete" {
-				return fmt.Errorf("unsupported content operation %q", operation.Type)
-			}
-			target, err := content.SafeJoin(options.contentRoot, operation.TargetPath)
-			if err != nil {
-				return fmt.Errorf("resolve delete target: %w", err)
-			}
-			if err := os.RemoveAll(target); err != nil {
-				return fmt.Errorf("delete encrypted content %s: %w", operation.TargetPath, err)
-			}
+		if _, err := app.ApplyStorageContentOperations(result.Operations, app.ContentOperationApplyOptions{
+			ContentRoot: options.contentRoot,
+		}); err != nil {
+			return err
 		}
 	}
 
@@ -293,21 +284,10 @@ func (c cli) runMove(options moveOptions) error {
 		return err
 	}
 	if options.contentRoot != "" {
-		for _, operation := range result.Operations {
-			if operation.Type != "move" {
-				return fmt.Errorf("unsupported content operation %q", operation.Type)
-			}
-			source, err := content.SafeJoin(options.contentRoot, operation.SourcePath)
-			if err != nil {
-				return fmt.Errorf("resolve move source: %w", err)
-			}
-			target, err := content.SafeJoin(options.contentRoot, operation.TargetPath)
-			if err != nil {
-				return fmt.Errorf("resolve move target: %w", err)
-			}
-			if err := os.Rename(source, target); err != nil {
-				return fmt.Errorf("move encrypted content %s to %s: %w", operation.SourcePath, operation.TargetPath, err)
-			}
+		if _, err := app.ApplyStorageContentOperations(result.Operations, app.ContentOperationApplyOptions{
+			ContentRoot: options.contentRoot,
+		}); err != nil {
+			return err
 		}
 	}
 
@@ -382,13 +362,11 @@ func (c cli) runAdd(options addOptions) error {
 		return err
 	}
 	if options.contentRoot != "" {
-		for _, operation := range result.Operations {
-			if operation.Type != "upload" {
-				return fmt.Errorf("unsupported content operation %q", operation.Type)
-			}
-			if err := uploadStagedContent(options.stagingContent, options.contentRoot, operation); err != nil {
-				return err
-			}
+		if _, err := app.ApplyStorageContentOperations(result.Operations, app.ContentOperationApplyOptions{
+			ContentRoot: options.contentRoot,
+			StagingRoot: options.stagingContent,
+		}); err != nil {
+			return err
 		}
 	}
 
@@ -400,57 +378,4 @@ func (c cli) runAdd(options addOptions) error {
 		fmt.Fprintf(c.out, "operation=%s source=%s target=%s\n", operation.Type, operation.SourcePath, operation.TargetPath)
 	}
 	return nil
-}
-
-func uploadStagedContent(stagingRoot, contentRoot string, operation storage.ContentOperation) error {
-	source, err := content.SafeJoin(stagingRoot, operation.SourcePath)
-	if err != nil {
-		return fmt.Errorf("resolve upload source: %w", err)
-	}
-	target, err := content.SafeJoin(contentRoot, operation.TargetPath)
-	if err != nil {
-		return fmt.Errorf("resolve upload target: %w", err)
-	}
-	if _, err := os.Stat(target); err == nil {
-		return fmt.Errorf("upload target already exists: %s", operation.TargetPath)
-	} else if !os.IsNotExist(err) {
-		return fmt.Errorf("stat upload target: %w", err)
-	}
-	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
-		return fmt.Errorf("create upload target parent: %w", err)
-	}
-	if err := os.Rename(source, target); err == nil {
-		return nil
-	}
-	if err := copyPath(source, target); err != nil {
-		return err
-	}
-	if err := os.RemoveAll(source); err != nil {
-		return fmt.Errorf("remove uploaded staging content: %w", err)
-	}
-	return nil
-}
-
-func copyPath(source, target string) error {
-	info, err := os.Stat(source)
-	if err != nil {
-		return fmt.Errorf("stat upload source: %w", err)
-	}
-	if !info.IsDir() {
-		return copyFile(source, target)
-	}
-	return filepath.WalkDir(source, func(path string, entry os.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-		relative, err := filepath.Rel(source, path)
-		if err != nil {
-			return err
-		}
-		targetPath := filepath.Join(target, relative)
-		if entry.IsDir() {
-			return os.MkdirAll(targetPath, 0o755)
-		}
-		return copyFile(path, targetPath)
-	})
 }
