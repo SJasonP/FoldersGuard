@@ -7,7 +7,7 @@ Settings controls WebUI preferences.
 Supported settings:
 
 - Operation guide format: `txt` or `md`.
-- Default maximum part size.
+- Default maximum part size in MB.
 - Source cleanup mode: ask every time, keep source files, or delete each file after successful processing.
 - Theme: system, light, or dark.
 - Language: system, English (United States), or Simplified Chinese.
@@ -16,7 +16,7 @@ Default settings:
 
 - Source cleanup mode defaults to ask every time.
 - Operation guide format defaults to `txt`.
-- Default maximum part size defaults to no limit.
+- Default maximum part size defaults to disabled file splitting.
 - Theme defaults to system.
 - Language defaults to system.
 

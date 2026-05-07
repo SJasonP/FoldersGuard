@@ -44,7 +44,7 @@ export function SettingsView({
             />
           </Form.Item>
           <Form.Item name="defaultMaxPartSize" label={t('defaultMaxPartSize')}>
-            <InputNumber min={0} style={{ width: '100%' }} />
+            <InputNumber min={0} precision={0} style={{ width: '100%' }} placeholder={t('partSizeDisabledHint')} />
           </Form.Item>
           <Form.Item name="sourceCleanupMode" label={t('sourceCleanupMode')} rules={[{ required: true }]}>
             <Select

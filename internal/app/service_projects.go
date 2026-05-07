@@ -291,6 +291,9 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 }
 
 func (s Service) resolveMaxPartSize(override int64) (int64, error) {
+	if override < 0 {
+		return NoSplitMaxPartSize, nil
+	}
 	if override > 0 {
 		return override, nil
 	}
@@ -302,7 +305,7 @@ func (s Service) resolveMaxPartSize(override int64) (int64, error) {
 	if settings.DefaultMaxPartSize > 0 {
 		return settings.DefaultMaxPartSize, nil
 	}
-	return (1 << 62), nil
+	return NoSplitMaxPartSize, nil
 }
 
 func (s Service) resolveSourceCleanupMode(requested string) (string, error) {

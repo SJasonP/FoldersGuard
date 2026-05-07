@@ -1,6 +1,6 @@
 import { Button, Empty, Flex, Input, Space, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { ReloadOutlined } from '@ant-design/icons';
+import { FolderAddOutlined, ImportOutlined, ReloadOutlined, ShareAltOutlined } from '@ant-design/icons';
 import type { LocalProjectRow } from '../types';
 
 type HomeViewProps = {
@@ -11,6 +11,10 @@ type HomeViewProps = {
   projectsError: string | null;
   selectedProjectId: string | null;
   disabled: boolean;
+  operationActive: boolean;
+  onCreateProject: () => void;
+  onImportProject: () => void;
+  onLoadShare: () => void;
   onProjectSearchChange: (value: string) => void;
   onRefresh: () => void;
   onSelectProject: (projectId: string | null) => void;
@@ -26,6 +30,10 @@ export function HomeView({
   projectsError,
   selectedProjectId,
   disabled,
+  operationActive,
+  onCreateProject,
+  onImportProject,
+  onLoadShare,
   onProjectSearchChange,
   onRefresh,
   onSelectProject,
@@ -36,7 +44,16 @@ export function HomeView({
     <Space direction="vertical" size="large" className="content-stack">
       <Flex justify="space-between" align="center" gap={16}>
         <Typography.Title level={2}>{t('localProjects')}</Typography.Title>
-        <Space>
+        <Space wrap>
+          <Button icon={<FolderAddOutlined />} onClick={onCreateProject} disabled={disabled || operationActive}>
+            {t('createProject')}
+          </Button>
+          <Button icon={<ImportOutlined />} onClick={onImportProject} disabled={disabled || operationActive}>
+            {t('importProject')}
+          </Button>
+          <Button icon={<ShareAltOutlined />} onClick={onLoadShare} disabled={disabled || operationActive}>
+            {t('loadShare')}
+          </Button>
           <Button onClick={() => onOpenProjectActions()} disabled={disabled || !selectedProjectId}>
             {t('viewProjectActions')}
           </Button>

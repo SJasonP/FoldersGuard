@@ -50,8 +50,8 @@ export function AddItemModal({ open, loading, onCancel, onSubmit, t }: AddItemMo
             t={t}
           />
         </Form.Item>
-        <Form.Item name="maxPartSize" label={t('defaultMaxPartSize')}>
-          <InputNumber min={1} style={{ width: '100%' }} placeholder={t('createUseDefaultMaxPartSize')} />
+        <Form.Item name="maxPartSize" label={t('maxPartSize')}>
+          <InputNumber min={0} precision={0} style={{ width: '100%' }} placeholder={t('createUseDefaultMaxPartSize')} />
         </Form.Item>
       </Form>
     </Modal>

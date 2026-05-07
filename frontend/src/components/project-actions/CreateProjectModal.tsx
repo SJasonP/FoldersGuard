@@ -56,7 +56,7 @@ export function CreateProjectModal({
         { label: t('contentOutputPath'), value: values.contentOutput },
         {
           label: t('defaultMaxPartSize'),
-          value: values.useDefaultMaxPartSize ? t('createUseDefaultMaxPartSize') : values.maxPartSize,
+          value: values.useDefaultMaxPartSize ? t('createUseDefaultMaxPartSize') : values.maxPartSize ?? 0,
         },
         { label: t('sourceCleanupOperationMode'), value: sourceCleanupLabel(values.sourceCleanup) },
         { label: t('forceOverwrite'), value: values.force ? t('passwordProtectedYes') : t('passwordProtectedNo') },
@@ -149,18 +149,19 @@ export function CreateProjectModal({
         </Form.Item>
         <Form.Item
           name="maxPartSize"
-          label={t('defaultMaxPartSize')}
+          label={t('maxPartSize')}
           rules={
             useDefaultMaxPartSize
               ? []
-              : [{ required: true, message: t('defaultMaxPartSize') }, { type: 'number', min: 1 }]
+              : [{ required: true, message: t('maxPartSize') }, { type: 'number', min: 0 }]
           }
         >
           <InputNumber
-            min={1}
+            min={0}
+            precision={0}
             style={{ width: '100%' }}
             disabled={useDefaultMaxPartSize}
-            placeholder={effectiveDefaultMaxPartSize > 0 ? String(effectiveDefaultMaxPartSize) : undefined}
+            placeholder={effectiveDefaultMaxPartSize > 4 ? String(effectiveDefaultMaxPartSize) : t('partSizeDisabledHint')}
           />
         </Form.Item>
         <Form.Item name="force" valuePropName="checked">

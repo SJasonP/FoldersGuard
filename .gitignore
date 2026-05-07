@@ -1,6 +1,10 @@
 .DS_Store
 .idea
-build
+build/*
+!build/
+!build/darwin/
+!build/darwin/Info.plist
+!build/darwin/Info.dev.plist
 bin
 dist
 node_modules

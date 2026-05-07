@@ -29,7 +29,7 @@ func TestSaveSettingsPersistsNormalizedValues(t *testing.T) {
 
 	saved, err := service.SaveSettings(Settings{
 		OperationGuideFormat: GuideFormatMD,
-		DefaultMaxPartSize:   4096,
+		DefaultMaxPartSize:   8 * BytesPerMB,
 		SourceCleanupMode:    SourceCleanupKeep,
 		Theme:                ThemeDark,
 		Language:             LanguageZHCN,
@@ -37,7 +37,7 @@ func TestSaveSettingsPersistsNormalizedValues(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if saved.OperationGuideFormat != GuideFormatMD || saved.DefaultMaxPartSize != 4096 || saved.Theme != ThemeDark || saved.Language != LanguageZHCN {
+	if saved.OperationGuideFormat != GuideFormatMD || saved.DefaultMaxPartSize != 8*BytesPerMB || saved.Theme != ThemeDark || saved.Language != LanguageZHCN {
 		t.Fatalf("saved settings = %+v", saved)
 	}
 
@@ -47,5 +47,22 @@ func TestSaveSettingsPersistsNormalizedValues(t *testing.T) {
 	}
 	if !reflect.DeepEqual(read, saved) {
 		t.Fatalf("read settings = %+v, want %+v", read, saved)
+	}
+}
+
+func TestSaveSettingsDisablesSmallDefaultMaxPartSize(t *testing.T) {
+	service, err := NewService(filepath.Join(t.TempDir(), "data"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	saved, err := service.SaveSettings(Settings{
+		DefaultMaxPartSize: 4 * BytesPerMB,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if saved.DefaultMaxPartSize != 0 {
+		t.Fatalf("default max part size = %d, want disabled", saved.DefaultMaxPartSize)
 	}
 }

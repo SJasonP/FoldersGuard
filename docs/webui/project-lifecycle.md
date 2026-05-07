@@ -26,9 +26,11 @@ Encrypted content output path rules:
 
 Maximum part size rules:
 
+- The value is entered in MB.
 - The value is optional.
 - If the user does not provide a value, FG uses the default maximum part size from Settings.
-- If provided, the value must be a positive integer size.
+- Values greater than 4 MB enable balanced file splitting.
+- Values less than or equal to 4 MB disable file splitting for that operation.
 
 Create behavior:
 

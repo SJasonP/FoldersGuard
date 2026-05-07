@@ -5,6 +5,7 @@ import { CreateProject } from '../../wailsjs/go/main/App';
 import type { CreateProjectResultModel, SettingsModel } from '../types';
 import { formatNumber } from '../formatters';
 import { showOperationError } from '../components/common/operationError';
+import { partSizeMBToOverrideBytes } from '../partSize';
 
 type CreateProjectValues = {
   sourcePath: string;
@@ -36,7 +37,7 @@ export function useProjectCreate({ messageApi, modalApi, t, settings, reloadProj
         sourcePath: values.sourcePath,
         contentOutput: values.contentOutput,
         password: values.password,
-        maxPartSize: values.useDefaultMaxPartSize ? 0 : Math.trunc(values.maxPartSize ?? 0),
+        maxPartSize: values.useDefaultMaxPartSize ? 0 : partSizeMBToOverrideBytes(values.maxPartSize),
         force: values.force,
         sourceCleanup: values.sourceCleanup,
         databaseExport: '',

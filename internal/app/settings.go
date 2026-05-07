@@ -8,6 +8,10 @@ import (
 )
 
 const (
+	BytesPerMB             int64 = 1024 * 1024
+	MinimumSplitPartSizeMB int64 = 5
+	NoSplitMaxPartSize     int64 = 1 << 62
+
 	GuideFormatTXT = "txt"
 	GuideFormatMD  = "md"
 
@@ -99,6 +103,9 @@ func normalizeSettings(settings Settings) (Settings, error) {
 
 	if settings.DefaultMaxPartSize < 0 {
 		return Settings{}, fmt.Errorf("default max part size must not be negative")
+	}
+	if settings.DefaultMaxPartSize < MinimumSplitPartSizeMB*BytesPerMB {
+		settings.DefaultMaxPartSize = 0
 	}
 
 	switch settings.SourceCleanupMode {

@@ -6,6 +6,7 @@ import { ApplyChangesModal } from './ApplyChangesModal';
 import { CreateFolderModal } from './CreateFolderModal';
 import { MoveItemModal } from './MoveItemModal';
 import { RenameItemModal } from './RenameItemModal';
+import { partSizeMBToOverrideBytes } from '../../partSize';
 
 type ProjectBrowserModalsProps = {
   addOpen: boolean;
@@ -86,7 +87,7 @@ export function ProjectBrowserModals({
               itemId: crypto.randomUUID(),
               sourcePath: values.sourcePath,
               targetFolderPath: targetFolder.path,
-              maxPartSize: Math.trunc(values.maxPartSize ?? 0),
+              maxPartSize: values.maxPartSize === undefined ? 0 : partSizeMBToOverrideBytes(values.maxPartSize),
             });
           }
           onCloseAdd();

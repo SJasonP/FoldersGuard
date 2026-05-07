@@ -362,11 +362,7 @@ function App() {
         <AppShell
           navigation={navigation}
           onNavigationChange={setNavigation}
-          onCreateProject={() => setCreateDialogOpen(true)}
-          onImportProject={() => setImportDialogOpen(true)}
-          onLoadShare={() => setLoadShareDialogOpen(true)}
           activeOperationLabel={activeOperationLabel}
-          actionsDisabled={!dataServicesEnabled}
           resolvedTheme={resolvedTheme}
           t={t}
         >
@@ -379,6 +375,10 @@ function App() {
               projectsError={projectsError}
               selectedProjectId={selectedProjectId}
               disabled={!dataServicesEnabled}
+              operationActive={activeOperationLabel !== null}
+              onCreateProject={() => setCreateDialogOpen(true)}
+              onImportProject={() => setImportDialogOpen(true)}
+              onLoadShare={() => setLoadShareDialogOpen(true)}
               onProjectSearchChange={setProjectSearch}
               onRefresh={() => void loadProjects()}
               onSelectProject={setSelectedProjectId}
