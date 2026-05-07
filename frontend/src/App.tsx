@@ -5,7 +5,7 @@ import type { ColumnsType } from 'antd/es/table';
 import enUS from 'antd/locale/en_US';
 import zhCN from 'antd/locale/zh_CN';
 import { AppInfo, SetLongRunningOperationActive } from '../wailsjs/go/main/App';
-import type { SupportedLanguage } from './i18n';
+import { resolveSystemLanguage, type SupportedLanguage } from './i18n';
 import i18n from './i18n';
 import { resolveTheme, themeAlgorithm, type ThemeMode } from './theme';
 import type { AppInfoModel, LocalProjectRow, NavigationKey } from './types';
@@ -35,7 +35,8 @@ function App() {
   const { t } = useTranslation();
   const antApp = AntApp.useApp();
   const [navigation, setNavigation] = useState<NavigationKey>('home');
-  const [language, setLanguage] = useState<'en-US' | 'zh-CN'>('en-US');
+  const [systemLanguage, setSystemLanguage] = useState<SupportedLanguage>(resolveSystemLanguage);
+  const [language, setLanguage] = useState<SupportedLanguage>(systemLanguage);
   const [themeMode, setThemeMode] = useState<ThemeMode>('system');
   const [resolvedTheme, setResolvedTheme] = useState(resolveTheme(themeMode));
   const [info, setInfo] = useState<AppInfoModel | null>(null);
@@ -47,6 +48,12 @@ function App() {
   useEffect(() => {
     void i18n.changeLanguage(language);
   }, [language]);
+
+  useEffect(() => {
+    const update = () => setSystemLanguage(resolveSystemLanguage());
+    window.addEventListener('languagechange', update);
+    return () => window.removeEventListener('languagechange', update);
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
@@ -64,6 +71,7 @@ function App() {
   } = useAppSettings({
     messageApi: antApp.message,
     t,
+    systemLanguage,
     setLanguage,
     setThemeMode,
   });
@@ -316,8 +324,6 @@ function App() {
           onCreateProject={() => setCreateDialogOpen(true)}
           onImportProject={() => setImportDialogOpen(true)}
           onLoadShare={() => setLoadShareDialogOpen(true)}
-          language={language}
-          onToggleLanguage={() => setLanguage(language === 'en-US' ? 'zh-CN' : 'en-US')}
           activeOperationLabel={activeOperationLabel}
           t={t}
         >

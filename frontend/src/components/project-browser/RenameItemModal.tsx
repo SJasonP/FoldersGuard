@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Form, Input, Modal } from 'antd';
 import type { ProjectBrowserItemModel } from '../../types';
+import { projectItemNameRules } from './projectBrowserNameValidation';
 
 type RenameItemModalProps = {
   open: boolean;
@@ -39,7 +40,7 @@ export function RenameItemModal({ open, item, onCancel, onSubmit, t }: RenameIte
           form.resetFields();
         }}
       >
-        <Form.Item name="newName" label={t('newName')} rules={[{ required: true, message: t('newName') }]}>
+        <Form.Item name="newName" label={t('newName')} rules={projectItemNameRules(t)}>
           <Input autoComplete="off" />
         </Form.Item>
       </Form>

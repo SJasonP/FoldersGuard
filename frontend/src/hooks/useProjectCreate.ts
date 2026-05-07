@@ -13,7 +13,6 @@ type CreateProjectValues = {
   useDefaultMaxPartSize: boolean;
   force: boolean;
   sourceCleanup: string;
-  databaseExport?: string;
 };
 
 type UseProjectCreateArgs = {
@@ -37,7 +36,7 @@ export function useProjectCreate({ messageApi, t, settings, reloadProjects }: Us
         maxPartSize: values.useDefaultMaxPartSize ? 0 : Math.trunc(values.maxPartSize ?? 0),
         force: values.force,
         sourceCleanup: values.sourceCleanup,
-        databaseExport: values.databaseExport?.trim() ?? '',
+        databaseExport: '',
       });
       setCreateDialogOpen(false);
       await reloadProjects();

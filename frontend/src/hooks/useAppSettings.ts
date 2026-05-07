@@ -3,15 +3,17 @@ import type { MessageInstance } from 'antd/es/message/interface';
 import { ReadSettings, SaveSettings } from '../../wailsjs/go/main/App';
 import type { SettingsModel } from '../types';
 import type { ThemeMode } from '../theme';
+import { resolveLanguageSetting, type SupportedLanguage } from '../i18n';
 
 type UseAppSettingsArgs = {
   messageApi: MessageInstance;
   t: (key: string) => string;
-  setLanguage: (language: 'en-US' | 'zh-CN') => void;
+  systemLanguage: SupportedLanguage;
+  setLanguage: (language: SupportedLanguage) => void;
   setThemeMode: (mode: ThemeMode) => void;
 };
 
-export function useAppSettings({ messageApi, t, setLanguage, setThemeMode }: UseAppSettingsArgs) {
+export function useAppSettings({ messageApi, t, systemLanguage, setLanguage, setThemeMode }: UseAppSettingsArgs) {
   const [settings, setSettings] = useState<SettingsModel | null>(null);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsSaving, setSettingsSaving] = useState(false);
@@ -19,16 +21,7 @@ export function useAppSettings({ messageApi, t, setLanguage, setThemeMode }: Use
   const applySettings = (nextSettings: SettingsModel) => {
     setSettings(nextSettings);
     setThemeMode((nextSettings.theme || 'system') as ThemeMode);
-    if (nextSettings.language === 'zh-CN') {
-      setLanguage('zh-CN');
-      return;
-    }
-    if (nextSettings.language === 'en-US') {
-      setLanguage('en-US');
-      return;
-    }
-    const browserLanguage = typeof navigator !== 'undefined' ? navigator.language : 'en-US';
-    setLanguage(browserLanguage.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en-US');
+    setLanguage(resolveLanguageSetting(nextSettings.language, systemLanguage));
   };
 
   useEffect(() => {
@@ -56,6 +49,12 @@ export function useAppSettings({ messageApi, t, setLanguage, setThemeMode }: Use
       cancelled = true;
     };
   }, [messageApi, t]);
+
+  useEffect(() => {
+    if (settings?.language === 'system') {
+      setLanguage(systemLanguage);
+    }
+  }, [settings?.language, setLanguage, systemLanguage]);
 
   const handleSaveSettings = async (values: SettingsModel) => {
     setSettingsSaving(true);

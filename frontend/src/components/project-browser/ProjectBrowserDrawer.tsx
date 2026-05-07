@@ -121,6 +121,9 @@ export function ProjectBrowserDrawer({
         for (const disabledID of descendantFolderIDs(state?.items ?? [], item.id)) {
           disabledIDs.add(disabledID);
         }
+        if (item.parentId) {
+          disabledIDs.add(item.parentId);
+        }
       }
       return buildSelectableFolderTree(state?.items ?? [], root?.id ?? '', pendingByID, disabledIDs);
     },

@@ -1,4 +1,5 @@
 import { Form, Input, Modal } from 'antd';
+import { projectItemNameRules } from './projectBrowserNameValidation';
 
 type CreateFolderModalValues = {
   name: string;
@@ -36,7 +37,7 @@ export function CreateFolderModal({ open, loading, onCancel, onSubmit, t }: Crea
           form.resetFields();
         }}
       >
-        <Form.Item name="name" label={t('folderName')} rules={[{ required: true, message: t('folderName') }]}>
+        <Form.Item name="name" label={t('folderName')} rules={projectItemNameRules(t)}>
           <Input autoComplete="off" />
         </Form.Item>
       </Form>

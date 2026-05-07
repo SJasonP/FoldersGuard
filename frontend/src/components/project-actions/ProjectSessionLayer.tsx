@@ -36,7 +36,6 @@ type ProjectSessionLayerProps = {
     useDefaultMaxPartSize: boolean;
     force: boolean;
     sourceCleanup: string;
-    databaseExport?: string;
   }) => void;
   importDialogOpen: boolean;
   importLoading: boolean;

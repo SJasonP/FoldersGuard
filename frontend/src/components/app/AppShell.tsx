@@ -15,8 +15,6 @@ type AppShellProps = {
   onCreateProject: () => void;
   onImportProject: () => void;
   onLoadShare: () => void;
-  language: 'en-US' | 'zh-CN';
-  onToggleLanguage: () => void;
   activeOperationLabel: string | null;
   children: React.ReactNode;
   t: (key: string) => string;
@@ -28,8 +26,6 @@ export function AppShell({
   onCreateProject,
   onImportProject,
   onLoadShare,
-  language,
-  onToggleLanguage,
   activeOperationLabel,
   children,
   t,
@@ -67,17 +63,14 @@ export function AppShell({
               {t('loadShare')}
             </Button>
           </Space>
-          <Space size="middle">
-            {activeOperationLabel ? (
-              <Space className="operation-status" size="small">
-                <Progress className="operation-progress" percent={100} size="small" status="active" showInfo={false} />
-                <Typography.Text>
-                  {t('operationRunning')}: {activeOperationLabel}
-                </Typography.Text>
-              </Space>
-            ) : null}
-            <Button onClick={onToggleLanguage}>{language}</Button>
-          </Space>
+          {activeOperationLabel ? (
+            <Space className="operation-status" size="small">
+              <Progress className="operation-progress" percent={100} size="small" status="active" showInfo={false} />
+              <Typography.Text>
+                {t('operationRunning')}: {activeOperationLabel}
+              </Typography.Text>
+            </Space>
+          ) : null}
         </Layout.Header>
         <Layout.Content className="app-content">{children}</Layout.Content>
       </Layout>

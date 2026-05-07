@@ -1,5 +1,6 @@
 import type { ProjectBrowserStateModel } from '../../types';
 import type { PendingAdd, PendingCreateFolder, PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
+import { validateProjectItemName } from './projectBrowserNameValidation';
 
 type PendingValidationArgs = {
   state: ProjectBrowserStateModel;
@@ -74,6 +75,9 @@ export function validatePendingProjectChanges({
   };
 
   for (const rename of pendingRenames) {
+    if (!validateProjectItemName(rename.newName)) {
+      blockingConflicts.add(t('conflictInvalidItemName', { name: rename.newName }));
+    }
     if (hasAncestorStructuralChange(rename.itemId)) {
       blockingConflicts.add(t('conflictRenameAncestorChanged', { path: rename.itemPath }));
     }
@@ -106,6 +110,9 @@ export function validatePendingProjectChanges({
   }
 
   for (const createFolder of pendingCreateFolders) {
+    if (!validateProjectItemName(createFolder.name)) {
+      blockingConflicts.add(t('conflictInvalidItemName', { name: createFolder.name }));
+    }
     const targetNode = nodesByPath.get(createFolder.targetFolderPath);
     if (hasTargetPathConflict(targetNode)) {
       blockingConflicts.add(t('conflictCreateFolderTargetChanged', { path: createFolder.targetFolderPath }));

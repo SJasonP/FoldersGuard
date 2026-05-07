@@ -13,6 +13,22 @@ export const resources = {
 } as const;
 
 export type SupportedLanguage = keyof typeof resources;
+export type LanguageSetting = SupportedLanguage | 'system';
+
+export function resolveSupportedLanguage(language: string | undefined): SupportedLanguage {
+  return language?.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en-US';
+}
+
+export function resolveSystemLanguage(): SupportedLanguage {
+  return resolveSupportedLanguage(typeof navigator !== 'undefined' ? navigator.language : undefined);
+}
+
+export function resolveLanguageSetting(setting: string | undefined, systemLanguage: SupportedLanguage): SupportedLanguage {
+  if (setting === 'zh-CN' || setting === 'en-US') {
+    return setting;
+  }
+  return systemLanguage;
+}
 
 void i18n.use(initReactI18next).init({
   resources,

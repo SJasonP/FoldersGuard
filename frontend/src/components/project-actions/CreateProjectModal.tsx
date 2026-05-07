@@ -12,7 +12,6 @@ type CreateProjectValues = {
   useDefaultMaxPartSize: boolean;
   force: boolean;
   sourceCleanup: string;
-  databaseExport?: string;
 };
 
 type CreateProjectModalProps = {
@@ -111,16 +110,6 @@ export function CreateProjectModal({
             dialogKind="open-directory"
             dialogTitle={t('contentOutputPath')}
             placeholder="/path/to/encrypted-content"
-            t={t}
-          />
-        </Form.Item>
-        <Form.Item name="databaseExport" label={t('databaseExportPath')}>
-          <PathInput
-            dialogKind="save-file"
-            dialogTitle={t('databaseExportPath')}
-            defaultFilename="project.fg"
-            filters={[{ displayName: 'FoldersGuard Project (*.fg)', pattern: '*.fg' }]}
-            placeholder="/path/to/exported-project.fg"
             t={t}
           />
         </Form.Item>
