@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
 import { CreateProject } from '../../wailsjs/go/main/App';
 import type { CreateProjectResultModel, SettingsModel } from '../types';
+import { formatNumber } from '../formatters';
 
 type CreateProjectValues = {
   sourcePath: string;
@@ -45,10 +46,10 @@ export function useProjectCreate({ messageApi, t, settings, reloadProjects }: Us
           t('createProjectSucceeded'),
           `${t('createSummaryProjectId')}: ${result.projectId}`,
           `${t('createSummaryProjectName')}: ${result.projectName}`,
-          `${t('createSummaryEncryptedFiles')}: ${result.encryptedFiles}`,
-          `${t('createSummaryEncryptedFolders')}: ${result.encryptedFolders}`,
-          `${t('createSummaryEncryptedParts')}: ${result.encryptedParts}`,
-          `${t('createSummaryDeletedCleartextFiles')}: ${result.deletedCleartextFiles}`,
+          `${t('createSummaryEncryptedFiles')}: ${formatNumber(result.encryptedFiles)}`,
+          `${t('createSummaryEncryptedFolders')}: ${formatNumber(result.encryptedFolders)}`,
+          `${t('createSummaryEncryptedParts')}: ${formatNumber(result.encryptedParts)}`,
+          `${t('createSummaryDeletedCleartextFiles')}: ${formatNumber(result.deletedCleartextFiles)}`,
         ].join(' | '),
       );
     } catch {

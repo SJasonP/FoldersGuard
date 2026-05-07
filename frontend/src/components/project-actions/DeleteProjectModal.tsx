@@ -1,14 +1,17 @@
-import { Form, Input, Modal, Space, Typography } from 'antd';
+import { Descriptions, Form, Input, Modal, Space, Typography } from 'antd';
+import type { LocalProjectSummary } from '../../types';
 
 type DeleteProjectModalProps = {
   open: boolean;
   loading: boolean;
+  dataDirectory: string;
+  project: LocalProjectSummary | null;
   onCancel: () => void;
   onSubmit: (password: string) => void;
   t: (key: string) => string;
 };
 
-export function DeleteProjectModal({ open, loading, onCancel, onSubmit, t }: DeleteProjectModalProps) {
+export function DeleteProjectModal({ open, loading, dataDirectory, project, onCancel, onSubmit, t }: DeleteProjectModalProps) {
   const [form] = Form.useForm<{ password: string }>();
 
   return (
@@ -26,6 +29,11 @@ export function DeleteProjectModal({ open, loading, onCancel, onSubmit, t }: Del
     >
       <Space direction="vertical" size="middle" className="content-stack">
         <Typography.Text>{t('deleteProjectConfirm')}</Typography.Text>
+        <Descriptions column={1} bordered size="small">
+          <Descriptions.Item label={t('projectId')}>{project?.projectId ?? ''}</Descriptions.Item>
+          <Descriptions.Item label={t('localDatabaseFileName')}>{project?.fileName ?? ''}</Descriptions.Item>
+          <Descriptions.Item label={t('dataDirectory')}>{dataDirectory}</Descriptions.Item>
+        </Descriptions>
         <Form
           form={form}
           layout="vertical"

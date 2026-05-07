@@ -1,4 +1,5 @@
 import { Alert, Descriptions, List, Modal, Typography } from 'antd';
+import { formatNumber } from '../../formatters';
 
 type ApplyChangesModalProps = {
   open: boolean;
@@ -74,11 +75,11 @@ export function ApplyChangesModal({
         />
       ) : null}
       <Descriptions column={1} bordered size="small">
-        <Descriptions.Item label={t('pendingRename')}>{renameCount}</Descriptions.Item>
-        <Descriptions.Item label={t('pendingMove')}>{moveCount}</Descriptions.Item>
-        <Descriptions.Item label={t('pendingRemove')}>{removeCount}</Descriptions.Item>
-        <Descriptions.Item label={t('pendingAdd')}>{addCount}</Descriptions.Item>
-        <Descriptions.Item label={t('pendingCreateFolder')}>{createFolderCount}</Descriptions.Item>
+        <Descriptions.Item label={t('pendingRename')}>{formatNumber(renameCount)}</Descriptions.Item>
+        <Descriptions.Item label={t('pendingMove')}>{formatNumber(moveCount)}</Descriptions.Item>
+        <Descriptions.Item label={t('pendingRemove')}>{formatNumber(removeCount)}</Descriptions.Item>
+        <Descriptions.Item label={t('pendingAdd')}>{formatNumber(addCount)}</Descriptions.Item>
+        <Descriptions.Item label={t('pendingCreateFolder')}>{formatNumber(createFolderCount)}</Descriptions.Item>
         <Descriptions.Item label={t('contentConnected')}>
           {contentConnected ? t('passwordProtectedYes') : t('passwordProtectedNo')}
         </Descriptions.Item>

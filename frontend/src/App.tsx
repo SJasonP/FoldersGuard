@@ -359,6 +359,7 @@ function App() {
           onCloseImport={() => setImportDialogOpen(false)}
           onImportProject={(values) => void handleImportProject(values)}
           projectActionsOpen={projectActionsOpen}
+          dataDirectory={info?.dataDir ?? ''}
           selectedProject={selectedProject}
           onCloseProjectActions={() => setProjectActionsOpen(false)}
           onOpenInspect={() => setInspectDialogOpen(true)}

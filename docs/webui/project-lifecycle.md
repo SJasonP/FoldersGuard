@@ -129,6 +129,6 @@ Delete rules:
 - Deleting a project removes local FG data only.
 - Deleting a project does not delete encrypted content unless another explicit content operation is selected.
 - The WebUI must ask for confirmation before deletion.
-- The confirmation shows the project name, project id, and data directory path affected.
+- The confirmation shows the project id, local database file name, and data directory path affected.
 
 After deletion, the WebUI refreshes the local project list.

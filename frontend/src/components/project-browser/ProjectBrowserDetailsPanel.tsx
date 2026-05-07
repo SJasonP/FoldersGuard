@@ -2,6 +2,7 @@ import { Descriptions, Empty, Typography } from 'antd';
 import type { ProjectBrowserItemModel } from '../../types';
 import type { PendingRename } from '../../hooks/useProjectBrowser';
 import { displayNameForItem } from './projectBrowserView';
+import { formatDateTime, formatFileSize, formatNumber } from '../../formatters';
 
 type ProjectBrowserDetailsPanelProps = {
   item: ProjectBrowserItemModel | null;
@@ -21,9 +22,9 @@ export function ProjectBrowserDetailsPanel({ item, pendingByID, pendingStateByID
           <Descriptions.Item label={t('itemId')}>{item.id}</Descriptions.Item>
           <Descriptions.Item label={t('itemPath')}>{item.path}</Descriptions.Item>
           <Descriptions.Item label={t('parentPath')}>{item.parentPath}</Descriptions.Item>
-          <Descriptions.Item label={t('fileSize')}>{item.size}</Descriptions.Item>
-          <Descriptions.Item label={t('childCount')}>{item.childCount}</Descriptions.Item>
-          <Descriptions.Item label={t('modifiedTime')}>{item.modifiedAt}</Descriptions.Item>
+          <Descriptions.Item label={t('fileSize')}>{formatFileSize(item.size)}</Descriptions.Item>
+          <Descriptions.Item label={t('childCount')}>{formatNumber(item.childCount)}</Descriptions.Item>
+          <Descriptions.Item label={t('modifiedTime')}>{formatDateTime(item.modifiedAt)}</Descriptions.Item>
           <Descriptions.Item label={t('metadataCaptured')}>
             {item.metadataCaptured ? t('passwordProtectedYes') : t('passwordProtectedNo')}
           </Descriptions.Item>

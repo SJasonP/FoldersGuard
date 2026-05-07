@@ -127,6 +127,7 @@ const zhCN = {
   loadShareableItemsFailed: '加载可分享条目失败。',
   loadSharePasswordHint: '若是无密码分享可留空。',
   loadShareSucceeded: '分享已加载。',
+  localDatabaseFileName: '本地数据库文件名',
   localProjects: '本地项目',
   metadataCaptured: '已捕获元数据',
   modifiedTime: '修改时间',

@@ -127,6 +127,7 @@ const enUS = {
   loadShareableItemsFailed: 'Failed to load shareable items.',
   loadSharePasswordHint: 'Leave empty for an unprotected share.',
   loadShareSucceeded: 'Share loaded.',
+  localDatabaseFileName: 'Local Database File Name',
   localProjects: 'Local Projects',
   metadataCaptured: 'Metadata Captured',
   modifiedTime: 'Modified Time',

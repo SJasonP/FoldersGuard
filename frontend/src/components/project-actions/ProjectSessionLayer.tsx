@@ -43,6 +43,7 @@ type ProjectSessionLayerProps = {
   onCloseImport: () => void;
   onImportProject: (values: { inputPath: string; password: string; force: boolean }) => void;
   projectActionsOpen: boolean;
+  dataDirectory: string;
   selectedProject: LocalProjectSummary | null;
   onCloseProjectActions: () => void;
   onOpenInspect: () => void;
@@ -120,6 +121,7 @@ export function ProjectSessionLayer({
   onCloseImport,
   onImportProject,
   projectActionsOpen,
+  dataDirectory,
   selectedProject,
   onCloseProjectActions,
   onOpenInspect,
@@ -226,7 +228,15 @@ export function ProjectSessionLayer({
       />
       <CreateShareResultDrawer open={createShareResultOpen} result={createShareResult} onClose={onCloseCreateShareResult} t={t} />
       <ExportProjectModal open={exportDialogOpen} loading={exportLoading} onCancel={onCloseExport} onSubmit={onExportProject} t={t} />
-      <DeleteProjectModal open={deleteDialogOpen} loading={deleteLoading} onCancel={onCloseDelete} onSubmit={onDeleteProject} t={t} />
+      <DeleteProjectModal
+        open={deleteDialogOpen}
+        loading={deleteLoading}
+        dataDirectory={dataDirectory}
+        project={selectedProject}
+        onCancel={onCloseDelete}
+        onSubmit={onDeleteProject}
+        t={t}
+      />
     </>
   );
 }

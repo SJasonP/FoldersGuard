@@ -1,5 +1,6 @@
 import { Descriptions, Drawer } from 'antd';
 import type { ShareSummaryModel } from '../../types';
+import { formatNumber } from '../../formatters';
 
 type ShareInspectDrawerProps = {
   open: boolean;
@@ -17,11 +18,11 @@ export function ShareInspectDrawer({ open, share, onClose, t }: ShareInspectDraw
           <Descriptions.Item label={t('databaseType')}>{share.databaseType}</Descriptions.Item>
           <Descriptions.Item label={t('formatVersion')}>{share.formatVersion}</Descriptions.Item>
           <Descriptions.Item label={t('schemaVersion')}>{share.schemaVersion}</Descriptions.Item>
-          <Descriptions.Item label={t('shareSummaryTopLevelItems')}>{share.topLevelItems}</Descriptions.Item>
-          <Descriptions.Item label={t('fileCount')}>{share.files}</Descriptions.Item>
-          <Descriptions.Item label={t('folderCount')}>{share.folders}</Descriptions.Item>
-          <Descriptions.Item label={t('partCount')}>{share.parts}</Descriptions.Item>
-          <Descriptions.Item label={t('storageObjects')}>{share.storageObjects}</Descriptions.Item>
+          <Descriptions.Item label={t('shareSummaryTopLevelItems')}>{formatNumber(share.topLevelItems)}</Descriptions.Item>
+          <Descriptions.Item label={t('fileCount')}>{formatNumber(share.files)}</Descriptions.Item>
+          <Descriptions.Item label={t('folderCount')}>{formatNumber(share.folders)}</Descriptions.Item>
+          <Descriptions.Item label={t('partCount')}>{formatNumber(share.parts)}</Descriptions.Item>
+          <Descriptions.Item label={t('storageObjects')}>{formatNumber(share.storageObjects)}</Descriptions.Item>
           <Descriptions.Item label={t('passwordProtected')}>
             {share.passwordProtected ? t('passwordProtectedYes') : t('passwordProtectedNo')}
           </Descriptions.Item>

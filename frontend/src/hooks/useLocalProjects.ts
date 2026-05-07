@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ListLocalProjects } from '../../wailsjs/go/main/App';
 import type { LocalProjectRow, LocalProjectSummary } from '../types';
+import { formatDateTime } from '../formatters';
 
 type UseLocalProjectsArgs = {
   language: 'en-US' | 'zh-CN';
@@ -52,12 +53,7 @@ export function useLocalProjects({ language, t }: UseLocalProjectsArgs) {
             key: project.projectId,
             projectId: project.projectId,
             fileName: project.fileName,
-            modifiedTime: modifiedAt
-              ? new Intl.DateTimeFormat(language, {
-                  dateStyle: 'medium',
-                  timeStyle: 'short',
-                }).format(modifiedAt)
-              : '',
+            modifiedTime: formatDateTime(modifiedAt),
             modifiedAtMs: modifiedAt?.getTime() ?? 0,
             availabilityStatus: t(project.availabilityStatus),
           };

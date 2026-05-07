@@ -1,5 +1,6 @@
 import { Descriptions, Drawer } from 'antd';
 import type { VerifyProjectResultModel } from '../../types';
+import { formatNumber } from '../../formatters';
 
 type VerifyProjectDrawerProps = {
   open: boolean;
@@ -17,10 +18,10 @@ export function VerifyProjectDrawer({ open, result, onClose, t }: VerifyProjectD
           <Descriptions.Item label={t('verifyProjectStatus')}>
             {result.status === 'ok' ? t('verificationOk') : t('verificationFailed')}
           </Descriptions.Item>
-          <Descriptions.Item label={t('checkedObjects')}>{result.checkedObjects}</Descriptions.Item>
-          <Descriptions.Item label={t('missingObjects')}>{result.missingObjects}</Descriptions.Item>
-          <Descriptions.Item label={t('tamperedObjects')}>{result.tamperedObjects}</Descriptions.Item>
-          <Descriptions.Item label={t('extraObjects')}>{result.extraObjects}</Descriptions.Item>
+          <Descriptions.Item label={t('checkedObjects')}>{formatNumber(result.checkedObjects)}</Descriptions.Item>
+          <Descriptions.Item label={t('missingObjects')}>{formatNumber(result.missingObjects)}</Descriptions.Item>
+          <Descriptions.Item label={t('tamperedObjects')}>{formatNumber(result.tamperedObjects)}</Descriptions.Item>
+          <Descriptions.Item label={t('extraObjects')}>{formatNumber(result.extraObjects)}</Descriptions.Item>
         </Descriptions>
       ) : null}
     </Drawer>

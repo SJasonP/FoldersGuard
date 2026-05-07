@@ -1,5 +1,6 @@
 import { Descriptions, Drawer } from 'antd';
 import type { InspectProjectResultModel } from '../../types';
+import { formatNumber } from '../../formatters';
 
 type InspectProjectDrawerProps = {
   open: boolean;
@@ -20,11 +21,11 @@ export function InspectProjectDrawer({ open, result, onClose, t }: InspectProjec
           <Descriptions.Item label={t('formatVersion')}>{result.formatVersion}</Descriptions.Item>
           <Descriptions.Item label={t('schemaVersion')}>{result.schemaVersion}</Descriptions.Item>
           <Descriptions.Item label={t('databaseType')}>{result.databaseType}</Descriptions.Item>
-          <Descriptions.Item label={t('itemCount')}>{result.items}</Descriptions.Item>
-          <Descriptions.Item label={t('folderCount')}>{result.folders}</Descriptions.Item>
-          <Descriptions.Item label={t('fileCount')}>{result.files}</Descriptions.Item>
-          <Descriptions.Item label={t('partCount')}>{result.parts}</Descriptions.Item>
-          <Descriptions.Item label={t('storageObjects')}>{result.storageObjects}</Descriptions.Item>
+          <Descriptions.Item label={t('itemCount')}>{formatNumber(result.items)}</Descriptions.Item>
+          <Descriptions.Item label={t('folderCount')}>{formatNumber(result.folders)}</Descriptions.Item>
+          <Descriptions.Item label={t('fileCount')}>{formatNumber(result.files)}</Descriptions.Item>
+          <Descriptions.Item label={t('partCount')}>{formatNumber(result.parts)}</Descriptions.Item>
+          <Descriptions.Item label={t('storageObjects')}>{formatNumber(result.storageObjects)}</Descriptions.Item>
         </Descriptions>
       ) : null}
     </Drawer>

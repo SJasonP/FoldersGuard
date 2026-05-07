@@ -7,6 +7,7 @@ import { ProjectBrowserItemTable } from './ProjectBrowserItemTable';
 import { ProjectBrowserModals } from './ProjectBrowserModals';
 import { ProjectBrowserPendingChanges } from './ProjectBrowserPendingChanges';
 import type { PendingAdd, PendingCreateFolder, PendingMove, PendingRemove, PendingRename } from '../../hooks/useProjectBrowser';
+import { formatDateTime, formatNumber } from '../../formatters';
 import {
   buildFolderTree,
   buildSelectableFolderTree,
@@ -166,11 +167,11 @@ export function ProjectBrowserDrawer({
           <Descriptions column={4} bordered size="small">
             <Descriptions.Item label={t('projectName')}>{state.projectName}</Descriptions.Item>
             <Descriptions.Item label={t('projectId')}>{state.projectId}</Descriptions.Item>
-            <Descriptions.Item label={t('fileCount')}>{state.files}</Descriptions.Item>
-            <Descriptions.Item label={t('folderCount')}>{state.folders}</Descriptions.Item>
-            <Descriptions.Item label={t('partCount')}>{state.parts}</Descriptions.Item>
-            <Descriptions.Item label={t('createdTime')}>{state.createdAt}</Descriptions.Item>
-            <Descriptions.Item label={t('updatedTime')}>{state.updatedAt}</Descriptions.Item>
+            <Descriptions.Item label={t('fileCount')}>{formatNumber(state.files)}</Descriptions.Item>
+            <Descriptions.Item label={t('folderCount')}>{formatNumber(state.folders)}</Descriptions.Item>
+            <Descriptions.Item label={t('partCount')}>{formatNumber(state.parts)}</Descriptions.Item>
+            <Descriptions.Item label={t('createdTime')}>{formatDateTime(state.createdAt)}</Descriptions.Item>
+            <Descriptions.Item label={t('updatedTime')}>{formatDateTime(state.updatedAt)}</Descriptions.Item>
             <Descriptions.Item label={t('contentConnected')}>
               {state.contentConnected ? t('passwordProtectedYes') : t('passwordProtectedNo')}
             </Descriptions.Item>
