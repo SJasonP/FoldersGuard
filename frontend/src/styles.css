@@ -128,9 +128,10 @@ body {
 
 .project-browser-grid {
   display: grid;
-  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(240px, 320px);
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(260px, 360px);
   gap: 18px;
   min-height: 420px;
+  align-items: start;
 }
 
 .project-browser-tree,
@@ -153,6 +154,14 @@ body {
 .project-browser-details {
   border-left: 1px solid var(--fg-border);
   padding-left: 18px;
+  overflow: auto;
+  max-width: 100%;
+}
+
+.project-browser-details .ant-descriptions-item-content,
+.project-browser-details .ant-typography {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .project-browser-breadcrumb-button {
@@ -166,4 +175,18 @@ body {
 
 .project-browser-breadcrumb-button:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 1400px) {
+  .project-browser-grid {
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  }
+
+  .project-browser-details {
+    grid-column: 1 / -1;
+    border-left: 0;
+    border-top: 1px solid var(--fg-border);
+    padding-left: 0;
+    padding-top: 18px;
+  }
 }

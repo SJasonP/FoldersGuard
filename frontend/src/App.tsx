@@ -414,10 +414,7 @@ function App() {
           selectedProject={selectedProject}
           onCloseProjectActions={() => setProjectActionsOpen(false)}
           onOpenInspect={() => setInspectDialogOpen(true)}
-          onOpenModify={() => {
-            setProjectActionsOpen(false);
-            setOpenProjectDialogOpen(true);
-          }}
+          onOpenModify={() => setOpenProjectDialogOpen(true)}
           onOpenVerify={() => setVerifyDialogOpen(true)}
           onOpenDecrypt={() => setDecryptDialogOpen(true)}
           onOpenCreateShare={() => setSharePasswordDialogOpen(true)}

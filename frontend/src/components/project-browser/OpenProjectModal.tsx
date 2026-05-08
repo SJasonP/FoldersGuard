@@ -1,5 +1,6 @@
 import { Form, Input, Modal } from 'antd';
 import { PathInput } from '../common/PathInput';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type OpenProjectValues = {
   password: string;
@@ -16,15 +17,13 @@ type OpenProjectModalProps = {
 
 export function OpenProjectModal({ open, loading, onCancel, onSubmit, t }: OpenProjectModalProps) {
   const [form] = Form.useForm<OpenProjectValues>();
+  useResetFormOnClose(form, open);
 
   return (
     <Modal
       title={t('modifyProject')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('openProject')}
       confirmLoading={loading}
@@ -36,7 +35,6 @@ export function OpenProjectModal({ open, loading, onCancel, onSubmit, t }: OpenP
         initialValues={{ encryptedPath: '' }}
         onFinish={(values) => {
           onSubmit(values);
-          form.resetFields();
         }}
       >
         <Form.Item name="password" label={t('password')} rules={[{ required: true, message: t('passwordRequired') }]}>

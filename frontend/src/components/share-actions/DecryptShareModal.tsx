@@ -1,6 +1,7 @@
 import { App as AntApp, Checkbox, Form, Input, Modal, Select } from 'antd';
 import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type DecryptShareValues = {
   password: string;
@@ -29,6 +30,7 @@ export function DecryptShareModal({
 }: DecryptShareModalProps) {
   const { modal } = AntApp.useApp();
   const [form] = Form.useForm<DecryptShareValues>();
+  useResetFormOnClose(form, open);
   const sourceCleanupLabel = (value: string) => {
     if (value === 'delete') {
       return t('sourceCleanupDelete');
@@ -51,7 +53,6 @@ export function DecryptShareModal({
       ],
       onConfirm: () => {
         onSubmit(values);
-        form.resetFields();
       },
     });
   };
@@ -60,10 +61,7 @@ export function DecryptShareModal({
     <Modal
       title={t('decryptShare')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('decryptShare')}
       confirmLoading={loading}

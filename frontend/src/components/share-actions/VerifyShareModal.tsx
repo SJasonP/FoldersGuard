@@ -1,5 +1,6 @@
 import { Form, Input, Modal } from 'antd';
 import { PathInput } from '../common/PathInput';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type VerifyShareValues = {
   password: string;
@@ -16,15 +17,13 @@ type VerifyShareModalProps = {
 
 export function VerifyShareModal({ open, loading, onCancel, onSubmit, t }: VerifyShareModalProps) {
   const [form] = Form.useForm<VerifyShareValues>();
+  useResetFormOnClose(form, open);
 
   return (
     <Modal
       title={t('verifyShare')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('verifyShare')}
       confirmLoading={loading}
@@ -35,7 +34,6 @@ export function VerifyShareModal({ open, loading, onCancel, onSubmit, t }: Verif
         layout="vertical"
         onFinish={(values) => {
           onSubmit(values);
-          form.resetFields();
         }}
       >
         <Form.Item name="password" label={t('password')}>

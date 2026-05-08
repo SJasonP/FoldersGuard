@@ -1,6 +1,7 @@
 import { App as AntApp, Checkbox, Form, Input, Modal } from 'antd';
 import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type ExportProjectValues = {
   password: string;
@@ -19,6 +20,7 @@ type ExportProjectModalProps = {
 export function ExportProjectModal({ open, loading, onCancel, onSubmit, t }: ExportProjectModalProps) {
   const { modal } = AntApp.useApp();
   const [form] = Form.useForm<ExportProjectValues>();
+  useResetFormOnClose(form, open);
   const confirmSubmit = (values: ExportProjectValues) => {
     showOperationConfirmation({
       modalApi: modal,
@@ -31,7 +33,6 @@ export function ExportProjectModal({ open, loading, onCancel, onSubmit, t }: Exp
       ],
       onConfirm: () => {
         onSubmit(values);
-        form.resetFields();
       },
     });
   };
@@ -40,13 +41,11 @@ export function ExportProjectModal({ open, loading, onCancel, onSubmit, t }: Exp
     <Modal
       title={t('exportProject')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('exportProject')}
       confirmLoading={loading}
+      destroyOnHidden
     >
       <Form
         form={form}

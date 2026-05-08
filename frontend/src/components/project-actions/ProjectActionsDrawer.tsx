@@ -44,7 +44,7 @@ export function ProjectActionsDrawer({
             {project.projectId} / {project.fileName}
           </Typography.Text>
         ) : null}
-        <Button block type="primary" onClick={onInspect}>
+        <Button block onClick={onInspect}>
           {t('inspectProject')}
         </Button>
         <Button block icon={<EditOutlined />} onClick={onModify}>

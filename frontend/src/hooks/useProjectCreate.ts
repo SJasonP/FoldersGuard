@@ -64,8 +64,7 @@ export function useProjectCreate({ messageApi, modalApi, t, settings, reloadProj
     }
   };
 
-  const defaultSourceCleanup =
-    settings?.sourceCleanupMode && settings.sourceCleanupMode !== 'ask' ? settings.sourceCleanupMode : 'keep';
+  const defaultSourceCleanup = 'keep';
 
   return {
     createDialogOpen,

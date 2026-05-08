@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Form, Modal, TreeSelect } from 'antd';
 import type { TreeSelectProps } from 'antd';
 import type { ProjectBrowserItemModel } from '../../types';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type MoveItemModalProps = {
   open: boolean;
@@ -14,10 +15,11 @@ type MoveItemModalProps = {
 
 export function MoveItemModal({ open, items, treeData, onCancel, onSubmit, t }: MoveItemModalProps) {
   const [form] = Form.useForm<{ targetFolderId: string }>();
+  useResetFormOnClose(form, open);
 
   useEffect(() => {
     if (open) {
-      form.resetFields();
+      form.setFieldsValue({ targetFolderId: '' });
     }
   }, [form, open]);
 
@@ -25,10 +27,7 @@ export function MoveItemModal({ open, items, treeData, onCancel, onSubmit, t }: 
     <Modal
       title={t('moveItem')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('moveItem')}
       destroyOnHidden
@@ -38,7 +37,6 @@ export function MoveItemModal({ open, items, treeData, onCancel, onSubmit, t }: 
         layout="vertical"
         onFinish={(values) => {
           onSubmit(values.targetFolderId);
-          form.resetFields();
         }}
       >
         <Form.Item name="targetFolderId" label={t('targetFolder')} rules={[{ required: true, message: t('targetFolder') }]}>

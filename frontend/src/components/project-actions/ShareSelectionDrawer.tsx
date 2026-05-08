@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Breadcrumb, Button, Descriptions, Drawer, Flex, Input, Space, Table, Tree, Typography } from 'antd';
+import { App as AntApp, Breadcrumb, Button, Descriptions, Drawer, Flex, Input, Space, Table, Tree, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { ProjectBrowserItemModel, ProjectBrowserStateModel } from '../../types';
 import { displayItemType } from '../../itemDisplay';
@@ -28,6 +28,7 @@ export function ShareSelectionDrawer({
   onContinue,
   t,
 }: ShareSelectionDrawerProps) {
+  const { modal } = AntApp.useApp();
   const root = state?.items.find((item) => item.id === state.rootFolderId) ?? null;
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
@@ -112,9 +113,23 @@ export function ShareSelectionDrawer({
       setItemSelected(activeFolderId, !activeFolderSelected);
     }
   };
+  const hasUnsavedSelection = selectedItemIds.length > 0 || searchQuery !== '' || activeFolderId !== (root?.id ?? '');
+  const closeDrawer = () => {
+    if (!hasUnsavedSelection) {
+      onCancel();
+      return;
+    }
+    modal.confirm({
+      title: t('unsavedChanges'),
+      content: t('unsavedChangesConfirm'),
+      okText: t('discardAndClose'),
+      cancelText: t('stay'),
+      onOk: onCancel,
+    });
+  };
 
   return (
-    <Drawer title={t('shareSelectionTitle')} open={open} onClose={onCancel} width={1120}>
+    <Drawer title={t('shareSelectionTitle')} open={open} onClose={closeDrawer} width={1120} maskClosable={false}>
       {state ? (
         <Flex vertical gap={18}>
           <Descriptions column={4} bordered size="small">
@@ -158,6 +173,7 @@ export function ShareSelectionDrawer({
                   >
                     {t('continueAction')}
                   </Button>
+                  <Button onClick={closeDrawer}>{t('close')}</Button>
                 </Space>
               </Flex>
               <Input.Search

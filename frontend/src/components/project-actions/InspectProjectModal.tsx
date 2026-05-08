@@ -1,4 +1,5 @@
 import { Form, Input, Modal } from 'antd';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type InspectProjectModalProps = {
   open: boolean;
@@ -10,25 +11,23 @@ type InspectProjectModalProps = {
 
 export function InspectProjectModal({ open, loading, onCancel, onSubmit, t }: InspectProjectModalProps) {
   const [form] = Form.useForm<{ password: string }>();
+  useResetFormOnClose(form, open);
 
   return (
     <Modal
       title={t('inspectProject')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('inspectProject')}
       confirmLoading={loading}
+      destroyOnHidden
     >
       <Form
         form={form}
         layout="vertical"
         onFinish={(values) => {
           onSubmit(values.password);
-          form.resetFields();
         }}
       >
         <Form.Item name="password" label={t('password')} rules={[{ required: true, message: t('passwordRequired') }]}>

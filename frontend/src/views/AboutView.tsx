@@ -1,4 +1,5 @@
 import { Space, Typography } from 'antd';
+import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 import type { AppInfoModel } from '../types';
 
 type AboutViewProps = {
@@ -25,7 +26,7 @@ export function AboutView({ info, t }: AboutViewProps) {
           <Typography.Text>{t('copyrightNotice')}</Typography.Text>
           <Typography.Text code>{info.copyrightNotice}</Typography.Text>
           <Typography.Text>{t('projectLink')}</Typography.Text>
-          <Typography.Link href={info.projectLink}>{info.projectLink}</Typography.Link>
+          <Typography.Link onClick={() => BrowserOpenURL(info.projectLink)}>{info.projectLink}</Typography.Link>
         </div>
       )}
     </Space>

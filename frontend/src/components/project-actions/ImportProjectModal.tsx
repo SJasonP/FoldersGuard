@@ -1,5 +1,6 @@
 import { Checkbox, Form, Input, Modal } from 'antd';
 import { PathInput } from '../common/PathInput';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type ImportProjectValues = {
   inputPath: string;
@@ -17,18 +18,17 @@ type ImportProjectModalProps = {
 
 export function ImportProjectModal({ open, loading, onCancel, onSubmit, t }: ImportProjectModalProps) {
   const [form] = Form.useForm<ImportProjectValues>();
+  useResetFormOnClose(form, open);
 
   return (
     <Modal
       title={t('importProject')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('importProject')}
       confirmLoading={loading}
+      destroyOnHidden
     >
       <Form
         form={form}
@@ -36,7 +36,6 @@ export function ImportProjectModal({ open, loading, onCancel, onSubmit, t }: Imp
         initialValues={{ force: false }}
         onFinish={(values) => {
           onSubmit(values);
-          form.resetFields();
         }}
       >
         <Form.Item

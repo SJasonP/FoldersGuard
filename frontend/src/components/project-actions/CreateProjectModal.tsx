@@ -2,6 +2,7 @@ import { App as AntApp, Checkbox, Form, Input, InputNumber, Modal, Select } from
 import type { SettingsModel } from '../../types';
 import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type CreateProjectValues = {
   sourcePath: string;
@@ -35,6 +36,7 @@ export function CreateProjectModal({
 }: CreateProjectModalProps) {
   const { modal } = AntApp.useApp();
   const [form] = Form.useForm<CreateProjectValues>();
+  useResetFormOnClose(form, open);
   const useDefaultMaxPartSize = Form.useWatch('useDefaultMaxPartSize', form) ?? true;
   const effectiveDefaultMaxPartSize = settings?.defaultMaxPartSize ?? 0;
   const sourceCleanupLabel = (value: string) => {
@@ -63,7 +65,6 @@ export function CreateProjectModal({
       ],
       onConfirm: () => {
         onSubmit(values);
-        form.resetFields();
       },
     });
   };
@@ -72,10 +73,7 @@ export function CreateProjectModal({
     <Modal
       title={t('createProject')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('createProject')}
       confirmLoading={loading}

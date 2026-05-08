@@ -1,4 +1,5 @@
 import { Form, Input, Modal } from 'antd';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type CreateSharePasswordModalProps = {
   open: boolean;
@@ -10,15 +11,13 @@ type CreateSharePasswordModalProps = {
 
 export function CreateSharePasswordModal({ open, loading, onCancel, onSubmit, t }: CreateSharePasswordModalProps) {
   const [form] = Form.useForm<{ password: string }>();
+  useResetFormOnClose(form, open);
 
   return (
     <Modal
       title={t('createShare')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('continueAction')}
       confirmLoading={loading}
@@ -29,7 +28,6 @@ export function CreateSharePasswordModal({ open, loading, onCancel, onSubmit, t 
         layout="vertical"
         onFinish={(values) => {
           onSubmit(values.password);
-          form.resetFields();
         }}
       >
         <Form.Item name="password" label={t('password')} rules={[{ required: true, message: t('passwordRequired') }]}>

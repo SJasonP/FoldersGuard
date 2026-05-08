@@ -1,6 +1,7 @@
 import { App as AntApp, Checkbox, Form, Input, Modal, Typography } from 'antd';
 import { showOperationConfirmation } from '../common/operationConfirmation';
 import { PathInput } from '../common/PathInput';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type CreateShareValues = {
   outputPath: string;
@@ -23,6 +24,8 @@ export function CreateShareModal({ open, loading, selectedItemCount, onCancel, o
   const { modal } = AntApp.useApp();
   const [form] = Form.useForm<CreateShareValues>();
   const passwordProtected = Form.useWatch('passwordProtected', form) ?? true;
+  useResetFormOnClose(form, open);
+
   const confirmSubmit = (values: CreateShareValues) => {
     showOperationConfirmation({
       modalApi: modal,
@@ -41,7 +44,6 @@ export function CreateShareModal({ open, loading, selectedItemCount, onCancel, o
       ],
       onConfirm: () => {
         onSubmit(values);
-        form.resetFields();
       },
     });
   };
@@ -50,15 +52,12 @@ export function CreateShareModal({ open, loading, selectedItemCount, onCancel, o
     <Modal
       title={t('createShare')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('createShare')}
       confirmLoading={loading}
-      width={720}
       destroyOnHidden
+      width={720}
     >
       <Form
         form={form}
@@ -69,9 +68,7 @@ export function CreateShareModal({ open, loading, selectedItemCount, onCancel, o
         }}
         onFinish={confirmSubmit}
       >
-        <Typography.Paragraph>
-          {t('selectedShareItemCount', { count: selectedItemCount })}
-        </Typography.Paragraph>
+        <Typography.Paragraph>{t('selectedShareItemCount', { count: selectedItemCount })}</Typography.Paragraph>
         <Form.Item
           name="outputPath"
           label={t('shareDatabaseOutputPath')}
@@ -92,11 +89,7 @@ export function CreateShareModal({ open, loading, selectedItemCount, onCancel, o
         <Form.Item
           name="sharePassword"
           label={t('sharePassword')}
-          rules={
-            passwordProtected
-              ? [{ required: true, message: t('sharePasswordRequired') }]
-              : []
-          }
+          rules={passwordProtected ? [{ required: true, message: t('sharePasswordRequired') }] : []}
         >
           <Input.Password autoComplete="new-password" disabled={!passwordProtected} />
         </Form.Item>

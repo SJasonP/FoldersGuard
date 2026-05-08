@@ -1,5 +1,6 @@
 import { Form, Input, Modal } from 'antd';
 import { projectItemNameRules } from './projectBrowserNameValidation';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type CreateFolderModalValues = {
   name: string;
@@ -15,15 +16,13 @@ type CreateFolderModalProps = {
 
 export function CreateFolderModal({ open, loading, onCancel, onSubmit, t }: CreateFolderModalProps) {
   const [form] = Form.useForm<CreateFolderModalValues>();
+  useResetFormOnClose(form, open);
 
   return (
     <Modal
       title={t('createFolder')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('createFolder')}
       confirmLoading={loading}
@@ -34,7 +33,6 @@ export function CreateFolderModal({ open, loading, onCancel, onSubmit, t }: Crea
         layout="vertical"
         onFinish={(values) => {
           onSubmit(values);
-          form.resetFields();
         }}
       >
         <Form.Item name="name" label={t('folderName')} rules={projectItemNameRules(t)}>

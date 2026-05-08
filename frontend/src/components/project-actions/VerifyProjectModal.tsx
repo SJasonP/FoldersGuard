@@ -1,5 +1,6 @@
 import { Form, Input, Modal } from 'antd';
 import { PathInput } from '../common/PathInput';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type VerifyProjectValues = {
   password: string;
@@ -16,15 +17,13 @@ type VerifyProjectModalProps = {
 
 export function VerifyProjectModal({ open, loading, onCancel, onSubmit, t }: VerifyProjectModalProps) {
   const [form] = Form.useForm<VerifyProjectValues>();
+  useResetFormOnClose(form, open);
 
   return (
     <Modal
       title={t('verifyProject')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('verifyProject')}
       confirmLoading={loading}
@@ -35,7 +34,6 @@ export function VerifyProjectModal({ open, loading, onCancel, onSubmit, t }: Ver
         layout="vertical"
         onFinish={(values) => {
           onSubmit(values);
-          form.resetFields();
         }}
       >
         <Form.Item name="password" label={t('password')} rules={[{ required: true, message: t('passwordRequired') }]}>

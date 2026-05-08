@@ -9,7 +9,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 )
 
-//go:embed all:frontend/dist
+//go:embed frontend/dist
 var assets embed.FS
 
 func main() {
@@ -21,10 +21,10 @@ func main() {
 
 	err = wails.Run(&options.App{
 		Title:     "FoldersGuard",
-		Width:     1180,
-		Height:    780,
-		MinWidth:  960,
-		MinHeight: 640,
+		Width:     1300,
+		Height:    700,
+		MinWidth:  700,
+		MinHeight: 500,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

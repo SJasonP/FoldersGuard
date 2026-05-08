@@ -1,5 +1,6 @@
 import { Form, Input, Modal, Typography } from 'antd';
 import { PathInput } from '../common/PathInput';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type LoadShareValues = {
   databasePath: string;
@@ -16,15 +17,13 @@ type LoadShareModalProps = {
 
 export function LoadShareModal({ open, loading, onCancel, onSubmit, t }: LoadShareModalProps) {
   const [form] = Form.useForm<LoadShareValues>();
+  useResetFormOnClose(form, open);
 
   return (
     <Modal
       title={t('loadShare')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('loadShare')}
       confirmLoading={loading}
@@ -35,7 +34,6 @@ export function LoadShareModal({ open, loading, onCancel, onSubmit, t }: LoadSha
         layout="vertical"
         onFinish={(values) => {
           onSubmit(values);
-          form.resetFields();
         }}
       >
         <Form.Item

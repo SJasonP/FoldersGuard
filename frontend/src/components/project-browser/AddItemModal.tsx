@@ -1,5 +1,6 @@
 import { Form, InputNumber, Modal } from 'antd';
 import { PathInput } from '../common/PathInput';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type AddItemModalValues = {
   sourcePath: string;
@@ -16,15 +17,13 @@ type AddItemModalProps = {
 
 export function AddItemModal({ open, loading, onCancel, onSubmit, t }: AddItemModalProps) {
   const [form] = Form.useForm<AddItemModalValues>();
+  useResetFormOnClose(form, open);
 
   return (
     <Modal
       title={t('addItem')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('addItem')}
       confirmLoading={loading}
@@ -35,7 +34,6 @@ export function AddItemModal({ open, loading, onCancel, onSubmit, t }: AddItemMo
         layout="vertical"
         onFinish={(values) => {
           onSubmit(values);
-          form.resetFields();
         }}
       >
         <Form.Item name="sourcePath" label={t('sourcePath')} rules={[{ required: true, message: t('sourcePath') }]}>

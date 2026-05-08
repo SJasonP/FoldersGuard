@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Form, Input, Modal } from 'antd';
 import type { ProjectBrowserItemModel } from '../../types';
 import { projectItemNameRules } from './projectBrowserNameValidation';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type RenameItemModalProps = {
   open: boolean;
@@ -13,6 +14,7 @@ type RenameItemModalProps = {
 
 export function RenameItemModal({ open, item, onCancel, onSubmit, t }: RenameItemModalProps) {
   const [form] = Form.useForm<{ newName: string }>();
+  useResetFormOnClose(form, open);
 
   useEffect(() => {
     if (open && item) {
@@ -24,10 +26,7 @@ export function RenameItemModal({ open, item, onCancel, onSubmit, t }: RenameIte
     <Modal
       title={t('renameItem')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('renameItem')}
       destroyOnHidden
@@ -37,7 +36,6 @@ export function RenameItemModal({ open, item, onCancel, onSubmit, t }: RenameIte
         layout="vertical"
         onFinish={(values) => {
           onSubmit(values.newName);
-          form.resetFields();
         }}
       >
         <Form.Item name="newName" label={t('newName')} rules={projectItemNameRules(t)}>

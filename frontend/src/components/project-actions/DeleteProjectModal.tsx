@@ -1,5 +1,6 @@
 import { Descriptions, Form, Input, Modal, Space, Typography } from 'antd';
 import type { LocalProjectSummary } from '../../types';
+import { useResetFormOnClose } from '../common/useResetFormOnClose';
 
 type DeleteProjectModalProps = {
   open: boolean;
@@ -13,19 +14,18 @@ type DeleteProjectModalProps = {
 
 export function DeleteProjectModal({ open, loading, dataDirectory, project, onCancel, onSubmit, t }: DeleteProjectModalProps) {
   const [form] = Form.useForm<{ password: string }>();
+  useResetFormOnClose(form, open);
 
   return (
     <Modal
       title={t('deleteProject')}
       open={open}
-      onCancel={() => {
-        form.resetFields();
-        onCancel();
-      }}
+      onCancel={onCancel}
       onOk={() => void form.submit()}
       okText={t('deleteProject')}
       okButtonProps={{ danger: true }}
       confirmLoading={loading}
+      destroyOnHidden
     >
       <Space direction="vertical" size="middle" className="content-stack">
         <Typography.Text>{t('deleteProjectConfirm')}</Typography.Text>
@@ -37,11 +37,10 @@ export function DeleteProjectModal({ open, loading, dataDirectory, project, onCa
         <Form
           form={form}
           layout="vertical"
-          onFinish={(values) => {
-            onSubmit(values.password);
-            form.resetFields();
-          }}
-        >
+        onFinish={(values) => {
+          onSubmit(values.password);
+        }}
+      >
           <Form.Item name="password" label={t('password')} rules={[{ required: true, message: t('passwordRequired') }]}>
             <Input.Password autoComplete="current-password" />
           </Form.Item>

@@ -46,15 +46,6 @@ export function SettingsView({
           <Form.Item name="defaultMaxPartSize" label={t('defaultMaxPartSize')}>
             <InputNumber min={0} precision={0} style={{ width: '100%' }} placeholder={t('partSizeDisabledHint')} />
           </Form.Item>
-          <Form.Item name="sourceCleanupMode" label={t('sourceCleanupMode')} rules={[{ required: true }]}>
-            <Select
-              options={[
-                { value: 'ask', label: t('sourceCleanupAsk') },
-                { value: 'keep', label: t('sourceCleanupKeep') },
-                { value: 'delete', label: t('sourceCleanupDelete') },
-              ]}
-            />
-          </Form.Item>
           <Form.Item name="theme" label={t('theme')} rules={[{ required: true }]}>
             <Select
               options={[

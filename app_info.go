@@ -14,7 +14,7 @@ func (a *App) AppInfo() AppInfo {
 		SchemaVersion:       format.SchemaVersion,
 		DataDir:             a.service.DataDir,
 		StartupError:        startupError,
-		CopyrightNotice:     "Copyright (c) 2026 SJasonP",
+		CopyrightNotice:     "Copyright (C) 2026 SJasonP",
 		ProjectLink:         "https://github.com/SJasonP/FoldersGuard",
 	}
 }
