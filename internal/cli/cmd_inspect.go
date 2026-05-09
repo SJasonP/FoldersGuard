@@ -76,7 +76,6 @@ func writeInspectResult(out interface {
 	fmt.Fprintf(out, "root_folder_id=%s\n", result.RootFolderID)
 	fmt.Fprintf(out, "root_name=%s\n", result.RootName)
 	fmt.Fprintf(out, "format_version=%s\n", result.FormatVersion)
-	fmt.Fprintf(out, "schema_version=%s\n", result.SchemaVersion)
 	fmt.Fprintf(out, "created_at=%s\n", result.CreatedAt.Format("2006-01-02T15:04:05.999999999Z07:00"))
 	fmt.Fprintf(out, "updated_at=%s\n", result.UpdatedAt.Format("2006-01-02T15:04:05.999999999Z07:00"))
 	fmt.Fprintf(out, "items=%d\n", result.Items)

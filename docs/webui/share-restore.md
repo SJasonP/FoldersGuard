@@ -147,7 +147,6 @@ After the share database is opened, the WebUI displays share information:
 - Share id.
 - Database type.
 - Format version.
-- Schema version.
 - Top-level item count.
 - File count.
 - Folder count.
@@ -220,7 +219,6 @@ Displayed information:
 - Share id.
 - Database type.
 - Format version.
-- Schema version.
 - Top-level item count.
 - File count.
 - Folder count.

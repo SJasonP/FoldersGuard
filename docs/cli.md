@@ -106,7 +106,6 @@ General:
 
 - [`fg help`](cli/general.md#fg-help)
 - [`fg version`](cli/general.md#fg-version)
-- [`fg schema`](cli/general.md#fg-schema)
 
 Project lifecycle:
 

@@ -59,7 +59,6 @@ type InspectResult struct {
 	RootFolderID   string
 	RootName       string
 	FormatVersion  string
-	SchemaVersion  string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	Items          int
@@ -143,7 +142,6 @@ type ShareSummary struct {
 	ShareID           string
 	DatabaseType      string
 	FormatVersion     string
-	SchemaVersion     string
 	TopLevelItems     int
 	Files             int
 	Folders           int

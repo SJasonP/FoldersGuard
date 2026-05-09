@@ -19,7 +19,7 @@ Running `foldersguard` or `fg` without arguments is equivalent to the matching h
 
 ## `fg version`
 
-Prints the application id and native format version.
+Prints the application id, product version, and native format version.
 
 Usage:
 
@@ -31,21 +31,6 @@ Output:
 
 ```text
 app_id=com.SJasonP.FoldersGuard
+product_version=1.0.0
 format_version=fg-native-v1
-```
-
-## `fg schema`
-
-Prints the FG database schema version.
-
-Usage:
-
-```text
-fg schema
-```
-
-Output:
-
-```text
-schema_version=<number>
 ```

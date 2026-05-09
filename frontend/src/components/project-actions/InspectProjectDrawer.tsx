@@ -19,7 +19,6 @@ export function InspectProjectDrawer({ open, result, onClose, t }: InspectProjec
           <Descriptions.Item label={t('rootFolderId')}>{result.rootFolderId}</Descriptions.Item>
           <Descriptions.Item label={t('rootName')}>{result.rootName}</Descriptions.Item>
           <Descriptions.Item label={t('formatVersion')}>{result.formatVersion}</Descriptions.Item>
-          <Descriptions.Item label={t('schemaVersion')}>{result.schemaVersion}</Descriptions.Item>
           <Descriptions.Item label={t('databaseType')}>{result.databaseType}</Descriptions.Item>
           <Descriptions.Item label={t('createdTime')}>{formatDateTime(result.createdAt)}</Descriptions.Item>
           <Descriptions.Item label={t('updatedTime')}>{formatDateTime(result.updatedAt)}</Descriptions.Item>

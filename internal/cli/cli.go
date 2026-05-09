@@ -69,7 +69,6 @@ func (c cli) rootCommand() *cobra.Command {
 	root.SetErr(io.Discard)
 	root.CompletionOptions.DisableDefaultCmd = true
 	root.AddCommand(c.versionCommand())
-	root.AddCommand(c.schemaCommand())
 	root.AddCommand(c.planCommand())
 	root.AddCommand(c.encryptCommand())
 	root.AddCommand(c.decryptCommand())

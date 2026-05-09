@@ -15,7 +15,6 @@ func TestRequiredMeta(t *testing.T) {
 	for _, key := range []string{
 		"app_id",
 		"format_version",
-		"schema_version",
 		"crypto_suite",
 		"content_crypto_suite",
 		"database_crypto_suite",

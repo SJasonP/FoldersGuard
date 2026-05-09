@@ -67,8 +67,8 @@ About information:
 
 - Product name.
 - App id.
-- Native format version.
-- Schema version.
+- Product version.
+- Format version.
 - Data directory path.
 - Copyright notice.
 - Project link.

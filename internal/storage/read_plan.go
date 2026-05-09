@@ -80,8 +80,7 @@ func (s *Store) ReadPlannedProject(ctx context.Context) (model.PlannedProject, e
 func validateMeta(meta map[string]string) error {
 	required := map[string]string{
 		"app_id":                format.AppID,
-		"format_version":        format.NativeFormatVersion,
-		"schema_version":        fmt.Sprint(format.SchemaVersion),
+		"format_version":        format.FormatVersion,
 		"crypto_suite":          format.CryptoSuite,
 		"content_crypto_suite":  format.ContentAlgorithm,
 		"database_crypto_suite": format.DatabaseAlgorithm,

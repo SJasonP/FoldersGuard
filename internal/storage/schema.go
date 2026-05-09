@@ -93,8 +93,7 @@ CREATE INDEX IF NOT EXISTS idx_parts_file ON parts(file_id, part_index);
 
 var RequiredMeta = map[string]string{
 	"app_id":                format.AppID,
-	"format_version":        format.NativeFormatVersion,
-	"schema_version":        "1",
+	"format_version":        format.FormatVersion,
 	"database_type":         "",
 	"project_id":            "",
 	"root_folder_id":        "",

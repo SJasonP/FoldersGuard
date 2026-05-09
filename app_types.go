@@ -1,14 +1,14 @@
 package main
 
 type AppInfo struct {
-	ProductName         string `json:"productName"`
-	AppID               string `json:"appId"`
-	NativeFormatVersion string `json:"nativeFormatVersion"`
-	SchemaVersion       int    `json:"schemaVersion"`
-	DataDir             string `json:"dataDir"`
-	StartupError        string `json:"startupError"`
-	CopyrightNotice     string `json:"copyrightNotice"`
-	ProjectLink         string `json:"projectLink"`
+	ProductName     string `json:"productName"`
+	ProductVersion  string `json:"productVersion"`
+	AppID           string `json:"appId"`
+	FormatVersion   string `json:"formatVersion"`
+	DataDir         string `json:"dataDir"`
+	StartupError    string `json:"startupError"`
+	CopyrightNotice string `json:"copyrightNotice"`
+	ProjectLink     string `json:"projectLink"`
 }
 
 type LocalProjectSummary struct {
@@ -22,7 +22,6 @@ type ShareSummary struct {
 	ShareID           string `json:"shareId"`
 	DatabaseType      string `json:"databaseType"`
 	FormatVersion     string `json:"formatVersion"`
-	SchemaVersion     string `json:"schemaVersion"`
 	TopLevelItems     int    `json:"topLevelItems"`
 	Files             int    `json:"files"`
 	Folders           int    `json:"folders"`
@@ -51,7 +50,6 @@ type InspectProjectResult struct {
 	RootFolderID   string `json:"rootFolderId"`
 	RootName       string `json:"rootName"`
 	FormatVersion  string `json:"formatVersion"`
-	SchemaVersion  string `json:"schemaVersion"`
 	CreatedAt      string `json:"createdAt"`
 	UpdatedAt      string `json:"updatedAt"`
 	Items          int    `json:"items"`

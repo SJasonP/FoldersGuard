@@ -87,7 +87,7 @@ Each top-level folder is represented by one SQLCipher-encrypted project database
 The project database contains all searchable and mutable FG data for that top-level folder:
 
 - Project identity.
-- Format and schema versions.
+- Format version.
 - Real names.
 - Visible UUID names.
 - Parent-child relationships.
@@ -134,7 +134,6 @@ Required keys:
 
 - `app_id`
 - `format_version`
-- `schema_version`
 - `database_type`
 - `project_id`
 - `root_folder_id`
@@ -357,7 +356,7 @@ For operations that require content changes, FG may produce an operation plan:
 
 ```text
 operation_plan:
-  version
+  plan_format
   operations:
     - upload encrypted object to UUID path
     - move encrypted UUID path to another UUID path
@@ -412,7 +411,7 @@ This preserves the "one visible object per logical file" behavior in ordinary fi
 
 ## Integrity
 
-Native format must support tamper detection.
+FG storage must support tamper detection.
 
 The implementation detects:
 
@@ -423,18 +422,17 @@ The implementation detects:
 - Wrong keys.
 - Wrong algorithm identifiers.
 
-## Versioning
+## Format Versioning
 
-All native storage data includes version information.
+All native storage data includes native format version information.
 
-Required version and algorithm metadata:
+Required format and algorithm metadata:
 
-- Native format version.
-- FG database schema version.
+- Format version.
 - Encryption algorithm identifier.
 - Crypto suite identifier.
 
-The implementation rejects unsupported format versions.
+The implementation rejects unsupported native format versions.
 
 ## Filesystem Entry Scope
 

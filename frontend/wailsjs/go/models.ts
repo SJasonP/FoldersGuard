@@ -2,9 +2,9 @@ export namespace main {
 	
 	export class AppInfo {
 	    productName: string;
+	    productVersion: string;
 	    appId: string;
-	    nativeFormatVersion: string;
-	    schemaVersion: number;
+	    formatVersion: string;
 	    dataDir: string;
 	    startupError: string;
 	    copyrightNotice: string;
@@ -17,9 +17,9 @@ export namespace main {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.productName = source["productName"];
+	        this.productVersion = source["productVersion"];
 	        this.appId = source["appId"];
-	        this.nativeFormatVersion = source["nativeFormatVersion"];
-	        this.schemaVersion = source["schemaVersion"];
+	        this.formatVersion = source["formatVersion"];
 	        this.dataDir = source["dataDir"];
 	        this.startupError = source["startupError"];
 	        this.copyrightNotice = source["copyrightNotice"];
@@ -627,7 +627,6 @@ export namespace main {
 	    rootFolderId: string;
 	    rootName: string;
 	    formatVersion: string;
-	    schemaVersion: string;
 	    createdAt: string;
 	    updatedAt: string;
 	    items: number;
@@ -648,7 +647,6 @@ export namespace main {
 	        this.rootFolderId = source["rootFolderId"];
 	        this.rootName = source["rootName"];
 	        this.formatVersion = source["formatVersion"];
-	        this.schemaVersion = source["schemaVersion"];
 	        this.createdAt = source["createdAt"];
 	        this.updatedAt = source["updatedAt"];
 	        this.items = source["items"];
@@ -791,7 +789,6 @@ export namespace main {
 	    shareId: string;
 	    databaseType: string;
 	    formatVersion: string;
-	    schemaVersion: string;
 	    topLevelItems: number;
 	    files: number;
 	    folders: number;
@@ -808,7 +805,6 @@ export namespace main {
 	        this.shareId = source["shareId"];
 	        this.databaseType = source["databaseType"];
 	        this.formatVersion = source["formatVersion"];
-	        this.schemaVersion = source["schemaVersion"];
 	        this.topLevelItems = source["topLevelItems"];
 	        this.files = source["files"];
 	        this.folders = source["folders"];
@@ -873,4 +869,3 @@ export namespace main {
 	}
 
 }
-

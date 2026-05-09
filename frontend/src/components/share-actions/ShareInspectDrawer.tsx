@@ -17,7 +17,6 @@ export function ShareInspectDrawer({ open, share, onClose, t }: ShareInspectDraw
           <Descriptions.Item label={t('shareId')}>{share.shareId}</Descriptions.Item>
           <Descriptions.Item label={t('databaseType')}>{share.databaseType}</Descriptions.Item>
           <Descriptions.Item label={t('formatVersion')}>{share.formatVersion}</Descriptions.Item>
-          <Descriptions.Item label={t('schemaVersion')}>{share.schemaVersion}</Descriptions.Item>
           <Descriptions.Item label={t('shareSummaryTopLevelItems')}>{formatNumber(share.topLevelItems)}</Descriptions.Item>
           <Descriptions.Item label={t('fileCount')}>{formatNumber(share.files)}</Descriptions.Item>
           <Descriptions.Item label={t('folderCount')}>{formatNumber(share.folders)}</Descriptions.Item>

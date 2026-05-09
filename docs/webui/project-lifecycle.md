@@ -71,7 +71,6 @@ Displayed information:
 - Root folder id.
 - Root folder name.
 - Format version.
-- Schema version.
 - Created time.
 - Updated time.
 - Item count.

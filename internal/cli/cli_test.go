@@ -28,24 +28,19 @@ func TestHelpUsesInvokedName(t *testing.T) {
 	}
 }
 
-func TestVersionAndSchemaOutput(t *testing.T) {
-	var version bytes.Buffer
-	if err := RunWithIO("fg", []string{"version"}, nil, &version); err != nil {
+func TestVersionOutput(t *testing.T) {
+	var output bytes.Buffer
+	if err := RunWithIO("fg", []string{"version"}, nil, &output); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(version.String(), "app_id=com.SJasonP.FoldersGuard\n") {
-		t.Fatalf("version output = %q", version.String())
+	if !strings.Contains(output.String(), "app_id=com.SJasonP.FoldersGuard\n") {
+		t.Fatalf("version output = %q", output.String())
 	}
-	if !strings.Contains(version.String(), "format_version=fg-native-v1\n") {
-		t.Fatalf("version output = %q", version.String())
+	if !strings.Contains(output.String(), "product_version=1.0.0\n") {
+		t.Fatalf("version output = %q", output.String())
 	}
-
-	var schema bytes.Buffer
-	if err := RunWithIO("fg", []string{"schema"}, nil, &schema); err != nil {
-		t.Fatal(err)
-	}
-	if schema.String() != "schema_version=1\n" {
-		t.Fatalf("schema output = %q", schema.String())
+	if !strings.Contains(output.String(), "format_version=fg-native-v1\n") {
+		t.Fatalf("version output = %q", output.String())
 	}
 }
 

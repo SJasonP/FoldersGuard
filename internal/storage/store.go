@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -61,8 +60,7 @@ func (s *Store) InitProject(ctx context.Context, spec ProjectSpec) error {
 	createdAt := spec.CreatedAt.UTC().Format(time.RFC3339Nano)
 	meta := map[string]string{
 		"app_id":                format.AppID,
-		"format_version":        format.NativeFormatVersion,
-		"schema_version":        strconv.Itoa(format.SchemaVersion),
+		"format_version":        format.FormatVersion,
 		"database_type":         spec.DatabaseType,
 		"project_id":            spec.ProjectID.String(),
 		"root_folder_id":        spec.RootFolderID.String(),

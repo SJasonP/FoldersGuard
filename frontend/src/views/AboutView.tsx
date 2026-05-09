@@ -15,12 +15,12 @@ export function AboutView({ info, t }: AboutViewProps) {
         <div className="about-grid">
           <Typography.Text>{t('productName')}</Typography.Text>
           <Typography.Text code>{info.productName}</Typography.Text>
+          <Typography.Text>{t('productVersion')}</Typography.Text>
+          <Typography.Text code>{info.productVersion}</Typography.Text>
           <Typography.Text>{t('appId')}</Typography.Text>
           <Typography.Text code>{info.appId}</Typography.Text>
           <Typography.Text>{t('formatVersion')}</Typography.Text>
-          <Typography.Text code>{info.nativeFormatVersion}</Typography.Text>
-          <Typography.Text>{t('schemaVersion')}</Typography.Text>
-          <Typography.Text code>{info.schemaVersion}</Typography.Text>
+          <Typography.Text code>{info.formatVersion}</Typography.Text>
           <Typography.Text>{t('dataDirectory')}</Typography.Text>
           <Typography.Text code>{info.dataDir}</Typography.Text>
           <Typography.Text>{t('copyrightNotice')}</Typography.Text>
