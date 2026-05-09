@@ -18,6 +18,10 @@ func (s Service) ListActiveProjects() ([]ActiveProjectSummary, error) {
 	if err := s.EnsureDataDir(); err != nil {
 		return nil, err
 	}
+	names, err := s.readProjectNames()
+	if err != nil {
+		return nil, err
+	}
 
 	entries, err := os.ReadDir(s.ProjectsDir())
 	if err != nil {
@@ -35,6 +39,7 @@ func (s Service) ListActiveProjects() ([]ActiveProjectSummary, error) {
 			FileName:     entry.Name(),
 			Availability: "available",
 		}
+		project.ProjectName = s.localProjectName(project.ProjectID, names)
 
 		info, err := entry.Info()
 		if err != nil || info.IsDir() {
@@ -140,6 +145,7 @@ func (s Service) DeleteProject(ctx context.Context, input DeleteProjectInput) (D
 	if err := os.Remove(sourcePath); err != nil {
 		return DeleteProjectResult{}, fmt.Errorf("delete active project database: %w", err)
 	}
+	_ = s.deleteLocalProjectName(input.ProjectID)
 	return DeleteProjectResult{ProjectID: input.ProjectID}, nil
 }
 
@@ -173,6 +179,10 @@ func (s Service) ImportProject(ctx context.Context, input ImportProjectInput) (I
 	if err := CopyFile(input.InputPath, activePath); err != nil {
 		return ImportProjectResult{}, err
 	}
+	_, _ = s.SaveLocalProjectName(SaveLocalProjectNameInput{
+		ProjectID:   plan.Project.ID.String(),
+		ProjectName: plan.RootItem.RealName,
+	})
 	return ImportProjectResult{
 		ProjectID: plan.Project.ID.String(),
 	}, nil
@@ -270,6 +280,10 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 	}).EncryptContent(ctx, plan); err != nil {
 		return CreateProjectResult{}, err
 	}
+	_, _ = s.SaveLocalProjectName(SaveLocalProjectNameInput{
+		ProjectID:   plan.Project.ID.String(),
+		ProjectName: plan.RootItem.RealName,
+	})
 
 	deletedFolders, err := removeEmptyFoldersUnderRoot(input.SourcePath)
 	if err != nil {

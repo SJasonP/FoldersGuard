@@ -20,12 +20,27 @@ func (a *App) ListLocalProjects() ([]LocalProjectSummary, error) {
 		}
 		result = append(result, LocalProjectSummary{
 			ProjectID:          project.ProjectID,
+			ProjectName:        project.ProjectName,
 			FileName:           project.FileName,
 			ModifiedAt:         modifiedAt,
 			AvailabilityStatus: project.Availability,
 		})
 	}
 	return result, nil
+}
+
+func (a *App) SaveLocalProjectName(request SaveLocalProjectNameRequest) (SaveLocalProjectNameResult, error) {
+	result, err := a.service.SaveLocalProjectName(app.SaveLocalProjectNameInput{
+		ProjectID:   request.ProjectID,
+		ProjectName: request.ProjectName,
+	})
+	if err != nil {
+		return SaveLocalProjectNameResult{}, err
+	}
+	return SaveLocalProjectNameResult{
+		ProjectID:   result.ProjectID,
+		ProjectName: result.ProjectName,
+	}, nil
 }
 
 func (a *App) InspectProject(request InspectProjectRequest) (InspectProjectResult, error) {

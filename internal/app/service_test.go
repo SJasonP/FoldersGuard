@@ -152,11 +152,41 @@ func TestServiceEnsureDataDirAndListActiveProjects(t *testing.T) {
 	if len(projects) != 1 {
 		t.Fatalf("project count = %d, want 1", len(projects))
 	}
-	if projects[0].ProjectID != "alpha" || projects[0].FileName != "alpha"+format.ProjectExtension || projects[0].Availability != "available" {
+	if projects[0].ProjectID != "alpha" || projects[0].ProjectName != "alpha" || projects[0].FileName != "alpha"+format.ProjectExtension || projects[0].Availability != "available" {
 		t.Fatalf("project summary = %+v", projects[0])
 	}
 	if !projects[0].ModifiedAt.Equal(now) {
 		t.Fatalf("modified at = %s, want %s", projects[0].ModifiedAt, now)
+	}
+}
+
+func TestServiceSaveLocalProjectName(t *testing.T) {
+	root := t.TempDir()
+	service := Service{DataDir: filepath.Join(root, "data")}
+	if err := service.EnsureDataDir(); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(service.ProjectsDir(), "alpha"+format.ProjectExtension), []byte("project"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	saved, err := service.SaveLocalProjectName(SaveLocalProjectNameInput{
+		ProjectID:   "alpha",
+		ProjectName: "  Personal Archive  ",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if saved.ProjectName != "Personal Archive" {
+		t.Fatalf("project name = %q", saved.ProjectName)
+	}
+
+	projects, err := service.ListActiveProjects()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(projects) != 1 || projects[0].ProjectName != "Personal Archive" {
+		t.Fatalf("projects = %+v", projects)
 	}
 }
 

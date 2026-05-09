@@ -183,6 +183,7 @@ function App() {
     inspectResult,
     inspectResultOpen,
     projectActionsOpen,
+    projectNameSaving,
     verifyDialogOpen,
     verifyLoading,
     verifyResult,
@@ -201,6 +202,7 @@ function App() {
     handleDeleteProject,
     handleExportProject,
     handleInspectProject,
+    handleSaveProjectName,
     handleVerifyProject,
   } = useProjectActions({
     messageApi: antApp.message,
@@ -290,9 +292,9 @@ function App() {
       },
       {
         title: t('projectName'),
-        dataIndex: 'fileName',
-        key: 'fileName',
-        sorter: (left, right) => left.fileName.localeCompare(right.fileName),
+        dataIndex: 'projectName',
+        key: 'projectName',
+        sorter: (left, right) => left.projectName.localeCompare(right.projectName),
       },
       {
         title: t('modifiedTime'),
@@ -413,6 +415,8 @@ function App() {
           dataDirectory={info?.dataDir ?? ''}
           selectedProject={selectedProject}
           onCloseProjectActions={() => setProjectActionsOpen(false)}
+          projectNameSaving={projectNameSaving}
+          onSaveProjectName={handleSaveProjectName}
           onOpenInspect={() => setInspectDialogOpen(true)}
           onOpenModify={() => setOpenProjectDialogOpen(true)}
           onOpenVerify={() => setVerifyDialogOpen(true)}

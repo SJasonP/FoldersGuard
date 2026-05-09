@@ -27,6 +27,7 @@ export type VerifyProjectResultModel = main.VerifyProjectResult;
 export type LocalProjectRow = {
   key: string;
   projectId: string;
+  projectName: string;
   fileName: string;
   modifiedTime: string;
   modifiedAtMs: number;

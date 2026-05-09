@@ -672,6 +672,7 @@ export namespace main {
 	}
 	export class LocalProjectSummary {
 	    projectId: string;
+	    projectName: string;
 	    fileName: string;
 	    modifiedAt: string;
 	    availabilityStatus: string;
@@ -683,6 +684,7 @@ export namespace main {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.projectId = source["projectId"];
+	        this.projectName = source["projectName"];
 	        this.fileName = source["fileName"];
 	        this.modifiedAt = source["modifiedAt"];
 	        this.availabilityStatus = source["availabilityStatus"];
@@ -726,6 +728,34 @@ export namespace main {
 	
 	
 	
+	export class SaveLocalProjectNameRequest {
+	    projectId: string;
+	    projectName: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SaveLocalProjectNameRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.projectName = source["projectName"];
+	    }
+	}
+	export class SaveLocalProjectNameResult {
+	    projectId: string;
+	    projectName: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SaveLocalProjectNameResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.projectName = source["projectName"];
+	    }
+	}
 	export class SelectPathRequest {
 	    kind: string;
 	    title: string;
@@ -869,3 +899,4 @@ export namespace main {
 	}
 
 }
+

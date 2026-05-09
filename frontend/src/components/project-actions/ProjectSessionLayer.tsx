@@ -47,6 +47,8 @@ type ProjectSessionLayerProps = {
   dataDirectory: string;
   selectedProject: LocalProjectSummary | null;
   onCloseProjectActions: () => void;
+  projectNameSaving: boolean;
+  onSaveProjectName: (projectName: string) => void;
   onOpenInspect: () => void;
   onOpenModify: () => void;
   onOpenVerify: () => void;
@@ -128,6 +130,8 @@ export function ProjectSessionLayer({
   dataDirectory,
   selectedProject,
   onCloseProjectActions,
+  projectNameSaving,
+  onSaveProjectName,
   onOpenInspect,
   onOpenModify,
   onOpenVerify,
@@ -186,7 +190,9 @@ export function ProjectSessionLayer({
       <ProjectActionsDrawer
         open={projectActionsOpen}
         project={selectedProject}
+        projectNameSaving={projectNameSaving}
         onClose={onCloseProjectActions}
+        onSaveProjectName={onSaveProjectName}
         onInspect={onOpenInspect}
         onModify={onOpenModify}
         onVerify={onOpenVerify}

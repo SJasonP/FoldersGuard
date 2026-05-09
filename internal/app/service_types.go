@@ -79,9 +79,20 @@ type VerifyResult struct {
 
 type ActiveProjectSummary struct {
 	ProjectID    string
+	ProjectName  string
 	FileName     string
 	ModifiedAt   time.Time
 	Availability string
+}
+
+type SaveLocalProjectNameInput struct {
+	ProjectID   string
+	ProjectName string
+}
+
+type SaveLocalProjectNameResult struct {
+	ProjectID   string
+	ProjectName string
 }
 
 type ExportProjectInput struct {

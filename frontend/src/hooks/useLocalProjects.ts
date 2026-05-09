@@ -59,7 +59,7 @@ export function useLocalProjects({ enabled, language, modalApi, t }: UseLocalPro
           }
           return (
             project.projectId.toLowerCase().includes(query) ||
-            project.fileName.toLowerCase().includes(query) ||
+            project.projectName.toLowerCase().includes(query) ||
             project.availabilityStatus.toLowerCase().includes(query)
           );
         })
@@ -68,6 +68,7 @@ export function useLocalProjects({ enabled, language, modalApi, t }: UseLocalPro
           return {
             key: project.projectId,
             projectId: project.projectId,
+            projectName: project.projectName,
             fileName: project.fileName,
             modifiedTime: formatDateTime(modifiedAt),
             modifiedAtMs: modifiedAt?.getTime() ?? 0,

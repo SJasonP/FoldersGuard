@@ -58,6 +58,10 @@ export function ReadSettings() {
   return window['go']['main']['App']['ReadSettings']();
 }
 
+export function SaveLocalProjectName(arg1) {
+  return window['go']['main']['App']['SaveLocalProjectName'](arg1);
+}
+
 export function SaveSettings(arg1) {
   return window['go']['main']['App']['SaveSettings'](arg1);
 }

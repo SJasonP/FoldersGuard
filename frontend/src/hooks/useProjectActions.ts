@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { MessageInstance } from 'antd/es/message/interface';
 import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
-import { DecryptProject, DeleteProject, ExportProject, InspectProject, VerifyProject } from '../../wailsjs/go/main/App';
+import { DecryptProject, DeleteProject, ExportProject, InspectProject, SaveLocalProjectName, VerifyProject } from '../../wailsjs/go/main/App';
 import type {
   DecryptProjectResultModel,
   DeleteProjectResultModel,
@@ -48,6 +48,7 @@ export function useProjectActions({
   const [exportLoading, setExportLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [projectNameSaving, setProjectNameSaving] = useState(false);
 
   const openProjectActions = () => {
     if (!selectedProjectId) {
@@ -178,6 +179,25 @@ export function useProjectActions({
     }
   };
 
+  const handleSaveProjectName = async (projectName: string) => {
+    if (!selectedProjectId) {
+      return;
+    }
+    setProjectNameSaving(true);
+    try {
+      await SaveLocalProjectName({
+        projectId: selectedProjectId,
+        projectName,
+      });
+      await reloadProjects();
+      messageApi.success(t('projectNameSaved'));
+    } catch (error) {
+      showOperationError(modalApi, t('projectNameSaveFailed'), error, t);
+    } finally {
+      setProjectNameSaving(false);
+    }
+  };
+
   return {
     decryptDialogOpen,
     decryptLoading,
@@ -192,6 +212,7 @@ export function useProjectActions({
     inspectResult,
     inspectResultOpen,
     projectActionsOpen,
+    projectNameSaving,
     selectedProject,
     verifyDialogOpen,
     verifyLoading,
@@ -211,6 +232,7 @@ export function useProjectActions({
     handleDeleteProject,
     handleExportProject,
     handleInspectProject,
+    handleSaveProjectName,
     handleVerifyProject,
   };
 }

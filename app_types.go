@@ -13,9 +13,20 @@ type AppInfo struct {
 
 type LocalProjectSummary struct {
 	ProjectID          string `json:"projectId"`
+	ProjectName        string `json:"projectName"`
 	FileName           string `json:"fileName"`
 	ModifiedAt         string `json:"modifiedAt"`
 	AvailabilityStatus string `json:"availabilityStatus"`
+}
+
+type SaveLocalProjectNameRequest struct {
+	ProjectID   string `json:"projectId"`
+	ProjectName string `json:"projectName"`
+}
+
+type SaveLocalProjectNameResult struct {
+	ProjectID   string `json:"projectId"`
+	ProjectName string `json:"projectName"`
 }
 
 type ShareSummary struct {

@@ -63,13 +63,14 @@ Primary actions:
 Local project list:
 
 - Lists all active `.fg` projects in FG's data directory.
-- Shows enough non-secret project identity for the user to choose a project.
+- Shows local project names for the user to choose a project.
+- Local project names are stored outside `.fg` databases in FG's local data directory.
 - Selecting a local project opens the project action menu.
 
 Project list fields:
 
 - Project id.
-- Local database file name.
+- Project name.
 - Local database modified time.
 - Availability status.
 
@@ -77,11 +78,11 @@ Project list behavior:
 
 - If there are no active projects, the list shows an empty state and keeps primary actions available.
 - The list supports search by non-secret displayed project identity.
-- The list supports sorting by project id, local database file name, local database modified time, and availability status.
+- The list supports sorting by project id, project name, local database modified time, and availability status.
 - The list can be refreshed from FG's data directory.
 - Local files that cannot be accessed at the filesystem level are shown as unavailable entries without exposing decrypted metadata.
 - Database validation failures are shown only after an open attempt.
-- Project names, root folder names, item counts, and decrypted metadata are shown only after password verification.
+- Root folder names, item counts, and decrypted metadata are shown only after password verification.
 
 ## Project Action Menu
 
@@ -100,6 +101,8 @@ Actions:
 Each action verifies the project password before continuing.
 
 The menu displays available non-secret project identity before password verification. Sensitive project metadata is displayed only after password verification.
+
+The menu includes an editable local project name field. Changing this field updates only FG's local project name record and does not modify the `.fg` database.
 
 ## Password Prompts
 

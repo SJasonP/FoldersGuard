@@ -30,6 +30,8 @@ export function OpenProjectBrowser(arg1:main.OpenProjectBrowserRequest):Promise<
 
 export function ReadSettings():Promise<main.Settings>;
 
+export function SaveLocalProjectName(arg1:main.SaveLocalProjectNameRequest):Promise<main.SaveLocalProjectNameResult>;
+
 export function SaveSettings(arg1:main.Settings):Promise<main.Settings>;
 
 export function SelectPath(arg1:main.SelectPathRequest):Promise<string>;
