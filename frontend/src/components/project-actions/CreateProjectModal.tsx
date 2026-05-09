@@ -52,7 +52,7 @@ export function CreateProjectModal({
       title: t('createProject'),
       message: t('createProjectConfirm'),
       okText: t('createProject'),
-      danger: values.sourceCleanup === 'delete',
+      danger: false,
       items: [
         { label: t('createSourcePath'), value: values.sourcePath },
         { label: t('contentOutputPath'), value: values.contentOutput },

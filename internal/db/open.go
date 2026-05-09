@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	sqlcipher "github.com/mutecomm/go-sqlcipher/v4"
+	_ "github.com/mutecomm/go-sqlcipher/v4"
 	_ "modernc.org/sqlite"
 )
 
@@ -64,6 +64,9 @@ func openPlain(ctx context.Context, path string) (*sql.DB, error) {
 }
 
 func openSQLCipher(ctx context.Context, path, password string) (*sql.DB, error) {
+	if err := SQLCipherAvailable(); err != nil {
+		return nil, err
+	}
 	if password == "" {
 		return nil, errors.New("database password is required")
 	}
@@ -143,5 +146,3 @@ func restrictDatabaseFile(path string) error {
 	}
 	return nil
 }
-
-var _ = sqlcipher.Version

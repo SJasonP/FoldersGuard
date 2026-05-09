@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"foldersguard/internal/app"
+	fgdb "foldersguard/internal/db"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -24,6 +25,9 @@ func NewApp() (*App, error) {
 	}
 	fgApp := &App{service: service}
 	if err := service.EnsureDataDir(); err != nil {
+		fgApp.startupError = err
+	}
+	if err := fgdb.SQLCipherAvailable(); err != nil && fgApp.startupError == nil {
 		fgApp.startupError = err
 	}
 	return fgApp, nil
