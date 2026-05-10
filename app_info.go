@@ -16,5 +16,6 @@ func (a *App) AppInfo() AppInfo {
 		StartupError:    startupError,
 		CopyrightNotice: "Copyright (C) 2026 SJasonP",
 		ProjectLink:     "https://github.com/SJasonP/FoldersGuard",
+		ThirdPartyLink:  "https://github.com/SJasonP/FoldersGuard/blob/main/THIRD-PARTY-NOTICES.md",
 	}
 }

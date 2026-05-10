@@ -17,8 +17,6 @@ export function AboutView({ info, t }: AboutViewProps) {
           <Typography.Text code>{info.productName}</Typography.Text>
           <Typography.Text>{t('productVersion')}</Typography.Text>
           <Typography.Text code>{info.productVersion}</Typography.Text>
-          <Typography.Text>{t('appId')}</Typography.Text>
-          <Typography.Text code>{info.appId}</Typography.Text>
           <Typography.Text>{t('formatVersion')}</Typography.Text>
           <Typography.Text code>{info.formatVersion}</Typography.Text>
           <Typography.Text>{t('dataDirectory')}</Typography.Text>
@@ -27,6 +25,8 @@ export function AboutView({ info, t }: AboutViewProps) {
           <Typography.Text code>{info.copyrightNotice}</Typography.Text>
           <Typography.Text>{t('projectLink')}</Typography.Text>
           <Typography.Link onClick={() => BrowserOpenURL(info.projectLink)}>{info.projectLink}</Typography.Link>
+          <Typography.Text>{t('openSourceLicenses')}</Typography.Text>
+          <Typography.Link onClick={() => BrowserOpenURL(info.thirdPartyLink)}>{t('viewOpenSourceLicenses')}</Typography.Link>
         </div>
       )}
     </Space>

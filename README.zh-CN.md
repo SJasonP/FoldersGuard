@@ -183,4 +183,6 @@ scripts/build-windows-amd64.ps1
 
 ## 许可证
 
-本项目使用 MIT License。见 `LICENSE`。
+FoldersGuard 自有源代码使用 MIT License。见 `LICENSE`。
+
+第三方组件按其各自许可证授权。发布或再分发 release 产物前，请查看 `THIRD-PARTY-NOTICES.md`。

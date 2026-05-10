@@ -9,6 +9,7 @@ type AppInfo struct {
 	StartupError    string `json:"startupError"`
 	CopyrightNotice string `json:"copyrightNotice"`
 	ProjectLink     string `json:"projectLink"`
+	ThirdPartyLink  string `json:"thirdPartyLink"`
 }
 
 type LocalProjectSummary struct {

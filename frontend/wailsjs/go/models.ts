@@ -9,6 +9,7 @@ export namespace main {
 	    startupError: string;
 	    copyrightNotice: string;
 	    projectLink: string;
+	    thirdPartyLink: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new AppInfo(source);
@@ -24,6 +25,7 @@ export namespace main {
 	        this.startupError = source["startupError"];
 	        this.copyrightNotice = source["copyrightNotice"];
 	        this.projectLink = source["projectLink"];
+	        this.thirdPartyLink = source["thirdPartyLink"];
 	    }
 	}
 	export class ProjectCreateFolderChange {

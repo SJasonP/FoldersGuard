@@ -183,4 +183,6 @@ Important documents:
 
 ## License
 
-This project is licensed under the MIT License. See `LICENSE`.
+FoldersGuard's own source code is licensed under the MIT License. See `LICENSE`.
+
+Third-party components are licensed under their own license terms. See `THIRD-PARTY-NOTICES.md` before publishing or redistributing release artifacts.
