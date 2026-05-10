@@ -4,9 +4,26 @@ English | [简体中文](README.zh-CN.md)
 
 > **Important notice:** All source code in this project was written by AI. This project makes no guarantee of security, cryptographic correctness, data durability, fitness for production use, or protection against data loss. Do not rely on it as the only protection for valuable, sensitive, or irreplaceable data.
 
-FoldersGuard is an experimental desktop and CLI tool for protecting folders by separating encrypted content from encrypted metadata.
+FoldersGuard is an experimental desktop and CLI tool for protecting folders while keeping encrypted data practical to move, upload, download, and share manually.
 
-The core idea is simple: a folder is the natural unit for storage, sharing, authorization, backup, upload, and restore. FoldersGuard encrypts file contents, hides real file and directory names behind UUID names, and stores the metadata needed to restore those files in SQLCipher-encrypted databases.
+## Why FoldersGuard
+
+FoldersGuard is built around one product idea: encrypted data should still behave like ordinary files and folders when you need to store or move it.
+
+The encrypted content remains a visible folder tree with UUID names. You can copy it to another disk, upload it to a cloud drive, download only part of it, or send selected encrypted files and directories to someone else. The real names, metadata, and keys needed to restore the data live separately in FoldersGuard's encrypted databases.
+
+This means FoldersGuard can share encrypted files and directories without decrypting them first. A share database describes exactly what the recipient is allowed to restore, so you can send one encrypted file, one encrypted folder, or a mixed selection without exposing parent folders, siblings, or unrelated project data.
+
+## Key Features
+
+- Manual encrypted-data handling: encrypted output is a normal folder tree that can be copied, uploaded, downloaded, backed up, or shared with ordinary tools.
+- Direct encrypted sharing: share encrypted files or directories without first creating a cleartext export.
+- Share-scoped access: `.fgs` share databases contain only the metadata and keys needed for the selected files and folders.
+- Hidden real names: visible encrypted file and directory names are UUID values.
+- Separate metadata: FoldersGuard data is separate from encrypted content, so metadata-only changes such as renaming do not require the encrypted content to be present.
+- Preserved folder hierarchy: the encrypted tree keeps the original logical structure, which makes manual storage workflows understandable.
+- Large-file splitting: large files can be split into balanced parts while remaining one logical file inside FoldersGuard.
+- Desktop and CLI workflows: the Wails WebUI is for interactive use; the CLI is for automation.
 
 ## Status
 

@@ -24,9 +24,9 @@ These components are part of the current Go application dependency graph for the
 | `github.com/spf13/cobra` | `v1.10.2` | Apache-2.0 |
 | `github.com/spf13/pflag` | `v1.0.10` | BSD-style |
 | `github.com/wailsapp/wails/v2` | `v2.12.0` | MIT |
-| `golang.org/x/sys` | `v0.43.0` | BSD-style |
-| `golang.org/x/term` | `v0.42.0` | BSD-style |
-| `modernc.org/libc` | `v1.72.2` | MIT / BSD-style |
+| `golang.org/x/sys` | `v0.44.0` | BSD-style |
+| `golang.org/x/term` | `v0.43.0` | BSD-style |
+| `modernc.org/libc` | `v1.72.3` | MIT / BSD-style |
 | `modernc.org/mathutil` | `v1.7.1` | BSD-style |
 | `modernc.org/memory` | `v1.11.0` | BSD-style |
 | `modernc.org/sqlite` | `v1.50.0` | BSD-style |
@@ -686,7 +686,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### golang.org/x/sys v0.43.0 - LICENSE
+### golang.org/x/sys v0.44.0 - LICENSE
 
 ```text
 Copyright 2009 The Go Authors.
@@ -718,7 +718,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### golang.org/x/term v0.42.0 - LICENSE
+### golang.org/x/term v0.43.0 - LICENSE
 
 ```text
 Copyright 2009 The Go Authors.
@@ -750,7 +750,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/libc v1.72.2 - LICENSE
+### modernc.org/libc v1.72.3 - LICENSE
 
 ```text
 Copyright (c) 2017 The Libc Authors. All rights reserved.
@@ -782,7 +782,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/libc v1.72.2 - LICENSE-3RD-PARTY.md
+### modernc.org/libc v1.72.3 - LICENSE-3RD-PARTY.md
 
 ```text
 # Third-Party Software Notices

@@ -153,7 +153,7 @@ const zhCN = {
   operationGuidePath: '操作指南路径',
   operationGuideWillBeWritten: '未连接加密内容时将写出操作指南。',
   operationRunning: '运行中',
-  openSourceLicenses: '开源许可证',
+  openSourceLicenses: '开源许可',
   openProject: '打开项目',
   openProjectFailed: '打开项目失败。',
   openProjectSucceeded: '项目已打开。',
