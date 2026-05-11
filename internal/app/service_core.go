@@ -39,11 +39,28 @@ func (s Service) ProjectsDir() string {
 }
 
 func (s Service) OperationGuidesDir() string {
+	if desktopDataDir := userDesktopDataDir(); desktopDataDir != "" {
+		return filepath.Join(desktopDataDir, "operation-guides")
+	}
 	return filepath.Join(s.DataDir, "operation-guides")
 }
 
 func (s Service) StagedContentDir() string {
+	if desktopDataDir := userDesktopDataDir(); desktopDataDir != "" {
+		return filepath.Join(desktopDataDir, "staged-content")
+	}
 	return filepath.Join(s.DataDir, "staged-content")
+}
+
+func userDesktopDataDir() string {
+	homeDir, err := os.UserHomeDir()
+	if err == nil && homeDir != "" {
+		desktopDir := filepath.Join(homeDir, "Desktop")
+		if info, statErr := os.Stat(desktopDir); statErr == nil && info.IsDir() {
+			return filepath.Join(desktopDir, format.DataDirName)
+		}
+	}
+	return ""
 }
 
 func (s Service) EnsureDataDir() error {

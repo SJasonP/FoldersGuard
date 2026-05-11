@@ -74,6 +74,10 @@ export function SetLongRunningOperationActive(arg1) {
   return window['go']['main']['App']['SetLongRunningOperationActive'](arg1);
 }
 
+export function SetOperationGuideCloseGuardActive(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetOperationGuideCloseGuardActive'](arg1, arg2, arg3);
+}
+
 export function VerifyProject(arg1) {
   return window['go']['main']['App']['VerifyProject'](arg1);
 }

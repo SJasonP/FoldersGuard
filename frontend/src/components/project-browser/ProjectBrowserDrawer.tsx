@@ -247,7 +247,6 @@ export function ProjectBrowserDrawer({
                   title: t('removeItem'),
                   content: selectedActionItems.map((item) => item.path).join('\n'),
                   okText: t('removeItem'),
-                  okButtonProps: { danger: true },
                   onOk: () => {
                     for (const item of selectedActionItems) {
                       onRemove({ itemId: item.id, itemPath: item.path });

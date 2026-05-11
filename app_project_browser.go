@@ -58,6 +58,7 @@ func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProj
 		ProjectID:           request.ProjectID,
 		Password:            request.Password,
 		EncryptedRoot:       request.EncryptedPath,
+		OperationGuideLang:  request.OperationGuideLang,
 		RenameChanges:       renames,
 		MoveChanges:         moves,
 		RemoveChanges:       removes,

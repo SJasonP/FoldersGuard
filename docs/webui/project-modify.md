@@ -149,13 +149,17 @@ If encrypted content is connected:
 
 - FG applies content operations directly.
 - FG reports the operations that were performed.
+- FG must not write an operation guide.
 
 If encrypted content is not connected:
 
-- FG writes encrypted output for new content into FG's data directory.
-- FG writes a human-readable operation guide into FG's data directory.
+- FG writes encrypted output for new content to the user's desktop when a desktop folder is available, falling back to FG's data directory otherwise.
+- FG writes a human-readable operation guide to the same desktop FoldersGuard workspace when available, falling back to FG's data directory otherwise.
 - The operation guide describes exactly how the user should upload, move, or delete encrypted objects.
 - The operation guide includes real file names where useful for user understanding.
+- The operation guide follows the active WebUI language when possible.
+- Closing an apply result that contains an operation guide requires confirmation.
+- Closing the application while an operation guide result is still open requires confirmation.
 
 The operation guide format is controlled by Settings.
 

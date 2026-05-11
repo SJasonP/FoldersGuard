@@ -16,6 +16,14 @@ type App struct {
 	startupError                error
 	longRunningOperationActive  bool
 	longRunningOperationActiveM sync.RWMutex
+	operationGuideGuard         operationGuideCloseGuard
+	operationGuideGuardM        sync.RWMutex
+}
+
+type operationGuideCloseGuard struct {
+	Active bool
+	Path   string
+	Lang   string
 }
 
 func NewApp() (*App, error) {
@@ -43,12 +51,28 @@ func (a *App) SetLongRunningOperationActive(active bool) {
 	a.longRunningOperationActive = active
 }
 
+func (a *App) SetOperationGuideCloseGuardActive(active bool, path string, lang string) {
+	a.operationGuideGuardM.Lock()
+	defer a.operationGuideGuardM.Unlock()
+	a.operationGuideGuard = operationGuideCloseGuard{
+		Active: active,
+		Path:   path,
+		Lang:   lang,
+	}
+}
+
 func (a *App) beforeClose(ctx context.Context) bool {
 	a.longRunningOperationActiveM.RLock()
 	active := a.longRunningOperationActive
 	a.longRunningOperationActiveM.RUnlock()
 	if !active {
-		return false
+		a.operationGuideGuardM.RLock()
+		guideGuard := a.operationGuideGuard
+		a.operationGuideGuardM.RUnlock()
+		if !guideGuard.Active {
+			return false
+		}
+		return a.confirmCloseWithOperationGuide(ctx, guideGuard)
 	}
 	_, _ = runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
 		Type:    runtime.WarningDialog,
@@ -57,4 +81,29 @@ func (a *App) beforeClose(ctx context.Context) bool {
 		Buttons: []string{"OK"},
 	})
 	return true
+}
+
+func (a *App) confirmCloseWithOperationGuide(ctx context.Context, guard operationGuideCloseGuard) bool {
+	title := "Operation guide still needs attention"
+	message := "An operation guide was generated for manual encrypted-content changes. Make sure you have saved or followed it before closing FoldersGuard."
+	closeButton := "Close"
+	stayButton := "Stay"
+	if guard.Lang == app.LanguageZHCN {
+		title = "操作指南仍需处理"
+		message = "本次更改已生成用于手动处理加密内容的操作指南。关闭 FoldersGuard 前，请确认你已经保存或完成指南中的步骤。"
+		closeButton = "关闭"
+		stayButton = "留在应用内"
+	}
+	if guard.Path != "" {
+		message += "\n\n" + guard.Path
+	}
+	button, _ := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
+		Type:          runtime.QuestionDialog,
+		Title:         title,
+		Message:       message,
+		Buttons:       []string{closeButton, stayButton},
+		DefaultButton: stayButton,
+		CancelButton:  stayButton,
+	})
+	return button != closeButton
 }

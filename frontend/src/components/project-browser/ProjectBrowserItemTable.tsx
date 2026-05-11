@@ -104,7 +104,7 @@ export function ProjectBrowserItemTable({
           <Button onClick={onOpenMove} disabled={noEditableSelection}>
             {t('moveItem')}
           </Button>
-          <Button danger onClick={onRemove} disabled={noEditableSelection}>
+          <Button onClick={onRemove} disabled={noEditableSelection}>
             {t('removeItem')}
           </Button>
           <Button onClick={onDiscardAll} disabled={pendingCount === 0}>

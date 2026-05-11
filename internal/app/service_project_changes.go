@@ -193,6 +193,7 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 			Operations: contentOperations,
 			CreatedAt:  time.Now(),
 			Format:     settings.OperationGuideFormat,
+			Language:   operationGuideLanguage(input.OperationGuideLang, settings.Language),
 		})
 		if err != nil {
 			return ApplyProjectChangesResult{}, err

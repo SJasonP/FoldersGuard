@@ -4,7 +4,7 @@ import { App as AntApp, ConfigProvider } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import enUS from 'antd/locale/en_US';
 import zhCN from 'antd/locale/zh_CN';
-import { AppInfo, SetLongRunningOperationActive } from '../wailsjs/go/main/App';
+import { AppInfo, SetLongRunningOperationActive, SetOperationGuideCloseGuardActive } from '../wailsjs/go/main/App';
 import { resolveSystemLanguage, type SupportedLanguage } from './i18n';
 import i18n from './i18n';
 import { resolveTheme, themeAlgorithm, type ThemeMode } from './theme';
@@ -278,6 +278,7 @@ function App() {
   } = useProjectBrowser({
     messageApi: antApp.message,
     modalApi: antApp.modal,
+    operationGuideLanguage: language,
     t,
     selectedProjectId,
   });
@@ -348,6 +349,11 @@ function App() {
   useEffect(() => {
     void SetLongRunningOperationActive(activeOperationLabel !== null);
   }, [activeOperationLabel]);
+
+  useEffect(() => {
+    const guidePath = applyResultOpen ? applyResult?.operationGuidePath ?? '' : '';
+    void SetOperationGuideCloseGuardActive(guidePath !== '', guidePath, language);
+  }, [applyResult?.operationGuidePath, applyResultOpen, language]);
 
   return (
     <ConfigProvider

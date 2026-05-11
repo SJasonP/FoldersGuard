@@ -102,6 +102,7 @@ export namespace main {
 	    projectId: string;
 	    password: string;
 	    encryptedPath: string;
+	    operationGuideLang: string;
 	    renameChanges: ProjectRenameChange[];
 	    moveChanges: ProjectMoveChange[];
 	    removeChanges: ProjectRemoveChange[];
@@ -117,6 +118,7 @@ export namespace main {
 	        this.projectId = source["projectId"];
 	        this.password = source["password"];
 	        this.encryptedPath = source["encryptedPath"];
+	        this.operationGuideLang = source["operationGuideLang"];
 	        this.renameChanges = this.convertValues(source["renameChanges"], ProjectRenameChange);
 	        this.moveChanges = this.convertValues(source["moveChanges"], ProjectMoveChange);
 	        this.removeChanges = this.convertValues(source["removeChanges"], ProjectRemoveChange);

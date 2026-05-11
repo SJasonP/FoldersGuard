@@ -154,7 +154,7 @@ func TestServiceApplyProjectMoveWritesOperationGuide(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(data), "move") {
+	if !strings.Contains(strings.ToLower(string(data)), "move") {
 		t.Fatalf("operation guide = %q", data)
 	}
 }

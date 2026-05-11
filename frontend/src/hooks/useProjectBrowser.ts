@@ -40,11 +40,12 @@ export type PendingCreateFolder = {
 type UseProjectBrowserArgs = {
   messageApi: MessageInstance;
   modalApi: ModalHookAPI;
+  operationGuideLanguage: string;
   t: (key: string, values?: Record<string, string | number>) => string;
   selectedProjectId: string | null;
 };
 
-export function useProjectBrowser({ messageApi, modalApi, t, selectedProjectId }: UseProjectBrowserArgs) {
+export function useProjectBrowser({ messageApi, modalApi, operationGuideLanguage, t, selectedProjectId }: UseProjectBrowserArgs) {
   const [openProjectDialogOpen, setOpenProjectDialogOpen] = useState(false);
   const [browserLoading, setBrowserLoading] = useState(false);
   const [applyLoading, setApplyLoading] = useState(false);
@@ -153,6 +154,7 @@ export function useProjectBrowser({ messageApi, modalApi, t, selectedProjectId }
         projectId: browserState.projectId,
         password: browserPassword,
         encryptedPath: browserEncryptedPath,
+        operationGuideLang: operationGuideLanguage,
         renameChanges: pendingRenames.map((rename) => ({
           itemPath: rename.itemPath,
           newName: rename.newName,

@@ -270,6 +270,7 @@ type ApplyProjectChangesInput struct {
 	ProjectID           string
 	Password            string
 	EncryptedRoot       string
+	OperationGuideLang  string
 	RenameChanges       []ProjectRenameChange
 	MoveChanges         []ProjectMoveChange
 	RemoveChanges       []ProjectRemoveChange

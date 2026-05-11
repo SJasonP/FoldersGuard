@@ -70,6 +70,7 @@ type ApplyProjectChangesRequest struct {
 	ProjectID           string                      `json:"projectId"`
 	Password            string                      `json:"password"`
 	EncryptedPath       string                      `json:"encryptedPath"`
+	OperationGuideLang  string                      `json:"operationGuideLang"`
 	RenameChanges       []ProjectRenameChange       `json:"renameChanges"`
 	MoveChanges         []ProjectMoveChange         `json:"moveChanges"`
 	RemoveChanges       []ProjectRemoveChange       `json:"removeChanges"`
