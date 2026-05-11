@@ -2,7 +2,9 @@
 
 This document defines the v1 local desktop WebUI for FoldersGuard.
 
-The WebUI is the primary interactive interface for normal users. It guides users through project creation, project import, share loading, project modification, decryption, sharing, export, deletion, settings, and progress review without requiring command-line knowledge.
+The WebUI is the primary interactive interface for normal users. It guides users through project creation, project
+import, share loading, project modification, decryption, sharing, export, deletion, settings, and progress review
+without requiring command-line knowledge.
 
 The CLI remains the stable automation interface.
 
@@ -14,12 +16,14 @@ Rules:
 
 - The WebUI runs as a local application.
 - The WebUI must not expose a general remote HTTP API by default.
-- The Go core is responsible for filesystem access, encryption, decryption, database access, validation, and storage operations.
+- The Go core is responsible for filesystem access, encryption, decryption, database access, validation, and storage
+  operations.
 - The frontend is responsible for display, navigation, local user interaction, and collecting explicit user choices.
 - The frontend must not implement cryptography, parse FG databases directly, or manipulate encrypted content directly.
 - Long-running work is owned by the Go core.
 - The WebUI shows a running status and progress feedback while long-running work is active.
-- Passwords, internal file keys, folder keys, database keys, and decrypted key material must never be shown in the WebUI.
+- Passwords, internal file keys, folder keys, database keys, and decrypted key material must never be shown in the
+  WebUI.
 
 ## Document Index
 

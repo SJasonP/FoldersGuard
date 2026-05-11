@@ -43,7 +43,8 @@ Localization behavior:
 - System language changes are applied automatically when the language setting is system.
 - Adding a new language must not require changing UI component logic.
 - Dates, times, numbers, and file sizes are formatted through localization-aware formatters.
-- Paths, project ids, UUID names, command names, file extensions, and cryptographic algorithm identifiers are not translated.
+- Paths, project ids, UUID names, command names, file extensions, and cryptographic algorithm identifiers are not
+  translated.
 
 ## Theme
 
@@ -51,7 +52,8 @@ The WebUI supports complete light and dark themes.
 
 Theme behavior:
 
-- Every WebUI screen, modal, form, table, tree, progress indicator, error state, warning state, empty state, and disabled state must support both light and dark themes.
+- Every WebUI screen, modal, form, table, tree, progress indicator, error state, warning state, empty state, and
+  disabled state must support both light and dark themes.
 - Theme defaults to system.
 - When theme is system, the WebUI automatically matches the host operating system light or dark appearance.
 - When the host system appearance changes while the WebUI is running, the WebUI updates without restart.

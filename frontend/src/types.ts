@@ -1,4 +1,4 @@
-import { main } from '../wailsjs/go/models';
+import {main} from '../wailsjs/go/models';
 
 export type NavigationKey = 'home' | 'settings' | 'about';
 export type AppInfoModel = main.AppInfo;
@@ -25,11 +25,11 @@ export type VerifyProjectRequestModel = main.VerifyProjectRequest;
 export type VerifyProjectResultModel = main.VerifyProjectResult;
 
 export type LocalProjectRow = {
-  key: string;
-  projectId: string;
-  projectName: string;
-  fileName: string;
-  modifiedTime: string;
-  modifiedAtMs: number;
-  availabilityStatus: string;
+    key: string;
+    projectId: string;
+    projectName: string;
+    fileName: string;
+    modifiedTime: string;
+    modifiedAtMs: number;
+    availabilityStatus: string;
 };

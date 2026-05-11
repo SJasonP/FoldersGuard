@@ -6,13 +6,18 @@ The WebUI operates on local filesystem paths selected or entered by the user.
 
 The WebUI uses FG's data directory as the source of local active projects.
 
-Passwords are required before entering protected workflows. When a workflow creates a new project or protected share, the password must be set and confirmed. When a workflow opens an existing project or protected share, the password must be verified before sensitive metadata or content operations are shown.
+Passwords are required before entering protected workflows. When a workflow creates a new project or protected share,
+the password must be set and confirmed. When a workflow opens an existing project or protected share, the password must
+be verified before sensitive metadata or content operations are shown.
 
-The WebUI must ask for explicit confirmation before applying project changes, deleting projects, exporting sensitive data, writing operation instructions, decrypting content, or deleting source files.
+The WebUI must ask for explicit confirmation before applying project changes, deleting projects, exporting sensitive
+data, writing operation instructions, decrypting content, or deleting source files.
 
-The WebUI must show clear progress for encryption, decryption, import, export, share generation, verification, operation-guide generation, and project modification apply steps.
+The WebUI must show clear progress for encryption, decryption, import, export, share generation, verification,
+operation-guide generation, and project modification apply steps.
 
-When a setting is configured to ask every time, the WebUI asks during the affected workflow and records the selected choice only for that operation.
+When a setting is configured to ask every time, the WebUI asks during the affected workflow and records the selected
+choice only for that operation.
 
 ## Application Shell
 
@@ -35,7 +40,8 @@ Window behavior:
 
 - If no long-running operation is active, closing the window exits the WebUI.
 - If a long-running operation is active, normal window close is blocked.
-- If the user forcibly terminates the application or the host system terminates it, any resulting incomplete work is outside FG's control.
+- If the user forcibly terminates the application or the host system terminates it, any resulting incomplete work is
+  outside FG's control.
 - If a project modification session has unapplied changes, leaving the session asks the user to apply, discard, or stay.
 
 ## First Launch
@@ -45,7 +51,8 @@ On first launch, FG ensures the data directory exists.
 First launch behavior:
 
 - If the data directory can be created or opened, the WebUI shows the start screen.
-- If the data directory cannot be created or opened, the WebUI shows a blocking error with the data directory path and the underlying error.
+- If the data directory cannot be created or opened, the WebUI shows a blocking error with the data directory path and
+  the underlying error.
 - The WebUI does not require an account, network connection, or remote service.
 
 ## Start Screen
@@ -80,7 +87,8 @@ Project list behavior:
 - The list supports search by non-secret displayed project identity.
 - The list supports sorting by project id, project name, local database modified time, and availability status.
 - The list can be refreshed from FG's data directory.
-- Local files that cannot be accessed at the filesystem level are shown as unavailable entries without exposing decrypted metadata.
+- Local files that cannot be accessed at the filesystem level are shown as unavailable entries without exposing
+  decrypted metadata.
 - Database validation failures are shown only after an open attempt.
 - Root folder names, item counts, and decrypted metadata are shown only after password verification.
 
@@ -100,9 +108,11 @@ Actions:
 
 Each action verifies the project password before continuing.
 
-The menu displays available non-secret project identity before password verification. Sensitive project metadata is displayed only after password verification.
+The menu displays available non-secret project identity before password verification. Sensitive project metadata is
+displayed only after password verification.
 
-The menu includes an editable local project name field. Changing this field updates only FG's local project name record and does not modify the `.fg` database.
+The menu includes an editable local project name field. Changing this field updates only FG's local project name record
+and does not modify the `.fg` database.
 
 ## Password Prompts
 

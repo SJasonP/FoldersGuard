@@ -4,7 +4,8 @@ This document defines the v1 command-line interface for `foldersguard` and `fg`.
 
 The CLI is the stable automation interface for FG. CLI semantics must remain predictable and scriptable.
 
-Command examples use `fg` as the short form. Every example can replace `fg` with `foldersguard` without changing behavior.
+Command examples use `fg` as the short form. Every example can replace `fg` with `foldersguard` without changing
+behavior.
 
 ## Global Rules
 
@@ -34,7 +35,8 @@ Passwords, internal file keys, and folder keys must never be printed in command 
 
 All paths are local filesystem paths.
 
-FG supports only regular files and directories. Symlinks, sockets, device files, FIFOs, and other special entries are unsupported.
+FG supports only regular files and directories. Symlinks, sockets, device files, FIFOs, and other special entries are
+unsupported.
 
 ## Password Input
 
@@ -61,8 +63,10 @@ Rules:
 - Password-protected `.fgs` share databases reject empty passwords.
 - Unprotected `.fgs` share databases require an explicit `--no-share-password` flag at creation time.
 - Environment-variable password input is intended for automation.
-- Interactive and environment-variable password input can collect both the project password and share password in one command.
-- A single command must not combine `--password-stdin` and `--share-password-stdin`, because stdin can provide only one password value.
+- Interactive and environment-variable password input can collect both the project password and share password in one
+  command.
+- A single command must not combine `--password-stdin` and `--share-password-stdin`, because stdin can provide only one
+  password value.
 
 ## Project References
 
@@ -72,13 +76,15 @@ A project reference is a project id.
 
 FG opens the matching active project database from FG's data directory.
 
-Exported `.fg` files are not active databases. They are accepted only by `fg import` as input and by `fg export` as output.
+Exported `.fg` files are not active databases. They are accepted only by `fg import` as input and by `fg export` as
+output.
 
 Commands that explicitly accept share databases also accept a path to an `.fgs` share database.
 
 Share databases are accepted by read/restore commands only: `fg decrypt`, `fg inspect`, and `fg verify`.
 
-Project editing, planning, and share creation commands require a project id and reject external `.fg` and `.fgs` database paths.
+Project editing, planning, and share creation commands require a project id and reject external `.fg` and `.fgs`
+database paths.
 
 ## Output And Overwrite Rules
 

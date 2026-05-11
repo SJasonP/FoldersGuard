@@ -29,7 +29,8 @@ Output path rules:
 
 Before decrypting, the WebUI shows a summary and asks for confirmation.
 
-When decryption starts, FG validates that the selected encrypted content path can be matched to encrypted content known by the project metadata.
+When decryption starts, FG validates that the selected encrypted content path can be matched to encrypted content known
+by the project metadata.
 
 Decrypt behavior:
 
@@ -107,7 +108,8 @@ Selection rules:
 
 - A share may contain a single file, multiple files, a single folder, multiple folders, or a mixed top-level set.
 - Selecting the same item more than once has no effect.
-- If both a folder and one of its descendants are selected, the descendant is included through the folder and is not duplicated.
+- If both a folder and one of its descendants are selected, the descendant is included through the folder and is not
+  duplicated.
 - The root folder can be selected.
 
 Share behavior:
@@ -166,7 +168,8 @@ Actions:
 - Decrypt Share.
 - Verify Share Content.
 
-Share actions use the loaded `.fgs` database. If the user leaves the share action menu, the loaded share session is closed.
+Share actions use the loaded `.fgs` database. If the user leaves the share action menu, the loaded share session is
+closed.
 
 ## Decrypt Share
 

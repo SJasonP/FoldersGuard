@@ -131,7 +131,8 @@ Conflict handling:
 - Conflicts are shown before apply.
 - Apply is disabled while blocking conflicts exist.
 - Non-blocking warnings are shown in the apply summary.
-- If a pending change becomes invalid because source local files changed or disappeared, apply is blocked until the user removes or updates that change.
+- If a pending change becomes invalid because source local files changed or disappeared, apply is blocked until the user
+  removes or updates that change.
 
 ## Apply Changes
 
@@ -153,8 +154,10 @@ If encrypted content is connected:
 
 If encrypted content is not connected:
 
-- FG writes encrypted output for new content to the user's desktop when a desktop folder is available, falling back to FG's data directory otherwise.
-- FG writes a human-readable operation guide to the same desktop FoldersGuard workspace when available, falling back to FG's data directory otherwise.
+- FG writes encrypted output for new content to the user's desktop when a desktop folder is available, falling back to
+  FG's data directory otherwise.
+- FG writes a human-readable operation guide to the same desktop FoldersGuard workspace when available, falling back to
+  FG's data directory otherwise.
 - The operation guide describes exactly how the user should upload, move, or delete encrypted objects.
 - The operation guide includes real file names where useful for user understanding.
 - The operation guide follows the active WebUI language when possible.

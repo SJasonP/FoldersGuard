@@ -1,6 +1,7 @@
 # Build
 
-FoldersGuard uses SQLCipher for project and share databases. SQLCipher is a CGO dependency, so release builds must be built with CGO enabled and a working C compiler for the target platform.
+FoldersGuard uses SQLCipher for project and share databases. SQLCipher is a CGO dependency, so release builds must be
+built with CGO enabled and a working C compiler for the target platform.
 
 ## Windows AMD64
 
@@ -67,4 +68,5 @@ wails build -platform windows/amd64
 
 If CGO is disabled, SQLCipher cannot be built into the application. Build with `CGO_ENABLED=1`.
 
-If the host C compiler is used for a different target platform, Go may fail while compiling `runtime/cgo`. Set `CC` and `CXX` to compilers for the target platform.
+If the host C compiler is used for a different target platform, Go may fail while compiling `runtime/cgo`. Set `CC` and
+`CXX` to compilers for the target platform.

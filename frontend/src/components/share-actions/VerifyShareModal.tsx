@@ -1,57 +1,57 @@
-import { Form, Input, Modal } from 'antd';
-import { PathInput } from '../common/PathInput';
-import { useResetFormOnClose } from '../common/useResetFormOnClose';
+import {Form, Input, Modal} from 'antd';
+import {PathInput} from '../common/PathInput';
+import {useResetFormOnClose} from '../common/useResetFormOnClose';
 
 type VerifyShareValues = {
-  password: string;
-  encryptedPath: string;
+    password: string;
+    encryptedPath: string;
 };
 
 type VerifyShareModalProps = {
-  open: boolean;
-  loading: boolean;
-  onCancel: () => void;
-  onSubmit: (values: VerifyShareValues) => void;
-  t: (key: string) => string;
+    open: boolean;
+    loading: boolean;
+    onCancel: () => void;
+    onSubmit: (values: VerifyShareValues) => void;
+    t: (key: string) => string;
 };
 
-export function VerifyShareModal({ open, loading, onCancel, onSubmit, t }: VerifyShareModalProps) {
-  const [form] = Form.useForm<VerifyShareValues>();
-  useResetFormOnClose(form, open);
+export function VerifyShareModal({open, loading, onCancel, onSubmit, t}: VerifyShareModalProps) {
+    const [form] = Form.useForm<VerifyShareValues>();
+    useResetFormOnClose(form, open);
 
-  return (
-    <Modal
-      title={t('verifyShare')}
-      open={open}
-      onCancel={onCancel}
-      onOk={() => void form.submit()}
-      okText={t('verifyShare')}
-      confirmLoading={loading}
-      destroyOnHidden
-    >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={(values) => {
-          onSubmit(values);
-        }}
-      >
-        <Form.Item name="password" label={t('password')}>
-          <Input.Password autoComplete="current-password" />
-        </Form.Item>
-        <Form.Item
-          name="encryptedPath"
-          label={t('verifyEncryptedPath')}
-          rules={[{ required: true, message: t('verifyEncryptedPath') }]}
+    return (
+        <Modal
+            title={t('verifyShare')}
+            open={open}
+            onCancel={onCancel}
+            onOk={() => void form.submit()}
+            okText={t('verifyShare')}
+            confirmLoading={loading}
+            destroyOnHidden
         >
-          <PathInput
-            dialogKind="open-directory"
-            dialogTitle={t('verifyEncryptedPath')}
-            placeholder="/path/to/encrypted-content"
-            t={t}
-          />
-        </Form.Item>
-      </Form>
-    </Modal>
-  );
+            <Form
+                form={form}
+                layout="vertical"
+                onFinish={(values) => {
+                    onSubmit(values);
+                }}
+            >
+                <Form.Item name="password" label={t('password')}>
+                    <Input.Password autoComplete="current-password"/>
+                </Form.Item>
+                <Form.Item
+                    name="encryptedPath"
+                    label={t('verifyEncryptedPath')}
+                    rules={[{required: true, message: t('verifyEncryptedPath')}]}
+                >
+                    <PathInput
+                        dialogKind="open-directory"
+                        dialogTitle={t('verifyEncryptedPath')}
+                        placeholder="/path/to/encrypted-content"
+                        t={t}
+                    />
+                </Form.Item>
+            </Form>
+        </Modal>
+    );
 }

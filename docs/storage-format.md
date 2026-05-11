@@ -7,9 +7,11 @@ This document describes the v1 native storage model.
 FG native mode separates encrypted content from FG data.
 
 - Encrypted content is the portable folder tree that users upload, download, move, and share.
-- FG data is the private encrypted project database that stores metadata, name mappings, internal keys, and storage layout.
+- FG data is the private encrypted project database that stores metadata, name mappings, internal keys, and storage
+  layout.
 
-FG data is not embedded in the encrypted content tree. In v1, FG data is stored only in FG's data directory, but users may export it.
+FG data is not embedded in the encrypted content tree. In v1, FG data is stored only in FG's data directory, but users
+may export it.
 
 App id:
 
@@ -25,11 +27,13 @@ FoldersGuard
 
 ## Encrypted Content Layout
 
-FG native mode stores encrypted content as a directory tree. The logical tree shape mirrors the original cleartext hierarchy, but visible names are UUID values.
+FG native mode stores encrypted content as a directory tree. The logical tree shape mirrors the original cleartext
+hierarchy, but visible names are UUID values.
 
 There is no required FG metadata file inside the encrypted content tree.
 
-FG reserved filenames and exported FG data do not need to be hidden. It is acceptable for an observer to know that FG is being used.
+FG reserved filenames and exported FG data do not need to be hidden. It is acceptable for an observer to know that FG is
+being used.
 
 ## FG Data Directory
 
@@ -37,7 +41,8 @@ FG data stores the metadata for one or more FG projects. V1 allows active FG dat
 
 The platform-specific path is the host OS user configuration directory plus the `FoldersGuard` data directory name.
 
-FG data is stored as SQLCipher-encrypted SQLite databases. FG data may be exported. Exported FG data is a database file that can be backed up or transferred.
+FG data is stored as SQLCipher-encrypted SQLite databases. FG data may be exported. Exported FG data is a database file
+that can be backed up or transferred.
 
 ## Encrypted SQLite Databases
 
@@ -56,7 +61,8 @@ Database types:
 
 - Project database: the active database for one top-level folder, normally represented as `.fg` when exported.
 - Exported project database: a portable copy of a project database.
-- Share database: a database containing only the metadata and keys needed for selected shared files and folders, always represented as `.fgs`.
+- Share database: a database containing only the metadata and keys needed for selected shared files and folders, always
+  represented as `.fgs`.
 
 ## File Extensions
 
@@ -64,7 +70,8 @@ FG database files use two public extensions.
 
 ### `.fg`
 
-Use `.fg` only when the database represents a normal FG project with exactly one top-level object and that object is a directory.
+Use `.fg` only when the database represents a normal FG project with exactly one top-level object and that object is a
+directory.
 
 ### `.fgs`
 
@@ -105,14 +112,17 @@ A share database is generated from a project database.
 
 It contains only the subset required to restore the selected shared files and folders.
 
-Share databases are rootless sets from the user's point of view. A `.fgs` database may contain one file, multiple files, one directory, multiple directories, or a mixed set of files and directories as top-level objects.
+Share databases are rootless sets from the user's point of view. A `.fgs` database may contain one file, multiple files,
+one directory, multiple directories, or a mixed set of files and directories as top-level objects.
 
-Internally, v1 stores these top-level objects under a virtual folder root so the same parent-child schema can be used. This virtual root is not restored as a user-visible directory and is not part of the shared content tree.
+Internally, v1 stores these top-level objects under a virtual folder root so the same parent-child schema can be used.
+This virtual root is not restored as a user-visible directory and is not part of the shared content tree.
 
 A share database may be password-protected or unprotected:
 
 - Password-protected share database: the recipient must enter the share password.
-- Unprotected share database: the database can be opened without a password and is a bearer secret that must be protected during transfer and storage.
+- Unprotected share database: the database can be opened without a password and is a bearer secret that must be
+  protected during transfer and storage.
 
 The share database is sent together with the encrypted content it describes.
 
@@ -180,7 +190,8 @@ Notes:
 - `windows_attributes` stores basic Windows file attributes when available.
 - `metadata_capabilities` records which original filesystem metadata fields were captured for the item.
 
-Original filesystem timestamps are stored in UTC with nanosecond precision. Host filesystems may round or truncate timestamps when FG restores them.
+Original filesystem timestamps are stored in UTC with nanosecond precision. Host filesystems may round or truncate
+timestamps when FG restores them.
 
 ### folders
 
@@ -283,7 +294,8 @@ Rules:
 - Metadata capture records the fields that were actually available on the source platform.
 - Restore uses the recorded capability set and does not invent missing platform metadata.
 - Directory metadata is restored after child entries are restored.
-- Split files have one logical metadata record on the file item; individual parts do not have user-visible filesystem metadata.
+- Split files have one logical metadata record on the file item; individual parts do not have user-visible filesystem
+  metadata.
 
 ## Internal Keys
 
@@ -297,7 +309,8 @@ Rules:
 - Folder keys define the logical authorization boundary and support share database generation.
 - The project database stores these keys inside the encrypted database.
 
-The database password unlocks the project database through SQLCipher. Once the database is unlocked, FG can access internal keys and decrypt content according to the operation.
+The database password unlocks the project database through SQLCipher. Once the database is unlocked, FG can access
+internal keys and decrypt content according to the operation.
 
 ## V1 Encryption Suite
 
@@ -363,7 +376,8 @@ operation_plan:
     - delete encrypted UUID path
 ```
 
-When FG has direct access to encrypted content, it may execute the plan itself. When it does not, it should show the instructions to the user.
+When FG has direct access to encrypted content, it may execute the plan itself. When it does not, it should show the
+instructions to the user.
 
 ## File Encryption And Splitting
 
@@ -394,7 +408,8 @@ Parts are not independent files in the security model.
 - Parts are not independently shareable.
 - Parts are not independently authorized.
 - Decryption requires all parts in the recorded order.
-- Any per-part authentication data exists only to detect corruption and tampering, not to create independent part-level access.
+- Any per-part authentication data exists only to detect corruption and tampering, not to create independent part-level
+  access.
 
 ## Split Representation
 
@@ -407,7 +422,8 @@ Physical representation:
 - Part order, sizes, offsets, and integrity data are stored in FG data.
 - Users treat the UUID directory as the encrypted representation of one original file.
 
-This preserves the "one visible object per logical file" behavior in ordinary file managers and cloud drives. A cleartext file may become a UUID directory in encrypted storage only when splitting is required.
+This preserves the "one visible object per logical file" behavior in ordinary file managers and cloud drives. A
+cleartext file may become a UUID directory in encrypted storage only when splitting is required.
 
 ## Integrity
 

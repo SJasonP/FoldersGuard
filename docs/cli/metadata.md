@@ -59,7 +59,8 @@ Behavior:
 - Updates FG metadata with new items, keys, and storage objects.
 - Produces storage operation instructions telling the user where to upload or move staged encrypted content.
 - If `--content` is provided, FG applies the storage operations directly.
-- If `--content` is omitted, FG writes only staged encrypted content and metadata changes, then prints the storage operations for manual execution.
+- If `--content` is omitted, FG writes only staged encrypted content and metadata changes, then prints the storage
+  operations for manual execution.
 
 Output:
 

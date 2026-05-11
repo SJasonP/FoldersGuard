@@ -2,47 +2,49 @@
 
 This document summarizes third-party open source components used by FoldersGuard.
 
-FoldersGuard's own source code is licensed under the MIT License in `LICENSE`. Third-party components are licensed under their own license terms. This notice is provided for release compliance and attribution; it is not legal advice.
+FoldersGuard's own source code is licensed under the MIT License in `LICENSE`. Third-party components are licensed under
+their own license terms. This notice is provided for release compliance and attribution; it is not legal advice.
 
 ## Runtime Components
 
-These components are part of the current Go application dependency graph for the CLI and Wails desktop application, based on `go list -deps -test=false`.
+These components are part of the current Go application dependency graph for the CLI and Wails desktop application,
+based on `go list -deps -test=false`.
 
-| Component | Version | License |
-|---|---:|---|
-| `github.com/dustin/go-humanize` | `v1.0.1` | MIT |
-| `github.com/google/uuid` | `v1.6.0` | BSD-style |
-| `github.com/leaanthony/go-ansi-parser` | `v1.6.1` | MIT |
-| `github.com/leaanthony/slicer` | `v1.6.0` | MIT |
-| `github.com/leaanthony/u` | `v1.1.1` | MIT |
-| `github.com/mattn/go-isatty` | `v0.0.22` | MIT |
-| `github.com/mutecomm/go-sqlcipher/v4` | `v4.4.2` | MIT / BSD-style |
-| `github.com/ncruces/go-strftime` | `v1.0.0` | MIT |
-| `github.com/pkg/errors` | `v0.9.1` | BSD-style |
-| `github.com/remyoudompheng/bigfft` | `v0.0.0-20230129092748-24d4a6f8daec` | BSD-style |
-| `github.com/rivo/uniseg` | `v0.4.7` | MIT |
-| `github.com/spf13/cobra` | `v1.10.2` | Apache-2.0 |
-| `github.com/spf13/pflag` | `v1.0.10` | BSD-style |
-| `github.com/wailsapp/wails/v2` | `v2.12.0` | MIT |
-| `golang.org/x/sys` | `v0.44.0` | BSD-style |
-| `golang.org/x/term` | `v0.43.0` | BSD-style |
-| `modernc.org/libc` | `v1.72.3` | MIT / BSD-style |
-| `modernc.org/mathutil` | `v1.7.1` | BSD-style |
-| `modernc.org/memory` | `v1.11.0` | BSD-style |
-| `modernc.org/sqlite` | `v1.50.0` | BSD-style |
+| Component                              |                              Version | License         |
+|----------------------------------------|-------------------------------------:|-----------------|
+| `github.com/dustin/go-humanize`        |                             `v1.0.1` | MIT             |
+| `github.com/google/uuid`               |                             `v1.6.0` | BSD-style       |
+| `github.com/leaanthony/go-ansi-parser` |                             `v1.6.1` | MIT             |
+| `github.com/leaanthony/slicer`         |                             `v1.6.0` | MIT             |
+| `github.com/leaanthony/u`              |                             `v1.1.1` | MIT             |
+| `github.com/mattn/go-isatty`           |                            `v0.0.22` | MIT             |
+| `github.com/mutecomm/go-sqlcipher/v4`  |                             `v4.4.2` | MIT / BSD-style |
+| `github.com/ncruces/go-strftime`       |                             `v1.0.0` | MIT             |
+| `github.com/pkg/errors`                |                             `v0.9.1` | BSD-style       |
+| `github.com/remyoudompheng/bigfft`     | `v0.0.0-20230129092748-24d4a6f8daec` | BSD-style       |
+| `github.com/rivo/uniseg`               |                             `v0.4.7` | MIT             |
+| `github.com/spf13/cobra`               |                            `v1.10.2` | Apache-2.0      |
+| `github.com/spf13/pflag`               |                            `v1.0.10` | BSD-style       |
+| `github.com/wailsapp/wails/v2`         |                            `v2.12.0` | MIT             |
+| `golang.org/x/sys`                     |                            `v0.44.0` | BSD-style       |
+| `golang.org/x/term`                    |                            `v0.43.0` | BSD-style       |
+| `modernc.org/libc`                     |                            `v1.72.3` | MIT / BSD-style |
+| `modernc.org/mathutil`                 |                             `v1.7.1` | BSD-style       |
+| `modernc.org/memory`                   |                            `v1.11.0` | BSD-style       |
+| `modernc.org/sqlite`                   |                            `v1.50.0` | BSD-style       |
 
 The frontend is bundled into the desktop application. Its package dependency manifest currently includes:
 
-| Component | Version | License |
-|---|---:|---|
-| `@ant-design/icons` | `6.2.2` | MIT |
-| `@vitejs/plugin-react` | `5.2.0` | MIT |
-| `antd` | `6.3.7` | MIT |
-| `i18next` | `26.0.9` | MIT |
-| `react` | `19.2.5` | MIT |
-| `react-dom` | `19.2.5` | MIT |
-| `react-i18next` | `17.0.6` | MIT |
-| `vite` | `8.0.10` | MIT |
+| Component              |  Version | License |
+|------------------------|---------:|---------|
+| `@ant-design/icons`    |  `6.2.2` | MIT     |
+| `@vitejs/plugin-react` |  `5.2.0` | MIT     |
+| `antd`                 |  `6.3.7` | MIT     |
+| `i18next`              | `26.0.9` | MIT     |
+| `react`                | `19.2.5` | MIT     |
+| `react-dom`            | `19.2.5` | MIT     |
+| `react-i18next`        | `17.0.6` | MIT     |
+| `vite`                 | `8.0.10` | MIT     |
 
 ## Source And Build Dependencies
 
@@ -53,34 +55,35 @@ The source repository also contains dependency manifests for development and bui
 
 Notable non-MIT licenses in the build/source dependency set include:
 
-| Component | Version | License | Notes |
-|---|---:|---|---|
-| `baseline-browser-mapping` | `2.10.27` | Apache-2.0 | Frontend source/build dependency from package-lock.json. |
-| `caniuse-lite` | `1.0.30001792` | CC-BY-4.0 | Frontend source/build dependency from package-lock.json. |
-| `detect-libc` | `2.1.2` | Apache-2.0 | Frontend source/build dependency from package-lock.json. |
-| `electron-to-chromium` | `1.5.351` | ISC | Frontend source/build dependency from package-lock.json. |
-| `github.com/hashicorp/golang-lru/v2` | `v2.0.7` | MPL-2.0 | Appears in the Go module graph through modernc.org tooling/test paths; not in the current runtime dependency graph. |
-| `lightningcss` | `1.32.0` | MPL-2.0 | Frontend source/build dependency from package-lock.json. |
-| `lightningcss-android-arm64` | `1.32.0` | MPL-2.0 | Frontend source/build dependency from package-lock.json. |
-| `lightningcss-darwin-arm64` | `1.32.0` | MPL-2.0 | Frontend source/build dependency from package-lock.json. |
-| `lightningcss-darwin-x64` | `1.32.0` | MPL-2.0 | Frontend source/build dependency from package-lock.json. |
-| `lightningcss-freebsd-x64` | `1.32.0` | MPL-2.0 | Frontend source/build dependency from package-lock.json. |
-| `lightningcss-linux-arm-gnueabihf` | `1.32.0` | MPL-2.0 | Frontend source/build dependency from package-lock.json. |
-| `lightningcss-linux-arm64-gnu` | `1.32.0` | MPL-2.0 | Frontend source/build dependency from package-lock.json. |
-| `lightningcss-linux-arm64-musl` | `1.32.0` | MPL-2.0 | Frontend source/build dependency from package-lock.json. |
-| `lightningcss-linux-x64-gnu` | `1.32.0` | MPL-2.0 | Frontend source/build dependency from package-lock.json. |
-| `lightningcss-linux-x64-musl` | `1.32.0` | MPL-2.0 | Frontend source/build dependency from package-lock.json. |
-| `lightningcss-win32-arm64-msvc` | `1.32.0` | MPL-2.0 | Frontend source/build dependency from package-lock.json. |
-| `lightningcss-win32-x64-msvc` | `1.32.0` | MPL-2.0 | Frontend source/build dependency from package-lock.json. |
-| `lru-cache` | `5.1.1` | ISC | Frontend source/build dependency from package-lock.json. |
-| `picocolors` | `1.1.1` | ISC | Frontend source/build dependency from package-lock.json. |
-| `semver` | `6.3.1` | ISC | Frontend source/build dependency from package-lock.json. |
-| `source-map-js` | `1.2.1` | BSD-3-Clause | Frontend source/build dependency from package-lock.json. |
-| `tslib` | `2.8.1` | 0BSD | Frontend source/build dependency from package-lock.json. |
-| `typescript` | `6.0.3` | Apache-2.0 | Frontend source/build dependency from package-lock.json. |
-| `yallist` | `3.1.1` | ISC | Frontend source/build dependency from package-lock.json. |
+| Component                            |        Version | License      | Notes                                                                                                               |
+|--------------------------------------|---------------:|--------------|---------------------------------------------------------------------------------------------------------------------|
+| `baseline-browser-mapping`           |      `2.10.27` | Apache-2.0   | Frontend source/build dependency from package-lock.json.                                                            |
+| `caniuse-lite`                       | `1.0.30001792` | CC-BY-4.0    | Frontend source/build dependency from package-lock.json.                                                            |
+| `detect-libc`                        |        `2.1.2` | Apache-2.0   | Frontend source/build dependency from package-lock.json.                                                            |
+| `electron-to-chromium`               |      `1.5.351` | ISC          | Frontend source/build dependency from package-lock.json.                                                            |
+| `github.com/hashicorp/golang-lru/v2` |       `v2.0.7` | MPL-2.0      | Appears in the Go module graph through modernc.org tooling/test paths; not in the current runtime dependency graph. |
+| `lightningcss`                       |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
+| `lightningcss-android-arm64`         |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
+| `lightningcss-darwin-arm64`          |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
+| `lightningcss-darwin-x64`            |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
+| `lightningcss-freebsd-x64`           |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
+| `lightningcss-linux-arm-gnueabihf`   |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
+| `lightningcss-linux-arm64-gnu`       |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
+| `lightningcss-linux-arm64-musl`      |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
+| `lightningcss-linux-x64-gnu`         |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
+| `lightningcss-linux-x64-musl`        |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
+| `lightningcss-win32-arm64-msvc`      |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
+| `lightningcss-win32-x64-msvc`        |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
+| `lru-cache`                          |        `5.1.1` | ISC          | Frontend source/build dependency from package-lock.json.                                                            |
+| `picocolors`                         |        `1.1.1` | ISC          | Frontend source/build dependency from package-lock.json.                                                            |
+| `semver`                             |        `6.3.1` | ISC          | Frontend source/build dependency from package-lock.json.                                                            |
+| `source-map-js`                      |        `1.2.1` | BSD-3-Clause | Frontend source/build dependency from package-lock.json.                                                            |
+| `tslib`                              |        `2.8.1` | 0BSD         | Frontend source/build dependency from package-lock.json.                                                            |
+| `typescript`                         |        `6.0.3` | Apache-2.0   | Frontend source/build dependency from package-lock.json.                                                            |
+| `yallist`                            |        `3.1.1` | ISC          | Frontend source/build dependency from package-lock.json.                                                            |
 
-If a release package includes source dependencies, `node_modules`, a Go module cache, or build tool binaries, include the relevant upstream license files for those packaged components as well.
+If a release package includes source dependencies, `node_modules`, a Go module cache, or build tool binaries, include
+the relevant upstream license files for those packaged components as well.
 
 ## Runtime License Notices
 
