@@ -62,20 +62,30 @@ func (s Service) applyOneProjectCreateFolder(ctx context.Context, store *storage
 		}
 	}
 
-	committed, err := store.CommitCreateFolder(ctx, prepared, time.Now())
-	if err != nil {
-		return projectAddApplyResult{}, err
-	}
-	result := projectAddApplyResult{ContentOperations: projectContentOperations(committed.Operations)}
 	if contentConnected {
-		applied, err := ApplyStorageContentOperations(committed.Operations, ContentOperationApplyOptions{
+		var committed storage.CreateFolderResult
+		applied, err := ApplyStorageContentOperationsWithCommit([]storage.ContentOperation{prepared.Operation}, ContentOperationApplyOptions{
 			ContentRoot: encryptedRoot,
 			StagingRoot: stagedContentPath,
+		}, func() error {
+			result, err := store.CommitCreateFolder(ctx, prepared, time.Now())
+			if err != nil {
+				return err
+			}
+			committed = result
+			return nil
 		})
 		if err != nil {
 			return projectAddApplyResult{}, err
 		}
-		result.AppliedContentChanges = appliedProjectContentOperations(applied)
+		return projectAddApplyResult{
+			ContentOperations:     projectContentOperations(committed.Operations),
+			AppliedContentChanges: appliedProjectContentOperations(applied),
+		}, nil
 	}
-	return result, nil
+	committed, err := store.CommitCreateFolder(ctx, prepared, time.Now())
+	if err != nil {
+		return projectAddApplyResult{}, err
+	}
+	return projectAddApplyResult{ContentOperations: projectContentOperations(committed.Operations)}, nil
 }

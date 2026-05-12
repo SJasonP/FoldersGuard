@@ -225,25 +225,42 @@ func (c cli) runRemove(options removeOptions) error {
 	if err != nil {
 		return err
 	}
+	if options.contentRoot != "" {
+		_, operations, err := store.PlanRemove(ctx, options.itemPath)
+		if err != nil {
+			return err
+		}
+		var result storage.RemoveResult
+		if _, err := app.ApplyStorageContentOperationsWithCommit(operations, app.ContentOperationApplyOptions{
+			ContentRoot: options.contentRoot,
+		}, func() error {
+			committed, err := store.RemoveItem(ctx, options.itemPath, time.Now())
+			if err != nil {
+				return err
+			}
+			result = committed
+			return nil
+		}); err != nil {
+			return err
+		}
+		writeRemoveResult(c, result)
+		return nil
+	}
 	result, err := store.RemoveItem(ctx, options.itemPath, time.Now())
 	if err != nil {
 		return err
 	}
-	if options.contentRoot != "" {
-		if _, err := app.ApplyStorageContentOperations(result.Operations, app.ContentOperationApplyOptions{
-			ContentRoot: options.contentRoot,
-		}); err != nil {
-			return err
-		}
-	}
+	writeRemoveResult(c, result)
+	return nil
+}
 
+func writeRemoveResult(c cli, result storage.RemoveResult) {
 	fmt.Fprintf(c.out, "project_id=%s\n", result.ProjectID)
 	fmt.Fprintf(c.out, "operation_plan_id=%s\n", result.OperationPlanID)
 	fmt.Fprintf(c.out, "operations=%d\n", len(result.Operations))
 	for _, operation := range result.Operations {
 		fmt.Fprintf(c.out, "operation=%s target=%s\n", operation.Type, operation.TargetPath)
 	}
-	return nil
 }
 
 func (c cli) runMove(options moveOptions) error {
@@ -279,25 +296,42 @@ func (c cli) runMove(options moveOptions) error {
 	if err != nil {
 		return err
 	}
+	if options.contentRoot != "" {
+		_, operations, err := store.PlanMove(ctx, options.itemPath, options.targetFolderPath)
+		if err != nil {
+			return err
+		}
+		var result storage.MoveResult
+		if _, err := app.ApplyStorageContentOperationsWithCommit(operations, app.ContentOperationApplyOptions{
+			ContentRoot: options.contentRoot,
+		}, func() error {
+			committed, err := store.MoveItem(ctx, options.itemPath, options.targetFolderPath, time.Now())
+			if err != nil {
+				return err
+			}
+			result = committed
+			return nil
+		}); err != nil {
+			return err
+		}
+		writeMoveResult(c, result)
+		return nil
+	}
 	result, err := store.MoveItem(ctx, options.itemPath, options.targetFolderPath, time.Now())
 	if err != nil {
 		return err
 	}
-	if options.contentRoot != "" {
-		if _, err := app.ApplyStorageContentOperations(result.Operations, app.ContentOperationApplyOptions{
-			ContentRoot: options.contentRoot,
-		}); err != nil {
-			return err
-		}
-	}
+	writeMoveResult(c, result)
+	return nil
+}
 
+func writeMoveResult(c cli, result storage.MoveResult) {
 	fmt.Fprintf(c.out, "project_id=%s\n", result.ProjectID)
 	fmt.Fprintf(c.out, "operation_plan_id=%s\n", result.OperationPlanID)
 	fmt.Fprintf(c.out, "operations=%d\n", len(result.Operations))
 	for _, operation := range result.Operations {
 		fmt.Fprintf(c.out, "operation=%s source=%s target=%s\n", operation.Type, operation.SourcePath, operation.TargetPath)
 	}
-	return nil
 }
 
 func (c cli) runAdd(options addOptions) error {
@@ -357,25 +391,38 @@ func (c cli) runAdd(options addOptions) error {
 	if err := (project.Executor{OutputRoot: options.stagingContent}).EncryptContent(ctx, addition); err != nil {
 		return err
 	}
+	if options.contentRoot != "" {
+		var result storage.AddResult
+		if _, err := app.ApplyStorageContentOperationsWithCommit(operations, app.ContentOperationApplyOptions{
+			ContentRoot: options.contentRoot,
+			StagingRoot: options.stagingContent,
+		}, func() error {
+			committed, err := store.CommitAdd(ctx, options.targetFolderPath, addition, operations, time.Now())
+			if err != nil {
+				return err
+			}
+			result = committed
+			return nil
+		}); err != nil {
+			return err
+		}
+		writeAddResult(c, result, options.stagingContent)
+		return nil
+	}
 	result, err := store.CommitAdd(ctx, options.targetFolderPath, addition, operations, time.Now())
 	if err != nil {
 		return err
 	}
-	if options.contentRoot != "" {
-		if _, err := app.ApplyStorageContentOperations(result.Operations, app.ContentOperationApplyOptions{
-			ContentRoot: options.contentRoot,
-			StagingRoot: options.stagingContent,
-		}); err != nil {
-			return err
-		}
-	}
+	writeAddResult(c, result, options.stagingContent)
+	return nil
+}
 
+func writeAddResult(c cli, result storage.AddResult, stagingContent string) {
 	fmt.Fprintf(c.out, "project_id=%s\n", result.ProjectID)
 	fmt.Fprintf(c.out, "operation_plan_id=%s\n", result.OperationPlanID)
-	fmt.Fprintf(c.out, "staging_content=%s\n", options.stagingContent)
+	fmt.Fprintf(c.out, "staging_content=%s\n", stagingContent)
 	fmt.Fprintf(c.out, "operations=%d\n", len(result.Operations))
 	for _, operation := range result.Operations {
 		fmt.Fprintf(c.out, "operation=%s source=%s target=%s\n", operation.Type, operation.SourcePath, operation.TargetPath)
 	}
-	return nil
 }

@@ -288,9 +288,12 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 		ProjectName: plan.RootItem.RealName,
 	})
 
-	deletedFolders, err := removeEmptyFoldersUnderRoot(input.SourcePath)
-	if err != nil {
-		return CreateProjectResult{}, err
+	deletedFolders := 0
+	if sourceCleanup == SourceCleanupDelete {
+		deletedFolders, err = removeEmptyFoldersUnderRoot(input.SourcePath)
+		if err != nil {
+			return CreateProjectResult{}, err
+		}
 	}
 
 	return CreateProjectResult{

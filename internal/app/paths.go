@@ -120,14 +120,21 @@ func ValidateOutputOutsideSource(source, output string) error {
 	if err != nil {
 		return fmt.Errorf("resolve output path: %w", err)
 	}
-	relative, err := filepath.Rel(sourceAbs, outputAbs)
+	outputInsideSource, err := pathContainsOrEquals(sourceAbs, outputAbs)
 	if err != nil {
-		return fmt.Errorf("compare source and output paths: %w", err)
+		return err
 	}
-	if relative == ".." || strings.HasPrefix(relative, ".."+string(os.PathSeparator)) {
-		return nil
+	if outputInsideSource {
+		return fmt.Errorf("output path must be outside the source folder")
 	}
-	return fmt.Errorf("output path must be outside the source folder")
+	sourceInsideOutput, err := pathContainsOrEquals(outputAbs, sourceAbs)
+	if err != nil {
+		return err
+	}
+	if sourceInsideOutput {
+		return fmt.Errorf("output path must not contain the source folder")
+	}
+	return nil
 }
 
 func ValidateDistinctPaths(left, right string) error {
@@ -143,4 +150,12 @@ func ValidateDistinctPaths(left, right string) error {
 		return fmt.Errorf("source and target paths must be different")
 	}
 	return nil
+}
+
+func pathContainsOrEquals(parent, child string) (bool, error) {
+	relative, err := filepath.Rel(parent, child)
+	if err != nil {
+		return false, fmt.Errorf("compare paths: %w", err)
+	}
+	return relative == "." || (relative != ".." && !strings.HasPrefix(relative, ".."+string(os.PathSeparator))), nil
 }

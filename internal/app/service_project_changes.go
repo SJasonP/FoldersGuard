@@ -87,27 +87,32 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		seenMoves[moveKey] = struct{}{}
 
 		if contentConnected {
-			if _, operations, err := store.PlanMove(ctx, change.ItemPath, change.TargetFolderPath); err != nil {
-				return ApplyProjectChangesResult{}, err
-			} else if err := ValidateStorageContentOperations(operations, ContentOperationApplyOptions{
-				ContentRoot: input.EncryptedRoot,
-			}); err != nil {
+			_, operations, err := store.PlanMove(ctx, change.ItemPath, change.TargetFolderPath)
+			if err != nil {
 				return ApplyProjectChangesResult{}, err
 			}
-		}
-		result, err := store.MoveItem(ctx, change.ItemPath, change.TargetFolderPath, time.Now())
-		if err != nil {
-			return ApplyProjectChangesResult{}, err
-		}
-		contentOperations = append(contentOperations, projectContentOperations(result.Operations)...)
-		if contentConnected {
-			applied, err := ApplyStorageContentOperations(result.Operations, ContentOperationApplyOptions{
+			var result storage.MoveResult
+			applied, err := ApplyStorageContentOperationsWithCommit(operations, ContentOperationApplyOptions{
 				ContentRoot: input.EncryptedRoot,
+			}, func() error {
+				committed, err := store.MoveItem(ctx, change.ItemPath, change.TargetFolderPath, time.Now())
+				if err != nil {
+					return err
+				}
+				result = committed
+				return nil
 			})
 			if err != nil {
 				return ApplyProjectChangesResult{}, err
 			}
+			contentOperations = append(contentOperations, projectContentOperations(result.Operations)...)
 			appliedContentChanges = append(appliedContentChanges, appliedProjectContentOperations(applied)...)
+		} else {
+			result, err := store.MoveItem(ctx, change.ItemPath, change.TargetFolderPath, time.Now())
+			if err != nil {
+				return ApplyProjectChangesResult{}, err
+			}
+			contentOperations = append(contentOperations, projectContentOperations(result.Operations)...)
 		}
 	}
 
@@ -123,27 +128,32 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		seenRemoves[change.ItemPath] = struct{}{}
 
 		if contentConnected {
-			if _, operations, err := store.PlanRemove(ctx, change.ItemPath); err != nil {
-				return ApplyProjectChangesResult{}, err
-			} else if err := ValidateStorageContentOperations(operations, ContentOperationApplyOptions{
-				ContentRoot: input.EncryptedRoot,
-			}); err != nil {
+			_, operations, err := store.PlanRemove(ctx, change.ItemPath)
+			if err != nil {
 				return ApplyProjectChangesResult{}, err
 			}
-		}
-		result, err := store.RemoveItem(ctx, change.ItemPath, time.Now())
-		if err != nil {
-			return ApplyProjectChangesResult{}, err
-		}
-		contentOperations = append(contentOperations, projectContentOperations(result.Operations)...)
-		if contentConnected {
-			applied, err := ApplyStorageContentOperations(result.Operations, ContentOperationApplyOptions{
+			var result storage.RemoveResult
+			applied, err := ApplyStorageContentOperationsWithCommit(operations, ContentOperationApplyOptions{
 				ContentRoot: input.EncryptedRoot,
+			}, func() error {
+				committed, err := store.RemoveItem(ctx, change.ItemPath, time.Now())
+				if err != nil {
+					return err
+				}
+				result = committed
+				return nil
 			})
 			if err != nil {
 				return ApplyProjectChangesResult{}, err
 			}
+			contentOperations = append(contentOperations, projectContentOperations(result.Operations)...)
 			appliedContentChanges = append(appliedContentChanges, appliedProjectContentOperations(applied)...)
+		} else {
+			result, err := store.RemoveItem(ctx, change.ItemPath, time.Now())
+			if err != nil {
+				return ApplyProjectChangesResult{}, err
+			}
+			contentOperations = append(contentOperations, projectContentOperations(result.Operations)...)
 		}
 	}
 

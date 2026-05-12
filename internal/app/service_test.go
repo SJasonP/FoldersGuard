@@ -55,6 +55,35 @@ func TestDefaultDataDirUsesFoldersGuardName(t *testing.T) {
 	}
 }
 
+func TestValidateOutputOutsideSourceRejectsAncestorOutput(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	if err := os.MkdirAll(source, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	err := ValidateOutputOutsideSource(source, root)
+	if err == nil {
+		t.Fatal("expected source parent output to be rejected")
+	}
+	if !strings.Contains(err.Error(), "must not contain the source folder") {
+		t.Fatalf("error = %v, want containment rejection", err)
+	}
+}
+
+func TestValidateOutputOutsideSourceAllowsSiblingOutput(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	output := filepath.Join(root, "output")
+	if err := os.MkdirAll(source, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ValidateOutputOutsideSource(source, output); err != nil {
+		t.Fatalf("sibling output rejected: %v", err)
+	}
+}
+
 func TestServiceInspectAndVerify(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()
@@ -328,6 +357,76 @@ func TestServiceCreateProject(t *testing.T) {
 
 	if _, err := os.Stat(filepath.Join(source, "docs", "note.txt")); !os.IsNotExist(err) {
 		t.Fatalf("source file stat error = %v, want not exist", err)
+	}
+}
+
+func TestServiceCreateProjectRejectsAncestorOutputWithoutDeletingSource(t *testing.T) {
+	ctx := context.Background()
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	dataDir := filepath.Join(root, "data")
+	password := "test-password"
+
+	if err := os.MkdirAll(source, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "note.txt"), []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	service, err := NewService(dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = service.CreateProject(ctx, CreateProjectInput{
+		SourcePath:    source,
+		ContentOutput: root,
+		Password:      password,
+		Force:         true,
+		SourceCleanup: SourceCleanupKeep,
+	})
+	if err == nil {
+		t.Fatal("expected ancestor output to be rejected")
+	}
+	if _, statErr := os.Stat(filepath.Join(source, "note.txt")); statErr != nil {
+		t.Fatalf("source was modified after rejected create: %v", statErr)
+	}
+}
+
+func TestServiceCreateProjectKeepPreservesEmptySourceFolders(t *testing.T) {
+	ctx := context.Background()
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	encrypted := filepath.Join(root, "encrypted")
+	dataDir := filepath.Join(root, "data")
+	password := "test-password"
+	emptyFolder := filepath.Join(source, "docs", "empty")
+
+	if err := os.MkdirAll(emptyFolder, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "note.txt"), []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	service, err := NewService(dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := service.CreateProject(ctx, CreateProjectInput{
+		SourcePath:    source,
+		ContentOutput: encrypted,
+		Password:      password,
+		SourceCleanup: SourceCleanupKeep,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.DeletedCleartextFiles != 0 || result.DeletedCleartextFolders != 0 {
+		t.Fatalf("create result = %+v, want no source cleanup", result)
+	}
+	if _, err := os.Stat(emptyFolder); err != nil {
+		t.Fatalf("empty source folder was not preserved: %v", err)
 	}
 }
 
