@@ -42,6 +42,7 @@ func NewApp() (*App, error) {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	a.restoreWindowPlacement(ctx)
 }
 
 func (a *App) SetLongRunningOperationActive(active bool) {
@@ -68,9 +69,14 @@ func (a *App) beforeClose(ctx context.Context) bool {
 		guideGuard := a.manualContentGuideGuard
 		a.manualContentGuideGuardM.RUnlock()
 		if !guideGuard.Active {
+			a.saveWindowPlacement(ctx)
 			return false
 		}
-		return a.confirmCloseWithManualContentGuide(ctx, guideGuard)
+		preventClose := a.confirmCloseWithManualContentGuide(ctx, guideGuard)
+		if !preventClose {
+			a.saveWindowPlacement(ctx)
+		}
+		return preventClose
 	}
 	_, _ = runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
 		Type:    runtime.WarningDialog,
@@ -79,6 +85,42 @@ func (a *App) beforeClose(ctx context.Context) bool {
 		Buttons: []string{"OK"},
 	})
 	return true
+}
+
+func (a *App) initialWindowSize() (int, int) {
+	placement, ok, err := a.service.ReadWindowPlacement(minWindowWidth, minWindowHeight)
+	if err != nil || !ok {
+		return defaultWindowWidth, defaultWindowHeight
+	}
+	return placement.Width, placement.Height
+}
+
+func (a *App) restoreWindowPlacement(ctx context.Context) {
+	placement, ok, err := a.service.ReadWindowPlacement(minWindowWidth, minWindowHeight)
+	if err != nil || !ok {
+		return
+	}
+	runtime.WindowSetSize(ctx, placement.Width, placement.Height)
+	runtime.WindowSetPosition(ctx, placement.X, placement.Y)
+	if placement.Maximised {
+		runtime.WindowMaximise(ctx)
+	}
+}
+
+func (a *App) saveWindowPlacement(ctx context.Context) {
+	if runtime.WindowIsFullscreen(ctx) || runtime.WindowIsMinimised(ctx) {
+		return
+	}
+	width, height := runtime.WindowGetSize(ctx)
+	x, y := runtime.WindowGetPosition(ctx)
+	placement := app.WindowPlacement{
+		X:         x,
+		Y:         y,
+		Width:     width,
+		Height:    height,
+		Maximised: runtime.WindowIsMaximised(ctx),
+	}
+	_ = a.service.SaveWindowPlacement(placement, minWindowWidth, minWindowHeight)
 }
 
 func (a *App) confirmCloseWithManualContentGuide(ctx context.Context, guard manualContentGuideCloseGuard) bool {

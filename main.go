@@ -12,6 +12,13 @@ import (
 //go:embed frontend/dist
 var assets embed.FS
 
+const (
+	defaultWindowWidth  = 1300
+	defaultWindowHeight = 700
+	minWindowWidth      = 700
+	minWindowHeight     = 500
+)
+
 func main() {
 	app, err := NewApp()
 	if err != nil {
@@ -19,12 +26,13 @@ func main() {
 		return
 	}
 
+	windowWidth, windowHeight := app.initialWindowSize()
 	err = wails.Run(&options.App{
 		Title:     "FoldersGuard",
-		Width:     1300,
-		Height:    700,
-		MinWidth:  700,
-		MinHeight: 500,
+		Width:     windowWidth,
+		Height:    windowHeight,
+		MinWidth:  minWindowWidth,
+		MinHeight: minWindowHeight,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
