@@ -253,7 +253,7 @@ func scanItem(scanner interface {
 }
 
 func (s *Store) readFolders(ctx context.Context, rootFolderID uuid.UUID, rootItemType model.ItemType) ([]model.Folder, model.Folder, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT folder_id, folder_key FROM folders ORDER BY folder_id`)
+	rows, err := s.db.QueryContext(ctx, `SELECT folder_id, folder_key, original_size FROM folders ORDER BY folder_id`)
 	if err != nil {
 		return nil, model.Folder{}, fmt.Errorf("query folders: %w", err)
 	}
@@ -265,7 +265,8 @@ func (s *Store) readFolders(ctx context.Context, rootFolderID uuid.UUID, rootIte
 	for rows.Next() {
 		var idText string
 		var key []byte
-		if err := rows.Scan(&idText, &key); err != nil {
+		var originalSize int64
+		if err := rows.Scan(&idText, &key, &originalSize); err != nil {
 			return nil, model.Folder{}, fmt.Errorf("scan folder: %w", err)
 		}
 		id, err := uuid.Parse(idText)
@@ -275,7 +276,10 @@ func (s *Store) readFolders(ctx context.Context, rootFolderID uuid.UUID, rootIte
 		if len(key) != 32 {
 			return nil, model.Folder{}, fmt.Errorf("folder %s key length = %d, want 32", id, len(key))
 		}
-		folder := model.Folder{ID: id, Key: key}
+		if originalSize < 0 {
+			return nil, model.Folder{}, fmt.Errorf("folder %s original size is negative", id)
+		}
+		folder := model.Folder{ID: id, Key: key, OriginalSize: originalSize}
 		if id == rootFolderID {
 			rootFolder = folder
 			foundRoot = true

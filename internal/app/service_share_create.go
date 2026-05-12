@@ -101,6 +101,10 @@ func shareableItems(plan model.PlannedProject) ([]ShareableItem, error) {
 	for _, file := range plan.Files {
 		sizeByID[file.ID.String()] = file.OriginalSize
 	}
+	sizeByID[plan.RootFolder.ID.String()] = plan.RootFolder.OriginalSize
+	for _, folder := range plan.Folders {
+		sizeByID[folder.ID.String()] = folder.OriginalSize
+	}
 	childCountByID := make(map[string]int)
 	for _, item := range plan.Items {
 		if item.ParentID != nil {

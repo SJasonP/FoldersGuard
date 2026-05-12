@@ -92,10 +92,14 @@ INSERT INTO items (
 
 func writeFolders(ctx context.Context, tx *sql.Tx, folders []model.Folder) error {
 	for _, folder := range folders {
+		if folder.OriginalSize < 0 {
+			return fmt.Errorf("folder %s original size is negative", folder.ID)
+		}
 		if _, err := tx.ExecContext(ctx, `
-INSERT INTO folders (folder_id, folder_key) VALUES (?, ?)`,
+INSERT INTO folders (folder_id, folder_key, original_size) VALUES (?, ?, ?)`,
 			folder.ID.String(),
 			folder.Key,
+			folder.OriginalSize,
 		); err != nil {
 			return fmt.Errorf("insert folder %s: %w", folder.ID, err)
 		}

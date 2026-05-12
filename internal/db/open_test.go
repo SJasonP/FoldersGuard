@@ -3,6 +3,7 @@ package db
 import (
 	"bytes"
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -75,6 +76,9 @@ func TestOpenProjectSQLCipherRejectsWrongPasswordAtOpen(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatal("expected wrong password to fail during open")
+	}
+	if !errors.Is(err, ErrInvalidDatabasePassword) {
+		t.Fatalf("error = %v, want ErrInvalidDatabasePassword", err)
 	}
 }
 

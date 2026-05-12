@@ -58,12 +58,21 @@ func TestServiceOpenProjectBrowser(t *testing.T) {
 	if len(state.Items) != 4 {
 		t.Fatalf("browser items = %d, want 4", len(state.Items))
 	}
+	wantSizes := map[string]int64{
+		"source":               9,
+		"source/docs":          5,
+		"source/docs/note.txt": 5,
+		"source/root.txt":      4,
+	}
 	for _, item := range state.Items {
 		if !item.MetadataCaptured {
 			t.Fatalf("item metadata captured = false for %s", item.Path)
 		}
 		if !item.ContentAvailable {
 			t.Fatalf("item content available = false for %s without content connection", item.Path)
+		}
+		if item.Size != wantSizes[item.Path] {
+			t.Fatalf("item %s size = %d, want %d", item.Path, item.Size, wantSizes[item.Path])
 		}
 	}
 }

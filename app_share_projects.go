@@ -13,7 +13,7 @@ func (a *App) CreateShare(request CreateShareRequest) (CreateShareResult, error)
 		SharePassword:     request.SharePassword,
 	})
 	if err != nil {
-		return CreateShareResult{}, err
+		return CreateShareResult{}, frontendError(err)
 	}
 
 	locations := make([]ShareContentLocation, 0, len(result.ContentLocations))

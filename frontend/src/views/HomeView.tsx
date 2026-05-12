@@ -5,6 +5,7 @@ import type {LocalProjectRow} from '../types';
 
 type HomeViewProps = {
     columns: ColumnsType<LocalProjectRow>;
+    tableScrollX: number;
     loading: boolean;
     projects: LocalProjectRow[];
     projectSearch: string;
@@ -24,6 +25,7 @@ type HomeViewProps = {
 
 export function HomeView({
                              columns,
+                             tableScrollX,
                              loading,
                              projects,
                              projectSearch,
@@ -73,6 +75,8 @@ export function HomeView({
                 columns={columns}
                 dataSource={projects}
                 loading={loading}
+                scroll={{x: tableScrollX}}
+                tableLayout="fixed"
                 rowSelection={{
                     type: 'radio',
                     selectedRowKeys: selectedProjectId ? [selectedProjectId] : [],

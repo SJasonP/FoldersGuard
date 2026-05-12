@@ -105,6 +105,46 @@ body {
     margin: 0;
 }
 
+.resizable-column-title {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+    padding-right: 10px;
+}
+
+.resizable-column-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.resizable-column-handle {
+    position: absolute;
+    top: -12px;
+    right: -8px;
+    bottom: -12px;
+    width: 12px;
+    cursor: col-resize;
+    user-select: none;
+}
+
+.resizable-column-handle::after {
+    position: absolute;
+    top: 12px;
+    right: 5px;
+    bottom: 12px;
+    width: 1px;
+    background: transparent;
+    content: "";
+}
+
+.resizable-column-handle:hover::after {
+    background: var(--fg-border);
+}
+
 .about-grid {
     display: grid;
     grid-template-columns: minmax(140px, max-content) minmax(0, 1fr);

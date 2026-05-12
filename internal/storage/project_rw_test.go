@@ -86,6 +86,10 @@ func TestWritePlannedProject(t *testing.T) {
 		}},
 	}
 
+	plan, err = model.PopulateFolderSizes(plan)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := store.WritePlannedProject(ctx, plan); err != nil {
 		t.Fatal(err)
 	}
@@ -122,6 +126,17 @@ SELECT length(file_key) FROM files WHERE file_id = ?`,
 	}
 	if keyLen != 32 {
 		t.Fatalf("file key length = %d, want 32", keyLen)
+	}
+	var rootSize int64
+	err = db.QueryRowContext(ctx, `
+SELECT original_size FROM folders WHERE folder_id = ?`,
+		rootID.String(),
+	).Scan(&rootSize)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rootSize != size {
+		t.Fatalf("root folder size = %d, want %d", rootSize, size)
 	}
 }
 
@@ -167,7 +182,7 @@ func TestReadPlannedProject(t *testing.T) {
 			CreatedAt:       now,
 			UpdatedAt:       now,
 		},
-		RootFolder: model.Folder{ID: rootID, Key: bytesOf(1, 32)},
+		RootFolder: model.Folder{ID: rootID, Key: bytesOf(1, 32), OriginalSize: fileSize},
 		Items: []model.Item{
 			{
 				ID:              folderID,
@@ -203,7 +218,7 @@ func TestReadPlannedProject(t *testing.T) {
 				UpdatedAt: now,
 			},
 		},
-		Folders: []model.Folder{{ID: folderID, Key: bytesOf(2, 32)}},
+		Folders: []model.Folder{{ID: folderID, Key: bytesOf(2, 32), OriginalSize: 0}},
 		Files: []model.File{{
 			ID:               fileID,
 			Key:              bytesOf(3, 32),
@@ -298,6 +313,12 @@ func TestReadPlannedProject(t *testing.T) {
 	if len(read.Folders) != 1 {
 		t.Fatalf("folders = %d, want 1", len(read.Folders))
 	}
+	if read.RootFolder.OriginalSize != fileSize {
+		t.Fatalf("root folder size = %d, want %d", read.RootFolder.OriginalSize, fileSize)
+	}
+	if read.Folders[0].OriginalSize != 0 {
+		t.Fatalf("child folder size = %d, want 0", read.Folders[0].OriginalSize)
+	}
 	if len(read.Files) != 1 {
 		t.Fatalf("files = %d, want 1", len(read.Files))
 	}
@@ -388,7 +409,7 @@ func TestReadPlannedProjectAllowsVirtualRootShare(t *testing.T) {
 			CreatedAt:       now,
 			UpdatedAt:       now,
 		},
-		RootFolder: model.Folder{ID: rootID, Key: bytesOf(3, 32)},
+		RootFolder: model.Folder{ID: rootID, Key: bytesOf(3, 32), OriginalSize: size},
 		Items: []model.Item{{
 			ID:              fileID,
 			ParentID:        &parentID,

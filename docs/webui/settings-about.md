@@ -84,8 +84,12 @@ Error display rules:
 - User-actionable errors are shown near the relevant field or operation.
 - Blocking errors use a modal dialog.
 - Background operation errors are shown in the operation result.
-- Technical details can be expanded when useful for debugging.
+- Error dialogs show user-facing messages only.
+- Error dialogs must not include expandable technical details.
 - Passwords, internal keys, database keys, and decrypted key material are never shown.
+- Unknown backend errors fall back to a generic operation failure message instead of displaying the raw backend error.
+- Known backend errors should be identified by stable error codes or sentinel errors, not by exposing raw low-level
+  messages to users.
 
 Common error categories:
 
@@ -95,6 +99,10 @@ Common error categories:
 - Path not found.
 - Path permission failure.
 - Output conflict.
+- Output folder is not empty, including hidden-file cases such as `.DS_Store`.
+- Output path is inside the source folder.
+- Output path contains the source folder.
+- Source and target paths are identical.
 - Encrypted content missing.
 - Encrypted content authentication failure.
 

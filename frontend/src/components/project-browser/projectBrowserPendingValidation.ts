@@ -47,12 +47,9 @@ export function validatePendingProjectChanges({
         path: item.path,
         type: item.type,
     }));
-    const nodesByID = new Map(nodes.map((node) => [node.id, node]));
     const nodesByPath = new Map(nodes.map((node) => [node.path, node]));
     const parentByID = new Map(nodes.map((node) => [node.id, node.parentId]));
     const renameByID = new Map(pendingRenames.map((rename) => [rename.itemId, rename]));
-    const moveByID = new Map(pendingMoves.map((move) => [move.itemId, move]));
-    const removeByID = new Map(pendingRemoves.map((remove) => [remove.itemId, remove]));
     const renameIDs = new Set(pendingRenames.map((rename) => rename.itemId));
     const moveIDs = new Set(pendingMoves.map((move) => move.itemId));
     const removeIDs = new Set(pendingRemoves.map((remove) => remove.itemId));

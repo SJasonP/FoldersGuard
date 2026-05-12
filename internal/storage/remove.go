@@ -54,6 +54,10 @@ func (s *Store) RemoveItem(ctx context.Context, itemPath string, now time.Time) 
 		return RemoveResult{}, fmt.Errorf("root item cannot be removed")
 	}
 
+	removedSize, err := itemOriginalSize(plan, item)
+	if err != nil {
+		return RemoveResult{}, err
+	}
 	itemIDs := subtreeItemIDs(plan, item.ID)
 	operation, err := deleteOperationForItem(plan, item.ID)
 	if err != nil {
@@ -114,6 +118,9 @@ INSERT INTO operation_steps (
 		if _, err := tx.ExecContext(ctx, `DELETE FROM items WHERE item_id = ?`, id.String()); err != nil {
 			return RemoveResult{}, fmt.Errorf("delete item %s: %w", id, err)
 		}
+	}
+	if err := updateFolderSizeAncestors(ctx, tx, *item.ParentID, -removedSize); err != nil {
+		return RemoveResult{}, err
 	}
 	if _, err := tx.ExecContext(ctx, `UPDATE meta SET value = ? WHERE key = 'updated_at'`, updatedAt); err != nil {
 		return RemoveResult{}, fmt.Errorf("update metadata timestamp: %w", err)

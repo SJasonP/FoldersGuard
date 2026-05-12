@@ -51,8 +51,8 @@ On first launch, FG ensures the data directory exists.
 First launch behavior:
 
 - If the data directory can be created or opened, the WebUI shows the start screen.
-- If the data directory cannot be created or opened, the WebUI shows a blocking error with the data directory path and
-  the underlying error.
+- If the data directory cannot be created or opened, the WebUI shows a blocking error with the data directory path.
+- Startup errors must not expose low-level technical details in the dialog.
 - The WebUI does not require an account, network connection, or remote service.
 
 ## Start Screen
@@ -133,7 +133,7 @@ Rules:
 
 Password failure behavior:
 
-- Incorrect passwords show a generic authentication failure.
+- Incorrect passwords show a clear password failure message.
 - Authentication failure must not reveal whether metadata, keys, or content authentication failed internally.
 - Retry remains available until the user dismisses the workflow.
 
@@ -147,6 +147,11 @@ Path selection rules:
 - File inputs must select files or target file paths as appropriate.
 - Existing output must follow FG overwrite rules.
 - Path validation errors are shown next to the field and block continuation.
+- Non-empty output directories must be reported clearly. The message must tell the user to choose an empty directory,
+  remove existing files including hidden files such as `.DS_Store`, or explicitly enable force overwrite.
+- Backend path safety rejections must be translated into user-facing messages. The WebUI must distinguish at least:
+  output inside the source folder, output containing the source folder, identical source and target paths, and non-empty
+  output folders.
 - The WebUI never creates plaintext output outside the user-selected output directory.
 - Restored paths must not escape the requested output directory.
 

@@ -143,6 +143,10 @@ func (p AddPlanner) Plan(scan fswalk.ScanResult) (model.PlannedProject, error) {
 		}
 	}
 
+	plan, err := model.PopulateFolderSizes(plan)
+	if err != nil {
+		return model.PlannedProject{}, err
+	}
 	return plan, nil
 }
 

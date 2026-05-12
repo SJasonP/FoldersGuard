@@ -109,6 +109,10 @@ func TestSelectShareSupportsMultipleRootlessItems(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+	plan, err = model.PopulateFolderSizes(plan)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := store.WritePlannedProject(ctx, plan); err != nil {
 		t.Fatal(err)
 	}
@@ -125,6 +129,12 @@ func TestSelectShareSupportsMultipleRootlessItems(t *testing.T) {
 	}
 	if len(selection.Plan.Folders) != 1 {
 		t.Fatalf("share folders = %d, want 1", len(selection.Plan.Folders))
+	}
+	if selection.Plan.RootFolder.OriginalSize != fileASize+fileBSize {
+		t.Fatalf("share root size = %d, want %d", selection.Plan.RootFolder.OriginalSize, fileASize+fileBSize)
+	}
+	if selection.Plan.Folders[0].OriginalSize != fileASize {
+		t.Fatalf("share folder size = %d, want %d", selection.Plan.Folders[0].OriginalSize, fileASize)
 	}
 	if len(selection.ContentLocations) != 2 {
 		t.Fatalf("content locations = %d, want 2", len(selection.ContentLocations))

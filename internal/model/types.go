@@ -55,8 +55,9 @@ type File struct {
 }
 
 type Folder struct {
-	ID  uuid.UUID
-	Key []byte
+	ID           uuid.UUID
+	Key          []byte
+	OriginalSize int64
 }
 
 type Part struct {

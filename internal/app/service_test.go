@@ -84,6 +84,62 @@ func TestValidateOutputOutsideSourceAllowsSiblingOutput(t *testing.T) {
 	}
 }
 
+func TestPrepareContentOutputReportsHiddenNonEmptyFile(t *testing.T) {
+	output := filepath.Join(t.TempDir(), "encrypted")
+	if err := os.MkdirAll(output, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(output, ".DS_Store"), []byte("finder metadata"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	err := PrepareContentOutput(output, false)
+	if err == nil {
+		t.Fatal("expected non-empty output folder error")
+	}
+	if !strings.Contains(err.Error(), ".DS_Store") || !strings.Contains(err.Error(), "not empty") {
+		t.Fatalf("error = %v, want hidden file and non-empty explanation", err)
+	}
+}
+
+func TestCreateProjectReportsNonEmptyContentOutput(t *testing.T) {
+	ctx := context.Background()
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	encrypted := filepath.Join(root, "encrypted")
+	dataDir := filepath.Join(root, "data")
+
+	if err := os.MkdirAll(source, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "note.txt"), []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(encrypted, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(encrypted, ".DS_Store"), []byte("finder metadata"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	service, err := NewService(dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = service.CreateProject(ctx, CreateProjectInput{
+		SourcePath:    source,
+		ContentOutput: encrypted,
+		Password:      "test-password",
+		SourceCleanup: SourceCleanupKeep,
+	})
+	if err == nil {
+		t.Fatal("expected non-empty output folder error")
+	}
+	if !strings.Contains(err.Error(), ".DS_Store") || !strings.Contains(err.Error(), "not empty") {
+		t.Fatalf("error = %v, want hidden file and non-empty explanation", err)
+	}
+}
+
 func TestServiceInspectAndVerify(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()

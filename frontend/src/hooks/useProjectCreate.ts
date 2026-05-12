@@ -2,7 +2,7 @@ import {useState} from 'react';
 import type {MessageInstance} from 'antd/es/message/interface';
 import type {HookAPI as ModalHookAPI} from 'antd/es/modal/useModal';
 import {CreateProject} from '../../wailsjs/go/main/App';
-import type {CreateProjectResultModel, SettingsModel} from '../types';
+import type {CreateProjectResultModel} from '../types';
 import {formatNumber} from '../formatters';
 import {showOperationError} from '../components/common/operationError';
 import {partSizeMBToOverrideBytes} from '../partSize';
@@ -22,11 +22,10 @@ type UseProjectCreateArgs = {
     messageApi: MessageInstance;
     modalApi: ModalHookAPI;
     t: (key: string) => string;
-    settings: SettingsModel | null;
     reloadProjects: () => Promise<void>;
 };
 
-export function useProjectCreate({messageApi, modalApi, t, settings, reloadProjects}: UseProjectCreateArgs) {
+export function useProjectCreate({messageApi, modalApi, t, reloadProjects}: UseProjectCreateArgs) {
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [createLoading, setCreateLoading] = useState(false);
 

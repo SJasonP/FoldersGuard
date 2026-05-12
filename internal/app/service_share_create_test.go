@@ -56,6 +56,17 @@ func TestServiceListShareableItemsAndCreateShare(t *testing.T) {
 	if items[0].Path != "source" || items[0].Type != "folder" {
 		t.Fatalf("root shareable item = %+v", items[0])
 	}
+	wantSizes := map[string]int64{
+		"source":               9,
+		"source/docs":          5,
+		"source/docs/note.txt": 5,
+		"source/root.txt":      4,
+	}
+	for _, item := range items {
+		if item.Size != wantSizes[item.Path] {
+			t.Fatalf("shareable item %s size = %d, want %d", item.Path, item.Size, wantSizes[item.Path])
+		}
+	}
 
 	result, err := service.CreateShare(ctx, CreateShareInput{
 		ProjectID:         created.ProjectID,

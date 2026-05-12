@@ -120,6 +120,10 @@ func (s *Store) SelectShare(ctx context.Context, itemPaths []string, now time.Ti
 			sharePlan.StorageObjects = append(sharePlan.StorageObjects, object)
 		}
 	}
+	sharePlan, err = model.PopulateFolderSizes(sharePlan)
+	if err != nil {
+		return ShareSelection{}, err
+	}
 	return ShareSelection{
 		SourceProjectID:  plan.Project.ID,
 		ShareID:          shareID,

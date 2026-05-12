@@ -47,6 +47,13 @@ func (s *Store) MoveItem(ctx context.Context, itemPath, targetFolderPath string,
 	if err != nil {
 		return MoveResult{}, fmt.Errorf("target folder: %w", err)
 	}
+	if item.ParentID == nil {
+		return MoveResult{}, fmt.Errorf("root item cannot be moved")
+	}
+	movedSize, err := itemOriginalSize(plan, item)
+	if err != nil {
+		return MoveResult{}, err
+	}
 
 	updatedAt := formatTime(now.UTC())
 	operationPlanID := uuid.New()
@@ -107,6 +114,12 @@ WHERE object_id = ?`,
 		); err != nil {
 			return MoveResult{}, fmt.Errorf("move storage object %s: %w", object.ID, err)
 		}
+	}
+	if err := updateFolderSizeAncestors(ctx, tx, *item.ParentID, -movedSize); err != nil {
+		return MoveResult{}, err
+	}
+	if err := updateFolderSizeAncestors(ctx, tx, targetFolder.ID, movedSize); err != nil {
+		return MoveResult{}, err
 	}
 	if _, err := tx.ExecContext(ctx, `UPDATE meta SET value = ? WHERE key = 'updated_at'`, updatedAt); err != nil {
 		return MoveResult{}, fmt.Errorf("update metadata timestamp: %w", err)

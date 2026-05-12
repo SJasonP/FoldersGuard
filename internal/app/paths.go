@@ -73,7 +73,7 @@ func PrepareDirectoryOutput(path string, force bool, label string) error {
 	}
 	if len(entries) > 0 {
 		if !force {
-			return fmt.Errorf("%s folder is not empty; use --force to replace it", label)
+			return fmt.Errorf("%w: %s folder is not empty (%s); choose an empty folder, remove existing files including hidden files such as .DS_Store, or use force overwrite", ErrOutputFolderNotEmpty, label, directoryEntriesSummary(entries))
 		}
 		if err := os.RemoveAll(path); err != nil {
 			return fmt.Errorf("remove existing %s folder: %w", label, err)
@@ -83,6 +83,24 @@ func PrepareDirectoryOutput(path string, force bool, label string) error {
 		}
 	}
 	return nil
+}
+
+func directoryEntriesSummary(entries []os.DirEntry) string {
+	const maxNames = 3
+	names := make([]string, 0, maxNames)
+	for i, entry := range entries {
+		if i >= maxNames {
+			break
+		}
+		names = append(names, entry.Name())
+	}
+	if len(entries) > maxNames {
+		return fmt.Sprintf("found %d items, including %s", len(entries), strings.Join(names, ", "))
+	}
+	if len(entries) == 1 {
+		return "found " + names[0]
+	}
+	return fmt.Sprintf("found %d items: %s", len(entries), strings.Join(names, ", "))
 }
 
 func PrepareFileOutput(path string, force bool) error {
@@ -125,14 +143,14 @@ func ValidateOutputOutsideSource(source, output string) error {
 		return err
 	}
 	if outputInsideSource {
-		return fmt.Errorf("output path must be outside the source folder")
+		return fmt.Errorf("%w: output path must be outside the source folder", ErrOutputInsideSource)
 	}
 	sourceInsideOutput, err := pathContainsOrEquals(outputAbs, sourceAbs)
 	if err != nil {
 		return err
 	}
 	if sourceInsideOutput {
-		return fmt.Errorf("output path must not contain the source folder")
+		return fmt.Errorf("%w: output path must not contain the source folder", ErrOutputContainsSource)
 	}
 	return nil
 }
@@ -147,7 +165,7 @@ func ValidateDistinctPaths(left, right string) error {
 		return fmt.Errorf("resolve target path: %w", err)
 	}
 	if leftAbs == rightAbs {
-		return fmt.Errorf("source and target paths must be different")
+		return fmt.Errorf("%w: source and target paths must be different", ErrSourceTargetSame)
 	}
 	return nil
 }

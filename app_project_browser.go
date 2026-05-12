@@ -13,7 +13,7 @@ func (a *App) OpenProjectBrowser(request OpenProjectBrowserRequest) (ProjectBrow
 		EncryptedRoot: request.EncryptedPath,
 	})
 	if err != nil {
-		return ProjectBrowserState{}, err
+		return ProjectBrowserState{}, frontendError(err)
 	}
 	return projectBrowserStateFromApp(state), nil
 }
@@ -65,7 +65,7 @@ func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProj
 		CreateFolderChanges: createFolders,
 	})
 	if err != nil {
-		return ApplyProjectChangesResult{}, err
+		return ApplyProjectChangesResult{}, frontendError(err)
 	}
 	return ApplyProjectChangesResult{
 		ProjectID:              result.ProjectID,

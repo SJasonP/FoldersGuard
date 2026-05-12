@@ -77,6 +77,10 @@ func TestRenameItem(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+	plan, err = model.PopulateFolderSizes(plan)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := store.WritePlannedProject(ctx, plan); err != nil {
 		t.Fatal(err)
 	}
@@ -187,6 +191,10 @@ func TestRemoveItem(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
+	plan, err = model.PopulateFolderSizes(plan)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := store.WritePlannedProject(ctx, plan); err != nil {
 		t.Fatal(err)
 	}
@@ -208,4 +216,175 @@ func TestRemoveItem(t *testing.T) {
 	if len(read.Items) != 0 || len(read.Folders) != 0 || len(read.Files) != 0 || len(read.StorageObjects) != 1 {
 		t.Fatalf("removed project = %+v", read)
 	}
+	if read.RootFolder.OriginalSize != 0 {
+		t.Fatalf("root folder size = %d, want 0", read.RootFolder.OriginalSize)
+	}
+}
+
+func TestCommitAddAndMoveMaintainFolderSizes(t *testing.T) {
+	ctx := context.Background()
+	db := openMemoryDB(t)
+	store, err := NewStore(db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := store.ApplySchema(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	projectID := uuid.New()
+	rootID := uuid.New()
+	docsID := uuid.New()
+	fileID := uuid.New()
+	addedID := uuid.New()
+	rootVisible := uuid.New()
+	docsVisible := uuid.New()
+	fileVisible := uuid.New()
+	addedVisible := uuid.New()
+	now := time.Date(2026, 5, 5, 10, 0, 0, 0, time.UTC)
+	rootParentID := rootID
+	fileSize := int64(10)
+	addedSize := int64(5)
+
+	plan := model.PlannedProject{
+		Project: model.Project{ID: projectID, RootFolderID: rootID, CreatedAt: now, UpdatedAt: now},
+		RootItem: model.Item{
+			ID:              rootID,
+			Type:            model.ItemTypeFolder,
+			VisibleName:     rootVisible,
+			RealName:        "Root",
+			OriginalMode:    uint32(0o40755),
+			OriginalModTime: now,
+			MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+			CreatedAt:       now,
+			UpdatedAt:       now,
+		},
+		RootFolder: model.Folder{ID: rootID, Key: make([]byte, 32)},
+		Items: []model.Item{
+			{
+				ID:              docsID,
+				ParentID:        &rootParentID,
+				Type:            model.ItemTypeFolder,
+				VisibleName:     docsVisible,
+				RealName:        "docs",
+				OriginalMode:    uint32(0o40755),
+				OriginalModTime: now,
+				MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+				CreatedAt:       now,
+				UpdatedAt:       now,
+			},
+			{
+				ID:              fileID,
+				ParentID:        &rootParentID,
+				Type:            model.ItemTypeFile,
+				VisibleName:     fileVisible,
+				RealName:        "old.txt",
+				OriginalMode:    uint32(0o100600),
+				OriginalModTime: now,
+				MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+				CreatedAt:       now,
+				UpdatedAt:       now,
+			},
+		},
+		Folders: []model.Folder{{ID: docsID, Key: make([]byte, 32)}},
+		Files: []model.File{{
+			ID:               fileID,
+			Key:              make([]byte, 32),
+			SourcePath:       "/tmp/old.txt",
+			OriginalSize:     fileSize,
+			ContentAlgorithm: "AES-256-GCM",
+			StorageKind:      model.StorageKindSingle,
+		}},
+		StorageObjects: []model.StorageObject{
+			{ID: uuid.New(), ItemID: rootID, Type: model.StorageObjectTypeFolder, VisiblePath: rootVisible.String()},
+			{ID: uuid.New(), ItemID: docsID, Type: model.StorageObjectTypeFolder, VisiblePath: rootVisible.String() + "/" + docsVisible.String()},
+			{ID: uuid.New(), ItemID: fileID, Type: model.StorageObjectTypeFile, VisiblePath: rootVisible.String() + "/" + fileVisible.String(), Size: &fileSize},
+		},
+	}
+	plan, err = model.PopulateFolderSizes(plan)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := store.InitProject(ctx, ProjectSpec{
+		ProjectID:       projectID,
+		RootFolderID:    rootID,
+		RootVisibleName: rootVisible,
+		RootRealName:    "Root",
+		RootFolderKey:   plan.RootFolder.Key,
+		DatabaseType:    "project",
+		CreatedAt:       now,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.WritePlannedProject(ctx, plan); err != nil {
+		t.Fatal(err)
+	}
+
+	addition := model.PlannedProject{
+		RootItem: model.Item{
+			ID:              addedID,
+			Type:            model.ItemTypeFile,
+			VisibleName:     addedVisible,
+			RealName:        "new.txt",
+			OriginalMode:    uint32(0o100600),
+			OriginalModTime: now,
+			MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+			CreatedAt:       now,
+			UpdatedAt:       now,
+		},
+		Files: []model.File{{
+			ID:               addedID,
+			Key:              make([]byte, 32),
+			SourcePath:       "/tmp/new.txt",
+			OriginalSize:     addedSize,
+			ContentAlgorithm: "AES-256-GCM",
+			StorageKind:      model.StorageKindSingle,
+		}},
+		StorageObjects: []model.StorageObject{
+			{ID: uuid.New(), ItemID: addedID, Type: model.StorageObjectTypeFile, VisiblePath: addedVisible.String(), Size: &addedSize},
+		},
+	}
+	addition, operations, err := store.PrepareAdd(ctx, "Root/docs", addition)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.CommitAdd(ctx, "Root/docs", addition, operations, now.Add(time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+	read, err := store.ReadPlannedProject(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertFolderSize(t, read, rootID, fileSize+addedSize)
+	assertFolderSize(t, read, docsID, addedSize)
+
+	if _, err := store.MoveItem(ctx, "Root/docs/new.txt", "Root", now.Add(2*time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+	read, err = store.ReadPlannedProject(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertFolderSize(t, read, rootID, fileSize+addedSize)
+	assertFolderSize(t, read, docsID, 0)
+}
+
+func assertFolderSize(t *testing.T, plan model.PlannedProject, folderID uuid.UUID, want int64) {
+	t.Helper()
+	if plan.RootFolder.ID == folderID {
+		if plan.RootFolder.OriginalSize != want {
+			t.Fatalf("root folder size = %d, want %d", plan.RootFolder.OriginalSize, want)
+		}
+		return
+	}
+	for _, folder := range plan.Folders {
+		if folder.ID == folderID {
+			if folder.OriginalSize != want {
+				t.Fatalf("folder %s size = %d, want %d", folderID, folder.OriginalSize, want)
+			}
+			return
+		}
+	}
+	t.Fatalf("folder %s not found", folderID)
 }

@@ -93,6 +93,22 @@ Rules:
 - The frontend does not display password-derived information.
 - Go services must clear password-derived temporary state as soon as the operation allows.
 
+## Error Boundary
+
+Errors crossing from Go services to the WebUI must be treated as a product boundary, not as raw debug output.
+
+Rules:
+
+- Go services expose stable, user-actionable error categories for common failures.
+- The WebUI maps known error categories to localized messages.
+- Unknown operation errors use a generic localized operation failure message.
+- Error dialogs do not show raw backend errors, stack traces, SQLCipher messages, driver messages, or expandable
+  technical-detail sections.
+- Wrong database passwords are shown as password failures, but must not disclose whether the database header, metadata,
+  keys, or authenticated content check failed.
+- Non-empty output folders are shown as output conflicts and must mention hidden files such as `.DS_Store`.
+- Output path safety failures are distinct from password failures and must remain clear to the user.
+
 ## Operation Progress Model
 
 Long-running operations run through Go application services.

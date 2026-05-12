@@ -22,6 +22,8 @@ const (
 	UnprotectedSharePassword = "FoldersGuard:v1:unprotected-share"
 )
 
+var ErrInvalidDatabasePassword = errors.New("database password is incorrect or the database cannot be opened with this password")
+
 type Config struct {
 	Path       string
 	DriverName string
@@ -109,7 +111,7 @@ func escapeSQLCipherPragmaString(value string) string {
 func validateSQLCipherOpen(ctx context.Context, database *sql.DB) error {
 	var count int
 	if err := database.QueryRowContext(ctx, `SELECT count(*) FROM sqlite_master`).Scan(&count); err != nil {
-		return fmt.Errorf("open SQLCipher database with configured key: %w", err)
+		return fmt.Errorf("%w: %v", ErrInvalidDatabasePassword, err)
 	}
 	if err := expectPragma(ctx, database, "cipher_page_size", sqlcipherPageSize); err != nil {
 		return err

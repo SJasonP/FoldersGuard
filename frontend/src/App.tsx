@@ -16,6 +16,7 @@ import {useProjectActions} from './hooks/useProjectActions';
 import {useProjectShare} from './hooks/useProjectShare';
 import {useProjectBrowser} from './hooks/useProjectBrowser';
 import {useShareActions} from './hooks/useShareActions';
+import {useResizableColumns} from './hooks/useResizableColumns';
 import {HomeView} from './views/HomeView';
 import {SettingsView} from './views/SettingsView';
 import {AboutView} from './views/AboutView';
@@ -31,14 +32,18 @@ const antLocales: Record<SupportedLanguage, typeof enUS> = {
     'zh-CN': zhCN,
 };
 
-function App() {
+type AppBodyProps = {
+    language: SupportedLanguage;
+    resolvedTheme: ReturnType<typeof resolveTheme>;
+    systemLanguage: SupportedLanguage;
+    setLanguage: (language: SupportedLanguage) => void;
+    setThemeMode: (themeMode: ThemeMode) => void;
+};
+
+function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setThemeMode}: AppBodyProps) {
     const {t} = useTranslation();
     const antApp = AntApp.useApp();
     const [navigation, setNavigation] = useState<NavigationKey>('home');
-    const [systemLanguage, setSystemLanguage] = useState<SupportedLanguage>(resolveSystemLanguage);
-    const [language, setLanguage] = useState<SupportedLanguage>(systemLanguage);
-    const [themeMode, setThemeMode] = useState<ThemeMode>('system');
-    const [resolvedTheme, setResolvedTheme] = useState(resolveTheme(themeMode));
     const [info, setInfo] = useState<AppInfoModel | null>(null);
     const [infoLoaded, setInfoLoaded] = useState(false);
     const shownStartupError = useRef<string | null>(null);
@@ -50,24 +55,6 @@ function App() {
             .finally(() => setInfoLoaded(true));
     }, []);
 
-    useEffect(() => {
-        void i18n.changeLanguage(language);
-    }, [language]);
-
-    useEffect(() => {
-        const update = () => setSystemLanguage(resolveSystemLanguage());
-        window.addEventListener('languagechange', update);
-        return () => window.removeEventListener('languagechange', update);
-    }, []);
-
-    useEffect(() => {
-        const media = window.matchMedia('(prefers-color-scheme: dark)');
-        const update = () => setResolvedTheme(resolveTheme(themeMode));
-        update();
-        media.addEventListener('change', update);
-        return () => media.removeEventListener('change', update);
-    }, [themeMode]);
-
     const startupError = info?.startupError ?? '';
     const startupBlocked = startupError !== '';
     const dataServicesEnabled = infoLoaded && !startupBlocked;
@@ -77,7 +64,7 @@ function App() {
             return;
         }
         shownStartupError.current = startupError;
-        showStartupError(antApp.modal, t('dataDirectoryUnavailable'), info?.dataDir ?? '', startupError, t);
+        showStartupError(antApp.modal, t('dataDirectoryUnavailable'), info?.dataDir ?? '', t);
     }, [antApp.modal, info?.dataDir, startupBlocked, startupError, t]);
 
     const {
@@ -122,7 +109,6 @@ function App() {
         messageApi: antApp.message,
         modalApi: antApp.modal,
         t,
-        settings,
         reloadProjects: loadProjects,
     });
 
@@ -281,35 +267,53 @@ function App() {
         selectedProjectId,
     });
 
+    const localProjectColumnDefinitions = useMemo(
+        () => [
+            {key: 'projectId', dataIndex: 'projectId' as const, title: t('projectId'), defaultWidth: 320, minWidth: 180},
+            {key: 'projectName', dataIndex: 'projectName' as const, title: t('projectName'), defaultWidth: 260, minWidth: 160},
+            {key: 'modifiedTime', dataIndex: 'modifiedTime' as const, title: t('modifiedTime'), defaultWidth: 210, minWidth: 160},
+            {key: 'availabilityStatus', dataIndex: 'availabilityStatus' as const, title: t('availabilityStatus'), defaultWidth: 180, minWidth: 150},
+        ],
+        [t],
+    );
+    const {
+        columnWidths: localProjectColumnWidths,
+        resizeTitle: resizeLocalProjectColumnTitle,
+        scrollX: localProjectTableScrollX,
+    } = useResizableColumns<LocalProjectRow>('foldersguard.localProjects.columnWidths.v1', localProjectColumnDefinitions);
     const columns = useMemo<ColumnsType<LocalProjectRow>>(
         () => [
             {
-                title: t('projectId'),
+                title: resizeLocalProjectColumnTitle(localProjectColumnDefinitions[0]),
                 dataIndex: 'projectId',
                 key: 'projectId',
+                width: localProjectColumnWidths.projectId,
                 sorter: (left, right) => left.projectId.localeCompare(right.projectId),
             },
             {
-                title: t('projectName'),
+                title: resizeLocalProjectColumnTitle(localProjectColumnDefinitions[1]),
                 dataIndex: 'projectName',
                 key: 'projectName',
+                width: localProjectColumnWidths.projectName,
                 sorter: (left, right) => left.projectName.localeCompare(right.projectName),
             },
             {
-                title: t('modifiedTime'),
+                title: resizeLocalProjectColumnTitle(localProjectColumnDefinitions[2]),
                 dataIndex: 'modifiedTime',
                 key: 'modifiedTime',
+                width: localProjectColumnWidths.modifiedTime,
                 defaultSortOrder: 'descend',
                 sorter: (left, right) => left.modifiedAtMs - right.modifiedAtMs,
             },
             {
-                title: t('availabilityStatus'),
+                title: resizeLocalProjectColumnTitle(localProjectColumnDefinitions[3]),
                 dataIndex: 'availabilityStatus',
                 key: 'availabilityStatus',
+                width: localProjectColumnWidths.availabilityStatus,
                 sorter: (left, right) => left.availabilityStatus.localeCompare(right.availabilityStatus),
             },
         ],
-        [t],
+        [localProjectColumnDefinitions, localProjectColumnWidths, resizeLocalProjectColumnTitle],
     );
 
     const activeOperationLabel = useMemo(() => {
@@ -353,18 +357,8 @@ function App() {
     }, [applyResult?.manualContentGuide, applyResultOpen, language]);
 
     return (
-        <ConfigProvider
-            locale={antLocales[language]}
-            theme={{
-                algorithm: themeAlgorithm(resolvedTheme),
-                token: {
-                    borderRadius: 6,
-                    colorPrimary: '#1677ff',
-                },
-            }}
-        >
-            <AntApp>
-                <AppShell
+        <>
+            <AppShell
                     navigation={navigation}
                     onNavigationChange={setNavigation}
                     activeOperationLabel={activeOperationLabel}
@@ -374,6 +368,7 @@ function App() {
                     {navigation === 'home' && (
                         <HomeView
                             columns={columns}
+                            tableScrollX={localProjectTableScrollX}
                             loading={projectsLoading}
                             projects={visibleProjects}
                             projectSearch={projectSearch}
@@ -536,6 +531,53 @@ function App() {
                     onVerifyShare={(values) => void handleVerifyShare(values)}
                     onCloseVerifyShareResult={() => setVerifyShareResultOpen(false)}
                     t={t}
+                />
+        </>
+    );
+}
+
+function App() {
+    const [systemLanguage, setSystemLanguage] = useState<SupportedLanguage>(resolveSystemLanguage);
+    const [language, setLanguage] = useState<SupportedLanguage>(systemLanguage);
+    const [themeMode, setThemeMode] = useState<ThemeMode>('system');
+    const [resolvedTheme, setResolvedTheme] = useState(resolveTheme(themeMode));
+
+    useEffect(() => {
+        void i18n.changeLanguage(language);
+    }, [language]);
+
+    useEffect(() => {
+        const update = () => setSystemLanguage(resolveSystemLanguage());
+        window.addEventListener('languagechange', update);
+        return () => window.removeEventListener('languagechange', update);
+    }, []);
+
+    useEffect(() => {
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+        const update = () => setResolvedTheme(resolveTheme(themeMode));
+        update();
+        media.addEventListener('change', update);
+        return () => media.removeEventListener('change', update);
+    }, [themeMode]);
+
+    return (
+        <ConfigProvider
+            locale={antLocales[language]}
+            theme={{
+                algorithm: themeAlgorithm(resolvedTheme),
+                token: {
+                    borderRadius: 6,
+                    colorPrimary: '#1677ff',
+                },
+            }}
+        >
+            <AntApp>
+                <AppBody
+                    language={language}
+                    resolvedTheme={resolvedTheme}
+                    systemLanguage={systemLanguage}
+                    setLanguage={setLanguage}
+                    setThemeMode={setThemeMode}
                 />
             </AntApp>
         </ConfigProvider>

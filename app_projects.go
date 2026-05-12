@@ -9,7 +9,7 @@ import (
 func (a *App) ListLocalProjects() ([]LocalProjectSummary, error) {
 	projects, err := a.service.ListActiveProjects()
 	if err != nil {
-		return nil, err
+		return nil, frontendError(err)
 	}
 
 	result := make([]LocalProjectSummary, 0, len(projects))
@@ -35,7 +35,7 @@ func (a *App) SaveLocalProjectName(request SaveLocalProjectNameRequest) (SaveLoc
 		ProjectName: request.ProjectName,
 	})
 	if err != nil {
-		return SaveLocalProjectNameResult{}, err
+		return SaveLocalProjectNameResult{}, frontendError(err)
 	}
 	return SaveLocalProjectNameResult{
 		ProjectID:   result.ProjectID,
@@ -49,7 +49,7 @@ func (a *App) InspectProject(request InspectProjectRequest) (InspectProjectResul
 		Password:   request.Password,
 	})
 	if err != nil {
-		return InspectProjectResult{}, err
+		return InspectProjectResult{}, frontendError(err)
 	}
 	return InspectProjectResult{
 		ProjectID:      result.ProjectID,
@@ -74,7 +74,7 @@ func (a *App) VerifyProject(request VerifyProjectRequest) (VerifyProjectResult, 
 		Password:   request.Password,
 	}, request.EncryptedPath)
 	if err != nil {
-		return VerifyProjectResult{}, err
+		return VerifyProjectResult{}, frontendError(err)
 	}
 	return VerifyProjectResult{
 		ProjectID:       result.ProjectID,
@@ -99,7 +99,7 @@ func (a *App) DecryptProject(request DecryptProjectRequest) (DecryptProjectResul
 		SourceCleanup: request.SourceCleanup,
 	})
 	if err != nil {
-		return DecryptProjectResult{}, err
+		return DecryptProjectResult{}, frontendError(err)
 	}
 	return DecryptProjectResult{
 		ProjectID:             result.ProjectID,
@@ -118,7 +118,7 @@ func (a *App) LoadShare(request LoadShareRequest) (ShareSummary, error) {
 		Password:     request.Password,
 	})
 	if err != nil {
-		return ShareSummary{}, err
+		return ShareSummary{}, frontendError(err)
 	}
 	return ShareSummary{
 		ShareID:           result.ShareID,
@@ -139,7 +139,7 @@ func (a *App) VerifyShare(request VerifyShareRequest) (VerifyProjectResult, erro
 		Password:     request.Password,
 	}, request.EncryptedPath)
 	if err != nil {
-		return VerifyProjectResult{}, err
+		return VerifyProjectResult{}, frontendError(err)
 	}
 	return VerifyProjectResult{
 		ProjectID:       result.ProjectID,
@@ -164,7 +164,7 @@ func (a *App) DecryptShare(request DecryptShareRequest) (DecryptShareResult, err
 		SourceCleanup: request.SourceCleanup,
 	})
 	if err != nil {
-		return DecryptShareResult{}, err
+		return DecryptShareResult{}, frontendError(err)
 	}
 	return DecryptShareResult{
 		ShareID:               result.ShareID,
@@ -185,7 +185,7 @@ func (a *App) ExportProject(request ExportProjectRequest) (ExportProjectResult, 
 		Force:      request.Force,
 	})
 	if err != nil {
-		return ExportProjectResult{}, err
+		return ExportProjectResult{}, frontendError(err)
 	}
 	return ExportProjectResult{
 		ProjectID:  result.ProjectID,
@@ -199,7 +199,7 @@ func (a *App) DeleteProject(request DeleteProjectRequest) (DeleteProjectResult, 
 		Password:  request.Password,
 	})
 	if err != nil {
-		return DeleteProjectResult{}, err
+		return DeleteProjectResult{}, frontendError(err)
 	}
 	return DeleteProjectResult{
 		ProjectID: result.ProjectID,
@@ -217,7 +217,7 @@ func (a *App) CreateProject(request CreateProjectRequest) (CreateProjectResult, 
 		DatabaseExport: request.DatabaseExport,
 	})
 	if err != nil {
-		return CreateProjectResult{}, err
+		return CreateProjectResult{}, frontendError(err)
 	}
 	return CreateProjectResult{
 		ProjectID:               result.ProjectID,
@@ -240,7 +240,7 @@ func (a *App) ImportProject(request ImportProjectRequest) (ImportProjectResult, 
 		Force:     request.Force,
 	})
 	if err != nil {
-		return ImportProjectResult{}, err
+		return ImportProjectResult{}, frontendError(err)
 	}
 	return ImportProjectResult{
 		ProjectID: result.ProjectID,

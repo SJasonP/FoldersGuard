@@ -5,7 +5,7 @@ import "foldersguard/internal/app"
 func (a *App) ReadSettings() (Settings, error) {
 	settings, err := a.service.ReadSettings()
 	if err != nil {
-		return Settings{}, err
+		return Settings{}, frontendError(err)
 	}
 	return mapSettings(settings), nil
 }
@@ -18,7 +18,7 @@ func (a *App) SaveSettings(settings Settings) (Settings, error) {
 		Language:           settings.Language,
 	})
 	if err != nil {
-		return Settings{}, err
+		return Settings{}, frontendError(err)
 	}
 	return mapSettings(saved), nil
 }

@@ -139,6 +139,9 @@ INSERT INTO operation_steps (
 	if err := writeStorageObjects(ctx, tx, addition.StorageObjects); err != nil {
 		return AddResult{}, err
 	}
+	if err := updateFolderSizeAncestors(ctx, tx, targetFolder.ID, plannedFilesSize(addition)); err != nil {
+		return AddResult{}, err
+	}
 	if _, err := tx.ExecContext(ctx, `UPDATE meta SET value = ? WHERE key = 'updated_at'`, updatedAt); err != nil {
 		return AddResult{}, fmt.Errorf("update metadata timestamp: %w", err)
 	}

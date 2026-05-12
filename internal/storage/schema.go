@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS items (
 CREATE TABLE IF NOT EXISTS folders (
 	folder_id TEXT PRIMARY KEY,
 	folder_key BLOB NOT NULL,
+	original_size INTEGER NOT NULL CHECK (original_size >= 0),
 	FOREIGN KEY(folder_id) REFERENCES items(item_id)
 );
 
