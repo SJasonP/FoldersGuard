@@ -2,7 +2,7 @@ BIN_DIR ?= bin
 PRIMARY_BIN := foldersguard
 ALIAS_BIN := fg
 
-.PHONY: build webui frontend-build test clean
+.PHONY: build webui macos-release frontend-build test clean
 
 build:
 	go build -o $(BIN_DIR)/$(PRIMARY_BIN) ./cmd/foldersguard
@@ -10,6 +10,9 @@ build:
 
 webui:
 	wails build
+
+macos-release:
+	./scripts/build-macos-release.sh
 
 frontend-build:
 	cd frontend && npm run build

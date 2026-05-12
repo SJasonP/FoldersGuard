@@ -70,3 +70,85 @@ If CGO is disabled, SQLCipher cannot be built into the application. Build with `
 
 If the host C compiler is used for a different target platform, Go may fail while compiling `runtime/cgo`. Set `CC` and
 `CXX` to compilers for the target platform.
+
+## macOS Release Signing And Notarization
+
+macOS release distribution requires an Apple Developer account, a `Developer ID Application` certificate installed in
+the login keychain, and notary service credentials.
+
+The automated release script builds the Wails app, signs the `.app` bundle with the hardened runtime, creates a ZIP
+archive for notarization, submits it to Apple, staples the notary ticket, and recreates the final ZIP artifact.
+
+Local release settings should be stored in `config/macos-release.env`. The `config/` directory is ignored by git, and
+`config.example/` contains templates that are safe to commit:
+
+```text
+mkdir -p config
+cp config.example/macos-release.env config/macos-release.env
+```
+
+Edit `config/macos-release.env`:
+
+```text
+APPLE_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+APPLE_NOTARY_KEYCHAIN_PROFILE="apple-notary"
+WAILS_PLATFORM="darwin/universal"
+DIST_DIR="dist/macos"
+```
+
+Then run:
+
+```text
+./scripts/build-macos-release.sh
+```
+
+The same workflow is available through Make:
+
+```text
+make macos-release
+```
+
+To store notary credentials in the macOS keychain:
+
+```text
+xcrun notarytool store-credentials apple-notary \
+  --apple-id "apple-id@example.com" \
+  --team-id "TEAMID" \
+  --password "app-specific-password"
+```
+
+Alternatively, pass credentials through environment variables:
+
+```text
+APPLE_ID="apple-id@example.com" \
+APPLE_TEAM_ID="TEAMID" \
+APPLE_APP_PASSWORD="app-specific-password" \
+./scripts/build-macos-release.sh
+```
+
+Useful script options:
+
+- `WAILS_PLATFORM`: Wails platform target. Defaults to `darwin/universal`.
+- `APPLE_SIGN_IDENTITY`: Developer ID Application signing identity. If omitted, the script uses the first installed
+  `Developer ID Application` identity.
+- `APPLE_NOTARY_KEYCHAIN_PROFILE`: keychain profile created by `xcrun notarytool store-credentials`.
+- `DIST_DIR`: output directory. Defaults to `dist/macos`.
+- `SKIP_BUILD=1`: sign and notarize an existing app bundle.
+- `SKIP_NOTARIZE=1`: build and sign only, without submitting to Apple.
+- `MACOS_RELEASE_ENV`: path to a different env file. Defaults to `config/macos-release.env`.
+
+The default app bundle path is:
+
+```text
+build/bin/FoldersGuard.app
+```
+
+The final ZIP artifact is:
+
+```text
+dist/macos/FoldersGuard-macos.zip
+```
+
+If the script cannot find a `Developer ID Application` identity, install the certificate from the Apple Developer
+account or set `APPLE_SIGN_IDENTITY` explicitly. An `Apple Development` certificate is not sufficient for Developer ID
+distribution and notarization.
