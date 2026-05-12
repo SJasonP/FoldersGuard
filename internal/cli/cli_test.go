@@ -2,10 +2,15 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"foldersguard/internal/db"
+	"foldersguard/internal/fswalk"
+	"foldersguard/internal/project"
 )
 
 func TestHelpUsesInvokedName(t *testing.T) {
@@ -184,6 +189,63 @@ func TestReadCommandsRejectExportedProjectDatabasePath(t *testing.T) {
 		if err == nil || !strings.Contains(err.Error(), "must be imported before use") {
 			t.Fatalf("command %v error = %v, want import requirement", args, err)
 		}
+	}
+}
+
+func TestVerifyPrintsProblemPaths(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	contentRoot := filepath.Join(root, "content")
+	databaseOutput := filepath.Join(root, "project.fg")
+	if err := os.MkdirAll(source, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "note.txt"), []byte("hello"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	scan, err := fswalk.ScanTopFolder(source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := project.Planner{MaxPartSize: 1024}.Plan(scan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := (project.Executor{OutputRoot: contentRoot}).EncryptContent(context.Background(), plan); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeProjectDatabase(context.Background(), db.Config{
+		Path:       databaseOutput,
+		DriverName: db.SQLCipherDriver,
+		Password:   "test-password",
+	}, plan); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(contentRoot, "extra-object"), []byte("extra"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Setenv("HOME", root)
+	t.Setenv("FG_TEST_PASSWORD", "test-password")
+	var out bytes.Buffer
+	if err := RunWithIO("fg", []string{
+		"import",
+		databaseOutput,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := RunWithIO("fg", []string{
+		"verify",
+		plan.Project.ID.String(),
+		"--content", contentRoot,
+		"--password-env", "FG_TEST_PASSWORD",
+	}, nil, &out); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), "extra_path=extra-object\n") {
+		t.Fatalf("verify output = %q, want extra path", out.String())
 	}
 }
 

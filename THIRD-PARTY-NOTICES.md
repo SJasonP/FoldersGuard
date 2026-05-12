@@ -31,7 +31,7 @@ based on `go list -deps -test=false`.
 | `modernc.org/libc`                     |                            `v1.72.3` | MIT / BSD-style |
 | `modernc.org/mathutil`                 |                             `v1.7.1` | BSD-style       |
 | `modernc.org/memory`                   |                            `v1.11.0` | BSD-style       |
-| `modernc.org/sqlite`                   |                            `v1.50.0` | BSD-style       |
+| `modernc.org/sqlite`                   |                            `v1.50.1` | BSD-style       |
 
 The frontend is bundled into the desktop application. Its package dependency manifest currently includes:
 
@@ -1226,7 +1226,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/sqlite v1.50.0 - LICENSE
+### modernc.org/sqlite v1.50.1 - LICENSE
 
 ```text
 Copyright (c) 2017 The Sqlite Authors. All rights reserved.

@@ -29,6 +29,8 @@ a mixed selection without exposing parent folders, siblings, or unrelated projec
 - Direct encrypted sharing: share encrypted files or directories without first creating a cleartext export.
 - Share-scoped access: `.fgs` share databases contain only the metadata and keys needed for the selected files and
   folders.
+- Integrity verification: verify encrypted content without decrypting it, and detect missing or tampered encrypted
+  objects before restore or sharing.
 - Hidden real names: visible encrypted file and directory names are UUID values.
 - Separate metadata: FoldersGuard data is separate from encrypted content, so metadata-only changes such as renaming do
   not require the encrypted content to be present.

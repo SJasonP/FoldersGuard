@@ -82,6 +82,9 @@ func (a *App) VerifyProject(request VerifyProjectRequest) (VerifyProjectResult, 
 		MissingObjects:  result.MissingObjects,
 		TamperedObjects: result.TamperedObjects,
 		ExtraObjects:    result.ExtraObjects,
+		MissingPaths:    result.MissingPaths,
+		TamperedPaths:   result.TamperedPaths,
+		ExtraPaths:      result.ExtraPaths,
 		Status:          result.Status,
 	}, nil
 }
@@ -144,6 +147,9 @@ func (a *App) VerifyShare(request VerifyShareRequest) (VerifyProjectResult, erro
 		MissingObjects:  result.MissingObjects,
 		TamperedObjects: result.TamperedObjects,
 		ExtraObjects:    result.ExtraObjects,
+		MissingPaths:    result.MissingPaths,
+		TamperedPaths:   result.TamperedPaths,
+		ExtraPaths:      result.ExtraPaths,
 		Status:          result.Status,
 	}, nil
 }

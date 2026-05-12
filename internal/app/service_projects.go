@@ -88,6 +88,9 @@ func (s Service) Verify(ctx context.Context, input DatabaseOpen, encryptedRoot s
 		MissingObjects:  report.MissingObjects,
 		TamperedObjects: report.TamperedObjects,
 		ExtraObjects:    report.ExtraObjects,
+		MissingPaths:    report.MissingPaths,
+		TamperedPaths:   report.TamperedPaths,
+		ExtraPaths:      report.ExtraPaths,
 		Status:          status,
 	}, nil
 }

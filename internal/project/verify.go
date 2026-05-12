@@ -15,10 +15,13 @@ type VerifyReport struct {
 	MissingObjects  int
 	TamperedObjects int
 	ExtraObjects    int
+	MissingPaths    []string
+	TamperedPaths   []string
+	ExtraPaths      []string
 }
 
 func (r VerifyReport) OK() bool {
-	return r.MissingObjects == 0 && r.TamperedObjects == 0 && r.ExtraObjects == 0
+	return r.MissingObjects == 0 && r.TamperedObjects == 0
 }
 
 type Verifier struct {
@@ -82,7 +85,8 @@ func (v Verifier) VerifyContent(ctx context.Context, plan model.PlannedProject) 
 	if err != nil {
 		return report, err
 	}
-	report.ExtraObjects = extra
+	report.ExtraPaths = extra
+	report.ExtraObjects = len(extra)
 	return report, nil
 }
 
@@ -99,19 +103,23 @@ func (v Verifier) verifyFolder(visiblePath string, expected map[string]struct{},
 	if err != nil {
 		if os.IsNotExist(err) {
 			report.MissingObjects++
+			report.MissingPaths = append(report.MissingPaths, cleanPath)
 			return nil
 		}
 		report.TamperedObjects++
+		report.TamperedPaths = append(report.TamperedPaths, cleanPath)
 		return nil
 	}
 	if !info.IsDir() {
 		report.TamperedObjects++
+		report.TamperedPaths = append(report.TamperedPaths, cleanPath)
 	}
 	return nil
 }
 
 func (v Verifier) verifyObject(ctx context.Context, key []byte, visiblePath string, associatedData []byte, expected map[string]struct{}, report *VerifyReport) error {
-	expected[filepath.Clean(filepath.FromSlash(visiblePath))] = struct{}{}
+	cleanPath := filepath.Clean(filepath.FromSlash(visiblePath))
+	expected[cleanPath] = struct{}{}
 	report.CheckedObjects++
 
 	encryptedPath, err := content.SafeJoin(v.EncryptedRoot, visiblePath)
@@ -121,19 +129,22 @@ func (v Verifier) verifyObject(ctx context.Context, key []byte, visiblePath stri
 	if _, err := os.Stat(encryptedPath); err != nil {
 		if os.IsNotExist(err) {
 			report.MissingObjects++
+			report.MissingPaths = append(report.MissingPaths, cleanPath)
 			return nil
 		}
 		report.TamperedObjects++
+		report.TamperedPaths = append(report.TamperedPaths, cleanPath)
 		return nil
 	}
 	if _, err := content.OpenObjectFromFile(ctx, key, encryptedPath, associatedData); err != nil {
 		report.TamperedObjects++
+		report.TamperedPaths = append(report.TamperedPaths, cleanPath)
 	}
 	return nil
 }
 
-func countExtraObjects(ctx context.Context, root string, expected map[string]struct{}) (int, error) {
-	extra := 0
+func countExtraObjects(ctx context.Context, root string, expected map[string]struct{}) ([]string, error) {
+	extra := []string{}
 	err := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -148,13 +159,31 @@ func countExtraObjects(ctx context.Context, root string, expected map[string]str
 		if relative == "." {
 			return nil
 		}
-		if _, ok := expected[filepath.Clean(relative)]; !ok {
-			extra++
+		if isIgnoredVerificationMetadata(entry.Name()) {
+			if entry.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		cleanRelative := filepath.Clean(relative)
+		if _, ok := expected[cleanRelative]; !ok {
+			extra = append(extra, filepath.ToSlash(cleanRelative))
 		}
 		return nil
 	})
 	if err != nil {
-		return 0, fmt.Errorf("walk encrypted content: %w", err)
+		return nil, fmt.Errorf("walk encrypted content: %w", err)
 	}
 	return extra, nil
+}
+
+func isIgnoredVerificationMetadata(name string) bool {
+	switch name {
+	case ".DS_Store", "._.DS_Store", "Thumbs.db", "ehthumbs.db", "desktop.ini":
+		return true
+	case ".Spotlight-V100", ".Trashes", ".fseventsd":
+		return true
+	default:
+		return len(name) > 2 && name[:2] == "._"
+	}
 }

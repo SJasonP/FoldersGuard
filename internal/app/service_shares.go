@@ -44,6 +44,9 @@ func (s Service) VerifyShare(ctx context.Context, input ShareOpen, encryptedRoot
 		MissingObjects:  report.MissingObjects,
 		TamperedObjects: report.TamperedObjects,
 		ExtraObjects:    report.ExtraObjects,
+		MissingPaths:    report.MissingPaths,
+		TamperedPaths:   report.TamperedPaths,
+		ExtraPaths:      report.ExtraPaths,
 		Status:          status,
 	}, nil
 }

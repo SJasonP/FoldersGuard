@@ -78,12 +78,15 @@ type VerifyProjectRequest struct {
 }
 
 type VerifyProjectResult struct {
-	ProjectID       string `json:"projectId"`
-	CheckedObjects  int    `json:"checkedObjects"`
-	MissingObjects  int    `json:"missingObjects"`
-	TamperedObjects int    `json:"tamperedObjects"`
-	ExtraObjects    int    `json:"extraObjects"`
-	Status          string `json:"status"`
+	ProjectID       string   `json:"projectId"`
+	CheckedObjects  int      `json:"checkedObjects"`
+	MissingObjects  int      `json:"missingObjects"`
+	TamperedObjects int      `json:"tamperedObjects"`
+	ExtraObjects    int      `json:"extraObjects"`
+	MissingPaths    []string `json:"missingPaths"`
+	TamperedPaths   []string `json:"tamperedPaths"`
+	ExtraPaths      []string `json:"extraPaths"`
+	Status          string   `json:"status"`
 }
 
 type DecryptProjectRequest struct {

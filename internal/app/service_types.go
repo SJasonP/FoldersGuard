@@ -74,6 +74,9 @@ type VerifyResult struct {
 	MissingObjects  int
 	TamperedObjects int
 	ExtraObjects    int
+	MissingPaths    []string
+	TamperedPaths   []string
+	ExtraPaths      []string
 	Status          string
 }
 

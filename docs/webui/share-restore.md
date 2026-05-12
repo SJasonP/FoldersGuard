@@ -77,6 +77,7 @@ Verify behavior:
 - FG checks that required encrypted content paths exist.
 - FG authenticates encrypted file objects and split parts.
 - FG reports missing, extra, and tampered content.
+- Extra content is informational and does not make verification fail.
 - FG does not write plaintext output.
 - FG does not delete encrypted content.
 - Source cleanup settings do not apply to verification.
@@ -86,7 +87,8 @@ After completion, the WebUI reports:
 - Checked object count.
 - Missing object count.
 - Tampered object count.
-- Extra object count.
+- Extra object count, for information only.
+- Missing, tampered, and extra object paths when present.
 - Verification status.
 
 ## Create Share
@@ -260,6 +262,7 @@ Verify behavior:
 - FG checks that required encrypted content paths exist.
 - FG authenticates encrypted file objects and split parts.
 - FG reports missing, extra, and tampered content.
+- Extra content is informational and does not make verification fail.
 - FG does not write plaintext output.
 - FG does not delete encrypted content.
 - Source cleanup settings do not apply to verification.

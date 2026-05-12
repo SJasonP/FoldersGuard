@@ -869,6 +869,9 @@ export namespace main {
 	    missingObjects: number;
 	    tamperedObjects: number;
 	    extraObjects: number;
+	    missingPaths: string[];
+	    tamperedPaths: string[];
+	    extraPaths: string[];
 	    status: string;
 	
 	    static createFrom(source: any = {}) {
@@ -882,6 +885,9 @@ export namespace main {
 	        this.missingObjects = source["missingObjects"];
 	        this.tamperedObjects = source["tamperedObjects"];
 	        this.extraObjects = source["extraObjects"];
+	        this.missingPaths = source["missingPaths"];
+	        this.tamperedPaths = source["tamperedPaths"];
+	        this.extraPaths = source["extraPaths"];
 	        this.status = source["status"];
 	    }
 	}

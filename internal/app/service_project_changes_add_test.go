@@ -113,4 +113,18 @@ func TestServiceApplyProjectAddUploadsConnectedContent(t *testing.T) {
 		t.Fatalf("browser state missing added file: %+v", result.BrowserState.Items)
 	}
 	assertExists(t, filepath.Join(encrypted, filepath.FromSlash(result.AppliedContentChanges[0].TargetPath)))
+	if err := os.WriteFile(filepath.Join(encrypted, ".DS_Store"), []byte("finder metadata"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	verify, err := service.Verify(ctx, DatabaseOpen{
+		ProjectRef: created.ProjectID,
+		Password:   password,
+	}, encrypted)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if verify.Status != "ok" || verify.MissingObjects != 0 || verify.TamperedObjects != 0 || verify.ExtraObjects != 0 {
+		t.Fatalf("verify after connected add = %+v", verify)
+	}
 }

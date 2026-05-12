@@ -79,5 +79,16 @@ func writeVerifyResult(out interface {
 	fmt.Fprintf(out, "missing_objects=%d\n", result.MissingObjects)
 	fmt.Fprintf(out, "tampered_objects=%d\n", result.TamperedObjects)
 	fmt.Fprintf(out, "extra_objects=%d\n", result.ExtraObjects)
+	writeVerifyPaths(out, "missing_path", result.MissingPaths)
+	writeVerifyPaths(out, "tampered_path", result.TamperedPaths)
+	writeVerifyPaths(out, "extra_path", result.ExtraPaths)
 	fmt.Fprintf(out, "status=%s\n", result.Status)
+}
+
+func writeVerifyPaths(out interface {
+	Write([]byte) (int, error)
+}, key string, paths []string) {
+	for _, path := range paths {
+		fmt.Fprintf(out, "%s=%s\n", key, path)
+	}
 }
