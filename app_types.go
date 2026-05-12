@@ -43,11 +43,10 @@ type ShareSummary struct {
 }
 
 type Settings struct {
-	OperationGuideFormat string `json:"operationGuideFormat"`
-	DefaultMaxPartSize   int64  `json:"defaultMaxPartSize"`
-	SourceCleanupMode    string `json:"sourceCleanupMode"`
-	Theme                string `json:"theme"`
-	Language             string `json:"language"`
+	DefaultMaxPartSize int64  `json:"defaultMaxPartSize"`
+	SourceCleanupMode  string `json:"sourceCleanupMode"`
+	Theme              string `json:"theme"`
+	Language           string `json:"language"`
 }
 
 type InspectProjectRequest struct {

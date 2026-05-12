@@ -273,7 +273,6 @@ type ApplyProjectChangesInput struct {
 	ProjectID           string
 	Password            string
 	EncryptedRoot       string
-	OperationGuideLang  string
 	RenameChanges       []ProjectRenameChange
 	MoveChanges         []ProjectMoveChange
 	RemoveChanges       []ProjectRemoveChange
@@ -282,15 +281,17 @@ type ApplyProjectChangesInput struct {
 }
 
 type ApplyProjectChangesResult struct {
-	ProjectID             string
-	AppliedRenames        int
-	AppliedMoves          int
-	AppliedRemoves        int
-	AppliedAdds           int
-	AppliedCreatedFolders int
-	OperationGuidePath    string
-	StagedContentPath     string
-	ContentOperations     []ProjectContentOperation
-	AppliedContentChanges []ProjectContentOperation
-	BrowserState          ProjectBrowserState
+	ProjectID              string
+	AppliedRenames         int
+	AppliedMoves           int
+	AppliedRemoves         int
+	AppliedAdds            int
+	AppliedCreatedFolders  int
+	ManualContentGuide     bool
+	StagedContentPath      string
+	StagedContentName      string
+	StagedContentOnDesktop bool
+	ContentOperations      []ProjectContentOperation
+	AppliedContentChanges  []ProjectContentOperation
+	BrowserState           ProjectBrowserState
 }

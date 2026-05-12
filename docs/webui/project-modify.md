@@ -150,21 +150,19 @@ If encrypted content is connected:
 
 - FG applies content operations directly.
 - FG reports the operations that were performed.
-- FG must not write an operation guide.
+- FG must not show a manual processing guide for already-applied content operations.
 
 If encrypted content is not connected:
 
-- FG writes encrypted output for new content to the user's desktop when a desktop folder is available, falling back to
-  FG's data directory otherwise.
-- FG writes a human-readable operation guide to the same desktop FoldersGuard workspace when available, falling back to
-  FG's data directory otherwise.
-- The operation guide describes exactly how the user should upload, move, or delete encrypted objects.
-- The operation guide includes real file names where useful for user understanding.
-- The operation guide follows the active WebUI language when possible.
-- Closing an apply result that contains an operation guide requires confirmation.
-- Closing the application while an operation guide result is still open requires confirmation.
-
-The operation guide format is controlled by Settings.
+- FG writes newly generated encrypted data for add/create-folder operations to the user's desktop when a desktop folder
+  is available, using a folder name in the form `[project name YYYY-MM-DD HH.mm]`, and falls back to FG's data
+  directory otherwise.
+- FG shows the manual processing guide directly inside the WebUI instead of writing a separate guide file.
+- The guide explains how to copy/upload, move, or delete encrypted objects.
+- Upload instructions refer to the encrypted-content relative path only; when the generated source and destination
+  relative path are the same, FG must not show a redundant `A -> A` mapping.
+- Closing an apply result that contains a manual processing guide requires confirmation.
+- Closing the application while a manual processing guide result is still open requires confirmation.
 
 Apply result:
 

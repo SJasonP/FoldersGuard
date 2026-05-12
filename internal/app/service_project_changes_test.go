@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 )
 
@@ -101,7 +100,7 @@ func TestServiceApplyProjectRenameRejectsRoot(t *testing.T) {
 	}
 }
 
-func TestServiceApplyProjectMoveWritesOperationGuide(t *testing.T) {
+func TestServiceApplyProjectMoveReturnsManualContentGuide(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()
 	source := filepath.Join(root, "source")
@@ -144,18 +143,11 @@ func TestServiceApplyProjectMoveWritesOperationGuide(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.AppliedMoves != 1 || len(result.ContentOperations) != 1 || result.OperationGuidePath == "" {
+	if result.AppliedMoves != 1 || len(result.ContentOperations) != 1 || !result.ManualContentGuide {
 		t.Fatalf("apply result = %+v", result)
 	}
 	if !browserHasPath(result.BrowserState, "source/archive/docs") {
 		t.Fatalf("browser state missing moved path: %+v", result.BrowserState.Items)
-	}
-	data, err := os.ReadFile(result.OperationGuidePath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !strings.Contains(strings.ToLower(string(data)), "move") {
-		t.Fatalf("operation guide = %q", data)
 	}
 }
 
@@ -200,7 +192,7 @@ func TestServiceApplyProjectRemoveDeletesConnectedContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.AppliedRemoves != 1 || len(result.AppliedContentChanges) != 1 || result.OperationGuidePath != "" {
+	if result.AppliedRemoves != 1 || len(result.AppliedContentChanges) != 1 || result.ManualContentGuide {
 		t.Fatalf("apply result = %+v", result)
 	}
 	if browserHasPath(result.BrowserState, "source/docs/note.txt") {
@@ -307,7 +299,7 @@ func TestServiceApplyProjectCreateFolderChange(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.AppliedCreatedFolders != 1 || result.OperationGuidePath == "" || result.StagedContentPath == "" || len(result.ContentOperations) != 1 {
+	if result.AppliedCreatedFolders != 1 || !result.ManualContentGuide || result.StagedContentPath == "" || len(result.ContentOperations) != 1 {
 		t.Fatalf("apply result = %+v", result)
 	}
 	if !browserHasPath(result.BrowserState, "source/docs/empty") {
@@ -357,7 +349,7 @@ func TestServiceApplyProjectCreateFolderUploadsConnectedContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.AppliedCreatedFolders != 1 || result.OperationGuidePath != "" || result.StagedContentPath != "" || len(result.AppliedContentChanges) != 1 {
+	if result.AppliedCreatedFolders != 1 || result.ManualContentGuide || result.StagedContentPath != "" || len(result.AppliedContentChanges) != 1 {
 		t.Fatalf("apply result = %+v", result)
 	}
 	if !browserHasPath(result.BrowserState, "source/empty") {

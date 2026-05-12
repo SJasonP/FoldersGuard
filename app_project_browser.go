@@ -58,7 +58,6 @@ func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProj
 		ProjectID:           request.ProjectID,
 		Password:            request.Password,
 		EncryptedRoot:       request.EncryptedPath,
-		OperationGuideLang:  request.OperationGuideLang,
 		RenameChanges:       renames,
 		MoveChanges:         moves,
 		RemoveChanges:       removes,
@@ -69,17 +68,19 @@ func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProj
 		return ApplyProjectChangesResult{}, err
 	}
 	return ApplyProjectChangesResult{
-		ProjectID:             result.ProjectID,
-		AppliedRenames:        result.AppliedRenames,
-		AppliedMoves:          result.AppliedMoves,
-		AppliedRemoves:        result.AppliedRemoves,
-		AppliedAdds:           result.AppliedAdds,
-		AppliedCreatedFolders: result.AppliedCreatedFolders,
-		OperationGuidePath:    result.OperationGuidePath,
-		StagedContentPath:     result.StagedContentPath,
-		ContentOperations:     projectContentOperationsFromApp(result.ContentOperations),
-		AppliedContentChanges: projectContentOperationsFromApp(result.AppliedContentChanges),
-		BrowserState:          projectBrowserStateFromApp(result.BrowserState),
+		ProjectID:              result.ProjectID,
+		AppliedRenames:         result.AppliedRenames,
+		AppliedMoves:           result.AppliedMoves,
+		AppliedRemoves:         result.AppliedRemoves,
+		AppliedAdds:            result.AppliedAdds,
+		AppliedCreatedFolders:  result.AppliedCreatedFolders,
+		ManualContentGuide:     result.ManualContentGuide,
+		StagedContentPath:      result.StagedContentPath,
+		StagedContentName:      result.StagedContentName,
+		StagedContentOnDesktop: result.StagedContentOnDesktop,
+		ContentOperations:      projectContentOperationsFromApp(result.ContentOperations),
+		AppliedContentChanges:  projectContentOperationsFromApp(result.AppliedContentChanges),
+		BrowserState:           projectBrowserStateFromApp(result.BrowserState),
 	}, nil
 }
 

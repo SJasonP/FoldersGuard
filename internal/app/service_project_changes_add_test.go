@@ -7,15 +7,20 @@ import (
 	"testing"
 )
 
-func TestServiceApplyProjectAddWritesStagedContentAndOperationGuide(t *testing.T) {
+func TestServiceApplyProjectAddWritesDesktopStagedContentAndManualGuideResult(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()
+	home := t.TempDir()
 	source := filepath.Join(root, "source")
 	addSource := filepath.Join(root, "new.txt")
 	encrypted := filepath.Join(root, "encrypted")
 	dataDir := filepath.Join(root, "data")
 	password := "project-password"
 
+	if err := os.Mkdir(filepath.Join(home, "Desktop"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("HOME", home)
 	if err := os.MkdirAll(source, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -51,14 +56,16 @@ func TestServiceApplyProjectAddWritesStagedContentAndOperationGuide(t *testing.T
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.AppliedAdds != 1 || len(result.ContentOperations) != 1 || result.OperationGuidePath == "" || result.StagedContentPath == "" {
+	if result.AppliedAdds != 1 || len(result.ContentOperations) != 1 || !result.ManualContentGuide || result.StagedContentPath == "" {
 		t.Fatalf("apply result = %+v", result)
+	}
+	if !result.StagedContentOnDesktop || result.StagedContentName == "" || filepath.Dir(result.StagedContentPath) != filepath.Join(home, "Desktop") {
+		t.Fatalf("staged desktop result = %+v", result)
 	}
 	if !browserHasPath(result.BrowserState, "source/new.txt") {
 		t.Fatalf("browser state missing added file: %+v", result.BrowserState.Items)
 	}
 	assertExists(t, filepath.Join(result.StagedContentPath, filepath.FromSlash(result.ContentOperations[0].SourcePath)))
-	assertExists(t, result.OperationGuidePath)
 }
 
 func TestServiceApplyProjectAddUploadsConnectedContent(t *testing.T) {
@@ -106,7 +113,7 @@ func TestServiceApplyProjectAddUploadsConnectedContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.AppliedAdds != 1 || len(result.AppliedContentChanges) != 1 || result.OperationGuidePath != "" || result.StagedContentPath != "" {
+	if result.AppliedAdds != 1 || len(result.AppliedContentChanges) != 1 || result.ManualContentGuide || result.StagedContentPath != "" {
 		t.Fatalf("apply result = %+v", result)
 	}
 	if !browserHasPath(result.BrowserState, "source/new.txt") {

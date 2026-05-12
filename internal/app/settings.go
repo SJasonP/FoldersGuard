@@ -12,9 +12,6 @@ const (
 	MinimumSplitPartSizeMB int64 = 5
 	NoSplitMaxPartSize     int64 = 1 << 62
 
-	GuideFormatTXT = "txt"
-	GuideFormatMD  = "md"
-
 	SourceCleanupAsk    = "ask"
 	SourceCleanupKeep   = "keep"
 	SourceCleanupDelete = "delete"
@@ -29,20 +26,18 @@ const (
 )
 
 type Settings struct {
-	OperationGuideFormat string `json:"operationGuideFormat"`
-	DefaultMaxPartSize   int64  `json:"defaultMaxPartSize"`
-	SourceCleanupMode    string `json:"sourceCleanupMode"`
-	Theme                string `json:"theme"`
-	Language             string `json:"language"`
+	DefaultMaxPartSize int64  `json:"defaultMaxPartSize"`
+	SourceCleanupMode  string `json:"sourceCleanupMode"`
+	Theme              string `json:"theme"`
+	Language           string `json:"language"`
 }
 
 func DefaultSettings() Settings {
 	return Settings{
-		OperationGuideFormat: GuideFormatTXT,
-		DefaultMaxPartSize:   0,
-		SourceCleanupMode:    SourceCleanupAsk,
-		Theme:                ThemeSystem,
-		Language:             LanguageSystem,
+		DefaultMaxPartSize: 0,
+		SourceCleanupMode:  SourceCleanupAsk,
+		Theme:              ThemeSystem,
+		Language:           LanguageSystem,
 	}
 }
 
@@ -93,14 +88,6 @@ func (s Service) SaveSettings(settings Settings) (Settings, error) {
 }
 
 func normalizeSettings(settings Settings) (Settings, error) {
-	switch settings.OperationGuideFormat {
-	case "", GuideFormatTXT:
-		settings.OperationGuideFormat = GuideFormatTXT
-	case GuideFormatMD:
-	default:
-		return Settings{}, fmt.Errorf("unsupported operation guide format %q", settings.OperationGuideFormat)
-	}
-
 	if settings.DefaultMaxPartSize < 0 {
 		return Settings{}, fmt.Errorf("default max part size must not be negative")
 	}

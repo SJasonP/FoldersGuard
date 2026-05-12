@@ -35,14 +35,6 @@ export function SettingsView({
                 onFinish={onSave}
             >
                 <div className="settings-grid">
-                    <Form.Item name="operationGuideFormat" label={t('operationGuideFormat')} rules={[{required: true}]}>
-                        <Select
-                            options={[
-                                {value: 'txt', label: 'txt'},
-                                {value: 'md', label: 'md'},
-                            ]}
-                        />
-                    </Form.Item>
                     <Form.Item name="defaultMaxPartSize" label={t('defaultMaxPartSize')}>
                         <InputNumber min={0} precision={0} style={{width: '100%'}}
                                      placeholder={t('partSizeDisabledHint')}/>

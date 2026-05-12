@@ -28,16 +28,15 @@ func TestSaveSettingsPersistsNormalizedValues(t *testing.T) {
 	}
 
 	saved, err := service.SaveSettings(Settings{
-		OperationGuideFormat: GuideFormatMD,
-		DefaultMaxPartSize:   8 * BytesPerMB,
-		SourceCleanupMode:    SourceCleanupKeep,
-		Theme:                ThemeDark,
-		Language:             LanguageZHCN,
+		DefaultMaxPartSize: 8 * BytesPerMB,
+		SourceCleanupMode:  SourceCleanupKeep,
+		Theme:              ThemeDark,
+		Language:           LanguageZHCN,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if saved.OperationGuideFormat != GuideFormatMD || saved.DefaultMaxPartSize != 8*BytesPerMB || saved.Theme != ThemeDark || saved.Language != LanguageZHCN {
+	if saved.DefaultMaxPartSize != 8*BytesPerMB || saved.Theme != ThemeDark || saved.Language != LanguageZHCN {
 		t.Fatalf("saved settings = %+v", saved)
 	}
 

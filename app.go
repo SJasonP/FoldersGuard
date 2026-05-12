@@ -16,13 +16,12 @@ type App struct {
 	startupError                error
 	longRunningOperationActive  bool
 	longRunningOperationActiveM sync.RWMutex
-	operationGuideGuard         operationGuideCloseGuard
-	operationGuideGuardM        sync.RWMutex
+	manualContentGuideGuard     manualContentGuideCloseGuard
+	manualContentGuideGuardM    sync.RWMutex
 }
 
-type operationGuideCloseGuard struct {
+type manualContentGuideCloseGuard struct {
 	Active bool
-	Path   string
 	Lang   string
 }
 
@@ -51,12 +50,11 @@ func (a *App) SetLongRunningOperationActive(active bool) {
 	a.longRunningOperationActive = active
 }
 
-func (a *App) SetOperationGuideCloseGuardActive(active bool, path string, lang string) {
-	a.operationGuideGuardM.Lock()
-	defer a.operationGuideGuardM.Unlock()
-	a.operationGuideGuard = operationGuideCloseGuard{
+func (a *App) SetManualContentGuideCloseGuardActive(active bool, lang string) {
+	a.manualContentGuideGuardM.Lock()
+	defer a.manualContentGuideGuardM.Unlock()
+	a.manualContentGuideGuard = manualContentGuideCloseGuard{
 		Active: active,
-		Path:   path,
 		Lang:   lang,
 	}
 }
@@ -66,13 +64,13 @@ func (a *App) beforeClose(ctx context.Context) bool {
 	active := a.longRunningOperationActive
 	a.longRunningOperationActiveM.RUnlock()
 	if !active {
-		a.operationGuideGuardM.RLock()
-		guideGuard := a.operationGuideGuard
-		a.operationGuideGuardM.RUnlock()
+		a.manualContentGuideGuardM.RLock()
+		guideGuard := a.manualContentGuideGuard
+		a.manualContentGuideGuardM.RUnlock()
 		if !guideGuard.Active {
 			return false
 		}
-		return a.confirmCloseWithOperationGuide(ctx, guideGuard)
+		return a.confirmCloseWithManualContentGuide(ctx, guideGuard)
 	}
 	_, _ = runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
 		Type:    runtime.WarningDialog,
@@ -83,19 +81,16 @@ func (a *App) beforeClose(ctx context.Context) bool {
 	return true
 }
 
-func (a *App) confirmCloseWithOperationGuide(ctx context.Context, guard operationGuideCloseGuard) bool {
-	title := "Operation guide still needs attention"
-	message := "An operation guide was generated for manual encrypted-content changes. Make sure you have saved or followed it before closing FoldersGuard."
+func (a *App) confirmCloseWithManualContentGuide(ctx context.Context, guard manualContentGuideCloseGuard) bool {
+	title := "Manual content guide still needs attention"
+	message := "Manual encrypted-content instructions are still open in FoldersGuard. Make sure you have finished them or kept the window available before closing."
 	closeButton := "Close"
 	stayButton := "Stay"
 	if guard.Lang == app.LanguageZHCN {
-		title = "操作指南仍需处理"
-		message = "本次更改已生成用于手动处理加密内容的操作指南。关闭 FoldersGuard 前，请确认你已经保存或完成指南中的步骤。"
+		title = "手动处理指南仍需处理"
+		message = "用于手动处理加密内容的指南仍在 FoldersGuard 内显示。关闭前，请确认你已经完成指南中的步骤，或仍能查看当前窗口。"
 		closeButton = "关闭"
 		stayButton = "留在应用内"
-	}
-	if guard.Path != "" {
-		message += "\n\n" + guard.Path
 	}
 	button, _ := runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
 		Type:          runtime.QuestionDialog,

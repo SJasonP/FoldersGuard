@@ -163,7 +163,6 @@ Required confirmations:
 - Create unprotected share database.
 - Export Project.
 - Delete Project.
-- Write operation guide.
 - Delete source files after successful processing.
 - Overwrite existing output.
 

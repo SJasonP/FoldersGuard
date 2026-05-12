@@ -40,7 +40,6 @@ export type PendingCreateFolder = {
 type UseProjectBrowserArgs = {
     messageApi: MessageInstance;
     modalApi: ModalHookAPI;
-    operationGuideLanguage: string;
     t: (key: string, values?: Record<string, string | number>) => string;
     selectedProjectId: string | null;
 };
@@ -48,7 +47,6 @@ type UseProjectBrowserArgs = {
 export function useProjectBrowser({
                                       messageApi,
                                       modalApi,
-                                      operationGuideLanguage,
                                       t,
                                       selectedProjectId
                                   }: UseProjectBrowserArgs) {
@@ -160,7 +158,6 @@ export function useProjectBrowser({
                 projectId: browserState.projectId,
                 password: browserPassword,
                 encryptedPath: browserEncryptedPath,
-                operationGuideLang: operationGuideLanguage,
                 renameChanges: pendingRenames.map((rename) => ({
                     itemPath: rename.itemPath,
                     newName: rename.newName,
@@ -191,8 +188,12 @@ export function useProjectBrowser({
             setPendingAdds([]);
             setPendingCreateFolders([]);
             messageApi.success(t('applyChangesSucceeded'));
-            if (result.operationGuidePath) {
-                messageApi.info(`${t('operationGuidePath')}: ${result.operationGuidePath}`);
+            if (result.manualContentGuide && result.stagedContentName) {
+                messageApi.info(
+                    result.stagedContentOnDesktop
+                        ? t('stagedContentWrittenToDesktop', {name: result.stagedContentName})
+                        : t('stagedContentWrittenToPath', {path: result.stagedContentPath}),
+                );
             }
         } catch (error) {
             showOperationError(modalApi, t('applyChangesFailed'), error, t);

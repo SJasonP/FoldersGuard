@@ -102,7 +102,6 @@ export namespace main {
 	    projectId: string;
 	    password: string;
 	    encryptedPath: string;
-	    operationGuideLang: string;
 	    renameChanges: ProjectRenameChange[];
 	    moveChanges: ProjectMoveChange[];
 	    removeChanges: ProjectRemoveChange[];
@@ -118,7 +117,6 @@ export namespace main {
 	        this.projectId = source["projectId"];
 	        this.password = source["password"];
 	        this.encryptedPath = source["encryptedPath"];
-	        this.operationGuideLang = source["operationGuideLang"];
 	        this.renameChanges = this.convertValues(source["renameChanges"], ProjectRenameChange);
 	        this.moveChanges = this.convertValues(source["moveChanges"], ProjectMoveChange);
 	        this.removeChanges = this.convertValues(source["removeChanges"], ProjectRemoveChange);
@@ -251,8 +249,10 @@ export namespace main {
 	    appliedRemoves: number;
 	    appliedAdds: number;
 	    appliedCreatedFolders: number;
-	    operationGuidePath: string;
+	    manualContentGuide: boolean;
 	    stagedContentPath: string;
+	    stagedContentName: string;
+	    stagedContentOnDesktop: boolean;
 	    contentOperations: ProjectContentOperation[];
 	    appliedContentChanges: ProjectContentOperation[];
 	    browserState: ProjectBrowserState;
@@ -269,8 +269,10 @@ export namespace main {
 	        this.appliedRemoves = source["appliedRemoves"];
 	        this.appliedAdds = source["appliedAdds"];
 	        this.appliedCreatedFolders = source["appliedCreatedFolders"];
-	        this.operationGuidePath = source["operationGuidePath"];
+	        this.manualContentGuide = source["manualContentGuide"];
 	        this.stagedContentPath = source["stagedContentPath"];
+	        this.stagedContentName = source["stagedContentName"];
+	        this.stagedContentOnDesktop = source["stagedContentOnDesktop"];
 	        this.contentOperations = this.convertValues(source["contentOperations"], ProjectContentOperation);
 	        this.appliedContentChanges = this.convertValues(source["appliedContentChanges"], ProjectContentOperation);
 	        this.browserState = this.convertValues(source["browserState"], ProjectBrowserState);
@@ -799,7 +801,6 @@ export namespace main {
 		}
 	}
 	export class Settings {
-	    operationGuideFormat: string;
 	    defaultMaxPartSize: number;
 	    sourceCleanupMode: string;
 	    theme: string;
@@ -811,7 +812,6 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.operationGuideFormat = source["operationGuideFormat"];
 	        this.defaultMaxPartSize = source["defaultMaxPartSize"];
 	        this.sourceCleanupMode = source["sourceCleanupMode"];
 	        this.theme = source["theme"];

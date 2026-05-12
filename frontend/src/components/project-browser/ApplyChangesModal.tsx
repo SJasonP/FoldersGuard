@@ -10,7 +10,7 @@ type ApplyChangesModalProps = {
     addCount: number;
     createFolderCount: number;
     contentConnected: boolean;
-    willWriteOperationGuide: boolean;
+    willShowManualContentGuide: boolean;
     blockingConflicts: string[];
     warnings: string[];
     onCancel: () => void;
@@ -27,7 +27,7 @@ export function ApplyChangesModal({
                                       addCount,
                                       createFolderCount,
                                       contentConnected,
-                                      willWriteOperationGuide,
+                                      willShowManualContentGuide,
                                       blockingConflicts,
                                       warnings,
                                       onCancel,
@@ -84,8 +84,8 @@ export function ApplyChangesModal({
                 <Descriptions.Item label={t('contentConnected')}>
                     {contentConnected ? t('passwordProtectedYes') : t('passwordProtectedNo')}
                 </Descriptions.Item>
-                <Descriptions.Item label={t('operationGuidePath')}>
-                    {willWriteOperationGuide ? t('operationGuideWillBeWritten') : t('passwordProtectedNo')}
+                <Descriptions.Item label={t('manualContentGuide')}>
+                    {willShowManualContentGuide ? t('manualContentGuideWillShow') : t('passwordProtectedNo')}
                 </Descriptions.Item>
             </Descriptions>
         </Modal>

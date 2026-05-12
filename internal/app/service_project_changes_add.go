@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
-
-	"github.com/google/uuid"
 
 	"foldersguard/internal/fswalk"
 	"foldersguard/internal/project"
@@ -106,13 +105,77 @@ func (s Service) applyOneProjectAdd(ctx context.Context, store *storage.Store, c
 	return projectAddApplyResult{ContentOperations: projectContentOperations(committed.Operations)}, nil
 }
 
-func (s Service) prepareProjectChangeStaging(projectID string) (string, error) {
-	if err := os.MkdirAll(s.StagedContentDir(), 0o755); err != nil {
-		return "", fmt.Errorf("create staged content directory: %w", err)
+type projectChangeStaging struct {
+	Path      string
+	Name      string
+	OnDesktop bool
+}
+
+func (s Service) prepareProjectChangeStaging(projectID string) (projectChangeStaging, error) {
+	stagingRoot := s.StagedContentDir()
+	if err := os.MkdirAll(stagingRoot, 0o755); err != nil {
+		return projectChangeStaging{}, fmt.Errorf("create staged content directory: %w", err)
 	}
-	path := filepath.Join(s.StagedContentDir(), projectID+"-"+uuid.NewString())
+
+	projectName := projectID
+	names, err := s.readProjectNames()
+	if err != nil {
+		return projectChangeStaging{}, err
+	}
+	projectName = s.localProjectName(projectID, names)
+
+	baseName := stagedContentDirectoryName(projectName, time.Now())
+	name := baseName
+	path := filepath.Join(stagingRoot, name)
+	for suffix := 2; ; suffix++ {
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			break
+		}
+		if err != nil {
+			return projectChangeStaging{}, fmt.Errorf("check staged content directory: %w", err)
+		}
+		name = fmt.Sprintf("%s %d", baseName, suffix)
+		path = filepath.Join(stagingRoot, name)
+	}
 	if err := PrepareDirectoryOutput(path, false, "staged content"); err != nil {
-		return "", err
+		return projectChangeStaging{}, err
 	}
-	return path, nil
+	return projectChangeStaging{
+		Path:      path,
+		Name:      name,
+		OnDesktop: userDesktopDir() != "" && filepath.Clean(stagingRoot) == filepath.Clean(userDesktopDir()),
+	}, nil
+}
+
+func stagedContentDirectoryName(projectName string, createdAt time.Time) string {
+	name := sanitizeStagedContentName(projectName)
+	if name == "" {
+		name = "FoldersGuard"
+	}
+	return fmt.Sprintf("%s %s", name, createdAt.Format("2006-01-02 15.04"))
+}
+
+func sanitizeStagedContentName(name string) string {
+	name = strings.TrimSpace(name)
+	replacer := strings.NewReplacer(
+		":", "-",
+		"/", "-",
+		"\\", "-",
+		"<", "-",
+		">", "-",
+		"\"", "-",
+		"|", "-",
+		"?", "-",
+		"*", "-",
+		"\x00", "",
+		"\n", " ",
+		"\r", " ",
+		"\t", " ",
+	)
+	name = replacer.Replace(name)
+	name = strings.Join(strings.Fields(name), " ")
+	for strings.Contains(name, "--") {
+		name = strings.ReplaceAll(name, "--", "-")
+	}
+	return strings.Trim(name, ".- ")
 }

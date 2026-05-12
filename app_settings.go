@@ -12,11 +12,10 @@ func (a *App) ReadSettings() (Settings, error) {
 
 func (a *App) SaveSettings(settings Settings) (Settings, error) {
 	saved, err := a.service.SaveSettings(app.Settings{
-		OperationGuideFormat: settings.OperationGuideFormat,
-		DefaultMaxPartSize:   settings.DefaultMaxPartSize,
-		SourceCleanupMode:    settings.SourceCleanupMode,
-		Theme:                settings.Theme,
-		Language:             settings.Language,
+		DefaultMaxPartSize: settings.DefaultMaxPartSize,
+		SourceCleanupMode:  settings.SourceCleanupMode,
+		Theme:              settings.Theme,
+		Language:           settings.Language,
 	})
 	if err != nil {
 		return Settings{}, err
@@ -26,10 +25,9 @@ func (a *App) SaveSettings(settings Settings) (Settings, error) {
 
 func mapSettings(settings app.Settings) Settings {
 	return Settings{
-		OperationGuideFormat: settings.OperationGuideFormat,
-		DefaultMaxPartSize:   settings.DefaultMaxPartSize,
-		SourceCleanupMode:    settings.SourceCleanupMode,
-		Theme:                settings.Theme,
-		Language:             settings.Language,
+		DefaultMaxPartSize: settings.DefaultMaxPartSize,
+		SourceCleanupMode:  settings.SourceCleanupMode,
+		Theme:              settings.Theme,
+		Language:           settings.Language,
 	}
 }

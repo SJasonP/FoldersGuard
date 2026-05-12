@@ -70,7 +70,6 @@ type ApplyProjectChangesRequest struct {
 	ProjectID           string                      `json:"projectId"`
 	Password            string                      `json:"password"`
 	EncryptedPath       string                      `json:"encryptedPath"`
-	OperationGuideLang  string                      `json:"operationGuideLang"`
 	RenameChanges       []ProjectRenameChange       `json:"renameChanges"`
 	MoveChanges         []ProjectMoveChange         `json:"moveChanges"`
 	RemoveChanges       []ProjectRemoveChange       `json:"removeChanges"`
@@ -79,15 +78,17 @@ type ApplyProjectChangesRequest struct {
 }
 
 type ApplyProjectChangesResult struct {
-	ProjectID             string                    `json:"projectId"`
-	AppliedRenames        int                       `json:"appliedRenames"`
-	AppliedMoves          int                       `json:"appliedMoves"`
-	AppliedRemoves        int                       `json:"appliedRemoves"`
-	AppliedAdds           int                       `json:"appliedAdds"`
-	AppliedCreatedFolders int                       `json:"appliedCreatedFolders"`
-	OperationGuidePath    string                    `json:"operationGuidePath"`
-	StagedContentPath     string                    `json:"stagedContentPath"`
-	ContentOperations     []ProjectContentOperation `json:"contentOperations"`
-	AppliedContentChanges []ProjectContentOperation `json:"appliedContentChanges"`
-	BrowserState          ProjectBrowserState       `json:"browserState"`
+	ProjectID              string                    `json:"projectId"`
+	AppliedRenames         int                       `json:"appliedRenames"`
+	AppliedMoves           int                       `json:"appliedMoves"`
+	AppliedRemoves         int                       `json:"appliedRemoves"`
+	AppliedAdds            int                       `json:"appliedAdds"`
+	AppliedCreatedFolders  int                       `json:"appliedCreatedFolders"`
+	ManualContentGuide     bool                      `json:"manualContentGuide"`
+	StagedContentPath      string                    `json:"stagedContentPath"`
+	StagedContentName      string                    `json:"stagedContentName"`
+	StagedContentOnDesktop bool                      `json:"stagedContentOnDesktop"`
+	ContentOperations      []ProjectContentOperation `json:"contentOperations"`
+	AppliedContentChanges  []ProjectContentOperation `json:"appliedContentChanges"`
+	BrowserState           ProjectBrowserState       `json:"browserState"`
 }

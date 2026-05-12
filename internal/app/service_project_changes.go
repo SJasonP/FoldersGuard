@@ -158,11 +158,16 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 	}
 
 	stagedContentPath := ""
+	stagedContentName := ""
+	stagedContentOnDesktop := false
 	if len(input.AddChanges) > 0 || len(input.CreateFolderChanges) > 0 {
-		stagedContentPath, err = s.prepareProjectChangeStaging(input.ProjectID)
+		staging, err := s.prepareProjectChangeStaging(input.ProjectID)
 		if err != nil {
 			return ApplyProjectChangesResult{}, err
 		}
+		stagedContentPath = staging.Path
+		stagedContentName = staging.Name
+		stagedContentOnDesktop = staging.OnDesktop
 	}
 
 	addResult, err := s.applyProjectAddChanges(ctx, store, input, stagedContentPath, contentConnected)
@@ -190,26 +195,10 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 			return ApplyProjectChangesResult{}, fmt.Errorf("remove uploaded staging content: %w", err)
 		}
 		resultStagedContentPath = ""
+		stagedContentName = ""
+		stagedContentOnDesktop = false
 	}
-
-	operationGuidePath := ""
-	if !contentConnected && len(contentOperations) > 0 {
-		settings, err := s.ReadSettings()
-		if err != nil {
-			return ApplyProjectChangesResult{}, err
-		}
-		path, err := s.WriteOperationGuide(OperationGuideInput{
-			ProjectID:  input.ProjectID,
-			Operations: contentOperations,
-			CreatedAt:  time.Now(),
-			Format:     settings.OperationGuideFormat,
-			Language:   operationGuideLanguage(input.OperationGuideLang, settings.Language),
-		})
-		if err != nil {
-			return ApplyProjectChangesResult{}, err
-		}
-		operationGuidePath = path
-	}
+	manualContentGuide := !contentConnected && len(contentOperations) > 0
 
 	state, err := s.OpenProjectBrowser(ctx, OpenProjectBrowserInput{
 		ProjectID:     input.ProjectID,
@@ -220,17 +209,19 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		return ApplyProjectChangesResult{}, err
 	}
 	return ApplyProjectChangesResult{
-		ProjectID:             state.ProjectID,
-		AppliedRenames:        len(changes),
-		AppliedMoves:          len(moveChanges),
-		AppliedRemoves:        len(removeChanges),
-		AppliedAdds:           len(input.AddChanges),
-		AppliedCreatedFolders: len(createFolderChanges),
-		OperationGuidePath:    operationGuidePath,
-		StagedContentPath:     resultStagedContentPath,
-		ContentOperations:     contentOperations,
-		AppliedContentChanges: appliedContentChanges,
-		BrowserState:          state,
+		ProjectID:              state.ProjectID,
+		AppliedRenames:         len(changes),
+		AppliedMoves:           len(moveChanges),
+		AppliedRemoves:         len(removeChanges),
+		AppliedAdds:            len(input.AddChanges),
+		AppliedCreatedFolders:  len(createFolderChanges),
+		ManualContentGuide:     manualContentGuide,
+		StagedContentPath:      resultStagedContentPath,
+		StagedContentName:      stagedContentName,
+		StagedContentOnDesktop: stagedContentOnDesktop,
+		ContentOperations:      contentOperations,
+		AppliedContentChanges:  appliedContentChanges,
+		BrowserState:           state,
 	}, nil
 }
 

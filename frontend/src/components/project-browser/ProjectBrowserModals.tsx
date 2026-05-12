@@ -23,7 +23,7 @@ type ProjectBrowserModalsProps = {
     renameOpen: boolean;
     blockingConflicts: string[];
     warnings: string[];
-    willWriteOperationGuide: boolean;
+    willShowManualContentGuide: boolean;
     itemsByID: Map<string, ProjectBrowserItemModel>;
     selectedItem: ProjectBrowserItemModel | null;
     selectedItems: ProjectBrowserItemModel[];
@@ -57,7 +57,7 @@ export function ProjectBrowserModals({
                                          renameOpen,
                                          blockingConflicts,
                                          warnings,
-                                         willWriteOperationGuide,
+                                         willShowManualContentGuide,
                                          itemsByID,
                                          selectedItem,
                                          selectedItems,
@@ -156,7 +156,7 @@ export function ProjectBrowserModals({
                 addCount={pendingAddCount}
                 createFolderCount={pendingCreateFolderCount}
                 contentConnected={contentConnected}
-                willWriteOperationGuide={willWriteOperationGuide}
+                willShowManualContentGuide={willShowManualContentGuide}
                 blockingConflicts={blockingConflicts}
                 warnings={warnings}
                 onCancel={onCloseApplyConfirm}
