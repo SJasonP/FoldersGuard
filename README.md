@@ -3,7 +3,8 @@
 English | [简体中文](README.zh-CN.md)
 
 > **Important notice:** All source code in this project was written by AI. This project makes no guarantee of security,
-> cryptographic correctness, data durability, fitness for production use, or protection against data loss. Do not rely on
+> cryptographic correctness, data durability, fitness for production use, or protection against data loss. Do not rely
+> on
 > it as the only protection for valuable, sensitive, or irreplaceable data.
 
 FoldersGuard is an experimental desktop and CLI tool for protecting folders while keeping encrypted data practical to
@@ -42,16 +43,9 @@ a mixed selection without exposing parent folders, siblings, or unrelated projec
 
 ## Status
 
-FoldersGuard is a work in progress.
-
-It currently includes:
-
-- A Go core for scanning, planning, encrypting, restoring, verifying, sharing, and modifying protected folder projects.
-- A CLI named `foldersguard`, with `fg` intended as its short alias.
-- A Wails desktop WebUI backed by the same Go core.
-- A React and Ant Design frontend with English and Simplified Chinese localization.
-- SQLCipher-backed `.fg` project databases and `.fgs` share databases.
-- Support for split large files, preserved directory hierarchy, UUID visible names, and portable filesystem metadata.
+FoldersGuard is a work in progress. It currently includes a Go core, a CLI, a Wails desktop WebUI, SQLCipher-backed
+`.fg` and `.fgs` databases, English and Simplified Chinese localization, and release scripts for signed and notarized
+macOS builds.
 
 The implementation should be treated as experimental software until independently reviewed and tested.
 
@@ -104,6 +98,9 @@ The WebUI is the main interactive interface. It is built with Wails, React, and 
 It supports project creation, import, export, inspection, decryption, verification, deletion, sharing, share loading,
 project browsing, and project modification workflows.
 
+The WebUI also provides localized operation summaries and manual encrypted-content instructions for workflows where the
+encrypted content is handled outside FoldersGuard.
+
 ### CLI
 
 The CLI is intended for automation and repeatable workflows.
@@ -139,35 +136,25 @@ fg plan encrypt
 
 See `docs/cli.md` and the files under `docs/cli/` for the CLI specification.
 
-## Repository Layout
+## Releases
 
-```text
-.
-├── cmd/foldersguard/        CLI entrypoint
-├── internal/app/            Application service layer used by the WebUI
-├── internal/cli/            Cobra CLI commands
-├── internal/content/        Content encryption and restore logic
-├── internal/crypto/         Cryptographic primitives used by the project
-├── internal/db/             SQLite and SQLCipher database opening logic
-├── internal/format/         Format constants and extension rules
-├── internal/fsmeta/         Filesystem metadata capture and restore helpers
-├── internal/fswalk/         Filesystem scanning
-├── internal/model/          Core data structures and split planning
-├── internal/project/        Project planning, execution, restore, and verify logic
-├── internal/storage/        Database schema and metadata persistence
-├── frontend/                React WebUI
-├── docs/                    Product, architecture, CLI, WebUI, and storage docs
-└── scripts/                 Build helper scripts
-```
+Release builds are published through GitHub Releases.
 
-## Development
+For v1.0.0, treat release artifacts as experimental. Test with copies of your data first, keep independent backups, and
+verify encrypted content before relying on a restore or share workflow.
+
+macOS release packages built with `make macos-release` are designed to be signed, notarized, and stapled before upload.
+Windows builds must be produced with CGO and a working Windows-target C compiler so SQLCipher support is actually
+included.
+
+## Development And Builds
 
 Requirements:
 
 - Go matching the version declared in `go.mod`.
 - Node.js and npm for the frontend.
 - Wails v2 for desktop builds.
-- A working C compiler when building with SQLCipher support.
+- CGO and a working target-platform C compiler for release builds with SQLCipher support.
 
 Run Go tests:
 
@@ -192,8 +179,6 @@ Build the Wails desktop app:
 ```text
 wails build
 ```
-
-## SQLCipher And CGO
 
 FoldersGuard uses SQLCipher for encrypted project and share databases. SQLCipher is a CGO dependency, so real release
 builds must use CGO and a working target-platform C compiler.
