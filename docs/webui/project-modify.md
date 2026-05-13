@@ -49,7 +49,7 @@ Displayed entry fields:
 
 - Item name.
 - Item type.
-- Size for files.
+- Size for files and folders.
 - Child count for folders when available.
 - Modification time when available.
 - Metadata capture status.

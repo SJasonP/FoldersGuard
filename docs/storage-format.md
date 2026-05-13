@@ -201,7 +201,10 @@ Stores folder-specific data.
 folders:
   folder_id
   folder_key
+  original_size
 ```
+
+`original_size` stores the total original byte size of all files below the folder, including nested descendants.
 
 ### files
 

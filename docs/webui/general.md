@@ -11,10 +11,10 @@ the password must be set and confirmed. When a workflow opens an existing projec
 be verified before sensitive metadata or content operations are shown.
 
 The WebUI must ask for explicit confirmation before applying project changes, deleting projects, exporting sensitive
-data, writing operation instructions, decrypting content, or deleting source files.
+data, showing manual processing instructions, decrypting content, or deleting source files.
 
 The WebUI must show clear progress for encryption, decryption, import, export, share generation, verification,
-operation-guide generation, and project modification apply steps.
+manual processing guide generation, and project modification apply steps.
 
 ## Application Shell
 
@@ -174,7 +174,7 @@ Confirmation content:
 - Project or share identity when available.
 - Input paths.
 - Output paths.
-- Whether source cleanup may delete files.
+- Whether source file handling may delete files.
 - Whether existing output may be overwritten.
 - Expected item counts when available.
 

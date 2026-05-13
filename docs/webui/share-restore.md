@@ -38,8 +38,9 @@ Decrypt behavior:
 - FG restores the original directory tree structure for the selected content.
 - Restored outputs keep supported restored file and directory metadata.
 - Directory objects do not contain encrypted file data and do not need to be decrypted.
-- Source cleanup behavior follows Settings.
-- When source cleanup is enabled, each encrypted file is deleted immediately after that file is successfully decrypted.
+- Source file handling follows Settings.
+- When source file handling is set to delete, each encrypted file is deleted immediately after that file is successfully
+  decrypted.
 - Encrypted files that fail authentication or cannot be decrypted are not deleted.
 
 Output conflict behavior:
@@ -80,7 +81,7 @@ Verify behavior:
 - Extra content is informational and does not make verification fail.
 - FG does not write plaintext output.
 - FG does not delete encrypted content.
-- Source cleanup settings do not apply to verification.
+- Source file handling settings do not apply to verification.
 
 After completion, the WebUI reports:
 
@@ -198,8 +199,9 @@ Share decryption behavior:
 - FG decrypts every recognized encrypted file or part under the selected directory.
 - FG restores the shared content's directory structure relative to the output directory.
 - Restored outputs keep supported restored file and directory metadata.
-- Source cleanup behavior follows Settings.
-- When source cleanup is enabled, each encrypted file is deleted immediately after that file is successfully decrypted.
+- Source file handling follows Settings.
+- When source file handling is set to delete, each encrypted file is deleted immediately after that file is successfully
+  decrypted.
 - Encrypted files that fail authentication or cannot be decrypted are not deleted.
 
 After completion, the WebUI reports:
@@ -265,7 +267,7 @@ Verify behavior:
 - Extra content is informational and does not make verification fail.
 - FG does not write plaintext output.
 - FG does not delete encrypted content.
-- Source cleanup settings do not apply to verification.
+- Source file handling settings do not apply to verification.
 
 After completion, the WebUI reports:
 

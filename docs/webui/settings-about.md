@@ -66,7 +66,6 @@ About shows product and format information.
 About information:
 
 - Product name.
-- App id.
 - Product version.
 - Format version.
 - Data directory path.

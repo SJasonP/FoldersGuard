@@ -38,7 +38,7 @@ A folder is the smallest recursively shareable collection.
 - Folder keys define logical authorization boundaries and are included in share-scoped data when that folder is shared.
 - Folder records identify child relationships inside the unlocked FG database.
 - Sharing a folder includes the metadata and internal keys needed to restore that folder recursively.
-- The top-level folder must have a password.
+- The top-level project database must have a password.
 
 ### Top-Level Folder
 
@@ -49,7 +49,7 @@ Rules:
 - `fg encrypt` creates one active project from one top-level folder.
 - Project metadata operations use that project root as the normal operating boundary.
 - `fg decrypt` and `fg verify` can operate on either one active project or one `.fgs` shared payload.
-- The top-level folder password is required.
+- The top-level project database password is required.
 - Unlocking the top-level folder allows recursive access to all supported contents under it.
 
 ### FG Data

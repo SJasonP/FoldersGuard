@@ -6,10 +6,9 @@ FoldersGuard, abbreviated as FG, is encryption software for protecting folders a
 product idea is that a folder is the natural unit for storage, download, upload, sharing, and authorization.
 
 FG encrypts each file independently, while FG's own SQLCipher-encrypted database stores the metadata and internal keys
-needed to open folders and files. Users unlock FG data with passwords. If a user has the password for a folder, they can
-decrypt everything inside that folder recursively. If a user has a share database, they can decrypt only the content
-described by that share database. They cannot decrypt sibling folders, parent folders, or unrelated files unless access
-is explicitly shared.
+needed to open folders and files. Users unlock project and share databases with passwords. A project password unlocks
+the whole active project database. A share database unlocks only the content described by that share database. Users
+cannot decrypt sibling folders, parent folders, or unrelated files unless access is explicitly shared.
 
 FG creates one active project from one top-level folder at a time. The top-level folder is the root operating boundary
 for normal project encryption, project metadata operations, project verification, project decryption, and share
@@ -121,7 +120,7 @@ FG native mode is the only supported encryption mode.
 
 - Every original file has its own file key.
 - Every folder has its own folder key.
-- The top-level folder must have a password.
+- The top-level project database must have a password.
 - FG data stores encrypted metadata and child keys for folders and files.
 - FG data is stored as a SQLCipher-encrypted SQLite database.
 - Real file and directory names are stored only inside encrypted FG databases or share databases.

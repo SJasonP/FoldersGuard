@@ -146,7 +146,7 @@ build/bin/FoldersGuard.app
 The final ZIP artifact is:
 
 ```text
-dist/macos/FoldersGuard-macos.zip
+dist/macos/FoldersGuard-macOS.zip
 ```
 
 If the script cannot find a `Developer ID Application` identity, install the certificate from the Apple Developer

@@ -37,11 +37,12 @@ Create behavior:
 - FG preserves supported directory structure, names, metadata, and file content according to the native format.
 - Unsupported filesystem entries are ignored as if they do not exist.
 - Hard links are treated as normal files.
-- Source cleanup behavior follows Settings.
-- When source cleanup is enabled, each cleartext file is deleted immediately after that file is successfully encrypted.
+- Source file handling follows Settings.
+- When source file handling is set to delete, each cleartext file is deleted immediately after that file is successfully
+  encrypted.
 - Cleartext files that fail to encrypt are not deleted.
-- When source cleanup is enabled, directories are removed after their child entries have been processed and only if they
-  are empty.
+- When source file handling is set to delete, directories are removed after their child entries have been processed and
+  only if they are empty.
 
 Before creation starts, the WebUI shows a confirmation summary.
 
