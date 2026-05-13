@@ -39,6 +39,14 @@ export function SettingsView({
                         <InputNumber min={0} precision={0} style={{width: '100%'}}
                                      placeholder={t('partSizeDisabledHint')}/>
                     </Form.Item>
+                    <Form.Item name="sourceCleanupMode" label={t('sourceCleanupMode')} rules={[{required: true}]}>
+                        <Select
+                            options={[
+                                {value: 'keep', label: t('sourceCleanupKeep')},
+                                {value: 'delete', label: t('sourceCleanupDelete')},
+                            ]}
+                        />
+                    </Form.Item>
                     <Form.Item name="theme" label={t('theme')} rules={[{required: true}]}>
                         <Select
                             options={[

@@ -1,4 +1,4 @@
-import {App as AntApp, Checkbox, Form, Input, Modal, Select} from 'antd';
+import {App as AntApp, Checkbox, Form, Input, Modal} from 'antd';
 import {showOperationConfirmation} from '../common/operationConfirmation';
 import {PathInput} from '../common/PathInput';
 import {useResetFormOnClose} from '../common/useResetFormOnClose';
@@ -8,13 +8,12 @@ type DecryptProjectValues = {
     encryptedPath: string;
     outputPath: string;
     force: boolean;
-    sourceCleanup: string;
 };
 
 type DecryptProjectModalProps = {
     open: boolean;
     loading: boolean;
-    defaultSourceCleanup: string;
+    sourceCleanupMode: string;
     onCancel: () => void;
     onSubmit: (values: DecryptProjectValues) => void;
     t: (key: string) => string;
@@ -23,7 +22,7 @@ type DecryptProjectModalProps = {
 export function DecryptProjectModal({
                                         open,
                                         loading,
-                                        defaultSourceCleanup,
+                                        sourceCleanupMode,
                                         onCancel,
                                         onSubmit,
                                         t,
@@ -44,11 +43,11 @@ export function DecryptProjectModal({
             title: t('decryptProject'),
             message: t('decryptProjectConfirm'),
             okText: t('decryptProject'),
-            danger: values.sourceCleanup === 'delete',
+            danger: sourceCleanupMode === 'delete',
             items: [
                 {label: t('verifyEncryptedPath'), value: values.encryptedPath},
                 {label: t('outputPath'), value: values.outputPath},
-                {label: t('sourceCleanupOperationMode'), value: sourceCleanupLabel(values.sourceCleanup)},
+                {label: t('sourceCleanupMode'), value: sourceCleanupLabel(sourceCleanupMode)},
                 {
                     label: t('forceOverwrite'),
                     value: values.force ? t('passwordProtectedYes') : t('passwordProtectedNo')
@@ -75,7 +74,6 @@ export function DecryptProjectModal({
                 layout="vertical"
                 initialValues={{
                     force: false,
-                    sourceCleanup: defaultSourceCleanup,
                 }}
                 onFinish={confirmSubmit}
             >
@@ -102,14 +100,6 @@ export function DecryptProjectModal({
                         dialogTitle={t('outputPath')}
                         placeholder="/path/to/restored-output"
                         t={t}
-                    />
-                </Form.Item>
-                <Form.Item name="sourceCleanup" label={t('sourceCleanupOperationMode')} rules={[{required: true}]}>
-                    <Select
-                        options={[
-                            {value: 'keep', label: t('sourceCleanupKeep')},
-                            {value: 'delete', label: t('sourceCleanupDelete')},
-                        ]}
                     />
                 </Form.Item>
                 <Form.Item name="force" valuePropName="checked">

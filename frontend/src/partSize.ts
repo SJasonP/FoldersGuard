@@ -16,11 +16,3 @@ export function partSizeMBToSettingsBytes(mb: number | null | undefined) {
     }
     return value * bytesPerMB;
 }
-
-export function partSizeMBToOverrideBytes(mb: number | null | undefined) {
-    const value = Math.trunc(mb ?? 0);
-    if (value < minimumSplitPartSizeMB) {
-        return -1;
-    }
-    return value * bytesPerMB;
-}

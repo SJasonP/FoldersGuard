@@ -28,7 +28,6 @@ export type PendingAdd = {
     itemId: string;
     sourcePath: string;
     targetFolderPath: string;
-    maxPartSize: number;
 };
 
 export type PendingCreateFolder = {
@@ -172,7 +171,7 @@ export function useProjectBrowser({
                 addChanges: pendingAdds.map((add) => ({
                     sourcePath: add.sourcePath,
                     targetFolderPath: add.targetFolderPath,
-                    maxPartSize: add.maxPartSize,
+                    maxPartSize: 0,
                 })),
                 createFolderChanges: pendingCreateFolders.map((createFolder) => ({
                     targetFolderPath: createFolder.targetFolderPath,

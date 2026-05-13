@@ -5,14 +5,14 @@ import {DecryptShareDrawer} from './DecryptShareDrawer';
 import {DecryptShareModal} from './DecryptShareModal';
 import {VerifyShareModal} from './VerifyShareModal';
 import {VerifyProjectDrawer} from '../project-actions/VerifyProjectDrawer';
-import type {DecryptShareResultModel, ShareSummaryModel, VerifyProjectResultModel} from '../../types';
+import type {DecryptShareResultModel, SettingsModel, ShareSummaryModel, VerifyProjectResultModel} from '../../types';
 
 type ShareSessionLayerProps = {
     decryptShareDialogOpen: boolean;
     decryptShareLoading: boolean;
     decryptShareResult: DecryptShareResultModel | null;
     decryptShareResultOpen: boolean;
-    defaultSourceCleanup: string;
+    settings: SettingsModel | null;
     shareActionsOpen: boolean;
     verifyShareDialogOpen: boolean;
     verifyShareLoading: boolean;
@@ -31,7 +31,6 @@ type ShareSessionLayerProps = {
         encryptedPath: string;
         outputPath: string;
         force: boolean;
-        sourceCleanup: string;
     }) => void;
     onCloseDecryptShareResult: () => void;
     onCloseVerifyShare: () => void;
@@ -45,7 +44,7 @@ export function ShareSessionLayer({
                                       decryptShareLoading,
                                       decryptShareResult,
                                       decryptShareResultOpen,
-                                      defaultSourceCleanup,
+                                      settings,
                                       shareActionsOpen,
                                       verifyShareDialogOpen,
                                       verifyShareLoading,
@@ -81,7 +80,7 @@ export function ShareSessionLayer({
             <DecryptShareModal
                 open={decryptShareDialogOpen}
                 loading={decryptShareLoading}
-                defaultSourceCleanup={defaultSourceCleanup}
+                sourceCleanupMode={settings?.sourceCleanupMode ?? 'delete'}
                 onCancel={onCloseDecryptShare}
                 onSubmit={(values) => onDecryptShare(values)}
                 t={t}

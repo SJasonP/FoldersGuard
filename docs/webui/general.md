@@ -16,9 +16,6 @@ data, writing operation instructions, decrypting content, or deleting source fil
 The WebUI must show clear progress for encryption, decryption, import, export, share generation, verification,
 operation-guide generation, and project modification apply steps.
 
-When a setting is configured to ask every time, the WebUI asks during the affected workflow and records the selected
-choice only for that operation.
-
 ## Application Shell
 
 The WebUI uses a persistent application shell.

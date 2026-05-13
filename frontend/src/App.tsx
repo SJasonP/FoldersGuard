@@ -102,7 +102,6 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
     const {
         createDialogOpen,
         createLoading,
-        defaultSourceCleanup,
         setCreateDialogOpen,
         handleCreateProject,
     } = useProjectCreate({
@@ -402,7 +401,6 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
                     createDialogOpen={createDialogOpen}
                     createLoading={createLoading}
                     settings={settings}
-                    defaultSourceCleanup={defaultSourceCleanup}
                     onCloseCreate={() => setCreateDialogOpen(false)}
                     onCreateProject={(values) => void handleCreateProject(values)}
                     importDialogOpen={importDialogOpen}
@@ -511,7 +509,7 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
                     decryptShareLoading={decryptShareLoading}
                     decryptShareResult={decryptShareResult}
                     decryptShareResultOpen={decryptShareResultOpen}
-                    defaultSourceCleanup={defaultSourceCleanup}
+                    settings={settings}
                     shareActionsOpen={shareActionsOpen}
                     verifyShareDialogOpen={verifyShareDialogOpen}
                     verifyShareLoading={verifyShareLoading}

@@ -12,7 +12,6 @@ const (
 	MinimumSplitPartSizeMB int64 = 5
 	NoSplitMaxPartSize     int64 = 1 << 62
 
-	SourceCleanupAsk    = "ask"
 	SourceCleanupKeep   = "keep"
 	SourceCleanupDelete = "delete"
 
@@ -35,7 +34,7 @@ type Settings struct {
 func DefaultSettings() Settings {
 	return Settings{
 		DefaultMaxPartSize: 0,
-		SourceCleanupMode:  SourceCleanupAsk,
+		SourceCleanupMode:  SourceCleanupDelete,
 		Theme:              ThemeSystem,
 		Language:           LanguageSystem,
 	}
@@ -96,8 +95,8 @@ func normalizeSettings(settings Settings) (Settings, error) {
 	}
 
 	switch settings.SourceCleanupMode {
-	case "", SourceCleanupAsk:
-		settings.SourceCleanupMode = SourceCleanupAsk
+	case "":
+		settings.SourceCleanupMode = SourceCleanupDelete
 	case SourceCleanupKeep, SourceCleanupDelete:
 	default:
 		return Settings{}, fmt.Errorf("unsupported source cleanup mode %q", settings.SourceCleanupMode)

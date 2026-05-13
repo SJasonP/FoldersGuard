@@ -27,17 +27,13 @@ type ProjectSessionLayerProps = {
     createDialogOpen: boolean;
     createLoading: boolean;
     settings: SettingsModel | null;
-    defaultSourceCleanup: string;
     onCloseCreate: () => void;
     onCreateProject: (values: {
         sourcePath: string;
         contentOutput: string;
         password: string;
         passwordConfirm: string;
-        maxPartSize?: number;
-        useDefaultMaxPartSize: boolean;
         force: boolean;
-        sourceCleanup: string;
     }) => void;
     importDialogOpen: boolean;
     importLoading: boolean;
@@ -78,7 +74,6 @@ type ProjectSessionLayerProps = {
         encryptedPath: string;
         outputPath: string;
         force: boolean;
-        sourceCleanup: string;
     }) => void;
     decryptResultOpen: boolean;
     decryptResult: DecryptProjectResultModel | null;
@@ -119,7 +114,6 @@ export function ProjectSessionLayer({
                                         createDialogOpen,
                                         createLoading,
                                         settings,
-                                        defaultSourceCleanup,
                                         onCloseCreate,
                                         onCreateProject,
                                         importDialogOpen,
@@ -206,7 +200,6 @@ export function ProjectSessionLayer({
                 open={createDialogOpen}
                 loading={createLoading}
                 settings={settings}
-                defaultSourceCleanup={defaultSourceCleanup}
                 onCancel={onCloseCreate}
                 onSubmit={onCreateProject}
                 t={t}
@@ -222,7 +215,7 @@ export function ProjectSessionLayer({
             <DecryptProjectModal
                 open={decryptDialogOpen}
                 loading={decryptLoading}
-                defaultSourceCleanup={defaultSourceCleanup}
+                sourceCleanupMode={settings?.sourceCleanupMode ?? 'delete'}
                 onCancel={onCloseDecrypt}
                 onSubmit={onDecryptProject}
                 t={t}

@@ -8,7 +8,6 @@ The WebUI asks for:
 
 - The source directory path.
 - The encrypted content output path.
-- The maximum part size when the user wants to override the default.
 - The project password and confirmation.
 
 Source path rules:
@@ -26,11 +25,10 @@ Encrypted content output path rules:
 
 Maximum part size rules:
 
-- The value is entered in MB.
-- The value is optional.
-- If the user does not provide a value, FG uses the default maximum part size from Settings.
+- The WebUI always uses the default maximum part size from Settings.
+- The value is configured in MB in Settings.
 - Values greater than 4 MB enable balanced file splitting.
-- Values less than or equal to 4 MB disable file splitting for that operation.
+- Values less than or equal to 4 MB disable file splitting.
 
 Create behavior:
 

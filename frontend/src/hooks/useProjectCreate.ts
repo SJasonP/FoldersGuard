@@ -5,17 +5,13 @@ import {CreateProject} from '../../wailsjs/go/main/App';
 import type {CreateProjectResultModel} from '../types';
 import {formatNumber} from '../formatters';
 import {showOperationError} from '../components/common/operationError';
-import {partSizeMBToOverrideBytes} from '../partSize';
 
 type CreateProjectValues = {
     sourcePath: string;
     contentOutput: string;
     password: string;
     passwordConfirm: string;
-    maxPartSize?: number;
-    useDefaultMaxPartSize: boolean;
     force: boolean;
-    sourceCleanup: string;
 };
 
 type UseProjectCreateArgs = {
@@ -36,9 +32,9 @@ export function useProjectCreate({messageApi, modalApi, t, reloadProjects}: UseP
                 sourcePath: values.sourcePath,
                 contentOutput: values.contentOutput,
                 password: values.password,
-                maxPartSize: values.useDefaultMaxPartSize ? 0 : partSizeMBToOverrideBytes(values.maxPartSize),
+                maxPartSize: 0,
                 force: values.force,
-                sourceCleanup: values.sourceCleanup,
+                sourceCleanup: '',
                 databaseExport: '',
             });
             setCreateDialogOpen(false);
@@ -63,12 +59,9 @@ export function useProjectCreate({messageApi, modalApi, t, reloadProjects}: UseP
         }
     };
 
-    const defaultSourceCleanup = 'keep';
-
     return {
         createDialogOpen,
         createLoading,
-        defaultSourceCleanup,
         setCreateDialogOpen,
         handleCreateProject,
     };

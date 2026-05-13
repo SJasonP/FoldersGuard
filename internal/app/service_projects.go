@@ -338,8 +338,8 @@ func (s Service) resolveSourceCleanupMode(requested string) (string, error) {
 	}
 
 	switch requested {
-	case "", SourceCleanupAsk:
-		return SourceCleanupKeep, nil
+	case "":
+		return SourceCleanupDelete, nil
 	case SourceCleanupKeep, SourceCleanupDelete:
 		return requested, nil
 	default:

@@ -70,7 +70,6 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
         encryptedPath: string;
         outputPath: string;
         force: boolean;
-        sourceCleanup: string;
     }) => {
         setDecryptShareLoading(true);
         try {
@@ -80,7 +79,7 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
                 encryptedPath: values.encryptedPath,
                 outputPath: values.outputPath,
                 force: values.force,
-                sourceCleanup: values.sourceCleanup,
+                sourceCleanup: '',
             });
             setDecryptShareDialogOpen(false);
             setDecryptShareResult(result);

@@ -1,10 +1,9 @@
-import {Form, InputNumber, Modal} from 'antd';
+import {Form, Modal} from 'antd';
 import {PathInput} from '../common/PathInput';
 import {useResetFormOnClose} from '../common/useResetFormOnClose';
 
 type AddItemModalValues = {
     sourcePath: string;
-    maxPartSize?: number;
 };
 
 type AddItemModalProps = {
@@ -48,10 +47,6 @@ export function AddItemModal({open, loading, onCancel, onSubmit, t}: AddItemModa
                         placeholder="/path/to/file-or-folder"
                         t={t}
                     />
-                </Form.Item>
-                <Form.Item name="maxPartSize" label={t('maxPartSize')}>
-                    <InputNumber min={0} precision={0} style={{width: '100%'}}
-                                 placeholder={t('createUseDefaultMaxPartSize')}/>
                 </Form.Item>
             </Form>
         </Modal>
