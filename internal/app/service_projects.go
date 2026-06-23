@@ -11,6 +11,7 @@ import (
 	"foldersguard/internal/format"
 	"foldersguard/internal/fswalk"
 	"foldersguard/internal/model"
+	"foldersguard/internal/noise"
 	"foldersguard/internal/project"
 )
 
@@ -70,11 +71,15 @@ func (s Service) Verify(ctx context.Context, input DatabaseOpen, encryptedRoot s
 	if err := ValidateExistingDirectory(encryptedRoot, "content"); err != nil {
 		return VerifyResult{}, err
 	}
+	noiseMode, err := s.resolveNoiseFileHandling("")
+	if err != nil {
+		return VerifyResult{}, err
+	}
 	plan, _, err := s.ReadDatabase(ctx, input)
 	if err != nil {
 		return VerifyResult{}, err
 	}
-	report, err := (project.Verifier{EncryptedRoot: encryptedRoot}).VerifyContent(ctx, plan)
+	report, err := (project.Verifier{EncryptedRoot: encryptedRoot, NoiseMode: noiseMode}).VerifyContent(ctx, plan)
 	if err != nil {
 		return VerifyResult{}, err
 	}
@@ -204,7 +209,11 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 	if err := ValidateDistinctPaths(input.SourcePath, input.ContentOutput); err != nil {
 		return CreateProjectResult{}, err
 	}
-	if err := PrepareContentOutput(input.ContentOutput, input.Force); err != nil {
+	noiseMode, err := s.resolveNoiseFileHandling("")
+	if err != nil {
+		return CreateProjectResult{}, err
+	}
+	if err := PrepareDirectoryOutputWithNoiseMode(input.ContentOutput, input.Force, "content output", noiseMode); err != nil {
 		return CreateProjectResult{}, err
 	}
 	if input.DatabaseExport != "" {
@@ -227,8 +236,7 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 	if err != nil {
 		return CreateProjectResult{}, err
 	}
-
-	scan, err := fswalk.ScanTopFolder(input.SourcePath)
+	scan, err := fswalk.ScanTopFolderWithNoiseMode(input.SourcePath, noiseMode)
 	if err != nil {
 		return CreateProjectResult{}, err
 	}
@@ -290,7 +298,7 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 
 	deletedFolders := 0
 	if sourceCleanup == SourceCleanupDelete {
-		deletedFolders, err = removeEmptyFoldersUnderRoot(input.SourcePath)
+		deletedFolders, err = removeEmptyFoldersUnderRoot(input.SourcePath, noiseMode)
 		if err != nil {
 			return CreateProjectResult{}, err
 		}
@@ -347,7 +355,26 @@ func (s Service) resolveSourceCleanupMode(requested string) (string, error) {
 	}
 }
 
-func removeEmptyFoldersUnderRoot(root string) (int, error) {
+func (s Service) resolveNoiseFileHandling(requested string) (string, error) {
+	if requested == "" {
+		settings, err := s.ReadSettings()
+		if err != nil {
+			return "", err
+		}
+		requested = settings.NoiseFileHandling
+	}
+
+	switch requested {
+	case "":
+		return NoiseFileIgnoreEverywhere, nil
+	case NoiseFileIgnoreEverywhere, NoiseFileIgnoreDuringVerifyAndMatching, NoiseFileDoNotIgnore:
+		return requested, nil
+	default:
+		return "", fmt.Errorf("unsupported noise file handling mode %q", requested)
+	}
+}
+
+func removeEmptyFoldersUnderRoot(root string, noiseMode string) (int, error) {
 	rootAbs, err := filepath.Abs(root)
 	if err != nil {
 		return 0, fmt.Errorf("resolve source root: %w", err)
@@ -377,6 +404,11 @@ func removeEmptyFoldersUnderRoot(root string) (int, error) {
 	})
 
 	for _, dir := range directories {
+		if noise.IgnoreDuringSourceScan(noiseMode) {
+			if err := removeIgnoredNoiseEntries(dir); err != nil {
+				return removed, err
+			}
+		}
 		entries, err := os.ReadDir(dir)
 		if err != nil {
 			return removed, fmt.Errorf("read source directory: %w", err)
@@ -390,4 +422,20 @@ func removeEmptyFoldersUnderRoot(root string) (int, error) {
 		removed++
 	}
 	return removed, nil
+}
+
+func removeIgnoredNoiseEntries(dir string) error {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return fmt.Errorf("read source directory for noise cleanup: %w", err)
+	}
+	for _, entry := range entries {
+		if !noise.IsName(entry.Name()) {
+			continue
+		}
+		if err := os.RemoveAll(filepath.Join(dir, entry.Name())); err != nil {
+			return fmt.Errorf("remove ignored noise entry: %w", err)
+		}
+	}
+	return nil
 }

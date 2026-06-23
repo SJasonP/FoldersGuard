@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"foldersguard/internal/model"
+	"foldersguard/internal/noise"
 )
 
 type ContentMatch struct {
@@ -12,8 +13,12 @@ type ContentMatch struct {
 }
 
 func MatchAvailableContent(ctx context.Context, encryptedRoot string, plan model.PlannedProject) (ContentMatch, error) {
+	return MatchAvailableContentWithNoiseMode(ctx, encryptedRoot, plan, noise.ModeDoNotIgnore)
+}
+
+func MatchAvailableContentWithNoiseMode(ctx context.Context, encryptedRoot string, plan model.PlannedProject, noiseMode string) (ContentMatch, error) {
 	itemByID := itemsByID(plan)
-	selection, err := matchAvailableContent(ctx, encryptedRoot, plan, itemByID)
+	selection, err := matchAvailableContent(ctx, encryptedRoot, plan, itemByID, noiseMode)
 	if err != nil {
 		return ContentMatch{}, err
 	}

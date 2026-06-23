@@ -23,6 +23,8 @@ Behavior:
 - Requires a project password.
 - Scans regular files and directories under `<source-folder>`.
 - Ignores unsupported filesystem entries as if they do not exist.
+- Applies the noise file handling setting. By default, recognized noise files are ignored as if they do not exist and
+  are not added to FG metadata.
 - Captures restorable filesystem metadata for supported files and directories.
 - Generates UUID visible names for encrypted files and directories.
 - Generates random internal file and folder keys.

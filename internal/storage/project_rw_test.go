@@ -470,3 +470,116 @@ func TestReadPlannedProjectAllowsVirtualRootShare(t *testing.T) {
 		t.Fatalf("items = %+v files = %+v", read.Items, read.Files)
 	}
 }
+
+func TestWritePlannedProjectRejectsDuplicateVisibleLeafNames(t *testing.T) {
+	ctx := context.Background()
+	db := openMemoryDB(t)
+	store, err := NewStore(db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := store.ApplySchema(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	projectID := uuid.New()
+	rootID := uuid.New()
+	leftID := uuid.New()
+	rightID := uuid.New()
+	leftFileID := uuid.New()
+	rightFileID := uuid.New()
+	rootVisible := uuid.New()
+	leftVisible := uuid.New()
+	rightVisible := uuid.New()
+	duplicateFileVisible := uuid.New()
+	now := time.Date(2026, 5, 5, 10, 0, 0, 0, time.UTC)
+	rootParent := rootID
+	leftParent := leftID
+	rightParent := rightID
+	size := int64(1)
+
+	plan := model.PlannedProject{
+		Project: model.Project{ID: projectID, RootFolderID: rootID, CreatedAt: now, UpdatedAt: now},
+		RootItem: model.Item{
+			ID:              rootID,
+			Type:            model.ItemTypeFolder,
+			VisibleName:     rootVisible,
+			RealName:        "Root",
+			OriginalMode:    uint32(0o40755),
+			OriginalModTime: now,
+			MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+			CreatedAt:       now,
+			UpdatedAt:       now,
+		},
+		RootFolder: model.Folder{ID: rootID, Key: bytesOf(1, 32), OriginalSize: 2},
+		Items: []model.Item{
+			{
+				ID:              leftID,
+				ParentID:        &rootParent,
+				Type:            model.ItemTypeFolder,
+				VisibleName:     leftVisible,
+				RealName:        "left",
+				OriginalMode:    uint32(0o40755),
+				OriginalModTime: now,
+				MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+				CreatedAt:       now,
+				UpdatedAt:       now,
+			},
+			{
+				ID:              rightID,
+				ParentID:        &rootParent,
+				Type:            model.ItemTypeFolder,
+				VisibleName:     rightVisible,
+				RealName:        "right",
+				OriginalMode:    uint32(0o40755),
+				OriginalModTime: now,
+				MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+				CreatedAt:       now,
+				UpdatedAt:       now,
+			},
+			{
+				ID:              leftFileID,
+				ParentID:        &leftParent,
+				Type:            model.ItemTypeFile,
+				VisibleName:     duplicateFileVisible,
+				RealName:        "same-left.txt",
+				OriginalMode:    uint32(0o100600),
+				OriginalModTime: now,
+				MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+				CreatedAt:       now,
+				UpdatedAt:       now,
+			},
+			{
+				ID:              rightFileID,
+				ParentID:        &rightParent,
+				Type:            model.ItemTypeFile,
+				VisibleName:     duplicateFileVisible,
+				RealName:        "same-right.txt",
+				OriginalMode:    uint32(0o100600),
+				OriginalModTime: now,
+				MetadataCaps:    []string{fsmeta.CapabilityMode, fsmeta.CapabilityModTime},
+				CreatedAt:       now,
+				UpdatedAt:       now,
+			},
+		},
+		Folders: []model.Folder{
+			{ID: leftID, Key: bytesOf(2, 32), OriginalSize: 1},
+			{ID: rightID, Key: bytesOf(3, 32), OriginalSize: 1},
+		},
+		Files: []model.File{
+			{ID: leftFileID, Key: bytesOf(4, 32), OriginalSize: size, ContentAlgorithm: "AES-256-GCM", StorageKind: model.StorageKindSingle},
+			{ID: rightFileID, Key: bytesOf(5, 32), OriginalSize: size, ContentAlgorithm: "AES-256-GCM", StorageKind: model.StorageKindSingle},
+		},
+		StorageObjects: []model.StorageObject{
+			{ID: uuid.New(), ItemID: rootID, Type: model.StorageObjectTypeFolder, VisiblePath: rootVisible.String()},
+			{ID: uuid.New(), ItemID: leftID, Type: model.StorageObjectTypeFolder, VisiblePath: rootVisible.String() + "/" + leftVisible.String()},
+			{ID: uuid.New(), ItemID: rightID, Type: model.StorageObjectTypeFolder, VisiblePath: rootVisible.String() + "/" + rightVisible.String()},
+			{ID: uuid.New(), ItemID: leftFileID, Type: model.StorageObjectTypeFile, VisiblePath: rootVisible.String() + "/" + leftVisible.String() + "/" + duplicateFileVisible.String(), Size: &size},
+			{ID: uuid.New(), ItemID: rightFileID, Type: model.StorageObjectTypeFile, VisiblePath: rootVisible.String() + "/" + rightVisible.String() + "/" + duplicateFileVisible.String(), Size: &size},
+		},
+	}
+
+	if err := store.WritePlannedProject(ctx, plan); err == nil {
+		t.Fatal("expected duplicate visible leaf name error")
+	}
+}

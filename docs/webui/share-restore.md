@@ -35,6 +35,8 @@ by the project metadata.
 Decrypt behavior:
 
 - FG decrypts every recognized encrypted file or part under the selected directory.
+- Noise file handling follows Settings while matching encrypted content. By default, recognized noise files are ignored
+  as if they do not exist.
 - FG restores the original directory tree structure for the selected content.
 - Restored outputs keep supported restored file and directory metadata.
 - Directory objects do not contain encrypted file data and do not need to be decrypted.
@@ -82,6 +84,8 @@ Verify behavior:
 - FG does not write plaintext output.
 - FG does not delete encrypted content.
 - Source file handling settings do not apply to verification.
+- Noise file handling settings do apply to verification. By default, recognized noise files are ignored as if they do
+  not exist and are not reported as extra content.
 
 After completion, the WebUI reports:
 
@@ -197,6 +201,8 @@ Before decrypting, the WebUI shows a summary and asks for confirmation.
 Share decryption behavior:
 
 - FG decrypts every recognized encrypted file or part under the selected directory.
+- Noise file handling follows Settings while matching encrypted content. By default, recognized noise files are ignored
+  as if they do not exist.
 - FG restores the shared content's directory structure relative to the output directory.
 - Restored outputs keep supported restored file and directory metadata.
 - Source file handling follows Settings.
@@ -268,6 +274,8 @@ Verify behavior:
 - FG does not write plaintext output.
 - FG does not delete encrypted content.
 - Source file handling settings do not apply to verification.
+- Noise file handling settings do apply to verification. By default, recognized noise files are ignored as if they do
+  not exist and are not reported as extra content.
 
 After completion, the WebUI reports:
 

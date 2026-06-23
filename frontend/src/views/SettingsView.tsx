@@ -47,6 +47,18 @@ export function SettingsView({
                             ]}
                         />
                     </Form.Item>
+                    <Form.Item name="noiseFileHandling" label={t('noiseFileHandling')} rules={[{required: true}]}>
+                        <Select
+                            options={[
+                                {value: 'ignore_everywhere', label: t('noiseFileIgnoreEverywhere')},
+                                {
+                                    value: 'ignore_during_verify_and_matching',
+                                    label: t('noiseFileIgnoreDuringVerifyAndMatching'),
+                                },
+                                {value: 'do_not_ignore', label: t('noiseFileDoNotIgnore')},
+                            ]}
+                        />
+                    </Form.Item>
                     <Form.Item name="theme" label={t('theme')} rules={[{required: true}]}>
                         <Select
                             options={[

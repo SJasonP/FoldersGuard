@@ -22,6 +22,8 @@ Behavior:
 - Restores real names from FG metadata.
 - Restores captured filesystem metadata for supported files and directories.
 - Reads encrypted content from `--content`.
+- Applies the noise file handling setting while matching encrypted content. By default, recognized noise files are
+  ignored as if they do not exist.
 - Authenticates encrypted file objects and split parts before committing restored plaintext files.
 - Writes restored plaintext under `--out`.
 
@@ -102,6 +104,8 @@ Behavior:
 - Checks that required encrypted content paths exist.
 - Authenticates encrypted file objects and split parts.
 - Reports missing, extra, or tampered content.
+- Applies the noise file handling setting. By default, recognized noise files are ignored as if they do not exist and
+  are not reported as extra content.
 - Does not write plaintext output.
 
 Output:

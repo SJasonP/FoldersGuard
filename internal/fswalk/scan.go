@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	"foldersguard/internal/fsmeta"
+	"foldersguard/internal/noise"
 )
 
 type EntryType string
@@ -32,6 +33,10 @@ type ScanResult struct {
 }
 
 func ScanTopFolder(root string) (ScanResult, error) {
+	return ScanTopFolderWithNoiseMode(root, noise.ModeDoNotIgnore)
+}
+
+func ScanTopFolderWithNoiseMode(root string, noiseMode string) (ScanResult, error) {
 	if root == "" {
 		return ScanResult{}, errors.New("root path is required")
 	}
@@ -73,6 +78,12 @@ func ScanTopFolder(root string) (ScanResult, error) {
 			return nil
 		}
 		if path == absRoot {
+			return nil
+		}
+		if noise.IgnoreDuringSourceScan(noiseMode) && noise.IsName(d.Name()) {
+			if d.IsDir() {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 
@@ -127,6 +138,10 @@ func ScanTopFolder(root string) (ScanResult, error) {
 }
 
 func ScanPath(path string) (ScanResult, error) {
+	return ScanPathWithNoiseMode(path, noise.ModeDoNotIgnore)
+}
+
+func ScanPathWithNoiseMode(path string, noiseMode string) (ScanResult, error) {
 	if path == "" {
 		return ScanResult{}, errors.New("path is required")
 	}
@@ -141,6 +156,9 @@ func ScanPath(path string) (ScanResult, error) {
 		return ScanResult{}, fmt.Errorf("stat path: %w", err)
 	}
 	if info.Mode().Type() == 0 {
+		if noise.IgnoreDuringSourceScan(noiseMode) && noise.IsName(filepath.Base(absPath)) {
+			return ScanResult{}, fmt.Errorf("path is ignored noise file")
+		}
 		metadata, err := fsmeta.Capture(absPath, info)
 		if err != nil {
 			return ScanResult{}, err
@@ -156,7 +174,10 @@ func ScanPath(path string) (ScanResult, error) {
 		}, nil
 	}
 	if info.IsDir() {
-		return ScanTopFolder(absPath)
+		if noise.IgnoreDuringSourceScan(noiseMode) && noise.IsName(filepath.Base(absPath)) {
+			return ScanResult{}, fmt.Errorf("path is ignored noise directory")
+		}
+		return ScanTopFolderWithNoiseMode(absPath, noiseMode)
 	}
 	return ScanResult{}, fmt.Errorf("path is unsupported: %s", unsupportedReason(info.Mode()))
 }

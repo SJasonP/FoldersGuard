@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"foldersguard/internal/fsmeta"
@@ -146,7 +147,17 @@ INSERT INTO parts (
 }
 
 func writeStorageObjects(ctx context.Context, tx *sql.Tx, objects []model.StorageObject) error {
+	visibleLeaves := make(map[string]string, len(objects))
 	for _, object := range objects {
+		leaf := filepath.Base(filepath.FromSlash(object.VisiblePath))
+		if leaf == "." || leaf == "" {
+			return fmt.Errorf("storage object %s visible path leaf is required", object.ID)
+		}
+		if previousPath, ok := visibleLeaves[leaf]; ok {
+			return fmt.Errorf("storage object visible name %s is used by both %s and %s", leaf, previousPath, object.VisiblePath)
+		}
+		visibleLeaves[leaf] = object.VisiblePath
+
 		var size any
 		if object.Size != nil {
 			size = *object.Size

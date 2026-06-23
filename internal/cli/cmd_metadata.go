@@ -372,7 +372,11 @@ func (c cli) runAdd(options addOptions) error {
 	}
 	defer database.Close()
 
-	scan, err := fswalk.ScanPath(options.sourcePath)
+	noiseMode, err := readNoiseFileHandling()
+	if err != nil {
+		return err
+	}
+	scan, err := fswalk.ScanPathWithNoiseMode(options.sourcePath, noiseMode)
 	if err != nil {
 		return err
 	}

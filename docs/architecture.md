@@ -258,6 +258,34 @@ Unsupported entries are not represented in FG metadata and are not reported in n
 
 Hard link relationships are not preserved. Each hard link path is processed as a normal regular file.
 
+FG also recognizes platform-generated noise files. Noise files are regular files or directories that operating systems
+and file managers commonly add around user content, but that users usually do not intend to protect as project content.
+
+Recognized noise names:
+
+- `.DS_Store`
+- `._.DS_Store`
+- Any AppleDouble sidecar beginning with `._`
+- `Thumbs.db`
+- `ehthumbs.db`
+- `desktop.ini`
+- `.Spotlight-V100`
+- `.Trashes`
+- `.fseventsd`
+
+Noise handling is configurable:
+
+- Ignore everywhere: default. FG treats recognized noise files as if they do not exist during source scanning, project
+  creation, project add, encrypted content matching, verification, decryption, share restore, source cleanup, and
+  output-folder emptiness checks. Ignored noise files are not represented in FG metadata.
+  For directory cleanup, overwrite preparation, and empty-folder checks, ignored noise files do not count as user content
+  and may be removed as incidental cleanup when FG removes or replaces the containing directory.
+- Ignore during verification and matching: FG may record noise files from source content as normal regular files, but
+  ignores extra recognized noise files that appear around encrypted content while matching, decrypting, restoring, or
+  verifying.
+- Do not ignore: FG treats recognized noise files as ordinary filesystem entries when they are regular files or
+  directories. They may be stored in FG metadata, encrypted, restored, and reported as extra content.
+
 ## Filesystem Metadata Policy
 
 FG preserves first-tier filesystem metadata for supported regular files and directories.

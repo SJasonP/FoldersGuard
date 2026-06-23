@@ -85,6 +85,8 @@ Rules:
 - Add imports selected local files or folders as new project items.
 - Adding a local folder recursively imports supported regular files and directories under it.
 - Unsupported filesystem entries are ignored as if they do not exist.
+- Noise file handling follows Settings. By default, recognized noise files are ignored as if they do not exist and are
+  not added to FG metadata.
 - Hard links are treated as normal files.
 - Each added item receives new FG identity, metadata, UUID names, and internal key material.
 - The edit session remains pending until the user applies or discards it.

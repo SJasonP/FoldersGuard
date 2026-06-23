@@ -79,7 +79,11 @@ func (c cli) runEncrypt(options encryptOptions) error {
 	}
 
 	ctx := context.Background()
-	scan, err := fswalk.ScanTopFolder(sourceFolder)
+	noiseMode, err := readNoiseFileHandling()
+	if err != nil {
+		return err
+	}
+	scan, err := fswalk.ScanTopFolderWithNoiseMode(sourceFolder, noiseMode)
 	if err != nil {
 		return err
 	}

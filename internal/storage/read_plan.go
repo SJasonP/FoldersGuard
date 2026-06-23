@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"github.com/google/uuid"
@@ -415,6 +416,7 @@ ORDER BY visible_path`)
 	defer rows.Close()
 
 	var objects []model.StorageObject
+	visibleLeaves := make(map[string]string)
 	for rows.Next() {
 		var objectIDText, itemIDText, objectTypeText, visiblePath string
 		var size sql.NullInt64
@@ -425,6 +427,14 @@ ORDER BY visible_path`)
 		if visiblePath == "" {
 			return nil, fmt.Errorf("storage object %s visible path is required", objectIDText)
 		}
+		leaf := filepath.Base(filepath.FromSlash(visiblePath))
+		if leaf == "." || leaf == "" {
+			return nil, fmt.Errorf("storage object %s visible path leaf is required", objectIDText)
+		}
+		if previousPath, ok := visibleLeaves[leaf]; ok {
+			return nil, fmt.Errorf("storage object visible name %s is used by both %s and %s", leaf, previousPath, visiblePath)
+		}
+		visibleLeaves[leaf] = visiblePath
 		objectID, err := uuid.Parse(objectIDText)
 		if err != nil {
 			return nil, fmt.Errorf("parse storage object id %q: %w", objectIDText, err)

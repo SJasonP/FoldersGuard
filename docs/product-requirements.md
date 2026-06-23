@@ -145,6 +145,15 @@ FG supports only regular files and directories.
 - Symlinks, sockets, FIFOs, device files, and other special entries are ignored as if they do not exist.
 - Unsupported entries are not represented in FG metadata and are not reported in normal command output.
 - Hard link relationships are not preserved; each hard link path is processed as a normal regular file.
+- FG provides a noise file handling setting for platform-generated metadata files such as `.DS_Store`, AppleDouble
+  `._*` files, `Thumbs.db`, `ehthumbs.db`, `desktop.ini`, `.Spotlight-V100`, `.Trashes`, and `.fseventsd`.
+- Noise file handling defaults to ignore everywhere, meaning recognized noise files are treated as absent during source
+  scanning, project creation, project add, encrypted content matching, verification, decryption, share restore, source
+  cleanup, and output-folder emptiness checks.
+- Under ignore everywhere, recognized noise files are not user content. They may be removed as incidental cleanup when FG
+  removes or replaces a containing directory, but they are not represented in FG metadata or normal operation output.
+- Users may instead choose to ignore recognized noise files only during verification and matching, or to not ignore them
+  at all.
 
 ### Filesystem Metadata Policy
 

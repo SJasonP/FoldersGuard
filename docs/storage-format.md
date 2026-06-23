@@ -468,3 +468,15 @@ Unsupported entries are ignored as if they do not exist:
 Unsupported entries are not recorded in the database.
 
 Hard link relationships are not represented. Each hard link path is stored as a normal regular file entry.
+
+Recognized platform noise files are controlled by the user's noise file handling setting.
+
+Noise file handling modes:
+
+- Ignore everywhere: default. Recognized noise files are treated as absent and are not recorded in the database.
+- Ignore during verification and matching: recognized noise files may be recorded if they are present in source content,
+  but extra recognized noise files outside the recorded database model are ignored while matching or verifying encrypted
+  content.
+- Do not ignore: recognized noise files are represented like normal regular files or directories when present.
+
+The native database stores only the entries that remain after this policy is applied.

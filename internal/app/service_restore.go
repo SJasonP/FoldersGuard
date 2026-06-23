@@ -15,7 +15,11 @@ func (s Service) DecryptProject(ctx context.Context, input DecryptProjectInput) 
 	if err := ValidateOutputOutsideSource(input.EncryptedRoot, input.OutputRoot); err != nil {
 		return DecryptProjectResult{}, err
 	}
-	if err := PrepareDirectoryOutput(input.OutputRoot, input.Force, "output"); err != nil {
+	noiseMode, err := s.resolveNoiseFileHandling("")
+	if err != nil {
+		return DecryptProjectResult{}, err
+	}
+	if err := PrepareDirectoryOutputWithNoiseMode(input.OutputRoot, input.Force, "output", noiseMode); err != nil {
 		return DecryptProjectResult{}, err
 	}
 
@@ -51,6 +55,7 @@ func (s Service) DecryptProject(ctx context.Context, input DecryptProjectInput) 
 	report, err := (project.Restorer{
 		EncryptedRoot: input.EncryptedRoot,
 		OutputRoot:    input.OutputRoot,
+		NoiseMode:     noiseMode,
 		AfterFile:     afterFile,
 	}).RestoreContentReport(ctx, plan)
 	if err != nil {

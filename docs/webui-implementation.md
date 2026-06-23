@@ -106,7 +106,9 @@ Rules:
   technical-detail sections.
 - Wrong database passwords are shown as password failures, but must not disclose whether the database header, metadata,
   keys, or authenticated content check failed.
-- Non-empty output folders are shown as output conflicts and must mention hidden files such as `.DS_Store`.
+- Non-empty output folders are shown as output conflicts. When noise file handling is ignore everywhere, recognized
+  noise files alone do not make an output folder non-empty. In other modes, the localized message must mention hidden
+  files such as `.DS_Store`.
 - Output path safety failures are distinct from password failures and must remain clear to the user.
 
 ## Operation Progress Model

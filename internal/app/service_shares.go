@@ -23,6 +23,10 @@ func (s Service) VerifyShare(ctx context.Context, input ShareOpen, encryptedRoot
 	if err := ValidateExistingDirectory(encryptedRoot, "content"); err != nil {
 		return VerifyResult{}, err
 	}
+	noiseMode, err := s.resolveNoiseFileHandling("")
+	if err != nil {
+		return VerifyResult{}, err
+	}
 	plan, meta, _, err := s.ReadShareDatabase(ctx, input)
 	if err != nil {
 		return VerifyResult{}, err
@@ -30,7 +34,7 @@ func (s Service) VerifyShare(ctx context.Context, input ShareOpen, encryptedRoot
 	if meta["database_type"] != "share" {
 		return VerifyResult{}, fmt.Errorf("database type = %q, want share", meta["database_type"])
 	}
-	report, err := (project.Verifier{EncryptedRoot: encryptedRoot}).VerifyContent(ctx, plan)
+	report, err := (project.Verifier{EncryptedRoot: encryptedRoot, NoiseMode: noiseMode}).VerifyContent(ctx, plan)
 	if err != nil {
 		return VerifyResult{}, err
 	}
@@ -58,7 +62,11 @@ func (s Service) DecryptShare(ctx context.Context, input DecryptShareInput) (Dec
 	if err := ValidateOutputOutsideSource(input.EncryptedRoot, input.OutputRoot); err != nil {
 		return DecryptShareResult{}, err
 	}
-	if err := PrepareDirectoryOutput(input.OutputRoot, input.Force, "output"); err != nil {
+	noiseMode, err := s.resolveNoiseFileHandling("")
+	if err != nil {
+		return DecryptShareResult{}, err
+	}
+	if err := PrepareDirectoryOutputWithNoiseMode(input.OutputRoot, input.Force, "output", noiseMode); err != nil {
 		return DecryptShareResult{}, err
 	}
 
@@ -94,6 +102,7 @@ func (s Service) DecryptShare(ctx context.Context, input DecryptShareInput) (Dec
 	report, err := (project.Restorer{
 		EncryptedRoot: input.EncryptedRoot,
 		OutputRoot:    input.OutputRoot,
+		NoiseMode:     noiseMode,
 		AfterFile:     afterFile,
 	}).RestoreContentReport(ctx, plan)
 	if err != nil {

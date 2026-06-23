@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"foldersguard/internal/fsmeta"
+	"foldersguard/internal/noise"
 )
 
 func TestScanTopFolder(t *testing.T) {
@@ -95,6 +96,40 @@ func TestScanTopFolderRejectsFileRoot(t *testing.T) {
 	if _, err := ScanTopFolder(file); err == nil {
 		t.Fatal("expected file root rejection")
 	}
+}
+
+func TestScanTopFolderNoiseHandling(t *testing.T) {
+	root := t.TempDir()
+	mustWrite(t, filepath.Join(root, ".DS_Store"), []byte("finder metadata"))
+	mustWrite(t, filepath.Join(root, "file.txt"), []byte("content"))
+
+	ignored, err := ScanTopFolderWithNoiseMode(root, noise.ModeIgnoreEverywhere)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if hasEntry(ignored, ".DS_Store") {
+		t.Fatal(".DS_Store was included with ignore everywhere")
+	}
+	if !hasEntry(ignored, "file.txt") {
+		t.Fatal("file.txt missing with ignore everywhere")
+	}
+
+	included, err := ScanTopFolderWithNoiseMode(root, noise.ModeDoNotIgnore)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !hasEntry(included, ".DS_Store") {
+		t.Fatal(".DS_Store missing with do not ignore")
+	}
+}
+
+func hasEntry(result ScanResult, path string) bool {
+	for _, entry := range result.Entries {
+		if entry.RootRelativePath == path {
+			return true
+		}
+	}
+	return false
 }
 
 func mustMkdir(t *testing.T, path string) {

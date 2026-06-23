@@ -36,6 +36,8 @@ Create behavior:
 - FG encrypts the selected directory into encrypted content.
 - FG preserves supported directory structure, names, metadata, and file content according to the native format.
 - Unsupported filesystem entries are ignored as if they do not exist.
+- Noise file handling follows Settings. By default, recognized noise files are ignored as if they do not exist and are
+  not added to FG metadata.
 - Hard links are treated as normal files.
 - Source file handling follows Settings.
 - When source file handling is set to delete, each cleartext file is deleted immediately after that file is successfully

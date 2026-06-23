@@ -803,6 +803,7 @@ export namespace main {
 	export class Settings {
 	    defaultMaxPartSize: number;
 	    sourceCleanupMode: string;
+	    noiseFileHandling: string;
 	    theme: string;
 	    language: string;
 	
@@ -814,6 +815,7 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.defaultMaxPartSize = source["defaultMaxPartSize"];
 	        this.sourceCleanupMode = source["sourceCleanupMode"];
+	        this.noiseFileHandling = source["noiseFileHandling"];
 	        this.theme = source["theme"];
 	        this.language = source["language"];
 	    }
@@ -909,4 +911,3 @@ export namespace main {
 	}
 
 }
-

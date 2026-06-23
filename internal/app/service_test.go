@@ -93,7 +93,7 @@ func TestPrepareContentOutputReportsHiddenNonEmptyFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := PrepareContentOutput(output, false)
+	err := PrepareDirectoryOutputWithNoiseMode(output, false, "content output", NoiseFileDoNotIgnore)
 	if err == nil {
 		t.Fatal("expected non-empty output folder error")
 	}
@@ -102,7 +102,7 @@ func TestPrepareContentOutputReportsHiddenNonEmptyFile(t *testing.T) {
 	}
 }
 
-func TestCreateProjectReportsNonEmptyContentOutput(t *testing.T) {
+func TestCreateProjectIgnoresNoiseOnlyContentOutputByDefault(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()
 	source := filepath.Join(root, "source")
@@ -124,6 +124,44 @@ func TestCreateProjectReportsNonEmptyContentOutput(t *testing.T) {
 
 	service, err := NewService(dataDir)
 	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = service.CreateProject(ctx, CreateProjectInput{
+		SourcePath:    source,
+		ContentOutput: encrypted,
+		Password:      "test-password",
+		SourceCleanup: SourceCleanupKeep,
+	})
+	if err != nil {
+		t.Fatalf("create project with noise-only output = %v, want allowed", err)
+	}
+}
+
+func TestCreateProjectReportsNoiseContentOutputWhenNotIgnored(t *testing.T) {
+	ctx := context.Background()
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	encrypted := filepath.Join(root, "encrypted")
+	dataDir := filepath.Join(root, "data")
+
+	if err := os.MkdirAll(source, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "note.txt"), []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(encrypted, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(encrypted, ".DS_Store"), []byte("finder metadata"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	service, err := NewService(dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.SaveSettings(Settings{NoiseFileHandling: NoiseFileDoNotIgnore}); err != nil {
 		t.Fatal(err)
 	}
 	_, err = service.CreateProject(ctx, CreateProjectInput{

@@ -142,7 +142,11 @@ func (c cli) planRemoveCommand() *cobra.Command {
 }
 
 func (c cli) runPlanEncrypt(sourceFolder string, maxPartSize int64) error {
-	scan, err := fswalk.ScanTopFolder(sourceFolder)
+	noiseMode, err := readNoiseFileHandling()
+	if err != nil {
+		return err
+	}
+	scan, err := fswalk.ScanTopFolderWithNoiseMode(sourceFolder, noiseMode)
 	if err != nil {
 		return err
 	}
@@ -186,7 +190,11 @@ func (c cli) runPlanAdd(options planAddOptions) error {
 	}
 	defer database.Close()
 
-	scan, err := fswalk.ScanPath(options.sourcePath)
+	noiseMode, err := readNoiseFileHandling()
+	if err != nil {
+		return err
+	}
+	scan, err := fswalk.ScanPathWithNoiseMode(options.sourcePath, noiseMode)
 	if err != nil {
 		return err
 	}

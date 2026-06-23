@@ -30,13 +30,14 @@ func TestSaveSettingsPersistsNormalizedValues(t *testing.T) {
 	saved, err := service.SaveSettings(Settings{
 		DefaultMaxPartSize: 8 * BytesPerMB,
 		SourceCleanupMode:  SourceCleanupKeep,
+		NoiseFileHandling:  NoiseFileDoNotIgnore,
 		Theme:              ThemeDark,
 		Language:           LanguageZHCN,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if saved.DefaultMaxPartSize != 8*BytesPerMB || saved.Theme != ThemeDark || saved.Language != LanguageZHCN {
+	if saved.DefaultMaxPartSize != 8*BytesPerMB || saved.SourceCleanupMode != SourceCleanupKeep || saved.NoiseFileHandling != NoiseFileDoNotIgnore || saved.Theme != ThemeDark || saved.Language != LanguageZHCN {
 		t.Fatalf("saved settings = %+v", saved)
 	}
 

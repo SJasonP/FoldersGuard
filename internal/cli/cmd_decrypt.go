@@ -58,7 +58,11 @@ func (c cli) runDecrypt(options decryptOptions) error {
 	if err := prepareDirectoryOutput(options.outputRoot, options.force, "output"); err != nil {
 		return err
 	}
-	if err := (project.Restorer{EncryptedRoot: options.contentRoot, OutputRoot: options.outputRoot}).RestoreContent(ctx, plan); err != nil {
+	noiseMode, err := readNoiseFileHandling()
+	if err != nil {
+		return err
+	}
+	if err := (project.Restorer{EncryptedRoot: options.contentRoot, OutputRoot: options.outputRoot, NoiseMode: noiseMode}).RestoreContent(ctx, plan); err != nil {
 		return err
 	}
 

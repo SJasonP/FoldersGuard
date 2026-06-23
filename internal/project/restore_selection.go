@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"foldersguard/internal/model"
+	"foldersguard/internal/noise"
 )
 
 type restoreSelection struct {
@@ -16,10 +17,10 @@ type restoreSelection struct {
 }
 
 func (r Restorer) selectAvailableContent(ctx context.Context, plan model.PlannedProject, itemByID map[string]model.Item) (restoreSelection, error) {
-	return matchAvailableContent(ctx, r.EncryptedRoot, plan, itemByID)
+	return matchAvailableContent(ctx, r.EncryptedRoot, plan, itemByID, r.NoiseMode)
 }
 
-func matchAvailableContent(ctx context.Context, encryptedRoot string, plan model.PlannedProject, itemByID map[string]model.Item) (restoreSelection, error) {
+func matchAvailableContent(ctx context.Context, encryptedRoot string, plan model.PlannedProject, itemByID map[string]model.Item, noiseMode string) (restoreSelection, error) {
 	objectsByLeaf := make(map[string][]model.StorageObject)
 	for _, object := range plan.StorageObjects {
 		objectsByLeaf[pathLeaf(object.VisiblePath)] = append(objectsByLeaf[pathLeaf(object.VisiblePath)], object)
@@ -42,6 +43,12 @@ func matchAvailableContent(ctx context.Context, encryptedRoot string, plan model
 			return err
 		}
 		if path == encryptedRoot {
+			return nil
+		}
+		if noise.IgnoreDuringMatching(noiseMode) && noise.IsName(entry.Name()) {
+			if entry.IsDir() {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 		selection.addObjectMatches(path, entry.IsDir(), objectsByLeaf, itemByID)

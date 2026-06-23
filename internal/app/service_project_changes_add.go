@@ -54,7 +54,11 @@ func (s Service) applyOneProjectAdd(ctx context.Context, store *storage.Store, c
 	if err != nil {
 		return projectAddApplyResult{}, err
 	}
-	scan, err := fswalk.ScanPath(change.SourcePath)
+	noiseMode, err := s.resolveNoiseFileHandling("")
+	if err != nil {
+		return projectAddApplyResult{}, err
+	}
+	scan, err := fswalk.ScanPathWithNoiseMode(change.SourcePath, noiseMode)
 	if err != nil {
 		return projectAddApplyResult{}, err
 	}

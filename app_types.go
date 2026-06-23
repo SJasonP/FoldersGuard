@@ -45,6 +45,7 @@ type ShareSummary struct {
 type Settings struct {
 	DefaultMaxPartSize int64  `json:"defaultMaxPartSize"`
 	SourceCleanupMode  string `json:"sourceCleanupMode"`
+	NoiseFileHandling  string `json:"noiseFileHandling"`
 	Theme              string `json:"theme"`
 	Language           string `json:"language"`
 }

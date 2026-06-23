@@ -8,6 +8,7 @@ import (
 
 	"foldersguard/internal/content"
 	"foldersguard/internal/model"
+	"foldersguard/internal/noise"
 )
 
 type VerifyReport struct {
@@ -26,6 +27,7 @@ func (r VerifyReport) OK() bool {
 
 type Verifier struct {
 	EncryptedRoot string
+	NoiseMode     string
 }
 
 func (v Verifier) VerifyContent(ctx context.Context, plan model.PlannedProject) (VerifyReport, error) {
@@ -81,7 +83,7 @@ func (v Verifier) VerifyContent(ctx context.Context, plan model.PlannedProject) 
 		}
 	}
 
-	extra, err := countExtraObjects(ctx, v.EncryptedRoot, expected)
+	extra, err := countExtraObjects(ctx, v.EncryptedRoot, expected, v.NoiseMode)
 	if err != nil {
 		return report, err
 	}
@@ -143,7 +145,7 @@ func (v Verifier) verifyObject(ctx context.Context, key []byte, visiblePath stri
 	return nil
 }
 
-func countExtraObjects(ctx context.Context, root string, expected map[string]struct{}) ([]string, error) {
+func countExtraObjects(ctx context.Context, root string, expected map[string]struct{}, noiseMode string) ([]string, error) {
 	extra := []string{}
 	err := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
@@ -159,7 +161,7 @@ func countExtraObjects(ctx context.Context, root string, expected map[string]str
 		if relative == "." {
 			return nil
 		}
-		if isIgnoredVerificationMetadata(entry.Name()) {
+		if noise.IgnoreDuringMatching(noiseMode) && noise.IsName(entry.Name()) {
 			if entry.IsDir() {
 				return filepath.SkipDir
 			}
@@ -175,15 +177,4 @@ func countExtraObjects(ctx context.Context, root string, expected map[string]str
 		return nil, fmt.Errorf("walk encrypted content: %w", err)
 	}
 	return extra, nil
-}
-
-func isIgnoredVerificationMetadata(name string) bool {
-	switch name {
-	case ".DS_Store", "._.DS_Store", "Thumbs.db", "ehthumbs.db", "desktop.ini":
-		return true
-	case ".Spotlight-V100", ".Trashes", ".fseventsd":
-		return true
-	default:
-		return len(name) > 2 && name[:2] == "._"
-	}
 }

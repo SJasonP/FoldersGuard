@@ -33,6 +33,18 @@ func activeProjectDatabasePathFromID(projectID string) (string, error) {
 	return service.ActiveProjectDatabasePath(projectID)
 }
 
+func readNoiseFileHandling() (string, error) {
+	service, err := app.NewService("")
+	if err != nil {
+		return "", err
+	}
+	settings, err := service.ReadSettings()
+	if err != nil {
+		return "", err
+	}
+	return settings.NoiseFileHandling, nil
+}
+
 func writeProjectDatabase(ctx context.Context, config db.Config, plan model.PlannedProject) error {
 	return app.WriteProjectDatabase(ctx, config, plan)
 }

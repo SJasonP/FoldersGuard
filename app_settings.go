@@ -14,6 +14,7 @@ func (a *App) SaveSettings(settings Settings) (Settings, error) {
 	saved, err := a.service.SaveSettings(app.Settings{
 		DefaultMaxPartSize: settings.DefaultMaxPartSize,
 		SourceCleanupMode:  settings.SourceCleanupMode,
+		NoiseFileHandling:  settings.NoiseFileHandling,
 		Theme:              settings.Theme,
 		Language:           settings.Language,
 	})
@@ -27,6 +28,7 @@ func mapSettings(settings app.Settings) Settings {
 	return Settings{
 		DefaultMaxPartSize: settings.DefaultMaxPartSize,
 		SourceCleanupMode:  settings.SourceCleanupMode,
+		NoiseFileHandling:  settings.NoiseFileHandling,
 		Theme:              settings.Theme,
 		Language:           settings.Language,
 	}

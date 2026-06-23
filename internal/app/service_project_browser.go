@@ -27,7 +27,11 @@ func (s Service) OpenProjectBrowser(ctx context.Context, input OpenProjectBrowse
 		if err := ValidateExistingDirectory(input.EncryptedRoot, "content"); err != nil {
 			return ProjectBrowserState{}, err
 		}
-		match, err := project.MatchAvailableContent(ctx, input.EncryptedRoot, plan)
+		noiseMode, err := s.resolveNoiseFileHandling("")
+		if err != nil {
+			return ProjectBrowserState{}, err
+		}
+		match, err := project.MatchAvailableContentWithNoiseMode(ctx, input.EncryptedRoot, plan, noiseMode)
 		if err != nil {
 			return ProjectBrowserState{}, err
 		}

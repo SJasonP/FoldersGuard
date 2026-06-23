@@ -38,6 +38,21 @@ All paths are local filesystem paths.
 FG supports only regular files and directories. Symlinks, sockets, device files, FIFOs, and other special entries are
 unsupported.
 
+FG has a noise file handling setting for platform-generated metadata files such as `.DS_Store`, AppleDouble `._*`
+files, `Thumbs.db`, `ehthumbs.db`, `desktop.ini`, `.Spotlight-V100`, `.Trashes`, and `.fseventsd`.
+
+Noise file handling modes:
+
+- Ignore everywhere: default. Recognized noise files are treated as if they do not exist during source scanning, project
+  creation, project add, encrypted content matching, verification, decryption, share restore, source cleanup, and
+  output-folder emptiness checks.
+  For directory cleanup, overwrite preparation, and empty-folder checks, ignored noise files do not count as user content
+  and may be removed as incidental cleanup when FG removes or replaces the containing directory.
+- Ignore during verification and matching: recognized noise files are treated as normal source files when they appear in
+  source content, but extra recognized noise files around encrypted content are ignored during matching, decryption,
+  restore, and verification.
+- Do not ignore: recognized noise files are treated like ordinary regular files or directories.
+
 ## Password Input
 
 Passwords are never accepted as positional arguments or flag values.

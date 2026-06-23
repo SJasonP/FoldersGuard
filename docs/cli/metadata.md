@@ -53,6 +53,8 @@ fg add <project-id> <source-path> <target-folder-path> --staging-content <folder
 Behavior:
 
 - Scans `<source-path>`.
+- Applies the noise file handling setting. By default, recognized noise files are ignored as if they do not exist and
+  are not added to FG metadata.
 - Captures restorable filesystem metadata for the newly added files and directories.
 - Uses `--max-part-size` to calculate native balanced splitting for newly added files.
 - Encrypts new content into `--staging-content`.

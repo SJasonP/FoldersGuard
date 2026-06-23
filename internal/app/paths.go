@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"foldersguard/internal/noise"
 )
 
 func ValidateDatabasePath(path string) error {
@@ -45,6 +47,10 @@ func PrepareContentOutput(path string, force bool) error {
 }
 
 func PrepareDirectoryOutput(path string, force bool, label string) error {
+	return PrepareDirectoryOutputWithNoiseMode(path, force, label, NoiseFileDoNotIgnore)
+}
+
+func PrepareDirectoryOutputWithNoiseMode(path string, force bool, label string, noiseMode string) error {
 	info, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -71,6 +77,7 @@ func PrepareDirectoryOutput(path string, force bool, label string) error {
 	if err != nil {
 		return fmt.Errorf("read %s folder: %w", label, err)
 	}
+	entries = nonIgnoredEntries(entries, noiseMode)
 	if len(entries) > 0 {
 		if !force {
 			return fmt.Errorf("%w: %s folder is not empty (%s); choose an empty folder, remove existing files including hidden files such as .DS_Store, or use force overwrite", ErrOutputFolderNotEmpty, label, directoryEntriesSummary(entries))
@@ -83,6 +90,20 @@ func PrepareDirectoryOutput(path string, force bool, label string) error {
 		}
 	}
 	return nil
+}
+
+func nonIgnoredEntries(entries []os.DirEntry, noiseMode string) []os.DirEntry {
+	if !noise.IgnoreDuringSourceScan(noiseMode) {
+		return entries
+	}
+	filtered := entries[:0]
+	for _, entry := range entries {
+		if noise.IsName(entry.Name()) {
+			continue
+		}
+		filtered = append(filtered, entry)
+	}
+	return filtered
 }
 
 func directoryEntriesSummary(entries []os.DirEntry) string {

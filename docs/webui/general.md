@@ -144,8 +144,10 @@ Path selection rules:
 - File inputs must select files or target file paths as appropriate.
 - Existing output must follow FG overwrite rules.
 - Path validation errors are shown next to the field and block continuation.
-- Non-empty output directories must be reported clearly. The message must tell the user to choose an empty directory,
-  remove existing files including hidden files such as `.DS_Store`, or explicitly enable force overwrite.
+- Non-empty output directories must be reported clearly. When noise file handling is ignore everywhere, recognized noise
+  files alone do not make an output directory non-empty. In other modes, the message must tell the user to choose an
+  empty directory, remove existing files including hidden files such as `.DS_Store`, or explicitly enable force
+  overwrite.
 - Backend path safety rejections must be translated into user-facing messages. The WebUI must distinguish at least:
   output inside the source folder, output containing the source folder, identical source and target paths, and non-empty
   output folders.

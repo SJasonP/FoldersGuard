@@ -16,6 +16,7 @@ import (
 type Restorer struct {
 	EncryptedRoot string
 	OutputRoot    string
+	NoiseMode     string
 	AfterFile     func(RestoredFile) error
 }
 

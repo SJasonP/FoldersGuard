@@ -15,6 +15,10 @@ const (
 	SourceCleanupKeep   = "keep"
 	SourceCleanupDelete = "delete"
 
+	NoiseFileIgnoreEverywhere              = "ignore_everywhere"
+	NoiseFileIgnoreDuringVerifyAndMatching = "ignore_during_verify_and_matching"
+	NoiseFileDoNotIgnore                   = "do_not_ignore"
+
 	ThemeSystem = "system"
 	ThemeLight  = "light"
 	ThemeDark   = "dark"
@@ -27,6 +31,7 @@ const (
 type Settings struct {
 	DefaultMaxPartSize int64  `json:"defaultMaxPartSize"`
 	SourceCleanupMode  string `json:"sourceCleanupMode"`
+	NoiseFileHandling  string `json:"noiseFileHandling"`
 	Theme              string `json:"theme"`
 	Language           string `json:"language"`
 }
@@ -35,6 +40,7 @@ func DefaultSettings() Settings {
 	return Settings{
 		DefaultMaxPartSize: 0,
 		SourceCleanupMode:  SourceCleanupDelete,
+		NoiseFileHandling:  NoiseFileIgnoreEverywhere,
 		Theme:              ThemeSystem,
 		Language:           LanguageSystem,
 	}
@@ -100,6 +106,14 @@ func normalizeSettings(settings Settings) (Settings, error) {
 	case SourceCleanupKeep, SourceCleanupDelete:
 	default:
 		return Settings{}, fmt.Errorf("unsupported source cleanup mode %q", settings.SourceCleanupMode)
+	}
+
+	switch settings.NoiseFileHandling {
+	case "":
+		settings.NoiseFileHandling = NoiseFileIgnoreEverywhere
+	case NoiseFileIgnoreEverywhere, NoiseFileIgnoreDuringVerifyAndMatching, NoiseFileDoNotIgnore:
+	default:
+		return Settings{}, fmt.Errorf("unsupported noise file handling mode %q", settings.NoiseFileHandling)
 	}
 
 	switch settings.Theme {

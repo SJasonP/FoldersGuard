@@ -5,11 +5,19 @@ import (
 )
 
 func prepareContentOutput(path string, force bool) error {
-	return app.PrepareContentOutput(path, force)
+	noiseMode, err := readNoiseFileHandling()
+	if err != nil {
+		return err
+	}
+	return app.PrepareDirectoryOutputWithNoiseMode(path, force, "content output", noiseMode)
 }
 
 func prepareDirectoryOutput(path string, force bool, label string) error {
-	return app.PrepareDirectoryOutput(path, force, label)
+	noiseMode, err := readNoiseFileHandling()
+	if err != nil {
+		return err
+	}
+	return app.PrepareDirectoryOutputWithNoiseMode(path, force, label, noiseMode)
 }
 
 func validateExistingDirectory(path, label string) error {

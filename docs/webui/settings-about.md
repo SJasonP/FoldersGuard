@@ -8,6 +8,7 @@ Supported settings:
 
 - Default maximum part size in MB.
 - Source file handling: keep source files, or delete source files after successful processing.
+- Noise file handling: ignore everywhere, ignore only during verification and matching, or do not ignore.
 - Theme: system, light, or dark.
 - Language: system, English (United States), or Simplified Chinese.
 
@@ -15,6 +16,7 @@ Default settings:
 
 - Source file handling defaults to delete source files.
 - Default maximum part size defaults to disabled file splitting.
+- Noise file handling defaults to ignore everywhere.
 - Theme defaults to system.
 - Language defaults to system.
 
@@ -22,6 +24,34 @@ Settings behavior:
 
 - Settings are saved when the user clicks Save Settings.
 - Settings that affect running operations apply only to future operations.
+
+Noise file handling controls how FG treats platform-generated metadata files that are not user content.
+
+Noise file names:
+
+- `.DS_Store`
+- `._.DS_Store`
+- Any AppleDouble sidecar beginning with `._`
+- `Thumbs.db`
+- `ehthumbs.db`
+- `desktop.ini`
+- `.Spotlight-V100`
+- `.Trashes`
+- `.fseventsd`
+
+Noise file handling modes:
+
+- Ignore everywhere: FG treats noise files as if they do not exist during source scanning, project creation, project add,
+  encrypted content matching, verification, decryption, share restore, source cleanup, and output-folder emptiness
+  checks. Noise files are not represented in FG metadata and are not reported as normal operation output.
+  For directory cleanup, overwrite preparation, and empty-folder checks, ignored noise files do not count as user content
+  and may be removed as incidental cleanup when FG removes or replaces the containing directory.
+- Ignore during verification and matching: FG records noise files as normal regular files when they are present in
+  source content, but ignores extra noise files that appear in encrypted content while matching, decrypting, restoring,
+  or verifying existing encrypted content.
+- Do not ignore: FG treats noise files as normal filesystem entries when they are regular files or directories. Extra
+  noise files in encrypted content are reported as extra content, and noise files in output folders make those folders
+  non-empty.
 
 ## Localization
 
@@ -96,14 +126,16 @@ Common error categories:
 - Path not found.
 - Path permission failure.
 - Output conflict.
-- Output folder is not empty, including hidden-file cases such as `.DS_Store`.
+- Output folder is not empty. When noise file handling is ignore everywhere, ignored noise files alone do not make an
+  output folder non-empty; otherwise hidden-file cases such as `.DS_Store` must be reported clearly.
 - Output path is inside the source folder.
 - Output path contains the source folder.
 - Source and target paths are identical.
 - Encrypted content missing.
 - Encrypted content authentication failure.
 
-Unsupported filesystem entries are ignored silently during normal scanning and are not reported as errors.
+Unsupported filesystem entries are ignored silently during normal scanning and are not reported as errors. Noise files
+follow the noise file handling setting.
 
 ## Accessibility And Keyboard Behavior
 
