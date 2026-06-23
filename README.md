@@ -140,7 +140,7 @@ See `docs/cli.md` and the files under `docs/cli/` for the CLI specification.
 
 Release builds are published through GitHub Releases.
 
-For v1.0.0, treat release artifacts as experimental. Test with copies of your data first, keep independent backups, and
+For v1.1.0, treat release artifacts as experimental. Test with copies of your data first, keep independent backups, and
 verify encrypted content before relying on a restore or share workflow.
 
 macOS release packages built with `make macos-release` are designed to be signed, notarized, and stapled before upload.

@@ -113,14 +113,92 @@ Rules:
 
 ## Operation Progress Model
 
-Long-running operations run through Go application services.
+Long-running operations run through Go application services. A project may contain hundreds of gigabytes of content, so
+progress reporting must be reliable, byte-accurate, and informative rather than a generic busy indicator.
 
-Progress rules:
+### Authority And Transport
 
-- Each long-running operation shows a visible running state.
-- Operations show progress feedback while work is active.
-- Progress may be determinate when totals are known or indeterminate when exact progress is not available.
-- The frontend does not infer completion by scanning files directly.
+- The Go core is the single source of truth for progress. It computes totals and reports advancement.
+- The Go core reports progress to the frontend through application events. The frontend subscribes to these events and
+  renders them.
+- The frontend does not infer progress or completion by scanning files, counting outputs, or timing operations itself.
+- Every long-running operation call carries an operation id. The frontend renders only events that match the operation
+  id it is currently waiting on, and ignores events from earlier or superseded operations.
+
+### Granularity
+
+- Progress is byte-weighted as the primary measure, because file and folder counts are unreliable at scale. One large
+  file or many small files must both produce a meaningful percentage.
+- Processed bytes advance within a file as content is streamed, not only when a whole file finishes. A single large file
+  must not leave the progress bar stalled.
+- Item counts (files, folders, parts) are reported as secondary information alongside byte progress.
+- When a precise byte total cannot be established, the operation reports indeterminate progress and still reports
+  processed counts and the current phase.
+
+### Totals
+
+- Totals are established before the main work begins, during a measuring phase or from existing project metadata.
+- Project creation derives the byte total from the planned source content size.
+- Decryption, restore, and verification derive the byte total from stored object and part sizes.
+- Export and import derive the byte total from the database payload size.
+- If actual sizes differ from the established total during work, reported progress is clamped so it never exceeds the
+  total and never moves backward.
+
+### Phases
+
+- Each operation is modeled as an ordered set of phases, for example: measuring, processing content, writing metadata,
+  and cleanup.
+- Each phase reports its own determinate or indeterminate progress and contributes to an overall operation progress.
+- The current phase, the phase position, and the total phase count are reported so the frontend can show both phase-level
+  and overall progress.
+
+### Reliability Rules
+
+- Reported progress is monotonic per phase and per operation; it never decreases.
+- Progress events are throttled by elapsed time and by processed bytes so that very large operations do not emit an
+  excessive number of events. Updates are coalesced between throttle points.
+- A progress event is always emitted on phase change, on failure, and on completion.
+- Every operation reaches a terminal state: completed, failed, or cancelled. A completed operation reports its final
+  byte and item totals as fully processed. The cancelled state is reached only when the application shuts down while an
+  operation is running; operations cannot be cancelled by the user.
+- Progress reporting must not block, slow, or alter the correctness of the underlying work.
+
+### Reported Fields
+
+Each progress event reports:
+
+- Operation id and operation kind.
+- Operation state: pending, running, completed, failed, or cancelled.
+- Current phase, phase position, and phase count.
+- Whether the current progress is determinate.
+- Processed bytes and total bytes when known.
+- Processed and total item counts when known.
+- The current item name when it is safe to display.
+- Throughput and an estimated time remaining when they can be derived.
+- An error summary when the operation failed, with sensitive values kept hidden.
+
+### No Cancellation
+
+- Long-running operations cannot be cancelled. Operations such as encryption, decryption, and applying changes would
+  leave encrypted output or source files in a partial state if interrupted, so FoldersGuard does not expose a cancel
+  control for any operation.
+- The operation context is cancelled only internally, when the operation finishes or when the application shuts down, to
+  release resources. It is never cancelled in response to a user action.
+
+### Operation Locking
+
+- While an operation runs, the WebUI prevents starting any other operation and prevents changing project selection.
+- The form or dialog that triggers an operation closes as soon as the operation starts, so only the progress display
+  remains visible.
+- The project list is locked while an operation runs: refreshing, searching, selecting a project, and opening project
+  actions are all disabled until the operation reaches a terminal state.
+- The progress display is shown above other surfaces, including modals and drawers, and is non-interactive.
+- Closing the window and quitting the app are blocked while an operation runs. If the user forces the app to quit anyway
+  — for example, Force Quit or killing the process — encrypted output and source files may be left incomplete or
+  damaged. Any resulting errors or data loss are entirely the user's own responsibility and are not the responsibility
+  of FoldersGuard or its developers.
+
+### Long-Running Operations
 
 Long-running operations include:
 

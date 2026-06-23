@@ -342,4 +342,10 @@ storage operations must stay in the Go core.
 The WebUI frontend must not implement cryptography, parse FG databases directly, or manipulate encrypted content
 directly. It collects user choices, displays project state, and shows operation progress reported by the Go core.
 
+Progress for long-running operations is owned and measured by the Go core. The core establishes byte totals before the
+main work, reports byte-weighted progress through phases as content is streamed, and reports a terminal state of
+completed or failed. The frontend renders this reported progress and must not infer progress by inspecting the
+filesystem. Long-running operations cannot be cancelled; while one runs, the WebUI blocks closing the window and quitting
+the app until it finishes.
+
 The WebUI runs as a local desktop application and must not expose a general remote HTTP API by default.

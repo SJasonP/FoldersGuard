@@ -36,9 +36,10 @@ Global navigation actions:
 Window behavior:
 
 - If no long-running operation is active, closing the window exits the WebUI.
-- If a long-running operation is active, normal window close is blocked.
-- If the user forcibly terminates the application or the host system terminates it, any resulting incomplete work is
-  outside FG's control.
+- If a long-running operation is active, closing the window and quitting the app are blocked, and the user is warned that
+  the operation cannot be cancelled and must finish first.
+- If the user forcibly terminates the application or the host system terminates it, any resulting incomplete or damaged
+  work is entirely the user's own responsibility and is not the responsibility of FoldersGuard or its developers.
 - If a project modification session has unapplied changes, leaving the session asks the user to apply, discard, or stay.
 
 ## First Launch
@@ -182,7 +183,8 @@ Confirmation content:
 
 ## Operation Status
 
-Long-running operations show status while work is active.
+Long-running operations show status while work is active. Because a project may hold hundreds of gigabytes, the status
+shows real progress reported by the Go core, not a generic busy indicator.
 
 Operation states:
 
@@ -194,13 +196,34 @@ Operation states:
 Status display:
 
 - Operation name.
-- Current phase.
+- Current phase, with phase position and phase count.
+- A determinate progress percentage when totals are known.
+- An indeterminate running indicator when totals are not yet known.
+- Processed bytes and total bytes, shown in localized human-readable sizes.
 - Processed file count when available.
 - Processed folder count when available.
 - Processed part count when available.
 - Total count when known.
+- Throughput and estimated time remaining when they can be derived.
 - Current path or item name when safe to display.
 - Error summary when failed.
+
+Progress display rules:
+
+- Progress is byte-weighted as the primary measure and advances within a large file, not only when whole files finish.
+- The reported percentage never moves backward and reaches one hundred percent only on successful completion.
+- The frontend renders only progress events that match the operation it is currently waiting on.
+
+No cancellation and locking:
+
+- Operations cannot be cancelled. No operation shows a cancel control.
+- The form or dialog that started the operation closes as soon as the operation begins, leaving only the progress
+  status visible.
+- While an operation runs, the project list is locked: refreshing, searching, selecting a project, opening project
+  actions, and starting another operation are all disabled until the operation finishes.
+- Closing the window and quitting the app are blocked while an operation runs. If the user forces the app to quit
+  anyway, any resulting incomplete or damaged data is entirely the user's own responsibility and not the responsibility
+  of FoldersGuard or its developers.
 
 Status rules:
 
