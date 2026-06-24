@@ -727,6 +727,26 @@ export namespace main {
 	    }
 	}
 	
+	export class ProjectBackupInfo {
+	    id: string;
+	    projectId: string;
+	    reason: string;
+	    createdAt: string;
+	    size: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProjectBackupInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.projectId = source["projectId"];
+	        this.reason = source["reason"];
+	        this.createdAt = source["createdAt"];
+	        this.size = source["size"];
+	    }
+	}
 	
 	
 	
@@ -734,6 +754,34 @@ export namespace main {
 	
 	
 	
+	export class RestoreProjectBackupRequest {
+	    projectId: string;
+	    backupId: string;
+	    force: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new RestoreProjectBackupRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.backupId = source["backupId"];
+	        this.force = source["force"];
+	    }
+	}
+	export class RestoreProjectBackupResult {
+	    projectId: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RestoreProjectBackupResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	    }
+	}
 	export class SaveLocalProjectNameRequest {
 	    projectId: string;
 	    projectName: string;
@@ -806,6 +854,7 @@ export namespace main {
 	    noiseFileHandling: string;
 	    theme: string;
 	    language: string;
+	    backupRetention: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -818,6 +867,7 @@ export namespace main {
 	        this.noiseFileHandling = source["noiseFileHandling"];
 	        this.theme = source["theme"];
 	        this.language = source["language"];
+	        this.backupRetention = source["backupRetention"];
 	    }
 	}
 	

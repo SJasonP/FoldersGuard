@@ -48,6 +48,25 @@ type Settings struct {
 	NoiseFileHandling  string `json:"noiseFileHandling"`
 	Theme              string `json:"theme"`
 	Language           string `json:"language"`
+	BackupRetention    int    `json:"backupRetention"`
+}
+
+type ProjectBackupInfo struct {
+	ID        string `json:"id"`
+	ProjectID string `json:"projectId"`
+	Reason    string `json:"reason"`
+	CreatedAt string `json:"createdAt"`
+	Size      int64  `json:"size"`
+}
+
+type RestoreProjectBackupRequest struct {
+	ProjectID string `json:"projectId"`
+	BackupID  string `json:"backupId"`
+	Force     bool   `json:"force"`
+}
+
+type RestoreProjectBackupResult struct {
+	ProjectID string `json:"projectId"`
 }
 
 type InspectProjectRequest struct {

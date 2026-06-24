@@ -10,6 +10,7 @@ import {ImportProjectModal} from './ImportProjectModal';
 import {InspectProjectDrawer} from './InspectProjectDrawer';
 import {InspectProjectModal} from './InspectProjectModal';
 import {ProjectActionsDrawer} from './ProjectActionsDrawer';
+import {RestoreBackupModal} from './RestoreBackupModal';
 import {ShareSelectionDrawer} from './ShareSelectionDrawer';
 import {VerifyProjectDrawer} from './VerifyProjectDrawer';
 import {VerifyProjectModal} from './VerifyProjectModal';
@@ -18,6 +19,7 @@ import type {
     DecryptProjectResultModel,
     InspectProjectResultModel,
     LocalProjectSummary,
+    ProjectBackupInfoModel,
     ProjectBrowserStateModel,
     SettingsModel,
     VerifyProjectResultModel,
@@ -51,6 +53,7 @@ type ProjectSessionLayerProps = {
     onOpenDecrypt: () => void;
     onOpenCreateShare: () => void;
     onOpenExport: () => void;
+    onOpenRestoreBackup: () => void;
     onOpenDelete: () => void;
     inspectDialogOpen: boolean;
     inspectLoading: boolean;
@@ -107,7 +110,13 @@ type ProjectSessionLayerProps = {
     deleteLoading: boolean;
     onCloseDelete: () => void;
     onDeleteProject: (password: string) => void;
-    t: (key: string) => string;
+    restoreBackupOpen: boolean;
+    backups: ProjectBackupInfoModel[];
+    backupsLoading: boolean;
+    restoreBackupLoading: boolean;
+    onCloseRestoreBackup: () => void;
+    onRestoreBackup: (backupId: string) => void;
+    t: (key: string, options?: Record<string, unknown>) => string;
 };
 
 export function ProjectSessionLayer({
@@ -132,6 +141,7 @@ export function ProjectSessionLayer({
                                         onOpenDecrypt,
                                         onOpenCreateShare,
                                         onOpenExport,
+                                        onOpenRestoreBackup,
                                         onOpenDelete,
                                         inspectDialogOpen,
                                         inspectLoading,
@@ -177,6 +187,12 @@ export function ProjectSessionLayer({
                                         deleteLoading,
                                         onCloseDelete,
                                         onDeleteProject,
+                                        restoreBackupOpen,
+                                        backups,
+                                        backupsLoading,
+                                        restoreBackupLoading,
+                                        onCloseRestoreBackup,
+                                        onRestoreBackup,
                                         t,
                                     }: ProjectSessionLayerProps) {
     return (
@@ -193,6 +209,7 @@ export function ProjectSessionLayer({
                 onDecrypt={onOpenDecrypt}
                 onCreateShare={onOpenCreateShare}
                 onExport={onOpenExport}
+                onRestoreBackup={onOpenRestoreBackup}
                 onDelete={onOpenDelete}
                 t={t}
             />
@@ -255,6 +272,15 @@ export function ProjectSessionLayer({
                 project={selectedProject}
                 onCancel={onCloseDelete}
                 onSubmit={onDeleteProject}
+                t={t}
+            />
+            <RestoreBackupModal
+                open={restoreBackupOpen}
+                loading={backupsLoading}
+                restoreLoading={restoreBackupLoading}
+                backups={backups}
+                onRestore={onRestoreBackup}
+                onCancel={onCloseRestoreBackup}
                 t={t}
             />
         </>

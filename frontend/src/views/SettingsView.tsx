@@ -39,6 +39,10 @@ export function SettingsView({
                         <InputNumber min={0} precision={0} style={{width: '100%'}}
                                      placeholder={t('partSizeDisabledHint')}/>
                     </Form.Item>
+                    <Form.Item name="backupRetention" label={t('backupRetention')}
+                               extra={t('backupRetentionHint')}>
+                        <InputNumber min={1} precision={0} style={{width: '100%'}}/>
+                    </Form.Item>
                     <Form.Item name="sourceCleanupMode" label={t('sourceCleanupMode')} rules={[{required: true}]}>
                         <Select
                             options={[

@@ -46,6 +46,10 @@ export function ListLocalProjects() {
   return window['go']['main']['App']['ListLocalProjects']();
 }
 
+export function ListProjectBackups(arg1) {
+  return window['go']['main']['App']['ListProjectBackups'](arg1);
+}
+
 export function LoadShare(arg1) {
   return window['go']['main']['App']['LoadShare'](arg1);
 }
@@ -56,6 +60,10 @@ export function OpenProjectBrowser(arg1) {
 
 export function ReadSettings() {
   return window['go']['main']['App']['ReadSettings']();
+}
+
+export function RestoreProjectBackup(arg1) {
+  return window['go']['main']['App']['RestoreProjectBackup'](arg1);
 }
 
 export function SaveLocalProjectName(arg1) {

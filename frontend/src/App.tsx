@@ -169,6 +169,10 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
         inspectResultOpen,
         projectActionsOpen,
         projectNameSaving,
+        restoreBackupOpen,
+        backups,
+        backupsLoading,
+        restoreBackupLoading,
         verifyDialogOpen,
         verifyLoading,
         verifyResult,
@@ -180,6 +184,7 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
         setInspectDialogOpen,
         setInspectResultOpen,
         setProjectActionsOpen,
+        setRestoreBackupOpen,
         setVerifyDialogOpen,
         setVerifyResultOpen,
         openProjectActions,
@@ -187,6 +192,8 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
         handleDeleteProject,
         handleExportProject,
         handleInspectProject,
+        handleOpenRestoreBackup,
+        handleRestoreBackup,
         handleSaveProjectName,
         handleVerifyProject,
     } = useProjectActions({
@@ -423,6 +430,7 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
                     onOpenDecrypt={() => setDecryptDialogOpen(true)}
                     onOpenCreateShare={() => setSharePasswordDialogOpen(true)}
                     onOpenExport={() => setExportDialogOpen(true)}
+                    onOpenRestoreBackup={() => void handleOpenRestoreBackup()}
                     onOpenDelete={() => setDeleteDialogOpen(true)}
                     inspectDialogOpen={inspectDialogOpen}
                     inspectLoading={inspectLoading}
@@ -468,6 +476,12 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
                     deleteLoading={deleteLoading}
                     onCloseDelete={() => setDeleteDialogOpen(false)}
                     onDeleteProject={(password) => void handleDeleteProject(password)}
+                    restoreBackupOpen={restoreBackupOpen}
+                    backups={backups}
+                    backupsLoading={backupsLoading}
+                    restoreBackupLoading={restoreBackupLoading}
+                    onCloseRestoreBackup={() => setRestoreBackupOpen(false)}
+                    onRestoreBackup={(backupId) => void handleRestoreBackup(backupId)}
                     t={t}
                 />
                 <ProjectBrowserLayer

@@ -17,6 +17,7 @@ export type ImportProjectResultModel = main.ImportProjectResult;
 export type InspectProjectRequestModel = main.InspectProjectRequest;
 export type InspectProjectResultModel = main.InspectProjectResult;
 export type LocalProjectSummary = main.LocalProjectSummary;
+export type ProjectBackupInfoModel = main.ProjectBackupInfo;
 export type ProjectBrowserItemModel = main.ProjectBrowserItem;
 export type ProjectBrowserStateModel = main.ProjectBrowserState;
 export type SettingsModel = main.Settings;

@@ -24,11 +24,15 @@ export function InspectProject(arg1:main.InspectProjectRequest):Promise<main.Ins
 
 export function ListLocalProjects():Promise<Array<main.LocalProjectSummary>>;
 
+export function ListProjectBackups(arg1:string):Promise<Array<main.ProjectBackupInfo>>;
+
 export function LoadShare(arg1:main.LoadShareRequest):Promise<main.ShareSummary>;
 
 export function OpenProjectBrowser(arg1:main.OpenProjectBrowserRequest):Promise<main.ProjectBrowserState>;
 
 export function ReadSettings():Promise<main.Settings>;
+
+export function RestoreProjectBackup(arg1:main.RestoreProjectBackupRequest):Promise<main.RestoreProjectBackupResult>;
 
 export function SaveLocalProjectName(arg1:main.SaveLocalProjectNameRequest):Promise<main.SaveLocalProjectNameResult>;
 

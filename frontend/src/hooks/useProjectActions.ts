@@ -6,6 +6,8 @@ import {
     DeleteProject,
     ExportProject,
     InspectProject,
+    ListProjectBackups,
+    RestoreProjectBackup,
     SaveLocalProjectName,
     VerifyProject
 } from '../../wailsjs/go/main/App';
@@ -15,6 +17,7 @@ import type {
     ExportProjectResultModel,
     InspectProjectResultModel,
     LocalProjectSummary,
+    ProjectBackupInfoModel,
     VerifyProjectResultModel,
 } from '../types';
 import {showOperationError} from '../components/common/operationError';
@@ -55,6 +58,10 @@ export function useProjectActions({
     const [exportLoading, setExportLoading] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [restoreBackupOpen, setRestoreBackupOpen] = useState(false);
+    const [backups, setBackups] = useState<ProjectBackupInfoModel[]>([]);
+    const [backupsLoading, setBackupsLoading] = useState(false);
+    const [restoreBackupLoading, setRestoreBackupLoading] = useState(false);
     const [projectNameSaving, setProjectNameSaving] = useState(false);
 
     const openProjectActions = () => {
@@ -185,6 +192,45 @@ export function useProjectActions({
         }
     };
 
+    const handleOpenRestoreBackup = async () => {
+        if (!selectedProjectId) {
+            return;
+        }
+        setBackups([]);
+        setRestoreBackupOpen(true);
+        setBackupsLoading(true);
+        try {
+            const result = await ListProjectBackups(selectedProjectId);
+            setBackups(result ?? []);
+        } catch (error) {
+            showOperationError(modalApi, t('restoreBackupFailed'), error, t);
+        } finally {
+            setBackupsLoading(false);
+        }
+    };
+
+    const handleRestoreBackup = async (backupId: string) => {
+        if (!selectedProjectId) {
+            return;
+        }
+        setRestoreBackupLoading(true);
+        try {
+            await RestoreProjectBackup({
+                projectId: selectedProjectId,
+                backupId,
+                force: true,
+            });
+            setRestoreBackupOpen(false);
+            setProjectActionsOpen(false);
+            await reloadProjects();
+            messageApi.success(t('restoreBackupSucceeded'));
+        } catch (error) {
+            showOperationError(modalApi, t('restoreBackupFailed'), error, t);
+        } finally {
+            setRestoreBackupLoading(false);
+        }
+    };
+
     const handleSaveProjectName = async (projectName: string) => {
         if (!selectedProjectId) {
             return;
@@ -219,6 +265,10 @@ export function useProjectActions({
         inspectResultOpen,
         projectActionsOpen,
         projectNameSaving,
+        restoreBackupOpen,
+        backups,
+        backupsLoading,
+        restoreBackupLoading,
         selectedProject,
         verifyDialogOpen,
         verifyLoading,
@@ -231,6 +281,7 @@ export function useProjectActions({
         setInspectDialogOpen,
         setInspectResultOpen,
         setProjectActionsOpen,
+        setRestoreBackupOpen,
         setVerifyDialogOpen,
         setVerifyResultOpen,
         openProjectActions,
@@ -238,6 +289,8 @@ export function useProjectActions({
         handleDeleteProject,
         handleExportProject,
         handleInspectProject,
+        handleOpenRestoreBackup,
+        handleRestoreBackup,
         handleSaveProjectName,
         handleVerifyProject,
     };

@@ -4,6 +4,7 @@ import {
     DeleteOutlined,
     EditOutlined,
     ExportOutlined,
+    HistoryOutlined,
     SafetyCertificateOutlined,
     ShareAltOutlined,
     UnlockOutlined,
@@ -22,6 +23,7 @@ type ProjectActionsDrawerProps = {
     onDecrypt: () => void;
     onCreateShare: () => void;
     onExport: () => void;
+    onRestoreBackup: () => void;
     onDelete: () => void;
     t: (key: string) => string;
 };
@@ -38,6 +40,7 @@ export function ProjectActionsDrawer({
                                          onDecrypt,
                                          onCreateShare,
                                          onExport,
+                                         onRestoreBackup,
                                          onDelete,
                                          t,
                                      }: ProjectActionsDrawerProps) {
@@ -98,6 +101,9 @@ export function ProjectActionsDrawer({
                 </Button>
                 <Button block icon={<ExportOutlined/>} onClick={onExport}>
                     {t('exportProject')}
+                </Button>
+                <Button block icon={<HistoryOutlined/>} onClick={onRestoreBackup}>
+                    {t('restoreBackup')}
                 </Button>
                 <Button block danger icon={<DeleteOutlined/>} onClick={onDelete}>
                     {t('deleteProject')}

@@ -17,6 +17,7 @@ func (a *App) SaveSettings(settings Settings) (Settings, error) {
 		NoiseFileHandling:  settings.NoiseFileHandling,
 		Theme:              settings.Theme,
 		Language:           settings.Language,
+		BackupRetention:    settings.BackupRetention,
 	})
 	if err != nil {
 		return Settings{}, frontendError(err)
@@ -31,5 +32,6 @@ func mapSettings(settings app.Settings) Settings {
 		NoiseFileHandling:  settings.NoiseFileHandling,
 		Theme:              settings.Theme,
 		Language:           settings.Language,
+		BackupRetention:    settings.BackupRetention,
 	}
 }
