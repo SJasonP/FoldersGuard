@@ -34,6 +34,7 @@ type Settings struct {
 	NoiseFileHandling  string `json:"noiseFileHandling"`
 	Theme              string `json:"theme"`
 	Language           string `json:"language"`
+	BackupRetention    int    `json:"backupRetention"`
 }
 
 func DefaultSettings() Settings {
@@ -43,6 +44,7 @@ func DefaultSettings() Settings {
 		NoiseFileHandling:  NoiseFileIgnoreEverywhere,
 		Theme:              ThemeSystem,
 		Language:           LanguageSystem,
+		BackupRetention:    DefaultBackupRetention,
 	}
 }
 
@@ -130,6 +132,13 @@ func normalizeSettings(settings Settings) (Settings, error) {
 	case LanguageENUS, LanguageZHCN:
 	default:
 		return Settings{}, fmt.Errorf("unsupported language %q", settings.Language)
+	}
+
+	if settings.BackupRetention < 0 {
+		return Settings{}, fmt.Errorf("backup retention must not be negative")
+	}
+	if settings.BackupRetention == 0 {
+		settings.BackupRetention = DefaultBackupRetention
 	}
 
 	return settings, nil

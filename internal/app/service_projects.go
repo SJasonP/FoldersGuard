@@ -161,6 +161,9 @@ func (s Service) DeleteProject(ctx context.Context, input DeleteProjectInput) (D
 	if meta["database_type"] != "project" {
 		return DeleteProjectResult{}, fmt.Errorf("database type = %q, want project", meta["database_type"])
 	}
+	if _, err := s.backupProjectDatabase(input.ProjectID, BackupReasonDelete); err != nil {
+		return DeleteProjectResult{}, fmt.Errorf("back up project database before delete: %w", err)
+	}
 	if err := os.Remove(sourcePath); err != nil {
 		return DeleteProjectResult{}, fmt.Errorf("delete active project database: %w", err)
 	}

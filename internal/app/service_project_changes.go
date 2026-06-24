@@ -33,6 +33,10 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 	tracker.SetPhases(progress.PhasePreparing, progress.PhaseEncrypting, progress.PhaseFinalizing)
 	tracker.StartPhase(progress.PhasePreparing, false)
 
+	if _, err := s.backupProjectDatabase(input.ProjectID, BackupReasonApply); err != nil {
+		return ApplyProjectChangesResult{}, fmt.Errorf("back up project database before applying changes: %w", err)
+	}
+
 	databasePath, err := s.ActiveProjectDatabasePath(input.ProjectID)
 	if err != nil {
 		return ApplyProjectChangesResult{}, err
