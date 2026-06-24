@@ -177,6 +177,77 @@ Restore rules:
 - Directory metadata is restored after child entries are restored.
 - Platform or filesystem limitations may reduce timestamp precision.
 
+## Planned Feature Set (v1.2–v1.6)
+
+The planned feature set extends v1.1 with reliability and security hardening for large, valuable data.
+
+Versioning approach:
+
+- Each feature ships as its own minor release, starting at v1.2, in the dependency order of the subsections below.
+- None of these features changes the storage format, so the storage format version is unchanged and every release stays
+  data-compatible with v1.
+- The target version numbers are the current plan and may shift.
+- Items marked planned are specified here to be built against and are not yet implemented.
+
+### Metadata-Database Backup
+
+**Status: Planned for v1.2 — not yet implemented.**
+
+- FG automatically snapshots a project database before destructive operations: applying changes, deleting a project, and
+  changing a password.
+- Backups are stored in a managed location under FG's data directory with bounded rotation.
+- Backups are encrypted SQLCipher databases and are stored with the same file restrictions as the live database.
+- The backup retention limit is configurable in Settings.
+- FG can restore a project database from a backup.
+
+### Password Change
+
+**Status: Planned for v1.3 — not yet implemented.**
+
+- A project (`.fg`) or share (`.fgs`) database password can be changed without re-encrypting content.
+- Internal per-file and per-folder content keys are unchanged; no encrypted object is rewritten.
+- Changing a password verifies the old password and confirms the new password before completing.
+- The change is crash-safe: FG backs up the database, re-keys a copy, confirms it opens under the new password, then
+  replaces the live database.
+- Changing a share password protects only future copies; share databases already distributed are unaffected.
+- Password change is available in both the CLI and the WebUI.
+
+### Resumable Operations
+
+**Status: Planned for v1.4 — not yet implemented.**
+
+- Long-running content operations can be re-run after an interruption and continue instead of restarting from the
+  beginning.
+- Encryption skips an encrypted object whose visible path already exists and passes integrity verification; a present
+  but corrupt object is rewritten.
+- Decryption and restore skip an output file that already exists and matches the expected content.
+- A source file is deleted only after its encrypted object is confirmed complete, even across a resumed run.
+- Progress counts already-completed work as processed at the start of a resumed run so totals stay accurate.
+- The user chooses between resuming and starting fresh.
+- Resuming verifies an existing object before skipping it; a faster skip-by-presence option may be offered.
+
+### Partial-Failure Tolerance
+
+**Status: Planned for v1.5 — not yet implemented.**
+
+- Content operations support an optional continue-on-error mode. The default remains abort on the first error.
+- In continue-on-error mode, file-level failures are recorded and the operation processes the remaining items.
+- The result reports the count and the list of failed items with reasons; sensitive values stay hidden.
+- A source file is never deleted when its own encryption failed.
+- Fatal conditions, such as the output disk being full or a database error, still abort the operation regardless of
+  mode.
+
+### Parallel Encryption
+
+**Status: Planned for v1.6 — not yet implemented.**
+
+- File encryption may process multiple files concurrently with a bounded worker pool.
+- Concurrency defaults to a value derived from the host CPU count and is configurable.
+- Within-file chunk streaming is unchanged; concurrency is across files, not within a file.
+- Byte-weighted progress remains accurate and monotonic under concurrency.
+- Source-file deletion and folder-creation ordering remain correct under concurrency.
+- A failure in one worker stops the operation cleanly, unless continue-on-error mode is enabled.
+
 ## Security Expectations
 
 FG must protect file contents, file names, directory names, and internal key material from unauthorized readers.

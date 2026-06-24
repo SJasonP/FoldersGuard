@@ -44,6 +44,18 @@ The platform-specific path is the host OS user configuration directory plus the 
 FG data is stored as SQLCipher-encrypted SQLite databases. FG data may be exported. Exported FG data is a database file
 that can be backed up or transferred.
 
+## Database Backups
+
+Planned; not yet implemented.
+
+FG keeps recent backups of a project database in a backups subdirectory of the FG data directory.
+
+- A backup is a byte copy of the encrypted SQLCipher project database, taken before a destructive operation on that
+  database.
+- Backups are named with the project id and a timestamp.
+- The number of retained backups per project is bounded by a configurable retention limit; older backups are pruned.
+- Backups use the same owner-only file permission restriction as live databases.
+
 ## Encrypted SQLite Databases
 
 FG uses SQLite for its internal data model.
@@ -452,6 +464,10 @@ Required format and algorithm metadata:
 - Crypto suite identifier.
 
 The implementation rejects unsupported native format versions.
+
+The format version tracks compatibility, not release numbering. It changes only when the on-disk database or content
+format changes. The planned v1.2 to v1.6 feature set does not change the storage format, so it does not change the format
+version, and those releases remain data-compatible with v1.
 
 ## Filesystem Entry Scope
 

@@ -231,3 +231,27 @@ Status rules:
 - Files that fail to encrypt are not deleted from the cleartext source.
 - Completed operations show a result summary.
 - Failed operations show recoverable details and keep sensitive values hidden.
+
+## Operation Options
+
+Planned; not yet implemented. These options apply to the long-running content operations and default to the
+v1 behavior.
+
+Resume:
+
+- When an encryption or decryption output already exists from an interrupted run, the WebUI offers to resume or to start
+  fresh.
+- Resuming skips objects that are already complete and processes only what remains; the progress display counts
+  already-completed work as processed.
+- Starting fresh re-processes every object and is the default.
+
+Failure handling:
+
+- An operation can abort on the first error or continue past item-level failures, following the default failure handling
+  setting and an optional per-operation override.
+- When continuing, the result summary lists the failed item count and per-item reasons, with sensitive values hidden.
+
+Concurrency:
+
+- Encryption can process several files at once, following the encryption concurrency setting.
+- Concurrency does not change the progress display, which remains byte-weighted.

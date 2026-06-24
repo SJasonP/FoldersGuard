@@ -62,3 +62,38 @@ Current tests verify:
 - Wrong database passwords fail during open.
 - SQLCipher database file permissions are restricted to owner read/write.
 - Passwords containing double quotes can create and reopen a database.
+
+## Password Change
+
+Planned; not yet implemented.
+
+FG changes a database password by re-keying the SQLCipher database, not by re-encrypting content.
+
+- The old password is verified by opening the database before any change is made.
+- Re-keying applies to a backup copy of the database, not to the live database, so an interruption cannot corrupt the
+  only working copy.
+- The sequence is: back up the database, re-key the copy, validate that the copy opens under the new password by
+  querying `sqlite_master`, then atomically replace the live database.
+- The re-keyed database keeps owner-only read/write permissions.
+- Internal per-file and per-folder content keys are unchanged, so no encrypted content object is rewritten.
+- A share database password change affects only future copies of the share database; already distributed copies are
+  independent and unaffected.
+
+## Database Backups
+
+Planned; not yet implemented.
+
+- Backups are byte copies of the encrypted SQLCipher database and contain key material.
+- Backups are stored with the same owner-only read/write restriction as the live database.
+- Backups never expose a plaintext SQLite header or plaintext metadata, because they are copies of the encrypted
+  database.
+- Backup retention is bounded and configurable.
+
+## Encryption Concurrency
+
+Planned; not yet implemented.
+
+- Parallel file encryption does not weaken the encryption suite. Each file uses an independent random 256-bit key, and
+  each object uses per-object nonces that are never reused with the same key.
+- Concurrent encryption shares no AEAD cipher state across files, so concurrency does not affect nonce uniqueness or
+  authentication.

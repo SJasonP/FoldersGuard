@@ -11,6 +11,9 @@ Supported settings:
 - Noise file handling: ignore everywhere, ignore only during verification and matching, or do not ignore.
 - Theme: system, light, or dark.
 - Language: system, English (United States), or Simplified Chinese.
+- Encryption concurrency: number of files encrypted at once (planned).
+- Database backup retention: number of project-database backups kept per project (planned).
+- Default failure handling: abort on the first error, or continue and report item-level failures (planned).
 
 Default settings:
 
@@ -19,6 +22,9 @@ Default settings:
 - Noise file handling defaults to ignore everywhere.
 - Theme defaults to system.
 - Language defaults to system.
+- Encryption concurrency defaults to a value derived from the host CPU count (planned).
+- Database backup retention defaults to a small bounded number of backups (planned).
+- Default failure handling defaults to abort on the first error (planned).
 
 Settings behavior:
 

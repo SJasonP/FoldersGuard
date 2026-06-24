@@ -225,6 +225,79 @@ manual-storage workflows by generating clear instructions.
 When FG has direct filesystem access to the encrypted content, it may perform these operations itself. The design must
 still support the manual instruction workflow.
 
+## Planned Operations And Data
+
+This section records the architectural decisions for the planned feature set. It is planned and not yet implemented. The
+behavior-level requirements are in the product requirements planned feature set.
+
+### Operation Resumption
+
+A long-running content operation can be re-run after an interruption and continue rather than restart.
+
+- Encrypted objects live at deterministic visible UUID paths derived from the project plan, so whether an object is
+  already written is answerable from the plan and the filesystem alone, without extra resume state on disk.
+- On resume, encryption treats an object as complete when its visible path exists and passes integrity verification. A
+  present but corrupt or partially written object is rewritten.
+- On resume, decryption and restore treat an output as complete when the output path exists and matches the expected
+  decrypted content.
+- Source-file deletion under delete-source remains safe: a source file is deleted only after its encrypted object is
+  confirmed complete in the same run, or verified complete on resume.
+- Resumption verifies an existing object before skipping it. A faster skip-by-presence option may be offered; the
+  integrity-verifying mode is the default.
+- If the plan changed between runs, such as a different split size or added or removed items, resumption applies only to
+  objects that still match the current plan. Objects that no longer match are rewritten or removed to match the plan.
+
+### Operation Failure Policy
+
+Content operations choose between aborting on the first error and continuing past recoverable item-level failures.
+
+- The default policy is abort on the first error, matching v1 behavior.
+- Continue-on-error policy records each item-level failure and proceeds with the remaining items.
+- Item-level failures are recoverable conditions tied to one file, such as an unreadable source or a permission error on
+  one entry.
+- Fatal conditions abort regardless of policy: a full output disk, a database error, or any condition that threatens the
+  integrity of the project database or the whole operation.
+- A source file is never deleted when its own encryption failed.
+- The operation result reports the number of failed items and a per-item reason. Internal keys and passwords are never
+  included in failure detail.
+
+### Change Password
+
+Changing a project or share password re-keys the database without re-encrypting content.
+
+- Content is encrypted with internal per-file and per-folder keys, and the password protects only the database, so
+  changing the password leaves every encrypted object unchanged.
+- A password change does not require encrypted content to be present.
+- The operation is crash-safe and never leaves the user without a working database. The sequence is: back up the
+  database, re-key a copy, confirm the copy opens under the new password, then atomically replace the live database.
+- The old password is verified before the change proceeds, and the new password is confirmed.
+- A share database password change protects only future copies. Share databases already distributed are independent
+  copies and are unaffected.
+
+### Metadata-Database Backup
+
+FG snapshots a project database before operations that modify or replace it.
+
+- A backup is taken before applying project changes, deleting a project, and changing a password.
+- Backups live in a managed backups location inside FG's data directory and are pruned to a configurable retention
+  limit.
+- A backup is a copy of the encrypted SQLCipher database; it contains key material and is stored with the same file
+  permission restrictions as the live database.
+- FG can restore a project database from a backup.
+
+### Encryption Concurrency
+
+File encryption may process multiple files concurrently.
+
+- Each file is encrypted independently with its own random key and per-object nonces, so concurrent file encryption
+  shares no cipher state and does not affect the encryption suite's guarantees.
+- Concurrency is bounded by a worker pool whose size defaults to a value derived from the host CPU count and is
+  configurable.
+- Concurrency is across files; chunk streaming within a single file remains sequential.
+- Folder-creation ordering and source-file deletion remain correct under concurrency: a folder exists before its
+  children are written, and a source file is deleted only after its own encrypted object is complete.
+- Progress remains byte-weighted, accurate, and monotonic under concurrency.
+
 ## Directory Hierarchy Policy
 
 V1 preserves hierarchy. This is intentional.

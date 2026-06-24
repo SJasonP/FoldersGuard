@@ -134,5 +134,37 @@ Delete rules:
 - Deleting a project does not delete encrypted content unless another explicit content operation is selected.
 - The WebUI must ask for confirmation before deletion.
 - The confirmation shows the project id, local database file name, and data directory path affected.
+- Deletion takes a database backup first (planned).
 
 After deletion, the WebUI refreshes the local project list.
+
+## Change Password
+
+Planned; not yet implemented.
+
+Change Password changes the password of a project database without re-encrypting content.
+
+The user enters the current password, then the new password and a confirmation.
+
+Rules:
+
+- The current password must be verified before the change.
+- The new password must be confirmed and must be non-empty for project databases.
+- Encrypted content does not need to be present, and no encrypted content object is changed.
+- The change takes a database backup first and replaces the live database only after the re-keyed copy is verified.
+- The WebUI shows progress and a result summary like other operations.
+
+## Restore Database Backup
+
+Planned; not yet implemented.
+
+Restore Database Backup replaces the active project database with one of its retained backups.
+
+Rules:
+
+- The WebUI lists retained backups for the project, newest first, with their creation time.
+- Restoring takes a backup of the current database first.
+- The WebUI must ask for confirmation, showing which backup will be restored and which project it replaces.
+- Restoring changes local FG data only and does not change any encrypted content object.
+
+After restoring, the WebUI refreshes the project view.

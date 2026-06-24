@@ -174,6 +174,11 @@ Actions:
 - Inspect Share.
 - Decrypt Share.
 - Verify Share Content.
+- Change Share Password (planned).
+
+Change Share Password re-keys the loaded `.fgs` database without re-encrypting content. It protects only future copies
+of the share database; copies already distributed are unaffected. It verifies the current password and confirms the new
+password, and is unavailable for unprotected shares.
 
 Share actions use the loaded `.fgs` database. If the user leaves the share action menu, the loaded share session is
 closed.

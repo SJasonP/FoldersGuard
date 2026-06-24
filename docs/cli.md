@@ -154,3 +154,36 @@ Planning:
 - [`fg plan add`](cli/plan.md#fg-plan-add)
 - [`fg plan move`](cli/plan.md#fg-plan-move)
 - [`fg plan remove`](cli/plan.md#fg-plan-remove)
+
+Maintenance (planned):
+
+- [`fg passwd`](cli/maintenance.md#fg-passwd)
+- [`fg backups list`](cli/maintenance.md#fg-backups-list)
+- [`fg backups restore`](cli/maintenance.md#fg-backups-restore)
+
+## Planned CLI Additions
+
+Planned; not yet implemented. These additions follow the same global rules, password input, project reference,
+and overwrite rules as the rest of the CLI.
+
+New flags on `fg encrypt` and `fg decrypt`:
+
+- `--resume`: continue an interrupted operation, skipping objects that already exist and pass integrity verification.
+- `--resume-fast`: continue an interrupted operation, skipping objects by presence only without verifying them.
+- `--fresh`: ignore any existing output and process every object; this is the default.
+- `--continue-on-error`: record item-level failures and process the remaining items instead of aborting on the first
+  error. The default remains abort on the first error.
+
+New flag on `fg encrypt`:
+
+- `--concurrency <n>`: number of files encrypted concurrently. The default is derived from the host CPU count. `1`
+  forces sequential encryption.
+
+Exit codes with `--continue-on-error`:
+
+- Exit status is `0` when every item succeeded.
+- Exit status is `1` when any item failed. The output lists the failed item count and per-item reasons. Internal keys
+  and passwords are never printed.
+
+New commands: `fg passwd`, `fg backups list`, and `fg backups restore`, documented in
+[maintenance CLI commands](cli/maintenance.md).
