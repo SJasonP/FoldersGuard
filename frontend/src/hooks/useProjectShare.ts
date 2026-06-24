@@ -58,6 +58,7 @@ export function useProjectShare({messageApi, modalApi, t, selectedProjectId}: Us
         if (!selectedProjectId) {
             return;
         }
+        setShareSelectionOpen(false);
         setShareLoading(true);
         try {
             const result = await CreateShare({
@@ -69,7 +70,6 @@ export function useProjectShare({messageApi, modalApi, t, selectedProjectId}: Us
                 passwordProtected: values.passwordProtected,
                 sharePassword: values.passwordProtected ? values.sharePassword ?? '' : '',
             });
-            setShareSelectionOpen(false);
             setCreateShareResult(result);
             setCreateShareResultOpen(true);
             messageApi.success(t('createShareSucceeded'));

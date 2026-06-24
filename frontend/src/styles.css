@@ -65,36 +65,81 @@ body {
     margin-top: 6px;
 }
 
-.app-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    height: 64px;
-    padding: 0 24px;
-    border-bottom: 1px solid var(--fg-border);
-    background: var(--fg-bg-container);
-}
-
 .app-content {
     padding: 24px;
     background: var(--fg-bg-layout);
 }
 
-.operation-status {
+.operation-overlay {
+    /* Portaled to document.body (outside .app-shell), so theme is applied via
+       the operation-overlay--light / --dark modifier rather than scoped vars. */
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    /* Above Ant Design modal/drawer masks so the progress is never dimmed.
+       pointer-events: none keeps it non-interactive and click-through. */
+    z-index: 2000;
+    pointer-events: none;
+    box-sizing: border-box;
+    width: min(520px, calc(100vw - 48px));
+    padding: 14px 18px 12px;
+    border-radius: 14px;
+    /* Frosted "liquid glass": translucent fill plus a backdrop blur. */
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.operation-overlay--light {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+    color: rgba(0, 0, 0, 0.88);
+}
+
+.operation-overlay--dark {
+    background: rgba(38, 38, 42, 0.68);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    color: rgba(255, 255, 255, 0.88);
+}
+
+/* Browsers without backdrop-filter fall back to a near-opaque fill. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .operation-overlay--light {
+        background: rgba(255, 255, 255, 0.97);
+    }
+
+    .operation-overlay--dark {
+        background: rgba(38, 38, 42, 0.97);
+    }
+}
+
+.operation-overlay-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.operation-overlay-spinner {
+    flex: 0 0 auto;
+    color: #1677ff;
+    font-size: 14px;
+}
+
+.operation-overlay-title {
     min-width: 0;
-    max-width: 420px;
+    font-size: 14px;
+    color: inherit;
 }
 
-.operation-progress {
-    width: 96px;
-    flex: 0 0 96px;
+.operation-overlay-bar {
+    margin: 8px 0 2px;
 }
 
-.operation-status .ant-typography {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.operation-overlay-detail {
+    display: block;
+    font-variant-numeric: tabular-nums;
 }
 
 .content-stack {

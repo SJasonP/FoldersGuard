@@ -69,10 +69,12 @@ func (a *App) InspectProject(request InspectProjectRequest) (InspectProjectResul
 }
 
 func (a *App) VerifyProject(request VerifyProjectRequest) (VerifyProjectResult, error) {
-	result, err := a.service.Verify(a.ctx, app.DatabaseOpen{
+	ctx, finish := a.beginOperation("verify")
+	result, err := a.service.Verify(ctx, app.DatabaseOpen{
 		ProjectRef: request.ProjectID,
 		Password:   request.Password,
 	}, request.EncryptedPath)
+	finish(err)
 	if err != nil {
 		return VerifyProjectResult{}, frontendError(err)
 	}
@@ -90,7 +92,8 @@ func (a *App) VerifyProject(request VerifyProjectRequest) (VerifyProjectResult, 
 }
 
 func (a *App) DecryptProject(request DecryptProjectRequest) (DecryptProjectResult, error) {
-	result, err := a.service.DecryptProject(a.ctx, app.DecryptProjectInput{
+	ctx, finish := a.beginOperation("decrypt")
+	result, err := a.service.DecryptProject(ctx, app.DecryptProjectInput{
 		ProjectID:     request.ProjectID,
 		Password:      request.Password,
 		EncryptedRoot: request.EncryptedPath,
@@ -98,6 +101,7 @@ func (a *App) DecryptProject(request DecryptProjectRequest) (DecryptProjectResul
 		Force:         request.Force,
 		SourceCleanup: request.SourceCleanup,
 	})
+	finish(err)
 	if err != nil {
 		return DecryptProjectResult{}, frontendError(err)
 	}
@@ -134,10 +138,12 @@ func (a *App) LoadShare(request LoadShareRequest) (ShareSummary, error) {
 }
 
 func (a *App) VerifyShare(request VerifyShareRequest) (VerifyProjectResult, error) {
-	result, err := a.service.VerifyShare(a.ctx, app.ShareOpen{
+	ctx, finish := a.beginOperation("verify")
+	result, err := a.service.VerifyShare(ctx, app.ShareOpen{
 		DatabasePath: request.DatabasePath,
 		Password:     request.Password,
 	}, request.EncryptedPath)
+	finish(err)
 	if err != nil {
 		return VerifyProjectResult{}, frontendError(err)
 	}
@@ -155,7 +161,8 @@ func (a *App) VerifyShare(request VerifyShareRequest) (VerifyProjectResult, erro
 }
 
 func (a *App) DecryptShare(request DecryptShareRequest) (DecryptShareResult, error) {
-	result, err := a.service.DecryptShare(a.ctx, app.DecryptShareInput{
+	ctx, finish := a.beginOperation("decrypt")
+	result, err := a.service.DecryptShare(ctx, app.DecryptShareInput{
 		DatabasePath:  request.DatabasePath,
 		Password:      request.Password,
 		EncryptedRoot: request.EncryptedPath,
@@ -163,6 +170,7 @@ func (a *App) DecryptShare(request DecryptShareRequest) (DecryptShareResult, err
 		Force:         request.Force,
 		SourceCleanup: request.SourceCleanup,
 	})
+	finish(err)
 	if err != nil {
 		return DecryptShareResult{}, frontendError(err)
 	}
@@ -178,12 +186,14 @@ func (a *App) DecryptShare(request DecryptShareRequest) (DecryptShareResult, err
 }
 
 func (a *App) ExportProject(request ExportProjectRequest) (ExportProjectResult, error) {
-	result, err := a.service.ExportProject(a.ctx, app.ExportProjectInput{
+	ctx, finish := a.beginOperation("export")
+	result, err := a.service.ExportProject(ctx, app.ExportProjectInput{
 		ProjectID:  request.ProjectID,
 		Password:   request.Password,
 		OutputPath: request.OutputPath,
 		Force:      request.Force,
 	})
+	finish(err)
 	if err != nil {
 		return ExportProjectResult{}, frontendError(err)
 	}
@@ -207,7 +217,8 @@ func (a *App) DeleteProject(request DeleteProjectRequest) (DeleteProjectResult, 
 }
 
 func (a *App) CreateProject(request CreateProjectRequest) (CreateProjectResult, error) {
-	result, err := a.service.CreateProject(a.ctx, app.CreateProjectInput{
+	ctx, finish := a.beginOperation("create")
+	result, err := a.service.CreateProject(ctx, app.CreateProjectInput{
 		SourcePath:     request.SourcePath,
 		ContentOutput:  request.ContentOutput,
 		Password:       request.Password,
@@ -216,6 +227,7 @@ func (a *App) CreateProject(request CreateProjectRequest) (CreateProjectResult, 
 		SourceCleanup:  request.SourceCleanup,
 		DatabaseExport: request.DatabaseExport,
 	})
+	finish(err)
 	if err != nil {
 		return CreateProjectResult{}, frontendError(err)
 	}
@@ -234,11 +246,13 @@ func (a *App) CreateProject(request CreateProjectRequest) (CreateProjectResult, 
 }
 
 func (a *App) ImportProject(request ImportProjectRequest) (ImportProjectResult, error) {
-	result, err := a.service.ImportProject(a.ctx, app.ImportProjectInput{
+	ctx, finish := a.beginOperation("import")
+	result, err := a.service.ImportProject(ctx, app.ImportProjectInput{
 		InputPath: request.InputPath,
 		Password:  request.Password,
 		Force:     request.Force,
 	})
+	finish(err)
 	if err != nil {
 		return ImportProjectResult{}, frontendError(err)
 	}

@@ -16,8 +16,12 @@ type App struct {
 	startupError                error
 	longRunningOperationActive  bool
 	longRunningOperationActiveM sync.RWMutex
+	uiLang                      string
+	uiLangM                     sync.RWMutex
 	manualContentGuideGuard     manualContentGuideCloseGuard
 	manualContentGuideGuardM    sync.RWMutex
+	currentOperation            *operationHandle
+	currentOperationM           sync.Mutex
 }
 
 type manualContentGuideCloseGuard struct {
@@ -45,10 +49,24 @@ func (a *App) startup(ctx context.Context) {
 	a.restoreWindowPlacement(ctx)
 }
 
-func (a *App) SetLongRunningOperationActive(active bool) {
+func (a *App) setLongRunningOperationActive(active bool) {
 	a.longRunningOperationActiveM.Lock()
 	defer a.longRunningOperationActiveM.Unlock()
 	a.longRunningOperationActive = active
+}
+
+// SetUILanguage records the current WebUI language so native dialogs (such as
+// the close guard shown while an operation is running) can be localized.
+func (a *App) SetUILanguage(lang string) {
+	a.uiLangM.Lock()
+	defer a.uiLangM.Unlock()
+	a.uiLang = lang
+}
+
+func (a *App) currentUILanguage() string {
+	a.uiLangM.RLock()
+	defer a.uiLangM.RUnlock()
+	return a.uiLang
 }
 
 func (a *App) SetManualContentGuideCloseGuardActive(active bool, lang string) {
@@ -78,13 +96,30 @@ func (a *App) beforeClose(ctx context.Context) bool {
 		}
 		return preventClose
 	}
+	a.warnLongRunningOperationClose(ctx)
+	return true
+}
+
+// warnLongRunningOperationClose tells the user that closing is blocked while an
+// operation runs, and that forcing the app to quit anyway is entirely at their
+// own risk. Operations cannot be cancelled, so the only safe path is to wait.
+func (a *App) warnLongRunningOperationClose(ctx context.Context) {
+	title := "FoldersGuard is working"
+	message := "An operation is still running and cannot be cancelled. FoldersGuard blocks closing the window and quitting the app until it finishes.\n\n" +
+		"If you force the app to quit anyway — for example, Force Quit or killing the process — the encrypted output and your source files may be left incomplete or damaged. Any errors or data loss that result are entirely your own responsibility and are not the responsibility of FoldersGuard or its developers."
+	okButton := "OK"
+	if a.currentUILanguage() == app.LanguageZHCN {
+		title = "FoldersGuard 正在执行操作"
+		message = "操作仍在进行中，且无法取消。在操作完成前，FoldersGuard 会阻止关闭窗口和退出应用。\n\n" +
+			"如果你仍然强行退出（例如“强制退出”或直接结束进程），加密输出和你的源文件可能会处于不完整或损坏的状态。由此产生的任何错误或数据丢失将完全由你自行承担，与 FoldersGuard 及其开发者无关。"
+		okButton = "我已知晓"
+	}
 	_, _ = runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
 		Type:    runtime.WarningDialog,
-		Title:   "FoldersGuard is working",
-		Message: "An operation is still running. FoldersGuard will block normal close until it finishes.",
-		Buttons: []string{"OK"},
+		Title:   title,
+		Message: message,
+		Buttons: []string{okButton},
 	})
-	return true
 }
 
 func (a *App) initialWindowSize() (int, int) {

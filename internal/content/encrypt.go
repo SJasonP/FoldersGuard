@@ -34,6 +34,9 @@ type FileSource struct {
 type Encryptor struct {
 	OutputRoot string
 	ChunkSize  int
+	// OnBytes, when set, is called with the number of plaintext bytes processed
+	// after each chunk is encrypted. It enables byte-weighted progress.
+	OnBytes func(int64)
 }
 
 func (e Encryptor) EncryptFile(ctx context.Context, source FileSource) error {
@@ -122,13 +125,13 @@ func (e Encryptor) sealReader(ctx context.Context, aead cipher.AEAD, reader io.R
 	}
 	defer output.Close()
 
-	if err := writeEncryptedObject(ctx, aead, reader, output, associatedData, e.ChunkSize); err != nil {
+	if err := writeEncryptedObject(ctx, aead, reader, output, associatedData, e.ChunkSize, e.OnBytes); err != nil {
 		return err
 	}
 	return nil
 }
 
-func writeEncryptedObject(ctx context.Context, aead cipher.AEAD, reader io.Reader, writer io.Writer, associatedData []byte, chunkSize int) error {
+func writeEncryptedObject(ctx context.Context, aead cipher.AEAD, reader io.Reader, writer io.Writer, associatedData []byte, chunkSize int, onProgress func(int64)) error {
 	if chunkSize <= 0 {
 		chunkSize = defaultChunkSize
 	}
@@ -173,6 +176,64 @@ func writeEncryptedObject(ctx context.Context, aead cipher.AEAD, reader io.Reade
 
 		if err := writeChunkRecord(writer, final, uint32(n), ciphertext); err != nil {
 			return err
+		}
+		if n > 0 && onProgress != nil {
+			onProgress(int64(n))
+		}
+		if final {
+			break
+		}
+	}
+	return nil
+}
+
+// StreamDecrypt reads one encrypted object from reader, authenticates and
+// decrypts it chunk by chunk, and writes the plaintext to writer without
+// buffering the whole object in memory. When onProgress is set it is called with
+// the number of plaintext bytes after each chunk.
+func StreamDecrypt(ctx context.Context, key []byte, reader io.Reader, writer io.Writer, associatedData []byte, onProgress func(int64)) error {
+	aead, err := fgcrypto.NewAES256GCM(key)
+	if err != nil {
+		return err
+	}
+
+	magic := make([]byte, len(objectMagic))
+	if _, err := io.ReadFull(reader, magic); err != nil {
+		return fmt.Errorf("read object magic: %w", err)
+	}
+	if string(magic) != objectMagic {
+		return fmt.Errorf("invalid encrypted object magic")
+	}
+
+	noncePrefix := make([]byte, noncePrefixSize)
+	if _, err := io.ReadFull(reader, noncePrefix); err != nil {
+		return fmt.Errorf("read nonce prefix: %w", err)
+	}
+
+	for index := uint32(0); ; index++ {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		final, plainLen, ciphertext, err := readChunkRecordReader(reader, aead.Overhead())
+		if err != nil {
+			return err
+		}
+		nonce := chunkNonce(noncePrefix, index)
+		chunkAD := chunkAssociatedData(associatedData, index, final)
+		chunk, err := aead.Open(nil, nonce, ciphertext, chunkAD)
+		if err != nil {
+			return fmt.Errorf("open encrypted chunk %d: %w", index, err)
+		}
+		if len(chunk) != int(plainLen) {
+			return fmt.Errorf("chunk %d plaintext length mismatch", index)
+		}
+		if len(chunk) > 0 {
+			if _, err := writer.Write(chunk); err != nil {
+				return fmt.Errorf("write plaintext chunk %d: %w", index, err)
+			}
+			if onProgress != nil {
+				onProgress(int64(len(chunk)))
+			}
 		}
 		if final {
 			break
@@ -267,6 +328,78 @@ func OpenObjectFromFile(ctx context.Context, key []byte, encryptedPath string, a
 	return plaintext, nil
 }
 
+// OpenObjectFileStream decrypts the encrypted object at encryptedPath and writes
+// the plaintext to outputPath, streaming chunk by chunk so the whole object is
+// never held in memory. The output is written to a temporary file and committed
+// atomically. When onProgress is set it reports plaintext bytes as they decrypt.
+func OpenObjectFileStream(ctx context.Context, key []byte, encryptedPath, outputPath string, associatedData []byte, onProgress func(int64)) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if encryptedPath == "" {
+		return fmt.Errorf("encrypted path is required")
+	}
+	if outputPath == "" {
+		return fmt.Errorf("output path is required")
+	}
+	input, err := os.Open(encryptedPath)
+	if err != nil {
+		return fmt.Errorf("open encrypted object: %w", err)
+	}
+	defer input.Close()
+
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
+		return fmt.Errorf("create plaintext directory: %w", err)
+	}
+	temp, err := os.CreateTemp(filepath.Dir(outputPath), "."+filepath.Base(outputPath)+".*.tmp")
+	if err != nil {
+		return fmt.Errorf("create temporary plaintext: %w", err)
+	}
+	tempPath := temp.Name()
+	committed := false
+	defer func() {
+		if !committed {
+			_ = os.Remove(tempPath)
+		}
+	}()
+
+	if err := StreamDecrypt(ctx, key, input, temp, associatedData, onProgress); err != nil {
+		_ = temp.Close()
+		return err
+	}
+	if err := temp.Chmod(0o600); err != nil {
+		_ = temp.Close()
+		return fmt.Errorf("restrict temporary plaintext permissions: %w", err)
+	}
+	if err := temp.Close(); err != nil {
+		return fmt.Errorf("close temporary plaintext: %w", err)
+	}
+	if err := os.Rename(tempPath, outputPath); err != nil {
+		return fmt.Errorf("commit plaintext: %w", err)
+	}
+	committed = true
+	return nil
+}
+
+// VerifyObjectFileStream authenticates and decrypts the encrypted object at
+// encryptedPath without writing the plaintext, streaming chunk by chunk. It
+// returns an error if the object cannot be authenticated. When onProgress is set
+// it reports plaintext bytes as they are verified.
+func VerifyObjectFileStream(ctx context.Context, key []byte, encryptedPath string, associatedData []byte, onProgress func(int64)) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if encryptedPath == "" {
+		return fmt.Errorf("encrypted path is required")
+	}
+	input, err := os.Open(encryptedPath)
+	if err != nil {
+		return fmt.Errorf("open encrypted object: %w", err)
+	}
+	defer input.Close()
+	return StreamDecrypt(ctx, key, input, io.Discard, associatedData, onProgress)
+}
+
 func WritePlaintextFile(outputPath string, plaintext []byte) error {
 	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
 		return fmt.Errorf("create plaintext directory: %w", err)
@@ -335,6 +468,27 @@ func writeChunkRecord(writer io.Writer, final bool, plaintextLen uint32, ciphert
 }
 
 func readChunkRecord(reader *bytes.Reader, overhead int) (bool, uint32, []byte, error) {
+	var header [9]byte
+	if _, err := io.ReadFull(reader, header[:]); err != nil {
+		return false, 0, nil, fmt.Errorf("read chunk header: %w", err)
+	}
+	final := header[0] == 1
+	plainLen := binary.BigEndian.Uint32(header[1:5])
+	cipherLen := binary.BigEndian.Uint32(header[5:9])
+	if cipherLen < uint32(overhead) {
+		return false, 0, nil, fmt.Errorf("invalid chunk ciphertext length")
+	}
+	if cipherLen != plainLen+uint32(overhead) {
+		return false, 0, nil, fmt.Errorf("chunk ciphertext length mismatch")
+	}
+	ciphertext := make([]byte, cipherLen)
+	if _, err := io.ReadFull(reader, ciphertext); err != nil {
+		return false, 0, nil, fmt.Errorf("read chunk ciphertext: %w", err)
+	}
+	return final, plainLen, ciphertext, nil
+}
+
+func readChunkRecordReader(reader io.Reader, overhead int) (bool, uint32, []byte, error) {
 	var header [9]byte
 	if _, err := io.ReadFull(reader, header[:]); err != nil {
 		return false, 0, nil, fmt.Errorf("read chunk header: %w", err)

@@ -26,6 +26,9 @@ export function useProjectCreate({messageApi, modalApi, t, reloadProjects}: UseP
     const [createLoading, setCreateLoading] = useState(false);
 
     const handleCreateProject = async (values: CreateProjectValues) => {
+        // Close the form as soon as the operation starts so only the progress
+        // overlay remains while encryption runs.
+        setCreateDialogOpen(false);
         setCreateLoading(true);
         try {
             const result: CreateProjectResultModel = await CreateProject({
@@ -37,7 +40,6 @@ export function useProjectCreate({messageApi, modalApi, t, reloadProjects}: UseP
                 sourceCleanup: '',
                 databaseExport: '',
             });
-            setCreateDialogOpen(false);
             await reloadProjects();
             messageApi.success(
                 [

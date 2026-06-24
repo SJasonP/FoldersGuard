@@ -89,6 +89,8 @@ export function useProjectActions({
         if (!selectedProjectId) {
             return;
         }
+        setExportDialogOpen(false);
+        setProjectActionsOpen(false);
         setExportLoading(true);
         try {
             const result: ExportProjectResultModel = await ExportProject({
@@ -97,8 +99,6 @@ export function useProjectActions({
                 outputPath: values.outputPath,
                 force: values.force,
             });
-            setExportDialogOpen(false);
-            setProjectActionsOpen(false);
             messageApi.success(`${t('exportProjectSucceeded')}: ${result.outputPath}`);
         } catch (error) {
             showOperationError(modalApi, t('exportProjectFailed'), error, t);
@@ -111,6 +111,8 @@ export function useProjectActions({
         if (!selectedProjectId) {
             return;
         }
+        setVerifyDialogOpen(false);
+        setProjectActionsOpen(false);
         setVerifyLoading(true);
         try {
             const result: VerifyProjectResultModel = await VerifyProject({
@@ -118,8 +120,6 @@ export function useProjectActions({
                 password: values.password,
                 encryptedPath: values.encryptedPath,
             });
-            setVerifyDialogOpen(false);
-            setProjectActionsOpen(false);
             setVerifyResult(result);
             setVerifyResultOpen(true);
             messageApi.success(t('verifyProjectSucceeded'));
@@ -139,6 +139,8 @@ export function useProjectActions({
         if (!selectedProjectId) {
             return;
         }
+        setDecryptDialogOpen(false);
+        setProjectActionsOpen(false);
         setDecryptLoading(true);
         try {
             const result: DecryptProjectResultModel = await DecryptProject({
@@ -149,8 +151,6 @@ export function useProjectActions({
                 force: values.force,
                 sourceCleanup: '',
             });
-            setDecryptDialogOpen(false);
-            setProjectActionsOpen(false);
             setDecryptResult(result);
             setDecryptResultOpen(true);
             messageApi.success(t('decryptProjectSucceeded'));
@@ -165,14 +165,14 @@ export function useProjectActions({
         if (!selectedProjectId) {
             return;
         }
+        setDeleteDialogOpen(false);
+        setProjectActionsOpen(false);
         setDeleteLoading(true);
         try {
             const result: DeleteProjectResultModel = await DeleteProject({
                 projectId: selectedProjectId,
                 password,
             });
-            setDeleteDialogOpen(false);
-            setProjectActionsOpen(false);
             setInspectResultOpen(false);
             setInspectResult(null);
             clearSelectedProject();

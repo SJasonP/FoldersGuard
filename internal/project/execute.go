@@ -8,12 +8,20 @@ import (
 
 	"foldersguard/internal/content"
 	"foldersguard/internal/model"
+	"foldersguard/internal/progress"
 )
 
 type Executor struct {
 	OutputRoot string
 	Encryptor  content.Encryptor
 	AfterFile  func(model.File) error
+	// Progress, when set, receives byte-weighted progress for the encryption
+	// phase. A nil tracker is safe and ignored.
+	Progress *progress.Tracker
+	// SkipProgressTotals, when true, leaves the tracker's byte and item totals
+	// untouched so a caller can establish a combined total across several
+	// EncryptContent calls (for example, applying multiple added items).
+	SkipProgressTotals bool
 }
 
 func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject) error {
@@ -23,6 +31,16 @@ func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject)
 
 	encryptor := e.Encryptor
 	encryptor.OutputRoot = e.OutputRoot
+	encryptor.OnBytes = e.Progress.AddBytes
+
+	if !e.SkipProgressTotals {
+		var totalBytes int64
+		for _, file := range plan.Files {
+			totalBytes += file.OriginalSize
+		}
+		e.Progress.SetTotalItems(len(plan.Files))
+		e.Progress.SetTotalBytes(totalBytes)
+	}
 
 	if err := e.createFolders(ctx, plan); err != nil {
 		return err
@@ -48,6 +66,7 @@ func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject)
 		if !ok {
 			return fmt.Errorf("missing visible path for file %s", file.ID)
 		}
+		e.Progress.SetItem(filepath.Base(file.SourcePath))
 		if err := encryptor.EncryptFile(ctx, content.FileSource{
 			FileID:       file.ID.String(),
 			AbsolutePath: file.SourcePath,
@@ -63,6 +82,7 @@ func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject)
 				return fmt.Errorf("post-encrypt file %s: %w", file.ID, err)
 			}
 		}
+		e.Progress.ItemDone()
 	}
 
 	return nil

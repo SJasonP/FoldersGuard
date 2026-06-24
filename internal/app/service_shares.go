@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"foldersguard/internal/progress"
 	"foldersguard/internal/project"
 )
 
@@ -34,7 +35,10 @@ func (s Service) VerifyShare(ctx context.Context, input ShareOpen, encryptedRoot
 	if meta["database_type"] != "share" {
 		return VerifyResult{}, fmt.Errorf("database type = %q, want share", meta["database_type"])
 	}
-	report, err := (project.Verifier{EncryptedRoot: encryptedRoot, NoiseMode: noiseMode}).VerifyContent(ctx, plan)
+	tracker := progress.FromContext(ctx)
+	tracker.SetPhases(progress.PhaseVerifying)
+	tracker.StartPhase(progress.PhaseVerifying, true)
+	report, err := (project.Verifier{EncryptedRoot: encryptedRoot, NoiseMode: noiseMode, Progress: tracker}).VerifyContent(ctx, plan)
 	if err != nil {
 		return VerifyResult{}, err
 	}
@@ -99,11 +103,15 @@ func (s Service) DecryptShare(ctx context.Context, input DecryptShareInput) (Dec
 		return nil
 	}
 
+	tracker := progress.FromContext(ctx)
+	tracker.SetPhases(progress.PhaseDecrypting)
+	tracker.StartPhase(progress.PhaseDecrypting, true)
 	report, err := (project.Restorer{
 		EncryptedRoot: input.EncryptedRoot,
 		OutputRoot:    input.OutputRoot,
 		NoiseMode:     noiseMode,
 		AfterFile:     afterFile,
+		Progress:      tracker,
 	}).RestoreContentReport(ctx, plan)
 	if err != nil {
 		return DecryptShareResult{}, err

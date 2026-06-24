@@ -26,12 +26,12 @@ based on `go list -deps -test=false`.
 | `github.com/spf13/cobra`               |                            `v1.10.2` | Apache-2.0      |
 | `github.com/spf13/pflag`               |                            `v1.0.10` | BSD-style       |
 | `github.com/wailsapp/wails/v2`         |                            `v2.12.0` | MIT             |
-| `golang.org/x/sys`                     |                            `v0.44.0` | BSD-style       |
-| `golang.org/x/term`                    |                            `v0.43.0` | BSD-style       |
-| `modernc.org/libc`                     |                            `v1.72.3` | MIT / BSD-style |
+| `golang.org/x/sys`                     |                            `v0.46.0` | BSD-style       |
+| `golang.org/x/term`                    |                            `v0.44.0` | BSD-style       |
+| `modernc.org/libc`                     |                            `v1.73.4` | MIT / BSD-style |
 | `modernc.org/mathutil`                 |                             `v1.7.1` | BSD-style       |
 | `modernc.org/memory`                   |                            `v1.11.0` | BSD-style       |
-| `modernc.org/sqlite`                   |                            `v1.50.1` | BSD-style       |
+| `modernc.org/sqlite`                   |                            `v1.53.0` | BSD-style       |
 
 The frontend is bundled into the desktop application. Its package dependency manifest currently includes:
 
@@ -44,7 +44,7 @@ The frontend is bundled into the desktop application. Its package dependency man
 | `react`                | `19.2.5` | MIT     |
 | `react-dom`            | `19.2.5` | MIT     |
 | `react-i18next`        | `17.0.6` | MIT     |
-| `vite`                 | `8.0.10` | MIT     |
+| `vite`                 | `8.0.16` | MIT     |
 
 ## Source And Build Dependencies
 
@@ -57,10 +57,10 @@ Notable non-MIT licenses in the build/source dependency set include:
 
 | Component                            |        Version | License      | Notes                                                                                                               |
 |--------------------------------------|---------------:|--------------|---------------------------------------------------------------------------------------------------------------------|
-| `baseline-browser-mapping`           |      `2.10.27` | Apache-2.0   | Frontend source/build dependency from package-lock.json.                                                            |
-| `caniuse-lite`                       | `1.0.30001792` | CC-BY-4.0    | Frontend source/build dependency from package-lock.json.                                                            |
+| `baseline-browser-mapping`           |      `2.10.38` | Apache-2.0   | Frontend source/build dependency from package-lock.json.                                                            |
+| `caniuse-lite`                       | `1.0.30001799` | CC-BY-4.0    | Frontend source/build dependency from package-lock.json.                                                            |
 | `detect-libc`                        |        `2.1.2` | Apache-2.0   | Frontend source/build dependency from package-lock.json.                                                            |
-| `electron-to-chromium`               |      `1.5.351` | ISC          | Frontend source/build dependency from package-lock.json.                                                            |
+| `electron-to-chromium`               |      `1.5.377` | ISC          | Frontend source/build dependency from package-lock.json.                                                            |
 | `github.com/hashicorp/golang-lru/v2` |       `v2.0.7` | MPL-2.0      | Appears in the Go module graph through modernc.org tooling/test paths; not in the current runtime dependency graph. |
 | `lightningcss`                       |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
 | `lightningcss-android-arm64`         |       `1.32.0` | MPL-2.0      | Frontend source/build dependency from package-lock.json.                                                            |
@@ -689,7 +689,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### golang.org/x/sys v0.44.0 - LICENSE
+### golang.org/x/sys v0.46.0 - LICENSE
 
 ```text
 Copyright 2009 The Go Authors.
@@ -721,7 +721,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### golang.org/x/term v0.43.0 - LICENSE
+### golang.org/x/term v0.44.0 - LICENSE
 
 ```text
 Copyright 2009 The Go Authors.
@@ -753,7 +753,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/libc v1.72.3 - LICENSE
+### modernc.org/libc v1.73.4 - LICENSE
 
 ```text
 Copyright (c) 2017 The Libc Authors. All rights reserved.
@@ -785,7 +785,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/libc v1.72.3 - LICENSE-3RD-PARTY.md
+### modernc.org/libc v1.73.4 - LICENSE-3RD-PARTY.md
 
 ```text
 # Third-Party Software Notices
@@ -1226,7 +1226,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/sqlite v1.50.1 - LICENSE
+### modernc.org/sqlite v1.53.0 - LICENSE
 
 ```text
 Copyright (c) 2017 The Sqlite Authors. All rights reserved.
@@ -1441,7 +1441,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### vite 8.0.10 - LICENSE.md
+### vite 8.0.16 - LICENSE.md
 
 ```text
 # Vite core license
@@ -2663,7 +2663,7 @@ Repository: https://github.com/lydell/js-tokens
 ## launch-editor, launch-editor-middleware
 License: MIT
 By: Evan You
-Repositories: https://github.com/yyx990803/launch-editor, https://github.com/yyx990803/launch-editor
+Repositories: https://github.com/vitejs/launch-editor, https://github.com/vitejs/launch-editor
 
 > The MIT License (MIT)
 > 

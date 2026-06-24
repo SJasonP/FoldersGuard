@@ -47,6 +47,7 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
     };
 
     const handleVerifyShare = async (values: { password: string; encryptedPath: string }) => {
+        setVerifyShareDialogOpen(false);
         setVerifyShareLoading(true);
         try {
             const result = await VerifyShare({
@@ -54,7 +55,6 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
                 password: values.password,
                 encryptedPath: values.encryptedPath,
             });
-            setVerifyShareDialogOpen(false);
             setVerifyShareResult(result);
             setVerifyShareResultOpen(true);
             messageApi.success(t('verifyShareSucceeded'));
@@ -71,6 +71,7 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
         outputPath: string;
         force: boolean;
     }) => {
+        setDecryptShareDialogOpen(false);
         setDecryptShareLoading(true);
         try {
             const result = await DecryptShare({
@@ -81,7 +82,6 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
                 force: values.force,
                 sourceCleanup: '',
             });
-            setDecryptShareDialogOpen(false);
             setDecryptShareResult(result);
             setDecryptShareResultOpen(true);
             messageApi.success(t('decryptShareSucceeded'));

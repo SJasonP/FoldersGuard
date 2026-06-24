@@ -11,6 +11,7 @@ import (
 	"foldersguard/internal/content"
 	"foldersguard/internal/fsmeta"
 	"foldersguard/internal/model"
+	"foldersguard/internal/progress"
 )
 
 type Restorer struct {
@@ -18,6 +19,9 @@ type Restorer struct {
 	OutputRoot    string
 	NoiseMode     string
 	AfterFile     func(RestoredFile) error
+	// Progress, when set, receives byte-weighted progress for restore.
+	// A nil tracker is safe and ignored.
+	Progress *progress.Tracker
 }
 
 type RestoredFile struct {
@@ -66,6 +70,21 @@ func (r Restorer) RestoreContentReport(ctx context.Context, plan model.PlannedPr
 		RestoredFolders: len(selection.folderIDs),
 		SkippedFolders:  CountRestorableFolders(plan) - len(selection.folderIDs),
 	}
+
+	// Totals reflect only the selected (available) files so progress reaches its
+	// total even on a partial restore.
+	var totalBytes int64
+	var totalItems int
+	for _, file := range plan.Files {
+		if _, ok := selection.fileIDs[file.ID.String()]; !ok {
+			continue
+		}
+		totalBytes += file.OriginalSize
+		totalItems++
+	}
+	r.Progress.SetTotalItems(totalItems)
+	r.Progress.SetTotalBytes(totalBytes)
+
 	for _, file := range plan.Files {
 		if _, ok := selection.fileIDs[file.ID.String()]; !ok {
 			continue
@@ -83,6 +102,7 @@ func (r Restorer) RestoreContentReport(ctx context.Context, plan model.PlannedPr
 		if err != nil {
 			return report, fmt.Errorf("resolve output path for file %s: %w", file.ID, err)
 		}
+		r.Progress.SetItem(filepath.Base(realPath))
 
 		switch file.StorageKind {
 		case model.StorageKindSingle:
@@ -131,6 +151,7 @@ func (r Restorer) RestoreContentReport(ctx context.Context, plan model.PlannedPr
 				return report, fmt.Errorf("post-restore file %s: %w", file.ID, err)
 			}
 		}
+		r.Progress.ItemDone()
 		report.DecryptedFiles++
 	}
 	if err := r.restoreFolderMetadata(ctx, plan, logicalPaths, itemByID, selection.folderIDs); err != nil {
@@ -201,7 +222,7 @@ func (r Restorer) restoreFolderMetadata(ctx context.Context, plan model.PlannedP
 
 func (r Restorer) restoreSingle(ctx context.Context, file model.File, encryptedPath, outputPath string) error {
 	ad := []byte("fg-content-v1:file:" + file.ID.String())
-	if err := content.OpenObjectFile(ctx, file.Key, encryptedPath, outputPath, ad); err != nil {
+	if err := content.OpenObjectFileStream(ctx, file.Key, encryptedPath, outputPath, ad, r.Progress.AddBytes); err != nil {
 		return fmt.Errorf("restore file %s: %w", file.ID, err)
 	}
 	return nil
@@ -237,15 +258,17 @@ func (r Restorer) restoreSplit(ctx context.Context, file model.File, sourcePaths
 		}
 		partPath := sourcePaths[part.ID.String()]
 		ad := []byte(fmt.Sprintf("fg-content-v1:part:%s:%d:%d:%d", file.ID.String(), part.Index, part.Offset, part.Size))
-		partPlaintext, err := content.OpenObjectFromFile(ctx, file.Key, partPath, ad)
+		input, err := os.Open(partPath)
 		if err != nil {
+			_ = temp.Close()
+			return fmt.Errorf("open encrypted part %s: %w", part.ID, err)
+		}
+		if err := content.StreamDecrypt(ctx, file.Key, input, temp, ad, r.Progress.AddBytes); err != nil {
+			_ = input.Close()
 			_ = temp.Close()
 			return fmt.Errorf("restore part %s: %w", part.ID, err)
 		}
-		if _, err := temp.Write(partPlaintext); err != nil {
-			_ = temp.Close()
-			return fmt.Errorf("write restored part %s: %w", part.ID, err)
-		}
+		_ = input.Close()
 	}
 	if err := temp.Chmod(0o600); err != nil {
 		_ = temp.Close()

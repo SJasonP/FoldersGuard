@@ -73,7 +73,22 @@ func ReadDatabase(ctx context.Context, config db.Config) (model.PlannedProject, 
 	return plan, meta, nil
 }
 
+type progressWriter func(int64)
+
+func (w progressWriter) Write(p []byte) (int, error) {
+	if len(p) > 0 {
+		w(int64(len(p)))
+	}
+	return len(p), nil
+}
+
 func CopyFile(source, target string) error {
+	return CopyFileProgress(source, target, nil)
+}
+
+// CopyFileProgress copies source to target and, when onProgress is set, reports
+// the number of bytes copied after each block.
+func CopyFileProgress(source, target string, onProgress func(int64)) error {
 	input, err := os.Open(source)
 	if err != nil {
 		return fmt.Errorf("open source database: %w", err)
@@ -92,7 +107,11 @@ func CopyFile(source, target string) error {
 		}
 	}()
 
-	if _, err := io.Copy(output, input); err != nil {
+	var writer io.Writer = output
+	if onProgress != nil {
+		writer = io.MultiWriter(output, progressWriter(onProgress))
+	}
+	if _, err := io.Copy(writer, input); err != nil {
 		return fmt.Errorf("copy database: %w", err)
 	}
 	if err := output.Sync(); err != nil {

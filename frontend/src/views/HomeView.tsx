@@ -42,30 +42,35 @@ export function HomeView({
                              onOpenProjectActions,
                              t,
                          }: HomeViewProps) {
+    // While an operation runs (or data services are unavailable) the whole list
+    // is locked: no refreshing, no selecting, no opening project actions. This
+    // prevents accidental interaction with project state mid-operation.
+    const locked = disabled || operationActive;
     return (
         <Space direction="vertical" size="large" className="content-stack">
             <Flex justify="space-between" align="center" gap={16}>
                 <Typography.Title level={2}>{t('localProjects')}</Typography.Title>
                 <Space wrap>
                     <Button icon={<FolderAddOutlined/>} onClick={onCreateProject}
-                            disabled={disabled || operationActive}>
+                            disabled={locked}>
                         {t('createProject')}
                     </Button>
-                    <Button icon={<ImportOutlined/>} onClick={onImportProject} disabled={disabled || operationActive}>
+                    <Button icon={<ImportOutlined/>} onClick={onImportProject} disabled={locked}>
                         {t('importProject')}
                     </Button>
-                    <Button icon={<ShareAltOutlined/>} onClick={onLoadShare} disabled={disabled || operationActive}>
+                    <Button icon={<ShareAltOutlined/>} onClick={onLoadShare} disabled={locked}>
                         {t('loadShare')}
                     </Button>
-                    <Button onClick={() => onOpenProjectActions()} disabled={disabled || !selectedProjectId}>
+                    <Button onClick={() => onOpenProjectActions()} disabled={locked || !selectedProjectId}>
                         {t('viewProjectActions')}
                     </Button>
                     <Input.Search
                         placeholder={t('searchProjects')}
                         value={projectSearch}
                         onChange={(event) => onProjectSearchChange(event.target.value)}
+                        disabled={locked}
                     />
-                    <Button icon={<ReloadOutlined/>} onClick={onRefresh} disabled={disabled}>
+                    <Button icon={<ReloadOutlined/>} onClick={onRefresh} disabled={locked}>
                         {t('refresh')}
                     </Button>
                 </Space>
@@ -80,18 +85,18 @@ export function HomeView({
                 rowSelection={{
                     type: 'radio',
                     selectedRowKeys: selectedProjectId ? [selectedProjectId] : [],
-                    getCheckboxProps: () => ({disabled}),
+                    getCheckboxProps: () => ({disabled: locked}),
                     onChange: (selectedRowKeys) => onSelectProject((selectedRowKeys[0] as string | undefined) ?? null),
                 }}
                 onRow={(record) => ({
                     onClick: () => {
-                        if (!disabled) {
+                        if (!locked) {
                             onSelectProject(record.projectId);
                             onOpenProjectActions(record.projectId);
                         }
                     },
                     onDoubleClick: () => {
-                        if (!disabled) {
+                        if (!locked) {
                             onOpenProjectActions(record.projectId);
                         }
                     },

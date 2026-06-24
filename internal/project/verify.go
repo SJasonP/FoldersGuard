@@ -9,6 +9,7 @@ import (
 	"foldersguard/internal/content"
 	"foldersguard/internal/model"
 	"foldersguard/internal/noise"
+	"foldersguard/internal/progress"
 )
 
 type VerifyReport struct {
@@ -28,6 +29,9 @@ func (r VerifyReport) OK() bool {
 type Verifier struct {
 	EncryptedRoot string
 	NoiseMode     string
+	// Progress, when set, receives byte-weighted progress for verification.
+	// A nil tracker is safe and ignored.
+	Progress *progress.Tracker
 }
 
 func (v Verifier) VerifyContent(ctx context.Context, plan model.PlannedProject) (VerifyReport, error) {
@@ -39,6 +43,23 @@ func (v Verifier) VerifyContent(ctx context.Context, plan model.PlannedProject) 
 	expected := make(map[string]struct{})
 	visiblePaths := visiblePathsByItem(plan)
 	partsByFile := partsByFileID(plan.Parts)
+
+	var totalBytes int64
+	var totalItems int
+	for _, file := range plan.Files {
+		switch file.StorageKind {
+		case model.StorageKindSingle:
+			totalBytes += file.OriginalSize
+			totalItems++
+		case model.StorageKindSplit:
+			for _, part := range partsByFile[file.ID.String()] {
+				totalBytes += part.Size
+				totalItems++
+			}
+		}
+	}
+	v.Progress.SetTotalItems(totalItems)
+	v.Progress.SetTotalBytes(totalBytes)
 
 	for _, object := range plan.StorageObjects {
 		if err := ctx.Err(); err != nil {
@@ -63,9 +84,11 @@ func (v Verifier) VerifyContent(ctx context.Context, plan model.PlannedProject) 
 			if !ok {
 				return report, fmt.Errorf("missing visible path for file %s", file.ID)
 			}
-			if err := v.verifyObject(ctx, file.Key, visiblePath, []byte("fg-content-v1:file:"+file.ID.String()), expected, &report); err != nil {
+			v.Progress.SetItem(filepath.Base(visiblePath))
+			if err := v.verifyObject(ctx, file.Key, visiblePath, []byte("fg-content-v1:file:"+file.ID.String()), file.OriginalSize, expected, &report); err != nil {
 				return report, err
 			}
+			v.Progress.ItemDone()
 		case model.StorageKindSplit:
 			visiblePath, ok := visiblePaths[file.ID.String()]
 			if !ok {
@@ -74,9 +97,11 @@ func (v Verifier) VerifyContent(ctx context.Context, plan model.PlannedProject) 
 			for _, part := range partsByFile[file.ID.String()] {
 				partPath := visiblePath + "/" + part.VisibleName.String()
 				ad := []byte(fmt.Sprintf("fg-content-v1:part:%s:%d:%d:%d", file.ID.String(), part.Index, part.Offset, part.Size))
-				if err := v.verifyObject(ctx, file.Key, partPath, ad, expected, &report); err != nil {
+				v.Progress.SetItem(part.VisibleName.String())
+				if err := v.verifyObject(ctx, file.Key, partPath, ad, part.Size, expected, &report); err != nil {
 					return report, err
 				}
+				v.Progress.ItemDone()
 			}
 		default:
 			return report, fmt.Errorf("unsupported storage kind %q", file.StorageKind)
@@ -119,7 +144,7 @@ func (v Verifier) verifyFolder(visiblePath string, expected map[string]struct{},
 	return nil
 }
 
-func (v Verifier) verifyObject(ctx context.Context, key []byte, visiblePath string, associatedData []byte, expected map[string]struct{}, report *VerifyReport) error {
+func (v Verifier) verifyObject(ctx context.Context, key []byte, visiblePath string, associatedData []byte, expectedSize int64, expected map[string]struct{}, report *VerifyReport) error {
 	cleanPath := filepath.Clean(filepath.FromSlash(visiblePath))
 	expected[cleanPath] = struct{}{}
 	report.CheckedObjects++
@@ -132,15 +157,31 @@ func (v Verifier) verifyObject(ctx context.Context, key []byte, visiblePath stri
 		if os.IsNotExist(err) {
 			report.MissingObjects++
 			report.MissingPaths = append(report.MissingPaths, cleanPath)
-			return nil
+		} else {
+			report.TamperedObjects++
+			report.TamperedPaths = append(report.TamperedPaths, cleanPath)
+		}
+		// The object's expected bytes still count as checked work so progress
+		// reaches its total even when objects are missing or tampered.
+		v.Progress.AddBytes(expectedSize)
+		return nil
+	}
+	var streamed int64
+	onBytes := func(n int64) {
+		streamed += n
+		v.Progress.AddBytes(n)
+	}
+	if err := content.VerifyObjectFileStream(ctx, key, encryptedPath, associatedData, onBytes); err != nil {
+		if ctx.Err() != nil {
+			return ctx.Err()
 		}
 		report.TamperedObjects++
 		report.TamperedPaths = append(report.TamperedPaths, cleanPath)
-		return nil
-	}
-	if _, err := content.OpenObjectFromFile(ctx, key, encryptedPath, associatedData); err != nil {
-		report.TamperedObjects++
-		report.TamperedPaths = append(report.TamperedPaths, cleanPath)
+		// Top up only the bytes not streamed before the authentication failure so
+		// progress reaches the object's expected total without double counting.
+		if remaining := expectedSize - streamed; remaining > 0 {
+			v.Progress.AddBytes(remaining)
+		}
 	}
 	return nil
 }

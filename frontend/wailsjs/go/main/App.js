@@ -70,12 +70,12 @@ export function SelectPath(arg1) {
   return window['go']['main']['App']['SelectPath'](arg1);
 }
 
-export function SetLongRunningOperationActive(arg1) {
-  return window['go']['main']['App']['SetLongRunningOperationActive'](arg1);
-}
-
 export function SetManualContentGuideCloseGuardActive(arg1, arg2) {
   return window['go']['main']['App']['SetManualContentGuideCloseGuardActive'](arg1, arg2);
+}
+
+export function SetUILanguage(arg1) {
+  return window['go']['main']['App']['SetUILanguage'](arg1);
 }
 
 export function VerifyProject(arg1) {

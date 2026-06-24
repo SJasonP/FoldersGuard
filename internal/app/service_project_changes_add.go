@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"foldersguard/internal/fswalk"
+	"foldersguard/internal/model"
+	"foldersguard/internal/progress"
 	"foldersguard/internal/project"
 	"foldersguard/internal/storage"
 )
@@ -18,11 +20,27 @@ type projectAddApplyResult struct {
 	AppliedContentChanges []ProjectContentOperation
 }
 
-func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Store, input ApplyProjectChangesInput, stagedContentPath string, contentConnected bool) (projectAddApplyResult, error) {
+func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Store, input ApplyProjectChangesInput, stagedContentPath string, contentConnected bool, tracker *progress.Tracker) (projectAddApplyResult, error) {
 	if len(input.AddChanges) == 0 {
 		return projectAddApplyResult{}, nil
 	}
 	result := projectAddApplyResult{}
+
+	noiseMode, err := s.resolveNoiseFileHandling("")
+	if err != nil {
+		return projectAddApplyResult{}, err
+	}
+
+	// Plan every add first so the combined byte and item total is known before
+	// any encryption begins. PrepareAdd later assigns storage names but does not
+	// change file sizes or counts, so the totals computed here are accurate.
+	type plannedAdd struct {
+		change   ProjectAddChange
+		addition model.PlannedProject
+	}
+	planned := make([]plannedAdd, 0, len(input.AddChanges))
+	var totalBytes int64
+	var totalFiles int
 
 	seenAdds := make(map[string]struct{}, len(input.AddChanges))
 	for _, change := range input.AddChanges {
@@ -38,7 +56,31 @@ func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Stor
 		}
 		seenAdds[addKey] = struct{}{}
 
-		operations, err := s.applyOneProjectAdd(ctx, store, change, stagedContentPath, input.EncryptedRoot, contentConnected)
+		maxPartSize, err := s.resolveMaxPartSize(change.MaxPartSize)
+		if err != nil {
+			return projectAddApplyResult{}, err
+		}
+		scan, err := fswalk.ScanPathWithNoiseMode(change.SourcePath, noiseMode)
+		if err != nil {
+			return projectAddApplyResult{}, err
+		}
+		addition, err := project.AddPlanner{MaxPartSize: maxPartSize}.Plan(scan)
+		if err != nil {
+			return projectAddApplyResult{}, err
+		}
+		planned = append(planned, plannedAdd{change: change, addition: addition})
+		for _, file := range addition.Files {
+			totalBytes += file.OriginalSize
+		}
+		totalFiles += len(addition.Files)
+	}
+
+	tracker.StartPhase(progress.PhaseEncrypting, true)
+	tracker.SetTotalBytes(totalBytes)
+	tracker.SetTotalItems(totalFiles)
+
+	for _, pa := range planned {
+		operations, err := s.applyOnePlannedAdd(ctx, store, pa.change, pa.addition, stagedContentPath, input.EncryptedRoot, contentConnected, tracker)
 		if err != nil {
 			return projectAddApplyResult{}, err
 		}
@@ -49,28 +91,16 @@ func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Stor
 	return result, nil
 }
 
-func (s Service) applyOneProjectAdd(ctx context.Context, store *storage.Store, change ProjectAddChange, stagedContentPath, encryptedRoot string, contentConnected bool) (projectAddApplyResult, error) {
-	maxPartSize, err := s.resolveMaxPartSize(change.MaxPartSize)
-	if err != nil {
-		return projectAddApplyResult{}, err
-	}
-	noiseMode, err := s.resolveNoiseFileHandling("")
-	if err != nil {
-		return projectAddApplyResult{}, err
-	}
-	scan, err := fswalk.ScanPathWithNoiseMode(change.SourcePath, noiseMode)
-	if err != nil {
-		return projectAddApplyResult{}, err
-	}
-	addition, err := project.AddPlanner{MaxPartSize: maxPartSize}.Plan(scan)
-	if err != nil {
-		return projectAddApplyResult{}, err
-	}
+func (s Service) applyOnePlannedAdd(ctx context.Context, store *storage.Store, change ProjectAddChange, addition model.PlannedProject, stagedContentPath, encryptedRoot string, contentConnected bool, tracker *progress.Tracker) (projectAddApplyResult, error) {
 	addition, operations, err := store.PrepareAdd(ctx, change.TargetFolderPath, addition)
 	if err != nil {
 		return projectAddApplyResult{}, err
 	}
-	if err := (project.Executor{OutputRoot: stagedContentPath}).EncryptContent(ctx, addition); err != nil {
+	if err := (project.Executor{
+		OutputRoot:         stagedContentPath,
+		Progress:           tracker,
+		SkipProgressTotals: true,
+	}).EncryptContent(ctx, addition); err != nil {
 		return projectAddApplyResult{}, err
 	}
 	if contentConnected {

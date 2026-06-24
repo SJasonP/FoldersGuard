@@ -4,7 +4,7 @@ import {App as AntApp, ConfigProvider} from 'antd';
 import type {ColumnsType} from 'antd/es/table';
 import enUS from 'antd/locale/en_US';
 import zhCN from 'antd/locale/zh_CN';
-import {AppInfo, SetLongRunningOperationActive, SetManualContentGuideCloseGuardActive} from '../wailsjs/go/main/App';
+import {AppInfo, SetManualContentGuideCloseGuardActive, SetUILanguage} from '../wailsjs/go/main/App';
 import i18n, {resolveSystemLanguage, type SupportedLanguage} from './i18n';
 import {resolveTheme, themeAlgorithm, type ThemeMode} from './theme';
 import type {AppInfoModel, LocalProjectRow, NavigationKey} from './types';
@@ -17,6 +17,7 @@ import {useProjectShare} from './hooks/useProjectShare';
 import {useProjectBrowser} from './hooks/useProjectBrowser';
 import {useShareActions} from './hooks/useShareActions';
 import {useResizableColumns} from './hooks/useResizableColumns';
+import {useOperationProgress} from './hooks/useOperationProgress';
 import {HomeView} from './views/HomeView';
 import {SettingsView} from './views/SettingsView';
 import {AboutView} from './views/AboutView';
@@ -347,9 +348,11 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
         verifyShareLoading,
     ]);
 
+    const {progress: operationProgress} = useOperationProgress();
+
     useEffect(() => {
-        void SetLongRunningOperationActive(activeOperationLabel !== null);
-    }, [activeOperationLabel]);
+        void SetUILanguage(language);
+    }, [language]);
 
     useEffect(() => {
         void SetManualContentGuideCloseGuardActive(Boolean(applyResultOpen && applyResult?.manualContentGuide), language);
@@ -361,6 +364,7 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
                     navigation={navigation}
                     onNavigationChange={setNavigation}
                     activeOperationLabel={activeOperationLabel}
+                    operationProgress={operationProgress}
                     resolvedTheme={resolvedTheme}
                     t={t}
                 >

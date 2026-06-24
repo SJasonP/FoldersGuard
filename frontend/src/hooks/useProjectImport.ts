@@ -17,6 +17,7 @@ export function useProjectImport({messageApi, modalApi, t, reloadProjects}: UseP
     const [importLoading, setImportLoading] = useState(false);
 
     const handleImportProject = async (values: { inputPath: string; password: string; force: boolean }) => {
+        setImportDialogOpen(false);
         setImportLoading(true);
         try {
             const result: ImportProjectResultModel = await ImportProject({
@@ -24,7 +25,6 @@ export function useProjectImport({messageApi, modalApi, t, reloadProjects}: UseP
                 password: values.password,
                 force: values.force,
             });
-            setImportDialogOpen(false);
             await reloadProjects();
             messageApi.success(`${t('importProjectSucceeded')}: ${result.projectId}`);
         } catch (error) {

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"foldersguard/internal/db"
+	"foldersguard/internal/progress"
 	"foldersguard/internal/storage"
 )
 
@@ -27,6 +28,10 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 			BrowserState: state,
 		}, nil
 	}
+
+	tracker := progress.FromContext(ctx)
+	tracker.SetPhases(progress.PhasePreparing, progress.PhaseEncrypting, progress.PhaseFinalizing)
+	tracker.StartPhase(progress.PhasePreparing, false)
 
 	databasePath, err := s.ActiveProjectDatabasePath(input.ProjectID)
 	if err != nil {
@@ -170,7 +175,7 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		stagedContentOnDesktop = staging.OnDesktop
 	}
 
-	addResult, err := s.applyProjectAddChanges(ctx, store, input, stagedContentPath, contentConnected)
+	addResult, err := s.applyProjectAddChanges(ctx, store, input, stagedContentPath, contentConnected, tracker)
 	if err != nil {
 		return ApplyProjectChangesResult{}, err
 	}
@@ -188,6 +193,8 @@ func (s Service) ApplyProjectChanges(ctx context.Context, input ApplyProjectChan
 		contentOperations = append(contentOperations, createFolderResult.ContentOperations...)
 		appliedContentChanges = append(appliedContentChanges, createFolderResult.AppliedContentChanges...)
 	}
+
+	tracker.StartPhase(progress.PhaseFinalizing, false)
 
 	resultStagedContentPath := stagedContentPath
 	if contentConnected && stagedContentPath != "" {

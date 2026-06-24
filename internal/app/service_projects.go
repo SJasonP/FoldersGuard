@@ -12,6 +12,7 @@ import (
 	"foldersguard/internal/fswalk"
 	"foldersguard/internal/model"
 	"foldersguard/internal/noise"
+	"foldersguard/internal/progress"
 	"foldersguard/internal/project"
 )
 
@@ -75,11 +76,15 @@ func (s Service) Verify(ctx context.Context, input DatabaseOpen, encryptedRoot s
 	if err != nil {
 		return VerifyResult{}, err
 	}
+	tracker := progress.FromContext(ctx)
+	tracker.SetPhases(progress.PhasePreparing, progress.PhaseVerifying)
+	tracker.StartPhase(progress.PhasePreparing, false)
 	plan, _, err := s.ReadDatabase(ctx, input)
 	if err != nil {
 		return VerifyResult{}, err
 	}
-	report, err := (project.Verifier{EncryptedRoot: encryptedRoot, NoiseMode: noiseMode}).VerifyContent(ctx, plan)
+	tracker.StartPhase(progress.PhaseVerifying, true)
+	report, err := (project.Verifier{EncryptedRoot: encryptedRoot, NoiseMode: noiseMode, Progress: tracker}).VerifyContent(ctx, plan)
 	if err != nil {
 		return VerifyResult{}, err
 	}
@@ -125,7 +130,13 @@ func (s Service) ExportProject(ctx context.Context, input ExportProjectInput) (E
 	if err := PrepareFileOutput(input.OutputPath, input.Force); err != nil {
 		return ExportProjectResult{}, err
 	}
-	if err := CopyFile(sourcePath, input.OutputPath); err != nil {
+	tracker := progress.FromContext(ctx)
+	tracker.SetPhases(progress.PhaseCopying)
+	tracker.StartPhase(progress.PhaseCopying, true)
+	if info, statErr := os.Stat(sourcePath); statErr == nil {
+		tracker.SetTotalBytes(info.Size())
+	}
+	if err := CopyFileProgress(sourcePath, input.OutputPath, tracker.AddBytes); err != nil {
 		return ExportProjectResult{}, err
 	}
 	return ExportProjectResult{
@@ -184,7 +195,13 @@ func (s Service) ImportProject(ctx context.Context, input ImportProjectInput) (I
 	if err := PrepareFileOutput(activePath, input.Force); err != nil {
 		return ImportProjectResult{}, err
 	}
-	if err := CopyFile(input.InputPath, activePath); err != nil {
+	tracker := progress.FromContext(ctx)
+	tracker.SetPhases(progress.PhaseCopying)
+	tracker.StartPhase(progress.PhaseCopying, true)
+	if info, statErr := os.Stat(input.InputPath); statErr == nil {
+		tracker.SetTotalBytes(info.Size())
+	}
+	if err := CopyFileProgress(input.InputPath, activePath, tracker.AddBytes); err != nil {
 		return ImportProjectResult{}, err
 	}
 	_, _ = s.SaveLocalProjectName(SaveLocalProjectNameInput{
@@ -209,6 +226,11 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 	if err := ValidateDistinctPaths(input.SourcePath, input.ContentOutput); err != nil {
 		return CreateProjectResult{}, err
 	}
+
+	tracker := progress.FromContext(ctx)
+	tracker.SetPhases(progress.PhasePreparing, progress.PhaseEncrypting, progress.PhaseFinalizing)
+	tracker.StartPhase(progress.PhasePreparing, false)
+
 	noiseMode, err := s.resolveNoiseFileHandling("")
 	if err != nil {
 		return CreateProjectResult{}, err
@@ -285,12 +307,15 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 		return nil
 	}
 
+	tracker.StartPhase(progress.PhaseEncrypting, true)
 	if err := (project.Executor{
 		OutputRoot: input.ContentOutput,
 		AfterFile:  afterFile,
+		Progress:   tracker,
 	}).EncryptContent(ctx, plan); err != nil {
 		return CreateProjectResult{}, err
 	}
+	tracker.StartPhase(progress.PhaseFinalizing, false)
 	_, _ = s.SaveLocalProjectName(SaveLocalProjectNameInput{
 		ProjectID:   plan.Project.ID.String(),
 		ProjectName: plan.RootItem.RealName,

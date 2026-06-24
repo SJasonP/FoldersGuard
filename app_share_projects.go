@@ -3,7 +3,8 @@ package main
 import "foldersguard/internal/app"
 
 func (a *App) CreateShare(request CreateShareRequest) (CreateShareResult, error) {
-	result, err := a.service.CreateShare(a.ctx, app.CreateShareInput{
+	ctx, finish := a.beginOperation("share")
+	result, err := a.service.CreateShare(ctx, app.CreateShareInput{
 		ProjectID:         request.ProjectID,
 		ProjectPassword:   request.ProjectPassword,
 		ItemPaths:         request.ItemPaths,
@@ -12,6 +13,7 @@ func (a *App) CreateShare(request CreateShareRequest) (CreateShareResult, error)
 		PasswordProtected: request.PasswordProtected,
 		SharePassword:     request.SharePassword,
 	})
+	finish(err)
 	if err != nil {
 		return CreateShareResult{}, frontendError(err)
 	}

@@ -54,7 +54,8 @@ func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProj
 			Name:             change.Name,
 		})
 	}
-	result, err := a.service.ApplyProjectChanges(a.ctx, app.ApplyProjectChangesInput{
+	ctx, finish := a.beginOperation("apply")
+	result, err := a.service.ApplyProjectChanges(ctx, app.ApplyProjectChangesInput{
 		ProjectID:           request.ProjectID,
 		Password:            request.Password,
 		EncryptedRoot:       request.EncryptedPath,
@@ -64,6 +65,7 @@ func (a *App) ApplyProjectChanges(request ApplyProjectChangesRequest) (ApplyProj
 		AddChanges:          adds,
 		CreateFolderChanges: createFolders,
 	})
+	finish(err)
 	if err != nil {
 		return ApplyProjectChangesResult{}, frontendError(err)
 	}

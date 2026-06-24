@@ -22,6 +22,21 @@ export function formatNumber(value: number | null | undefined) {
     return new Intl.NumberFormat(currentLanguage()).format(value ?? 0);
 }
 
+export function formatDuration(seconds: number | null | undefined) {
+    const total = Math.max(0, Math.round(seconds ?? 0));
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const secs = total % 60;
+    if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+    return `${minutes}:${String(secs).padStart(2, '0')}`;
+}
+
+export function formatThroughput(bytesPerSecond: number | null | undefined) {
+    return `${formatFileSize(bytesPerSecond)}/s`;
+}
+
 export function formatFileSize(bytes: number | null | undefined) {
     const value = Math.max(0, bytes ?? 0);
     if (value < 1024) {

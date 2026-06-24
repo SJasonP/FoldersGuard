@@ -1,20 +1,24 @@
-import {Layout, Menu, Progress, Space, Typography} from 'antd';
+import {Layout, Menu, Typography} from 'antd';
 import {HomeOutlined, InfoCircleOutlined, SettingOutlined,} from '@ant-design/icons';
 import type {NavigationKey} from '../../types';
+import type {OperationProgress as OperationProgressData} from '../../hooks/useOperationProgress';
+import {OperationProgress} from './OperationProgress';
 
 type AppShellProps = {
     navigation: NavigationKey;
     onNavigationChange: (navigation: NavigationKey) => void;
     activeOperationLabel: string | null;
+    operationProgress: OperationProgressData | null;
     resolvedTheme: 'light' | 'dark';
     children: React.ReactNode;
-    t: (key: string) => string;
+    t: (key: string, options?: Record<string, unknown>) => string;
 };
 
 export function AppShell({
                              navigation,
                              onNavigationChange,
                              activeOperationLabel,
+                             operationProgress,
                              resolvedTheme,
                              children,
                              t,
@@ -38,19 +42,16 @@ export function AppShell({
                 />
             </Layout.Sider>
             <Layout>
-                {activeOperationLabel ? (
-                    <Layout.Header className="app-header">
-                        <Space className="operation-status" size="small">
-                            <Progress className="operation-progress" percent={100} size="small" status="active"
-                                      showInfo={false}/>
-                            <Typography.Text>
-                                {t('operationRunning')}: {activeOperationLabel}
-                            </Typography.Text>
-                        </Space>
-                    </Layout.Header>
-                ) : null}
                 <Layout.Content className="app-content">{children}</Layout.Content>
             </Layout>
+            {activeOperationLabel ? (
+                <OperationProgress
+                    label={activeOperationLabel}
+                    progress={operationProgress}
+                    resolvedTheme={resolvedTheme}
+                    t={t}
+                />
+            ) : null}
         </Layout>
     );
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"foldersguard/internal/progress"
 	"foldersguard/internal/project"
 )
 
@@ -22,6 +23,10 @@ func (s Service) DecryptProject(ctx context.Context, input DecryptProjectInput) 
 	if err := PrepareDirectoryOutputWithNoiseMode(input.OutputRoot, input.Force, "output", noiseMode); err != nil {
 		return DecryptProjectResult{}, err
 	}
+
+	tracker := progress.FromContext(ctx)
+	tracker.SetPhases(progress.PhasePreparing, progress.PhaseDecrypting)
+	tracker.StartPhase(progress.PhasePreparing, false)
 
 	plan, meta, err := s.ReadDatabase(ctx, DatabaseOpen{
 		ProjectRef: input.ProjectID,
@@ -52,11 +57,13 @@ func (s Service) DecryptProject(ctx context.Context, input DecryptProjectInput) 
 		return nil
 	}
 
+	tracker.StartPhase(progress.PhaseDecrypting, true)
 	report, err := (project.Restorer{
 		EncryptedRoot: input.EncryptedRoot,
 		OutputRoot:    input.OutputRoot,
 		NoiseMode:     noiseMode,
 		AfterFile:     afterFile,
+		Progress:      tracker,
 	}).RestoreContentReport(ctx, plan)
 	if err != nil {
 		return DecryptProjectResult{}, err
