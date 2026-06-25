@@ -191,7 +191,7 @@ Versioning approach:
 
 ### Metadata-Database Backup
 
-**Status: Planned for v1.2 — not yet implemented.**
+**Status: Implemented in v1.2.**
 
 - FG automatically snapshots a project database before destructive operations: applying changes, deleting a project, and
   changing a password.

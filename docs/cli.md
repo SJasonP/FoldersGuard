@@ -155,11 +155,11 @@ Planning:
 - [`fg plan move`](cli/plan.md#fg-plan-move)
 - [`fg plan remove`](cli/plan.md#fg-plan-remove)
 
-Maintenance (planned):
+Maintenance:
 
-- [`fg passwd`](cli/maintenance.md#fg-passwd)
 - [`fg backups list`](cli/maintenance.md#fg-backups-list)
 - [`fg backups restore`](cli/maintenance.md#fg-backups-restore)
+- [`fg passwd`](cli/maintenance.md#fg-passwd) (planned)
 
 ## Planned CLI Additions
 
@@ -185,5 +185,5 @@ Exit codes with `--continue-on-error`:
 - Exit status is `1` when any item failed. The output lists the failed item count and per-item reasons. Internal keys
   and passwords are never printed.
 
-New commands: `fg passwd`, `fg backups list`, and `fg backups restore`, documented in
-[maintenance CLI commands](cli/maintenance.md).
+New command: `fg passwd`, documented in [maintenance CLI commands](cli/maintenance.md). The `fg backups` commands are
+already available.

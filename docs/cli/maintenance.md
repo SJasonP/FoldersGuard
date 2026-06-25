@@ -1,9 +1,11 @@
 # Maintenance CLI Commands
 
-Planned; not yet implemented. These commands follow the same global rules, password input, project reference,
-and output conventions as the rest of the CLI.
+These commands follow the same global rules, password input, project reference, and output conventions as the rest of
+the CLI. `fg backups list` and `fg backups restore` are available; `fg passwd` is planned.
 
 ## `fg passwd`
+
+Planned; not yet implemented.
 
 Changes the password of a project database, or a password-protected share database, by re-keying it. Content is not
 re-encrypted.
@@ -64,8 +66,8 @@ Output:
 
 ```text
 project_id=<uuid>
-backup_id=<id> created=<timestamp>
-backup_id=<id> created=<timestamp>
+backup_id=<id> reason=<reason> created=<timestamp> size=<bytes>
+backup_id=<id> reason=<reason> created=<timestamp> size=<bytes>
 ```
 
 ## `fg backups restore`
