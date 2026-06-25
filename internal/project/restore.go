@@ -22,6 +22,11 @@ type Restorer struct {
 	// Progress, when set, receives byte-weighted progress for restore.
 	// A nil tracker is safe and ignored.
 	Progress *progress.Tracker
+	// Resume, when true, skips a file whose output already exists at the expected
+	// size instead of decrypting it again, so an interrupted restore can continue.
+	// Verifying the output content would require a full decryption, which would
+	// negate the benefit, so resume matches on presence and size.
+	Resume bool
 }
 
 type RestoredFile struct {
@@ -103,6 +108,19 @@ func (r Restorer) RestoreContentReport(ctx context.Context, plan model.PlannedPr
 			return report, fmt.Errorf("resolve output path for file %s: %w", file.ID, err)
 		}
 		r.Progress.SetItem(filepath.Base(realPath))
+
+		if r.Resume {
+			info, err := os.Stat(outputPath)
+			switch {
+			case err == nil && !info.IsDir() && info.Size() == file.OriginalSize:
+				r.Progress.AddBytes(file.OriginalSize)
+				r.Progress.ItemDone()
+				report.DecryptedFiles++
+				continue
+			case err != nil && !os.IsNotExist(err):
+				return report, fmt.Errorf("stat restored output %s: %w", outputPath, err)
+			}
+		}
 
 		switch file.StorageKind {
 		case model.StorageKindSingle:
