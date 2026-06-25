@@ -104,6 +104,8 @@ const zhCN = {
     extraObjects: '多余对象数',
     extraObjectPaths: '多余对象路径',
     forceOverwrite: '强制覆盖',
+    resumeDecryption: '续作',
+    resumeDecryptionHint: '继续被中断的解密：保留已有输出，仅还原缺失或大小不符的文件。',
     fileCount: '文件数量',
     fileSize: '文件大小',
     failedEncryptedFiles: '失败加密文件数',

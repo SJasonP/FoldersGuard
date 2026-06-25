@@ -161,21 +161,19 @@ Maintenance:
 - [`fg backups restore`](cli/maintenance.md#fg-backups-restore)
 - [`fg passwd`](cli/maintenance.md#fg-passwd)
 
-## Planned CLI Additions
+## Resume And Planned CLI Additions
 
-Planned; not yet implemented. These additions follow the same global rules, password input, project reference,
-and overwrite rules as the rest of the CLI.
+`fg decrypt --resume` is available: it continues an interrupted decryption, keeping the existing output and restoring
+only files that are missing or the wrong size. It is mutually exclusive with `--force`. Processing every file again is
+the default.
 
-New flags on `fg encrypt` and `fg decrypt`:
+The additions below are planned and not yet implemented. They follow the same global rules, password input, project
+reference, and overwrite rules as the rest of the CLI.
 
-- `--resume`: continue an interrupted operation, skipping objects that already exist and pass integrity verification.
-- `--resume-fast`: continue an interrupted operation, skipping objects by presence only without verifying them.
-- `--fresh`: ignore any existing output and process every object; this is the default.
+New flags on `fg encrypt`:
+
 - `--continue-on-error`: record item-level failures and process the remaining items instead of aborting on the first
   error. The default remains abort on the first error.
-
-New flag on `fg encrypt`:
-
 - `--concurrency <n>`: number of files encrypted concurrently. The default is derived from the host CPU count. `1`
   forces sequential encryption.
 

@@ -8,6 +8,7 @@ type DecryptProjectValues = {
     encryptedPath: string;
     outputPath: string;
     force: boolean;
+    resume: boolean;
 };
 
 type DecryptProjectModalProps = {
@@ -51,6 +52,10 @@ export function DecryptProjectModal({
                     label: t('forceOverwrite'),
                     value: values.force ? t('passwordProtectedYes') : t('passwordProtectedNo')
                 },
+                {
+                    label: t('resumeDecryption'),
+                    value: values.resume ? t('passwordProtectedYes') : t('passwordProtectedNo')
+                },
             ],
             onConfirm: () => {
                 onSubmit(values);
@@ -73,6 +78,7 @@ export function DecryptProjectModal({
                 layout="vertical"
                 initialValues={{
                     force: false,
+                    resume: false,
                 }}
                 onFinish={confirmSubmit}
             >
@@ -103,6 +109,9 @@ export function DecryptProjectModal({
                 </Form.Item>
                 <Form.Item name="force" valuePropName="checked">
                     <Checkbox>{t('forceOverwrite')}</Checkbox>
+                </Form.Item>
+                <Form.Item name="resume" valuePropName="checked" extra={t('resumeDecryptionHint')}>
+                    <Checkbox>{t('resumeDecryption')}</Checkbox>
                 </Form.Item>
             </Form>
         </Modal>

@@ -104,6 +104,8 @@ const enUS = {
     extraObjects: 'Extra Objects',
     extraObjectPaths: 'Extra Object Paths',
     forceOverwrite: 'Force overwrite',
+    resumeDecryption: 'Resume',
+    resumeDecryptionHint: 'Continue an interrupted decryption: keep the existing output and restore only files that are missing or the wrong size.',
     fileCount: 'File Count',
     fileSize: 'File Size',
     failedEncryptedFiles: 'Failed Encrypted Files',

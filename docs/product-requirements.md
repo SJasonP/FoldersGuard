@@ -214,17 +214,18 @@ Versioning approach:
 
 ### Resumable Operations
 
-**Status: Planned for v1.4 — not yet implemented.**
+**Status: Implemented in v1.4 for decryption. Encryption resume is a core primitive, not a user-facing operation.**
 
-- Long-running content operations can be re-run after an interruption and continue instead of restarting from the
-  beginning.
-- Encryption skips an encrypted object whose visible path already exists and passes integrity verification; a present
-  but corrupt object is rewritten.
-- Decryption and restore skip an output file that already exists and matches the expected content.
-- A source file is deleted only after its encrypted object is confirmed complete, even across a resumed run.
-- Progress counts already-completed work as processed at the start of a resumed run so totals stay accurate.
-- The user chooses between resuming and starting fresh.
-- Resuming verifies an existing object before skipping it; a faster skip-by-presence option may be offered.
+- Decryption and restore can be re-run after an interruption and continue instead of restarting from the beginning. A
+  file whose output already exists at the expected size is skipped; a missing or wrong-size output is restored.
+- Resuming a decryption keeps the existing partial output rather than rejecting a non-empty output or overwriting it.
+- Progress counts already-restored work as processed at the start of a resumed run so totals stay accurate.
+- The user chooses between resuming and starting fresh, in the CLI (`fg decrypt --resume`) and the WebUI.
+- The encryption executor supports the same skip-on-resume behavior as a core primitive: an object whose visible path
+  exists, and optionally passes integrity verification, is skipped, and a missing or corrupt object is rewritten. It is
+  not exposed as a `create` flag, because each create generates a fresh project with new keys and visible names, so
+  re-running create cannot match a prior partial output. Resuming a partially encrypted project would be a separate
+  project-scoped operation.
 
 ### Partial-Failure Tolerance
 

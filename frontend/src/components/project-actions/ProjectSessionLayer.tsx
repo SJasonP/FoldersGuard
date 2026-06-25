@@ -79,6 +79,7 @@ type ProjectSessionLayerProps = {
         encryptedPath: string;
         outputPath: string;
         force: boolean;
+        resume: boolean;
     }) => void;
     decryptResultOpen: boolean;
     decryptResult: DecryptProjectResultModel | null;

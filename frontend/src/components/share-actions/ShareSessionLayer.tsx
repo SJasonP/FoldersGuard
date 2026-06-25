@@ -32,6 +32,7 @@ type ShareSessionLayerProps = {
         encryptedPath: string;
         outputPath: string;
         force: boolean;
+        resume: boolean;
     }) => void;
     onCloseDecryptShareResult: () => void;
     onCloseVerifyShare: () => void;

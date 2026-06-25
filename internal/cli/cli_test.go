@@ -41,7 +41,7 @@ func TestVersionOutput(t *testing.T) {
 	if !strings.Contains(output.String(), "app_id=com.SJasonP.FoldersGuard\n") {
 		t.Fatalf("version output = %q", output.String())
 	}
-	if !strings.Contains(output.String(), "product_version=1.3.0\n") {
+	if !strings.Contains(output.String(), "product_version=1.4.0\n") {
 		t.Fatalf("version output = %q", output.String())
 	}
 	if !strings.Contains(output.String(), "format_version=fg-native-v1\n") {

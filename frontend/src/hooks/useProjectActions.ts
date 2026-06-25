@@ -145,6 +145,7 @@ export function useProjectActions({
         encryptedPath: string;
         outputPath: string;
         force: boolean;
+        resume: boolean;
     }) => {
         if (!selectedProjectId) {
             return;
@@ -160,6 +161,7 @@ export function useProjectActions({
                 outputPath: values.outputPath,
                 force: values.force,
                 sourceCleanup: '',
+                resume: values.resume,
             });
             setDecryptResult(result);
             setDecryptResultOpen(true);

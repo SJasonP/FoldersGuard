@@ -234,24 +234,22 @@ Status rules:
 
 ## Operation Options
 
-Planned; not yet implemented. These options apply to the long-running content operations and default to the
-v1 behavior.
+These options apply to the long-running content operations and default to the v1 behavior.
 
-Resume:
+Resume (available for decryption):
 
-- When an encryption or decryption output already exists from an interrupted run, the WebUI offers to resume or to start
-  fresh.
-- Resuming skips objects that are already complete and processes only what remains; the progress display counts
-  already-completed work as processed.
-- Starting fresh re-processes every object and is the default.
+- Decrypt Project and Decrypt Share offer a Resume option. When set, the decryption keeps the existing output and
+  restores only files that are missing or the wrong size; the progress display counts already-restored work as
+  processed.
+- Resume is off by default, so decryption restores every file.
 
-Failure handling:
+Failure handling (planned; not yet implemented):
 
 - An operation can abort on the first error or continue past item-level failures, following the default failure handling
   setting and an optional per-operation override.
 - When continuing, the result summary lists the failed item count and per-item reasons, with sensitive values hidden.
 
-Concurrency:
+Concurrency (planned; not yet implemented):
 
 - Encryption can process several files at once, following the encryption concurrency setting.
 - Concurrency does not change the progress display, which remains byte-weighted.
