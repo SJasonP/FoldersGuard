@@ -43,7 +43,6 @@ export function DecryptShareModal({
             title: t('decryptShare'),
             message: t('decryptShareConfirm'),
             okText: t('decryptShare'),
-            danger: sourceCleanupMode === 'delete',
             items: [
                 {label: t('verifyEncryptedPath'), value: values.encryptedPath},
                 {label: t('outputPath'), value: values.outputPath},

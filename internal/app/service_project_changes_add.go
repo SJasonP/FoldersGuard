@@ -30,6 +30,10 @@ func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Stor
 	if err != nil {
 		return projectAddApplyResult{}, err
 	}
+	sourceCleanup, err := s.resolveSourceCleanupMode("")
+	if err != nil {
+		return projectAddApplyResult{}, err
+	}
 
 	// Plan every add first so the combined byte and item total is known before
 	// any encryption begins. PrepareAdd later assigns storage names but does not
@@ -80,7 +84,7 @@ func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Stor
 	tracker.SetTotalItems(totalFiles)
 
 	for _, pa := range planned {
-		operations, err := s.applyOnePlannedAdd(ctx, store, pa.change, pa.addition, stagedContentPath, input.EncryptedRoot, contentConnected, tracker)
+		operations, err := s.applyOnePlannedAdd(ctx, store, pa.change, pa.addition, stagedContentPath, input.EncryptedRoot, contentConnected, sourceCleanup, noiseMode, tracker)
 		if err != nil {
 			return projectAddApplyResult{}, err
 		}
@@ -91,7 +95,7 @@ func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Stor
 	return result, nil
 }
 
-func (s Service) applyOnePlannedAdd(ctx context.Context, store *storage.Store, change ProjectAddChange, addition model.PlannedProject, stagedContentPath, encryptedRoot string, contentConnected bool, tracker *progress.Tracker) (projectAddApplyResult, error) {
+func (s Service) applyOnePlannedAdd(ctx context.Context, store *storage.Store, change ProjectAddChange, addition model.PlannedProject, stagedContentPath, encryptedRoot string, contentConnected bool, sourceCleanup, noiseMode string, tracker *progress.Tracker) (projectAddApplyResult, error) {
 	addition, operations, err := store.PrepareAdd(ctx, change.TargetFolderPath, addition)
 	if err != nil {
 		return projectAddApplyResult{}, err
@@ -127,6 +131,9 @@ func (s Service) applyOnePlannedAdd(ctx context.Context, store *storage.Store, c
 		if err != nil {
 			return projectAddApplyResult{}, err
 		}
+		if err := s.cleanupAddedSources(change.SourcePath, addition, sourceCleanup, noiseMode); err != nil {
+			return projectAddApplyResult{}, err
+		}
 		return projectAddApplyResult{
 			ContentOperations:     projectContentOperations(committed.Operations),
 			AppliedContentChanges: appliedProjectContentOperations(applied),
@@ -136,7 +143,45 @@ func (s Service) applyOnePlannedAdd(ctx context.Context, store *storage.Store, c
 	if err != nil {
 		return projectAddApplyResult{}, err
 	}
+	if err := s.cleanupAddedSources(change.SourcePath, addition, sourceCleanup, noiseMode); err != nil {
+		return projectAddApplyResult{}, err
+	}
 	return projectAddApplyResult{ContentOperations: projectContentOperations(committed.Operations)}, nil
+}
+
+// cleanupAddedSources applies the source-cleanup setting after an add is
+// committed. When the setting is delete, the encrypted source files are removed,
+// and for a directory add the now-empty source directories are pruned. It runs
+// only after a successful commit so an interrupted add never deletes a source
+// whose encrypted content was rolled back.
+func (s Service) cleanupAddedSources(sourcePath string, addition model.PlannedProject, sourceCleanup, noiseMode string) error {
+	if sourceCleanup != SourceCleanupDelete {
+		return nil
+	}
+	for _, file := range addition.Files {
+		if file.SourcePath == "" {
+			continue
+		}
+		if err := os.Remove(file.SourcePath); err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return fmt.Errorf("delete source file: %w", err)
+		}
+	}
+	info, err := os.Stat(sourcePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("stat add source: %w", err)
+	}
+	if info.IsDir() {
+		if _, err := removeEmptyFoldersUnderRoot(sourcePath, noiseMode); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 type projectChangeStaging struct {

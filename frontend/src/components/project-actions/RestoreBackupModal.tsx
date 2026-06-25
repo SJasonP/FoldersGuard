@@ -42,7 +42,6 @@ export function RestoreBackupModal({
             title: t('restoreBackup'),
             content: t('restoreBackupConfirm', {time: formatDateTime(backup.createdAt)}),
             okText: t('restoreBackup'),
-            okButtonProps: {danger: true},
             onOk: () => onRestore(backup.id),
         });
     };

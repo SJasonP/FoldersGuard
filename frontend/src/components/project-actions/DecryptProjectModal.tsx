@@ -43,7 +43,6 @@ export function DecryptProjectModal({
             title: t('decryptProject'),
             message: t('decryptProjectConfirm'),
             okText: t('decryptProject'),
-            danger: sourceCleanupMode === 'delete',
             items: [
                 {label: t('verifyEncryptedPath'), value: values.encryptedPath},
                 {label: t('outputPath'), value: values.outputPath},

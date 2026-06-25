@@ -122,7 +122,7 @@ CLI 规范见 `docs/cli.md` 和 `docs/cli/` 下的文件。
 
 发布构建通过 GitHub Releases 提供。
 
-对于 v1.1.0，请把 release 产物视为实验性版本。请先用数据副本测试，保留独立备份，并在依赖恢复或分享流程前先验证加密内容。
+对于 v1.2.0，请把 release 产物视为实验性版本。请先用数据副本测试，保留独立备份，并在依赖恢复或分享流程前先验证加密内容。
 
 通过 `make macos-release` 生成的 macOS 发布包设计为在上传前完成签名、公证和 staple。Windows 构建必须启用 CGO，并使用可用于
 Windows 目标平台的 C 编译器，才能真正包含 SQLCipher 支持。

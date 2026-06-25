@@ -32,7 +32,6 @@ export function CreateShareModal({open, loading, selectedItemCount, onCancel, on
             title: t('createShare'),
             message: values.passwordProtected ? t('createShareConfirm') : t('createUnprotectedShareConfirm'),
             okText: t('createShare'),
-            danger: !values.passwordProtected,
             items: [
                 {label: t('shareSelectionItems'), value: selectedItemCount},
                 {label: t('shareDatabaseOutputPath'), value: values.outputPath},
