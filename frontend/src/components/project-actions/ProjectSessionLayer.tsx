@@ -9,6 +9,7 @@ import {ExportProjectModal} from './ExportProjectModal';
 import {ImportProjectModal} from './ImportProjectModal';
 import {InspectProjectDrawer} from './InspectProjectDrawer';
 import {InspectProjectModal} from './InspectProjectModal';
+import {ChangePasswordModal} from '../common/ChangePasswordModal';
 import {ProjectActionsDrawer} from './ProjectActionsDrawer';
 import {RestoreBackupModal} from './RestoreBackupModal';
 import {ShareSelectionDrawer} from './ShareSelectionDrawer';
@@ -53,6 +54,7 @@ type ProjectSessionLayerProps = {
     onOpenDecrypt: () => void;
     onOpenCreateShare: () => void;
     onOpenExport: () => void;
+    onOpenChangePassword: () => void;
     onOpenRestoreBackup: () => void;
     onOpenDelete: () => void;
     inspectDialogOpen: boolean;
@@ -116,6 +118,10 @@ type ProjectSessionLayerProps = {
     restoreBackupLoading: boolean;
     onCloseRestoreBackup: () => void;
     onRestoreBackup: (backupId: string) => void;
+    changePasswordOpen: boolean;
+    changePasswordLoading: boolean;
+    onCloseChangePassword: () => void;
+    onChangePassword: (values: { oldPassword: string; newPassword: string }) => void;
     t: (key: string, options?: Record<string, unknown>) => string;
 };
 
@@ -141,6 +147,7 @@ export function ProjectSessionLayer({
                                         onOpenDecrypt,
                                         onOpenCreateShare,
                                         onOpenExport,
+                                        onOpenChangePassword,
                                         onOpenRestoreBackup,
                                         onOpenDelete,
                                         inspectDialogOpen,
@@ -193,6 +200,10 @@ export function ProjectSessionLayer({
                                         restoreBackupLoading,
                                         onCloseRestoreBackup,
                                         onRestoreBackup,
+                                        changePasswordOpen,
+                                        changePasswordLoading,
+                                        onCloseChangePassword,
+                                        onChangePassword,
                                         t,
                                     }: ProjectSessionLayerProps) {
     return (
@@ -209,6 +220,7 @@ export function ProjectSessionLayer({
                 onDecrypt={onOpenDecrypt}
                 onCreateShare={onOpenCreateShare}
                 onExport={onOpenExport}
+                onChangePassword={onOpenChangePassword}
                 onRestoreBackup={onOpenRestoreBackup}
                 onDelete={onOpenDelete}
                 t={t}
@@ -281,6 +293,14 @@ export function ProjectSessionLayer({
                 backups={backups}
                 onRestore={onRestoreBackup}
                 onCancel={onCloseRestoreBackup}
+                t={t}
+            />
+            <ChangePasswordModal
+                open={changePasswordOpen}
+                loading={changePasswordLoading}
+                title={t('changePassword')}
+                onCancel={onCloseChangePassword}
+                onSubmit={onChangePassword}
                 t={t}
             />
         </>

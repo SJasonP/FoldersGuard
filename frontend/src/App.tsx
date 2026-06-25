@@ -130,18 +130,22 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
         decryptShareLoading,
         decryptShareResult,
         decryptShareResultOpen,
+        handleChangeSharePassword,
         handleDecryptShare,
         handleLoadShare,
         handleVerifyShare,
         inspectShareOpen,
         loadShareDialogOpen,
         loadedShare,
+        changeSharePasswordOpen,
+        changeSharePasswordLoading,
         setLoadShareDialogOpen,
         setDecryptShareDialogOpen,
         setDecryptShareResultOpen,
         setInspectShareOpen,
         setVerifyShareDialogOpen,
         setVerifyShareResultOpen,
+        setChangeSharePasswordOpen,
         shareActionsOpen,
         shareLoading,
         verifyShareDialogOpen,
@@ -173,6 +177,8 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
         backups,
         backupsLoading,
         restoreBackupLoading,
+        changePasswordOpen,
+        changePasswordLoading,
         verifyDialogOpen,
         verifyLoading,
         verifyResult,
@@ -185,6 +191,7 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
         setInspectResultOpen,
         setProjectActionsOpen,
         setRestoreBackupOpen,
+        setChangePasswordOpen,
         setVerifyDialogOpen,
         setVerifyResultOpen,
         openProjectActions,
@@ -194,6 +201,7 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
         handleInspectProject,
         handleOpenRestoreBackup,
         handleRestoreBackup,
+        handleChangePassword,
         handleSaveProjectName,
         handleVerifyProject,
     } = useProjectActions({
@@ -430,6 +438,7 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
                     onOpenDecrypt={() => setDecryptDialogOpen(true)}
                     onOpenCreateShare={() => setSharePasswordDialogOpen(true)}
                     onOpenExport={() => setExportDialogOpen(true)}
+                    onOpenChangePassword={() => setChangePasswordOpen(true)}
                     onOpenRestoreBackup={() => void handleOpenRestoreBackup()}
                     onOpenDelete={() => setDeleteDialogOpen(true)}
                     inspectDialogOpen={inspectDialogOpen}
@@ -482,6 +491,10 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
                     restoreBackupLoading={restoreBackupLoading}
                     onCloseRestoreBackup={() => setRestoreBackupOpen(false)}
                     onRestoreBackup={(backupId) => void handleRestoreBackup(backupId)}
+                    changePasswordOpen={changePasswordOpen}
+                    changePasswordLoading={changePasswordLoading}
+                    onCloseChangePassword={() => setChangePasswordOpen(false)}
+                    onChangePassword={(values) => void handleChangePassword(values)}
                     t={t}
                 />
                 <ProjectBrowserLayer
@@ -546,6 +559,11 @@ function AppBody({language, resolvedTheme, systemLanguage, setLanguage, setTheme
                     onCloseVerifyShare={() => setVerifyShareDialogOpen(false)}
                     onVerifyShare={(values) => void handleVerifyShare(values)}
                     onCloseVerifyShareResult={() => setVerifyShareResultOpen(false)}
+                    changeSharePasswordOpen={changeSharePasswordOpen}
+                    changeSharePasswordLoading={changeSharePasswordLoading}
+                    onOpenChangeSharePassword={() => setChangeSharePasswordOpen(true)}
+                    onCloseChangeSharePassword={() => setChangeSharePasswordOpen(false)}
+                    onChangeSharePassword={(values) => void handleChangeSharePassword(values)}
                     t={t}
                 />
         </>

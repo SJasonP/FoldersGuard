@@ -10,6 +10,14 @@ export function ApplyProjectChanges(arg1) {
   return window['go']['main']['App']['ApplyProjectChanges'](arg1);
 }
 
+export function ChangeProjectPassword(arg1) {
+  return window['go']['main']['App']['ChangeProjectPassword'](arg1);
+}
+
+export function ChangeSharePassword(arg1) {
+  return window['go']['main']['App']['ChangeSharePassword'](arg1);
+}
+
 export function CreateProject(arg1) {
   return window['go']['main']['App']['CreateProject'](arg1);
 }

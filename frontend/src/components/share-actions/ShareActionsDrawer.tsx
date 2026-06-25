@@ -1,5 +1,5 @@
 import {Button, Descriptions, Drawer, Space} from 'antd';
-import {SafetyCertificateOutlined} from '@ant-design/icons';
+import {KeyOutlined, SafetyCertificateOutlined} from '@ant-design/icons';
 import type {ShareSummaryModel} from '../../types';
 import {formatNumber} from '../../formatters';
 
@@ -10,10 +10,11 @@ type ShareActionsDrawerProps = {
     onInspect: () => void;
     onDecrypt: () => void;
     onVerify: () => void;
+    onChangePassword: () => void;
     t: (key: string) => string;
 };
 
-export function ShareActionsDrawer({open, share, onClose, onInspect, onDecrypt, onVerify, t}: ShareActionsDrawerProps) {
+export function ShareActionsDrawer({open, share, onClose, onInspect, onDecrypt, onVerify, onChangePassword, t}: ShareActionsDrawerProps) {
     return (
         <Drawer title={t('shareActions')} open={open} onClose={onClose} width={540}>
             <Space direction="vertical" size="middle" className="content-stack">
@@ -43,6 +44,11 @@ export function ShareActionsDrawer({open, share, onClose, onInspect, onDecrypt, 
                 <Button block icon={<SafetyCertificateOutlined/>} onClick={onVerify}>
                     {t('verifyShare')}
                 </Button>
+                {share?.passwordProtected ? (
+                    <Button block icon={<KeyOutlined/>} onClick={onChangePassword}>
+                        {t('changeSharePassword')}
+                    </Button>
+                ) : null}
             </Space>
         </Drawer>
     );

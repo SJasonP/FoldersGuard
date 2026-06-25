@@ -296,6 +296,38 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class ChangeProjectPasswordRequest {
+	    projectId: string;
+	    oldPassword: string;
+	    newPassword: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ChangeProjectPasswordRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.projectId = source["projectId"];
+	        this.oldPassword = source["oldPassword"];
+	        this.newPassword = source["newPassword"];
+	    }
+	}
+	export class ChangeSharePasswordRequest {
+	    databasePath: string;
+	    oldPassword: string;
+	    newPassword: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ChangeSharePasswordRequest(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.databasePath = source["databasePath"];
+	        this.oldPassword = source["oldPassword"];
+	        this.newPassword = source["newPassword"];
+	    }
+	}
 	export class CreateProjectRequest {
 	    sourcePath: string;
 	    contentOutput: string;

@@ -1,4 +1,5 @@
 import type {TFunction} from 'i18next';
+import {ChangePasswordModal} from '../common/ChangePasswordModal';
 import {ShareActionsDrawer} from './ShareActionsDrawer';
 import {ShareInspectDrawer} from './ShareInspectDrawer';
 import {DecryptShareDrawer} from './DecryptShareDrawer';
@@ -36,6 +37,11 @@ type ShareSessionLayerProps = {
     onCloseVerifyShare: () => void;
     onVerifyShare: (values: { password: string; encryptedPath: string }) => void;
     onCloseVerifyShareResult: () => void;
+    changeSharePasswordOpen: boolean;
+    changeSharePasswordLoading: boolean;
+    onOpenChangeSharePassword: () => void;
+    onCloseChangeSharePassword: () => void;
+    onChangeSharePassword: (values: { oldPassword: string; newPassword: string }) => void;
     t: TFunction;
 };
 
@@ -63,6 +69,11 @@ export function ShareSessionLayer({
                                       onCloseVerifyShare,
                                       onVerifyShare,
                                       onCloseVerifyShareResult,
+                                      changeSharePasswordOpen,
+                                      changeSharePasswordLoading,
+                                      onOpenChangeSharePassword,
+                                      onCloseChangeSharePassword,
+                                      onChangeSharePassword,
                                       t,
                                   }: ShareSessionLayerProps) {
     return (
@@ -74,6 +85,7 @@ export function ShareSessionLayer({
                 onInspect={onOpenInspectShare}
                 onDecrypt={onOpenDecryptShare}
                 onVerify={onOpenVerifyShare}
+                onChangePassword={onOpenChangeSharePassword}
                 t={t}
             />
             <ShareInspectDrawer open={inspectShareOpen} share={loadedShare} onClose={onCloseInspectShare} t={t}/>
@@ -104,6 +116,14 @@ export function ShareSessionLayer({
                 onClose={onCloseVerifyShareResult}
                 title={t('verifyShare')}
                 identityLabel={t('shareId')}
+                t={t}
+            />
+            <ChangePasswordModal
+                open={changeSharePasswordOpen}
+                loading={changeSharePasswordLoading}
+                title={t('changeSharePassword')}
+                onCancel={onCloseChangeSharePassword}
+                onSubmit={onChangeSharePassword}
                 t={t}
             />
         </>

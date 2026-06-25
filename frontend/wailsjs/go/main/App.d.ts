@@ -6,6 +6,10 @@ export function AppInfo():Promise<main.AppInfo>;
 
 export function ApplyProjectChanges(arg1:main.ApplyProjectChangesRequest):Promise<main.ApplyProjectChangesResult>;
 
+export function ChangeProjectPassword(arg1:main.ChangeProjectPasswordRequest):Promise<void>;
+
+export function ChangeSharePassword(arg1:main.ChangeSharePasswordRequest):Promise<void>;
+
 export function CreateProject(arg1:main.CreateProjectRequest):Promise<main.CreateProjectResult>;
 
 export function CreateShare(arg1:main.CreateShareRequest):Promise<main.CreateShareResult>;

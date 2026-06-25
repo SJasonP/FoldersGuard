@@ -2,6 +2,7 @@ import {useState} from 'react';
 import type {MessageInstance} from 'antd/es/message/interface';
 import type {HookAPI as ModalHookAPI} from 'antd/es/modal/useModal';
 import {
+    ChangeProjectPassword,
     DecryptProject,
     DeleteProject,
     ExportProject,
@@ -62,6 +63,8 @@ export function useProjectActions({
     const [backups, setBackups] = useState<ProjectBackupInfoModel[]>([]);
     const [backupsLoading, setBackupsLoading] = useState(false);
     const [restoreBackupLoading, setRestoreBackupLoading] = useState(false);
+    const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+    const [changePasswordLoading, setChangePasswordLoading] = useState(false);
     const [projectNameSaving, setProjectNameSaving] = useState(false);
 
     const openProjectActions = () => {
@@ -231,6 +234,27 @@ export function useProjectActions({
         }
     };
 
+    const handleChangePassword = async (values: { oldPassword: string; newPassword: string }) => {
+        if (!selectedProjectId) {
+            return;
+        }
+        setChangePasswordOpen(false);
+        setProjectActionsOpen(false);
+        setChangePasswordLoading(true);
+        try {
+            await ChangeProjectPassword({
+                projectId: selectedProjectId,
+                oldPassword: values.oldPassword,
+                newPassword: values.newPassword,
+            });
+            messageApi.success(t('changePasswordSucceeded'));
+        } catch (error) {
+            showOperationError(modalApi, t('changePasswordFailed'), error, t);
+        } finally {
+            setChangePasswordLoading(false);
+        }
+    };
+
     const handleSaveProjectName = async (projectName: string) => {
         if (!selectedProjectId) {
             return;
@@ -269,6 +293,8 @@ export function useProjectActions({
         backups,
         backupsLoading,
         restoreBackupLoading,
+        changePasswordOpen,
+        changePasswordLoading,
         selectedProject,
         verifyDialogOpen,
         verifyLoading,
@@ -282,6 +308,7 @@ export function useProjectActions({
         setInspectResultOpen,
         setProjectActionsOpen,
         setRestoreBackupOpen,
+        setChangePasswordOpen,
         setVerifyDialogOpen,
         setVerifyResultOpen,
         openProjectActions,
@@ -291,6 +318,7 @@ export function useProjectActions({
         handleInspectProject,
         handleOpenRestoreBackup,
         handleRestoreBackup,
+        handleChangePassword,
         handleSaveProjectName,
         handleVerifyProject,
     };

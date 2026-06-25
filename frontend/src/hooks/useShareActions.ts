@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import type {MessageInstance} from 'antd/es/message/interface';
 import type {HookAPI as ModalHookAPI} from 'antd/es/modal/useModal';
-import {DecryptShare, LoadShare, VerifyShare} from '../../wailsjs/go/main/App';
+import {ChangeSharePassword, DecryptShare, LoadShare, VerifyShare} from '../../wailsjs/go/main/App';
 import type {DecryptShareResultModel, ShareSummaryModel, VerifyProjectResultModel} from '../types';
 import {showOperationError} from '../components/common/operationError';
 
@@ -26,6 +26,8 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
     const [verifyShareLoading, setVerifyShareLoading] = useState(false);
     const [verifyShareResult, setVerifyShareResult] = useState<VerifyProjectResultModel | null>(null);
     const [verifyShareResultOpen, setVerifyShareResultOpen] = useState(false);
+    const [changeSharePasswordOpen, setChangeSharePasswordOpen] = useState(false);
+    const [changeSharePasswordLoading, setChangeSharePasswordLoading] = useState(false);
 
     const handleLoadShare = async (values: { databasePath: string; password: string }) => {
         setShareLoading(true);
@@ -92,6 +94,26 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
         }
     };
 
+    const handleChangeSharePassword = async (values: { oldPassword: string; newPassword: string }) => {
+        if (!loadedShareDatabasePath) {
+            return;
+        }
+        setChangeSharePasswordOpen(false);
+        setChangeSharePasswordLoading(true);
+        try {
+            await ChangeSharePassword({
+                databasePath: loadedShareDatabasePath,
+                oldPassword: values.oldPassword,
+                newPassword: values.newPassword,
+            });
+            messageApi.success(t('changeSharePasswordSucceeded'));
+        } catch (error) {
+            showOperationError(modalApi, t('changeSharePasswordFailed'), error, t);
+        } finally {
+            setChangeSharePasswordLoading(false);
+        }
+    };
+
     const closeShareSession = () => {
         setShareActionsOpen(false);
         setInspectShareOpen(false);
@@ -101,6 +123,7 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
         setVerifyShareDialogOpen(false);
         setVerifyShareResultOpen(false);
         setVerifyShareResult(null);
+        setChangeSharePasswordOpen(false);
         setLoadedShare(null);
         setLoadedShareDatabasePath('');
     };
@@ -111,6 +134,7 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
         decryptShareLoading,
         decryptShareResult,
         decryptShareResultOpen,
+        handleChangeSharePassword,
         handleDecryptShare,
         handleLoadShare,
         handleVerifyShare,
@@ -118,12 +142,15 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
         loadedShare,
         loadedShareDatabasePath,
         inspectShareOpen,
+        changeSharePasswordOpen,
+        changeSharePasswordLoading,
         setLoadShareDialogOpen,
         setInspectShareOpen,
         setDecryptShareDialogOpen,
         setDecryptShareResultOpen,
         setVerifyShareDialogOpen,
         setVerifyShareResultOpen,
+        setChangeSharePasswordOpen,
         shareActionsOpen,
         shareLoading,
         verifyShareDialogOpen,

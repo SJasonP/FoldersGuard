@@ -69,6 +69,18 @@ type RestoreProjectBackupResult struct {
 	ProjectID string `json:"projectId"`
 }
 
+type ChangeProjectPasswordRequest struct {
+	ProjectID   string `json:"projectId"`
+	OldPassword string `json:"oldPassword"`
+	NewPassword string `json:"newPassword"`
+}
+
+type ChangeSharePasswordRequest struct {
+	DatabasePath string `json:"databasePath"`
+	OldPassword  string `json:"oldPassword"`
+	NewPassword  string `json:"newPassword"`
+}
+
 type InspectProjectRequest struct {
 	ProjectID string `json:"projectId"`
 	Password  string `json:"password"`
