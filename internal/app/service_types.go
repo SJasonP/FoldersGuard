@@ -21,6 +21,7 @@ type DecryptShareInput struct {
 	OutputRoot    string
 	Force         bool
 	SourceCleanup string
+	Resume        bool
 }
 
 type DecryptShareResult struct {
@@ -40,6 +41,7 @@ type DecryptProjectInput struct {
 	OutputRoot    string
 	Force         bool
 	SourceCleanup string
+	Resume        bool
 }
 
 type DecryptProjectResult struct {

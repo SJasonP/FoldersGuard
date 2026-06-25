@@ -70,7 +70,11 @@ func (s Service) DecryptShare(ctx context.Context, input DecryptShareInput) (Dec
 	if err != nil {
 		return DecryptShareResult{}, err
 	}
-	if err := PrepareDirectoryOutputWithNoiseMode(input.OutputRoot, input.Force, "output", noiseMode); err != nil {
+	if input.Resume {
+		if err := os.MkdirAll(input.OutputRoot, 0o755); err != nil {
+			return DecryptShareResult{}, fmt.Errorf("create output folder: %w", err)
+		}
+	} else if err := PrepareDirectoryOutputWithNoiseMode(input.OutputRoot, input.Force, "output", noiseMode); err != nil {
 		return DecryptShareResult{}, err
 	}
 
@@ -112,6 +116,7 @@ func (s Service) DecryptShare(ctx context.Context, input DecryptShareInput) (Dec
 		NoiseMode:     noiseMode,
 		AfterFile:     afterFile,
 		Progress:      tracker,
+		Resume:        input.Resume,
 	}).RestoreContentReport(ctx, plan)
 	if err != nil {
 		return DecryptShareResult{}, err

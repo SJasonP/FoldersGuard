@@ -20,7 +20,13 @@ func (s Service) DecryptProject(ctx context.Context, input DecryptProjectInput) 
 	if err != nil {
 		return DecryptProjectResult{}, err
 	}
-	if err := PrepareDirectoryOutputWithNoiseMode(input.OutputRoot, input.Force, "output", noiseMode); err != nil {
+	if input.Resume {
+		// Resuming keeps the existing partial output and skips already-restored
+		// files, so the non-empty output must not be rejected or wiped.
+		if err := os.MkdirAll(input.OutputRoot, 0o755); err != nil {
+			return DecryptProjectResult{}, fmt.Errorf("create output folder: %w", err)
+		}
+	} else if err := PrepareDirectoryOutputWithNoiseMode(input.OutputRoot, input.Force, "output", noiseMode); err != nil {
 		return DecryptProjectResult{}, err
 	}
 
@@ -64,6 +70,7 @@ func (s Service) DecryptProject(ctx context.Context, input DecryptProjectInput) 
 		NoiseMode:     noiseMode,
 		AfterFile:     afterFile,
 		Progress:      tracker,
+		Resume:        input.Resume,
 	}).RestoreContentReport(ctx, plan)
 	if err != nil {
 		return DecryptProjectResult{}, err
