@@ -159,7 +159,7 @@ Maintenance:
 
 - [`fg backups list`](cli/maintenance.md#fg-backups-list)
 - [`fg backups restore`](cli/maintenance.md#fg-backups-restore)
-- [`fg passwd`](cli/maintenance.md#fg-passwd) (planned)
+- [`fg passwd`](cli/maintenance.md#fg-passwd)
 
 ## Planned CLI Additions
 
@@ -185,5 +185,5 @@ Exit codes with `--continue-on-error`:
 - Exit status is `1` when any item failed. The output lists the failed item count and per-item reasons. Internal keys
   and passwords are never printed.
 
-New command: `fg passwd`, documented in [maintenance CLI commands](cli/maintenance.md). The `fg backups` commands are
-already available.
+The `fg passwd` and `fg backups` maintenance commands are already available; see
+[maintenance CLI commands](cli/maintenance.md).

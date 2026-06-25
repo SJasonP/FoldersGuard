@@ -202,7 +202,7 @@ Versioning approach:
 
 ### Password Change
 
-**Status: Planned for v1.3 — not yet implemented.**
+**Status: Implemented in v1.3.**
 
 - A project (`.fg`) or share (`.fgs`) database password can be changed without re-encrypting content.
 - Internal per-file and per-folder content keys are unchanged; no encrypted object is rewritten.

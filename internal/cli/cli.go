@@ -82,6 +82,7 @@ func (c cli) rootCommand() *cobra.Command {
 	root.AddCommand(c.moveCommand())
 	root.AddCommand(c.removeCommand())
 	root.AddCommand(c.backupsCommand())
+	root.AddCommand(c.passwdCommand())
 	return root
 }
 
