@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -15,6 +16,7 @@ type decryptOptions struct {
 	outputRoot      string
 	passwordOptions passwordOptions
 	force           bool
+	resume          bool
 }
 
 func (c cli) decryptCommand() *cobra.Command {
@@ -36,6 +38,8 @@ func (c cli) decryptCommand() *cobra.Command {
 	command.Flags().BoolVar(&options.passwordOptions.passwordStdin, "password-stdin", false, "read password from stdin")
 	command.Flags().StringVar(&options.passwordOptions.passwordEnv, "password-env", "", "read password from an environment variable")
 	command.Flags().BoolVar(&options.force, "force", false, "replace existing outputs")
+	command.Flags().BoolVar(&options.resume, "resume", false, "continue an interrupted decryption, skipping outputs that already exist at the expected size")
+	command.MarkFlagsMutuallyExclusive("force", "resume")
 	mustMarkRequired(command, "content")
 	mustMarkRequired(command, "out")
 	command.MarkFlagsMutuallyExclusive("password-stdin", "password-env")
@@ -55,14 +59,20 @@ func (c cli) runDecrypt(options decryptOptions) error {
 	if err != nil {
 		return err
 	}
-	if err := prepareDirectoryOutput(options.outputRoot, options.force, "output"); err != nil {
+	if options.resume {
+		// Resuming keeps the existing partial output, so the non-empty output
+		// must not be rejected or wiped.
+		if err := os.MkdirAll(options.outputRoot, 0o755); err != nil {
+			return fmt.Errorf("create output folder: %w", err)
+		}
+	} else if err := prepareDirectoryOutput(options.outputRoot, options.force, "output"); err != nil {
 		return err
 	}
 	noiseMode, err := readNoiseFileHandling()
 	if err != nil {
 		return err
 	}
-	if err := (project.Restorer{EncryptedRoot: options.contentRoot, OutputRoot: options.outputRoot, NoiseMode: noiseMode}).RestoreContent(ctx, plan); err != nil {
+	if err := (project.Restorer{EncryptedRoot: options.contentRoot, OutputRoot: options.outputRoot, NoiseMode: noiseMode, Resume: options.resume}).RestoreContent(ctx, plan); err != nil {
 		return err
 	}
 

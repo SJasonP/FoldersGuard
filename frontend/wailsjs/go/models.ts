@@ -473,6 +473,7 @@ export namespace main {
 	    outputPath: string;
 	    force: boolean;
 	    sourceCleanup: string;
+	    resume: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new DecryptProjectRequest(source);
@@ -486,6 +487,7 @@ export namespace main {
 	        this.outputPath = source["outputPath"];
 	        this.force = source["force"];
 	        this.sourceCleanup = source["sourceCleanup"];
+	        this.resume = source["resume"];
 	    }
 	}
 	export class DecryptProjectResult {
@@ -519,6 +521,7 @@ export namespace main {
 	    outputPath: string;
 	    force: boolean;
 	    sourceCleanup: string;
+	    resume: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new DecryptShareRequest(source);
@@ -532,6 +535,7 @@ export namespace main {
 	        this.outputPath = source["outputPath"];
 	        this.force = source["force"];
 	        this.sourceCleanup = source["sourceCleanup"];
+	        this.resume = source["resume"];
 	    }
 	}
 	export class DecryptShareResult {

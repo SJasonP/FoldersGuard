@@ -100,6 +100,7 @@ func (a *App) DecryptProject(request DecryptProjectRequest) (DecryptProjectResul
 		OutputRoot:    request.OutputPath,
 		Force:         request.Force,
 		SourceCleanup: request.SourceCleanup,
+		Resume:        request.Resume,
 	})
 	finish(err)
 	if err != nil {
@@ -169,6 +170,7 @@ func (a *App) DecryptShare(request DecryptShareRequest) (DecryptShareResult, err
 		OutputRoot:    request.OutputPath,
 		Force:         request.Force,
 		SourceCleanup: request.SourceCleanup,
+		Resume:        request.Resume,
 	})
 	finish(err)
 	if err != nil {

@@ -127,6 +127,7 @@ type DecryptProjectRequest struct {
 	OutputPath    string `json:"outputPath"`
 	Force         bool   `json:"force"`
 	SourceCleanup string `json:"sourceCleanup"`
+	Resume        bool   `json:"resume"`
 }
 
 type DecryptProjectResult struct {
@@ -157,6 +158,7 @@ type DecryptShareRequest struct {
 	OutputPath    string `json:"outputPath"`
 	Force         bool   `json:"force"`
 	SourceCleanup string `json:"sourceCleanup"`
+	Resume        bool   `json:"resume"`
 }
 
 type DecryptShareResult struct {
