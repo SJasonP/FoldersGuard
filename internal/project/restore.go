@@ -27,6 +27,15 @@ type Restorer struct {
 	// Verifying the output content would require a full decryption, which would
 	// negate the benefit, so resume matches on presence and size.
 	Resume bool
+	// ContinueOnError, when true, records a file that fails to decrypt and
+	// continues with the remaining files instead of aborting. The default is to
+	// abort on the first error.
+	ContinueOnError bool
+	// OnFileError, when set, is called for each file that fails to decrypt under
+	// ContinueOnError, with the file and its error. A failed file's encrypted
+	// source is never deleted, because AfterFile runs only after a successful
+	// restore.
+	OnFileError func(model.File, error)
 }
 
 type RestoredFile struct {
@@ -133,6 +142,13 @@ func (r Restorer) RestoreContentReport(ctx context.Context, plan model.PlannedPr
 				return report, fmt.Errorf("missing selected encrypted path for file %s", file.ID)
 			}
 			if err := r.restoreSingle(ctx, file, sourcePath, outputPath); err != nil {
+				if r.ContinueOnError && ctx.Err() == nil {
+					if r.OnFileError != nil {
+						r.OnFileError(file, err)
+					}
+					r.Progress.ItemDone()
+					continue
+				}
 				return report, err
 			}
 			restoredEncryptedPaths = []string{visiblePath}
@@ -145,6 +161,13 @@ func (r Restorer) RestoreContentReport(ctx context.Context, plan model.PlannedPr
 				return report, err
 			}
 			if err := r.restoreSplit(ctx, file, sourcePaths, parts, outputPath); err != nil {
+				if r.ContinueOnError && ctx.Err() == nil {
+					if r.OnFileError != nil {
+						r.OnFileError(file, err)
+					}
+					r.Progress.ItemDone()
+					continue
+				}
 				return report, err
 			}
 			restoredEncryptedPaths = encryptedPartPaths(visiblePath, parts)
