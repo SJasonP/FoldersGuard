@@ -1,6 +1,7 @@
 import {Descriptions, Drawer} from 'antd';
 import type {DecryptShareResultModel} from '../../types';
 import {formatNumber} from '../../formatters';
+import {FailuresList} from '../common/FailuresList';
 
 type DecryptShareDrawerProps = {
     open: boolean;
@@ -26,6 +27,7 @@ export function DecryptShareDrawer({open, result, onClose, t}: DecryptShareDrawe
                         label={t('failedEncryptedFiles')}>{formatNumber(result.failedEncryptedFiles)}</Descriptions.Item>
                 </Descriptions>
             ) : null}
+            {result ? <FailuresList failures={result.failures} t={t}/> : null}
         </Drawer>
     );
 }

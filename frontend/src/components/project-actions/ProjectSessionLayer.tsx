@@ -80,6 +80,7 @@ type ProjectSessionLayerProps = {
         outputPath: string;
         force: boolean;
         resume: boolean;
+        continueOnError: boolean;
     }) => void;
     decryptResultOpen: boolean;
     decryptResult: DecryptProjectResultModel | null;
@@ -246,6 +247,7 @@ export function ProjectSessionLayer({
                 open={decryptDialogOpen}
                 loading={decryptLoading}
                 sourceCleanupMode={settings?.sourceCleanupMode ?? 'delete'}
+                defaultFailureHandling={settings?.failureHandling ?? 'abort'}
                 onCancel={onCloseDecrypt}
                 onSubmit={onDecryptProject}
                 t={t}

@@ -33,6 +33,7 @@ type ShareSessionLayerProps = {
         outputPath: string;
         force: boolean;
         resume: boolean;
+        continueOnError: boolean;
     }) => void;
     onCloseDecryptShareResult: () => void;
     onCloseVerifyShare: () => void;
@@ -94,6 +95,7 @@ export function ShareSessionLayer({
                 open={decryptShareDialogOpen}
                 loading={decryptShareLoading}
                 sourceCleanupMode={settings?.sourceCleanupMode ?? 'delete'}
+                defaultFailureHandling={settings?.failureHandling ?? 'abort'}
                 onCancel={onCloseDecryptShare}
                 onSubmit={(values) => onDecryptShare(values)}
                 t={t}

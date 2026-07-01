@@ -7,6 +7,7 @@ export type CreateProjectRequestModel = main.CreateProjectRequest;
 export type CreateProjectResultModel = main.CreateProjectResult;
 export type CreateShareResultModel = main.CreateShareResult;
 export type DecryptProjectResultModel = main.DecryptProjectResult;
+export type FailedItemModel = main.FailedItem;
 export type DecryptShareResultModel = main.DecryptShareResult;
 export type DeleteProjectRequestModel = main.DeleteProjectRequest;
 export type DeleteProjectResultModel = main.DeleteProjectResult;

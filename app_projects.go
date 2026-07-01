@@ -94,13 +94,14 @@ func (a *App) VerifyProject(request VerifyProjectRequest) (VerifyProjectResult, 
 func (a *App) DecryptProject(request DecryptProjectRequest) (DecryptProjectResult, error) {
 	ctx, finish := a.beginOperation("decrypt")
 	result, err := a.service.DecryptProject(ctx, app.DecryptProjectInput{
-		ProjectID:     request.ProjectID,
-		Password:      request.Password,
-		EncryptedRoot: request.EncryptedPath,
-		OutputRoot:    request.OutputPath,
-		Force:         request.Force,
-		SourceCleanup: request.SourceCleanup,
-		Resume:        request.Resume,
+		ProjectID:       request.ProjectID,
+		Password:        request.Password,
+		EncryptedRoot:   request.EncryptedPath,
+		OutputRoot:      request.OutputPath,
+		Force:           request.Force,
+		SourceCleanup:   request.SourceCleanup,
+		Resume:          request.Resume,
+		FailureHandling: request.FailureHandling,
 	})
 	finish(err)
 	if err != nil {
@@ -114,7 +115,22 @@ func (a *App) DecryptProject(request DecryptProjectRequest) (DecryptProjectResul
 		SkippedFolders:        result.SkippedFolders,
 		DeletedEncryptedFiles: result.DeletedEncryptedFiles,
 		FailedEncryptedFiles:  result.FailedEncryptedFiles,
+		Failures:              toFailedItems(result.Failures),
 	}, nil
+}
+
+// toFailedItems maps service-layer failures to the frontend-facing type. It
+// always returns a non-nil slice so the WebUI receives [] rather than null.
+func toFailedItems(items []app.FailedItem) []FailedItem {
+	out := make([]FailedItem, 0, len(items))
+	for _, item := range items {
+		out = append(out, FailedItem{
+			FileID: item.FileID,
+			Name:   item.Name,
+			Reason: item.Reason,
+		})
+	}
+	return out
 }
 
 func (a *App) LoadShare(request LoadShareRequest) (ShareSummary, error) {
@@ -164,13 +180,14 @@ func (a *App) VerifyShare(request VerifyShareRequest) (VerifyProjectResult, erro
 func (a *App) DecryptShare(request DecryptShareRequest) (DecryptShareResult, error) {
 	ctx, finish := a.beginOperation("decrypt")
 	result, err := a.service.DecryptShare(ctx, app.DecryptShareInput{
-		DatabasePath:  request.DatabasePath,
-		Password:      request.Password,
-		EncryptedRoot: request.EncryptedPath,
-		OutputRoot:    request.OutputPath,
-		Force:         request.Force,
-		SourceCleanup: request.SourceCleanup,
-		Resume:        request.Resume,
+		DatabasePath:    request.DatabasePath,
+		Password:        request.Password,
+		EncryptedRoot:   request.EncryptedPath,
+		OutputRoot:      request.OutputPath,
+		Force:           request.Force,
+		SourceCleanup:   request.SourceCleanup,
+		Resume:          request.Resume,
+		FailureHandling: request.FailureHandling,
 	})
 	finish(err)
 	if err != nil {
@@ -184,6 +201,7 @@ func (a *App) DecryptShare(request DecryptShareRequest) (DecryptShareResult, err
 		SkippedFolders:        result.SkippedFolders,
 		DeletedEncryptedFiles: result.DeletedEncryptedFiles,
 		FailedEncryptedFiles:  result.FailedEncryptedFiles,
+		Failures:              toFailedItems(result.Failures),
 	}, nil
 }
 
@@ -221,13 +239,14 @@ func (a *App) DeleteProject(request DeleteProjectRequest) (DeleteProjectResult, 
 func (a *App) CreateProject(request CreateProjectRequest) (CreateProjectResult, error) {
 	ctx, finish := a.beginOperation("create")
 	result, err := a.service.CreateProject(ctx, app.CreateProjectInput{
-		SourcePath:     request.SourcePath,
-		ContentOutput:  request.ContentOutput,
-		Password:       request.Password,
-		MaxPartSize:    request.MaxPartSize,
-		Force:          request.Force,
-		SourceCleanup:  request.SourceCleanup,
-		DatabaseExport: request.DatabaseExport,
+		SourcePath:      request.SourcePath,
+		ContentOutput:   request.ContentOutput,
+		Password:        request.Password,
+		MaxPartSize:     request.MaxPartSize,
+		Force:           request.Force,
+		SourceCleanup:   request.SourceCleanup,
+		DatabaseExport:  request.DatabaseExport,
+		FailureHandling: request.FailureHandling,
 	})
 	finish(err)
 	if err != nil {
@@ -244,6 +263,7 @@ func (a *App) CreateProject(request CreateProjectRequest) (CreateProjectResult, 
 		DeletedCleartextFiles:   result.DeletedCleartextFiles,
 		DeletedCleartextFolders: result.DeletedCleartextFolders,
 		FailedFiles:             result.FailedFiles,
+		Failures:                toFailedItems(result.Failures),
 	}, nil
 }
 

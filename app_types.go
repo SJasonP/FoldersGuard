@@ -49,6 +49,16 @@ type Settings struct {
 	Theme              string `json:"theme"`
 	Language           string `json:"language"`
 	BackupRetention    int    `json:"backupRetention"`
+	FailureHandling    string `json:"failureHandling"`
+}
+
+// FailedItem describes one item that failed during a continue-on-error
+// operation. Only the non-secret visible file id, base name, and reason are
+// exposed; passwords and internal keys are never included.
+type FailedItem struct {
+	FileID string `json:"fileId"`
+	Name   string `json:"name"`
+	Reason string `json:"reason"`
 }
 
 type ProjectBackupInfo struct {
@@ -125,19 +135,21 @@ type DecryptProjectRequest struct {
 	Password      string `json:"password"`
 	EncryptedPath string `json:"encryptedPath"`
 	OutputPath    string `json:"outputPath"`
-	Force         bool   `json:"force"`
-	SourceCleanup string `json:"sourceCleanup"`
-	Resume        bool   `json:"resume"`
+	Force           bool   `json:"force"`
+	SourceCleanup   string `json:"sourceCleanup"`
+	Resume          bool   `json:"resume"`
+	FailureHandling string `json:"failureHandling"`
 }
 
 type DecryptProjectResult struct {
-	ProjectID             string `json:"projectId"`
-	OutputPath            string `json:"outputPath"`
-	DecryptedFiles        int    `json:"decryptedFiles"`
-	RestoredFolders       int    `json:"restoredFolders"`
-	SkippedFolders        int    `json:"skippedFolders"`
-	DeletedEncryptedFiles int    `json:"deletedEncryptedFiles"`
-	FailedEncryptedFiles  int    `json:"failedEncryptedFiles"`
+	ProjectID             string       `json:"projectId"`
+	OutputPath            string       `json:"outputPath"`
+	DecryptedFiles        int          `json:"decryptedFiles"`
+	RestoredFolders       int          `json:"restoredFolders"`
+	SkippedFolders        int          `json:"skippedFolders"`
+	DeletedEncryptedFiles int          `json:"deletedEncryptedFiles"`
+	FailedEncryptedFiles  int          `json:"failedEncryptedFiles"`
+	Failures              []FailedItem `json:"failures"`
 }
 
 type LoadShareRequest struct {
@@ -156,19 +168,21 @@ type DecryptShareRequest struct {
 	Password      string `json:"password"`
 	EncryptedPath string `json:"encryptedPath"`
 	OutputPath    string `json:"outputPath"`
-	Force         bool   `json:"force"`
-	SourceCleanup string `json:"sourceCleanup"`
-	Resume        bool   `json:"resume"`
+	Force           bool   `json:"force"`
+	SourceCleanup   string `json:"sourceCleanup"`
+	Resume          bool   `json:"resume"`
+	FailureHandling string `json:"failureHandling"`
 }
 
 type DecryptShareResult struct {
-	ShareID               string `json:"shareId"`
-	OutputPath            string `json:"outputPath"`
-	DecryptedFiles        int    `json:"decryptedFiles"`
-	RestoredFolders       int    `json:"restoredFolders"`
-	SkippedFolders        int    `json:"skippedFolders"`
-	DeletedEncryptedFiles int    `json:"deletedEncryptedFiles"`
-	FailedEncryptedFiles  int    `json:"failedEncryptedFiles"`
+	ShareID               string       `json:"shareId"`
+	OutputPath            string       `json:"outputPath"`
+	DecryptedFiles        int          `json:"decryptedFiles"`
+	RestoredFolders       int          `json:"restoredFolders"`
+	SkippedFolders        int          `json:"skippedFolders"`
+	DeletedEncryptedFiles int          `json:"deletedEncryptedFiles"`
+	FailedEncryptedFiles  int          `json:"failedEncryptedFiles"`
+	Failures              []FailedItem `json:"failures"`
 }
 
 type ExportProjectRequest struct {
@@ -193,26 +207,28 @@ type DeleteProjectResult struct {
 }
 
 type CreateProjectRequest struct {
-	SourcePath     string `json:"sourcePath"`
-	ContentOutput  string `json:"contentOutput"`
-	Password       string `json:"password"`
-	MaxPartSize    int64  `json:"maxPartSize"`
-	Force          bool   `json:"force"`
-	SourceCleanup  string `json:"sourceCleanup"`
-	DatabaseExport string `json:"databaseExport"`
+	SourcePath      string `json:"sourcePath"`
+	ContentOutput   string `json:"contentOutput"`
+	Password        string `json:"password"`
+	MaxPartSize     int64  `json:"maxPartSize"`
+	Force           bool   `json:"force"`
+	SourceCleanup   string `json:"sourceCleanup"`
+	DatabaseExport  string `json:"databaseExport"`
+	FailureHandling string `json:"failureHandling"`
 }
 
 type CreateProjectResult struct {
-	ProjectID               string `json:"projectId"`
-	ProjectName             string `json:"projectName"`
-	ContentOutput           string `json:"contentOutput"`
-	DatabaseExport          string `json:"databaseExport"`
-	EncryptedFiles          int    `json:"encryptedFiles"`
-	EncryptedFolders        int    `json:"encryptedFolders"`
-	EncryptedParts          int    `json:"encryptedParts"`
-	DeletedCleartextFiles   int    `json:"deletedCleartextFiles"`
-	DeletedCleartextFolders int    `json:"deletedCleartextFolders"`
-	FailedFiles             int    `json:"failedFiles"`
+	ProjectID               string       `json:"projectId"`
+	ProjectName             string       `json:"projectName"`
+	ContentOutput           string       `json:"contentOutput"`
+	DatabaseExport          string       `json:"databaseExport"`
+	EncryptedFiles          int          `json:"encryptedFiles"`
+	EncryptedFolders        int          `json:"encryptedFolders"`
+	EncryptedParts          int          `json:"encryptedParts"`
+	DeletedCleartextFiles   int          `json:"deletedCleartextFiles"`
+	DeletedCleartextFolders int          `json:"deletedCleartextFolders"`
+	FailedFiles             int          `json:"failedFiles"`
+	Failures                []FailedItem `json:"failures"`
 }
 
 type ImportProjectRequest struct {

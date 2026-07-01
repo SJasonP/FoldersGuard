@@ -9,12 +9,14 @@ type DecryptShareValues = {
     outputPath: string;
     force: boolean;
     resume: boolean;
+    continueOnError: boolean;
 };
 
 type DecryptShareModalProps = {
     open: boolean;
     loading: boolean;
     sourceCleanupMode: string;
+    defaultFailureHandling: string;
     onCancel: () => void;
     onSubmit: (values: DecryptShareValues) => void;
     t: (key: string) => string;
@@ -24,6 +26,7 @@ export function DecryptShareModal({
                                       open,
                                       loading,
                                       sourceCleanupMode,
+                                      defaultFailureHandling,
                                       onCancel,
                                       onSubmit,
                                       t,
@@ -56,6 +59,10 @@ export function DecryptShareModal({
                     label: t('resumeDecryption'),
                     value: values.resume ? t('passwordProtectedYes') : t('passwordProtectedNo')
                 },
+                {
+                    label: t('continueOnError'),
+                    value: values.continueOnError ? t('passwordProtectedYes') : t('passwordProtectedNo')
+                },
             ],
             onConfirm: () => {
                 onSubmit(values);
@@ -79,6 +86,7 @@ export function DecryptShareModal({
                 initialValues={{
                     force: false,
                     resume: false,
+                    continueOnError: defaultFailureHandling === 'continue',
                 }}
                 onFinish={confirmSubmit}
             >
@@ -111,6 +119,9 @@ export function DecryptShareModal({
                 </Form.Item>
                 <Form.Item name="resume" valuePropName="checked" extra={t('resumeDecryptionHint')}>
                     <Checkbox>{t('resumeDecryption')}</Checkbox>
+                </Form.Item>
+                <Form.Item name="continueOnError" valuePropName="checked" extra={t('continueOnErrorHint')}>
+                    <Checkbox>{t('continueOnError')}</Checkbox>
                 </Form.Item>
             </Form>
         </Modal>

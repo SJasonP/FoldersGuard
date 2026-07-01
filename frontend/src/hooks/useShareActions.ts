@@ -73,6 +73,7 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
         outputPath: string;
         force: boolean;
         resume: boolean;
+        continueOnError: boolean;
     }) => {
         setDecryptShareDialogOpen(false);
         setDecryptShareLoading(true);
@@ -85,6 +86,7 @@ export function useShareActions({messageApi, modalApi, t}: UseShareActionsArgs) 
                 force: values.force,
                 sourceCleanup: '',
                 resume: values.resume,
+                failureHandling: values.continueOnError ? 'continue' : 'abort',
             });
             setDecryptShareResult(result);
             setDecryptShareResultOpen(true);

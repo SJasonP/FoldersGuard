@@ -39,6 +39,7 @@ export function useProjectCreate({messageApi, modalApi, t, reloadProjects}: UseP
                 force: values.force,
                 sourceCleanup: '',
                 databaseExport: '',
+                failureHandling: '',
             });
             await reloadProjects();
             messageApi.success(

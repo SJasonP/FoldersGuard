@@ -9,12 +9,14 @@ type DecryptProjectValues = {
     outputPath: string;
     force: boolean;
     resume: boolean;
+    continueOnError: boolean;
 };
 
 type DecryptProjectModalProps = {
     open: boolean;
     loading: boolean;
     sourceCleanupMode: string;
+    defaultFailureHandling: string;
     onCancel: () => void;
     onSubmit: (values: DecryptProjectValues) => void;
     t: (key: string) => string;
@@ -24,6 +26,7 @@ export function DecryptProjectModal({
                                         open,
                                         loading,
                                         sourceCleanupMode,
+                                        defaultFailureHandling,
                                         onCancel,
                                         onSubmit,
                                         t,
@@ -56,6 +59,10 @@ export function DecryptProjectModal({
                     label: t('resumeDecryption'),
                     value: values.resume ? t('passwordProtectedYes') : t('passwordProtectedNo')
                 },
+                {
+                    label: t('continueOnError'),
+                    value: values.continueOnError ? t('passwordProtectedYes') : t('passwordProtectedNo')
+                },
             ],
             onConfirm: () => {
                 onSubmit(values);
@@ -79,6 +86,7 @@ export function DecryptProjectModal({
                 initialValues={{
                     force: false,
                     resume: false,
+                    continueOnError: defaultFailureHandling === 'continue',
                 }}
                 onFinish={confirmSubmit}
             >
@@ -112,6 +120,9 @@ export function DecryptProjectModal({
                 </Form.Item>
                 <Form.Item name="resume" valuePropName="checked" extra={t('resumeDecryptionHint')}>
                     <Checkbox>{t('resumeDecryption')}</Checkbox>
+                </Form.Item>
+                <Form.Item name="continueOnError" valuePropName="checked" extra={t('continueOnErrorHint')}>
+                    <Checkbox>{t('continueOnError')}</Checkbox>
                 </Form.Item>
             </Form>
         </Modal>

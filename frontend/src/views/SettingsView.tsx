@@ -63,6 +63,15 @@ export function SettingsView({
                             ]}
                         />
                     </Form.Item>
+                    <Form.Item name="failureHandling" label={t('failureHandling')}
+                               extra={t('failureHandlingHint')} rules={[{required: true}]}>
+                        <Select
+                            options={[
+                                {value: 'abort', label: t('failureHandlingAbort')},
+                                {value: 'continue', label: t('failureHandlingContinue')},
+                            ]}
+                        />
+                    </Form.Item>
                     <Form.Item name="theme" label={t('theme')} rules={[{required: true}]}>
                         <Select
                             options={[

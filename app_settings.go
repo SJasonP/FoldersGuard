@@ -18,6 +18,7 @@ func (a *App) SaveSettings(settings Settings) (Settings, error) {
 		Theme:              settings.Theme,
 		Language:           settings.Language,
 		BackupRetention:    settings.BackupRetention,
+		FailureHandling:    settings.FailureHandling,
 	})
 	if err != nil {
 		return Settings{}, frontendError(err)
@@ -33,5 +34,6 @@ func mapSettings(settings app.Settings) Settings {
 		Theme:              settings.Theme,
 		Language:           settings.Language,
 		BackupRetention:    settings.BackupRetention,
+		FailureHandling:    settings.FailureHandling,
 	}
 }

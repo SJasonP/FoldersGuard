@@ -146,6 +146,7 @@ export function useProjectActions({
         outputPath: string;
         force: boolean;
         resume: boolean;
+        continueOnError: boolean;
     }) => {
         if (!selectedProjectId) {
             return;
@@ -162,6 +163,7 @@ export function useProjectActions({
                 force: values.force,
                 sourceCleanup: '',
                 resume: values.resume,
+                failureHandling: values.continueOnError ? 'continue' : 'abort',
             });
             setDecryptResult(result);
             setDecryptResultOpen(true);

@@ -336,6 +336,7 @@ export namespace main {
 	    force: boolean;
 	    sourceCleanup: string;
 	    databaseExport: string;
+	    failureHandling: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new CreateProjectRequest(source);
@@ -350,6 +351,7 @@ export namespace main {
 	        this.force = source["force"];
 	        this.sourceCleanup = source["sourceCleanup"];
 	        this.databaseExport = source["databaseExport"];
+	        this.failureHandling = source["failureHandling"];
 	    }
 	}
 	export class CreateProjectResult {
@@ -363,6 +365,7 @@ export namespace main {
 	    deletedCleartextFiles: number;
 	    deletedCleartextFolders: number;
 	    failedFiles: number;
+	    failures: FailedItem[];
 	
 	    static createFrom(source: any = {}) {
 	        return new CreateProjectResult(source);
@@ -380,7 +383,26 @@ export namespace main {
 	        this.deletedCleartextFiles = source["deletedCleartextFiles"];
 	        this.deletedCleartextFolders = source["deletedCleartextFolders"];
 	        this.failedFiles = source["failedFiles"];
+	        this.failures = this.convertValues(source["failures"], FailedItem);
 	    }
+
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class CreateShareRequest {
 	    projectId: string;
@@ -474,6 +496,7 @@ export namespace main {
 	    force: boolean;
 	    sourceCleanup: string;
 	    resume: boolean;
+	    failureHandling: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new DecryptProjectRequest(source);
@@ -488,6 +511,7 @@ export namespace main {
 	        this.force = source["force"];
 	        this.sourceCleanup = source["sourceCleanup"];
 	        this.resume = source["resume"];
+	        this.failureHandling = source["failureHandling"];
 	    }
 	}
 	export class DecryptProjectResult {
@@ -498,6 +522,7 @@ export namespace main {
 	    skippedFolders: number;
 	    deletedEncryptedFiles: number;
 	    failedEncryptedFiles: number;
+	    failures: FailedItem[];
 	
 	    static createFrom(source: any = {}) {
 	        return new DecryptProjectResult(source);
@@ -512,7 +537,26 @@ export namespace main {
 	        this.skippedFolders = source["skippedFolders"];
 	        this.deletedEncryptedFiles = source["deletedEncryptedFiles"];
 	        this.failedEncryptedFiles = source["failedEncryptedFiles"];
+	        this.failures = this.convertValues(source["failures"], FailedItem);
 	    }
+
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class DecryptShareRequest {
 	    databasePath: string;
@@ -522,6 +566,7 @@ export namespace main {
 	    force: boolean;
 	    sourceCleanup: string;
 	    resume: boolean;
+	    failureHandling: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new DecryptShareRequest(source);
@@ -536,6 +581,7 @@ export namespace main {
 	        this.force = source["force"];
 	        this.sourceCleanup = source["sourceCleanup"];
 	        this.resume = source["resume"];
+	        this.failureHandling = source["failureHandling"];
 	    }
 	}
 	export class DecryptShareResult {
@@ -546,6 +592,7 @@ export namespace main {
 	    skippedFolders: number;
 	    deletedEncryptedFiles: number;
 	    failedEncryptedFiles: number;
+	    failures: FailedItem[];
 	
 	    static createFrom(source: any = {}) {
 	        return new DecryptShareResult(source);
@@ -560,7 +607,26 @@ export namespace main {
 	        this.skippedFolders = source["skippedFolders"];
 	        this.deletedEncryptedFiles = source["deletedEncryptedFiles"];
 	        this.failedEncryptedFiles = source["failedEncryptedFiles"];
+	        this.failures = this.convertValues(source["failures"], FailedItem);
 	    }
+
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class DeleteProjectRequest {
 	    projectId: string;
@@ -884,6 +950,23 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class FailedItem {
+	    fileId: string;
+	    name: string;
+	    reason: string;
+
+	    static createFrom(source: any = {}) {
+	        return new FailedItem(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.fileId = source["fileId"];
+	        this.name = source["name"];
+	        this.reason = source["reason"];
+	    }
+	}
+
 	export class Settings {
 	    defaultMaxPartSize: number;
 	    sourceCleanupMode: string;
@@ -891,6 +974,7 @@ export namespace main {
 	    theme: string;
 	    language: string;
 	    backupRetention: number;
+	    failureHandling: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -904,6 +988,7 @@ export namespace main {
 	        this.theme = source["theme"];
 	        this.language = source["language"];
 	        this.backupRetention = source["backupRetention"];
+	        this.failureHandling = source["failureHandling"];
 	    }
 	}
 	

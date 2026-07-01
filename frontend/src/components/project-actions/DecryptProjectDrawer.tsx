@@ -1,6 +1,7 @@
 import {Descriptions, Drawer} from 'antd';
 import type {DecryptProjectResultModel} from '../../types';
 import {formatNumber} from '../../formatters';
+import {FailuresList} from '../common/FailuresList';
 
 type DecryptProjectDrawerProps = {
     open: boolean;
@@ -28,6 +29,7 @@ export function DecryptProjectDrawer({open, result, onClose, t}: DecryptProjectD
                         label={t('failedEncryptedFiles')}>{formatNumber(result.failedEncryptedFiles)}</Descriptions.Item>
                 </Descriptions>
             ) : null}
+            {result ? <FailuresList failures={result.failures} t={t}/> : null}
         </Drawer>
     );
 }
