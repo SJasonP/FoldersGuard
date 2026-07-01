@@ -161,27 +161,33 @@ Maintenance:
 - [`fg backups restore`](cli/maintenance.md#fg-backups-restore)
 - [`fg passwd`](cli/maintenance.md#fg-passwd)
 
-## Resume And Planned CLI Additions
+## Resume And Continue-On-Error
 
 `fg decrypt --resume` is available: it continues an interrupted decryption, keeping the existing output and restoring
 only files that are missing or the wrong size. It is mutually exclusive with `--force`. Processing every file again is
 the default.
 
-The additions below are planned and not yet implemented. They follow the same global rules, password input, project
-reference, and overwrite rules as the rest of the CLI.
-
-New flags on `fg encrypt`:
-
-- `--continue-on-error`: record item-level failures and process the remaining items instead of aborting on the first
-  error. The default remains abort on the first error.
-- `--concurrency <n>`: number of files encrypted concurrently. The default is derived from the host CPU count. `1`
-  forces sequential encryption.
+`fg encrypt --continue-on-error` and `fg decrypt --continue-on-error` are available: they record item-level failures and
+process the remaining files instead of aborting on the first error. The default remains abort on the first error. The
+flag is an explicit switch and does not read the WebUI default-failure-handling setting.
 
 Exit codes with `--continue-on-error`:
 
 - Exit status is `0` when every item succeeded.
-- Exit status is `1` when any item failed. The output lists the failed item count and per-item reasons. Internal keys
-  and passwords are never printed.
+- Exit status is `1` when any item failed. Standard output includes a `failed_files` count (and `encrypted_files` /
+  `restored_files` for the count that succeeded); each failed item is written to standard error as
+  `failed_file=<visible id>`. Only the non-secret visible file id is printed; internal keys and passwords are never
+  printed.
+
+## Planned CLI Additions
+
+The addition below is planned and not yet implemented. It follows the same global rules, password input, project
+reference, and overwrite rules as the rest of the CLI.
+
+New flag on `fg encrypt`:
+
+- `--concurrency <n>`: number of files encrypted concurrently. The default is derived from the host CPU count. `1`
+  forces sequential encryption.
 
 The `fg passwd` and `fg backups` maintenance commands are already available; see
 [maintenance CLI commands](cli/maintenance.md).

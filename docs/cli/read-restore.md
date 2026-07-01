@@ -7,7 +7,7 @@ Decrypts encrypted content using an active project or share database.
 Usage:
 
 ```text
-fg decrypt <project-ref> --content <encrypted-content-folder> --out <output-folder> [--password-stdin | --password-env <name>] [--force]
+fg decrypt <project-ref> --content <encrypted-content-folder> --out <output-folder> [--password-stdin | --password-env <name>] [--force] [--resume] [--continue-on-error]
 ```
 
 Arguments:
@@ -15,6 +15,10 @@ Arguments:
 - `<project-ref>`: project id or `.fgs` share database.
 - `--content <encrypted-content-folder>`: encrypted content folder.
 - `--out <output-folder>`: restored plaintext output folder.
+- `--resume`: continue an interrupted decryption, keeping the existing output and restoring only files that are missing
+  or the wrong size. Mutually exclusive with `--force`.
+- `--continue-on-error`: record item-level failures and restore the remaining files instead of aborting on the first
+  error. The default aborts on the first error.
 
 Behavior:
 
@@ -46,7 +50,12 @@ folders=<count>
 files=<count>
 parts=<count>
 restored_files=<count>
+failed_files=<count>
 ```
+
+With `--continue-on-error`, `restored_files` is the count that succeeded and `failed_files` is the count that failed.
+Each failed item is written to standard error as `failed_file=<visible id>`, and the command exits `1` when any file
+failed. Only the non-secret visible file id is printed.
 
 ## `fg inspect`
 

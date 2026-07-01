@@ -229,14 +229,16 @@ Versioning approach:
 
 ### Partial-Failure Tolerance
 
-**Status: Planned for v1.5 — not yet implemented.**
+**Status: Implemented in v1.5.**
 
-- Content operations support an optional continue-on-error mode. The default remains abort on the first error.
+- Encryption and decryption support an optional continue-on-error mode. The default remains abort on the first error,
+  and is selectable through a default failure-handling setting with an optional per-operation override.
 - In continue-on-error mode, file-level failures are recorded and the operation processes the remaining items.
-- The result reports the count and the list of failed items with reasons; sensitive values stay hidden.
-- A source file is never deleted when its own encryption failed.
-- Fatal conditions, such as the output disk being full or a database error, still abort the operation regardless of
-  mode.
+- The result reports the count and the list of failed items with reasons; only the non-secret visible file id, base
+  name, and reason are exposed, and passwords and internal keys stay hidden.
+- A source file is never deleted when its own encryption failed, and an encrypted object is never deleted when its own
+  decryption failed.
+- Cancellation still aborts the operation immediately regardless of mode.
 
 ### Parallel Encryption
 

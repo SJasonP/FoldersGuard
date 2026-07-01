@@ -10,6 +10,19 @@ same `.fg` / `.fgs` databases and encrypted content. No 1.x release changes the 
 FoldersGuard is experimental software and makes no guarantee of security, cryptographic correctness, or data durability.
 Do not rely on it as the only protection for valuable, sensitive, or irreplaceable data.
 
+## [1.5.0] - 2026-07-02
+
+### Added
+
+- Partial-failure tolerance for encryption and decryption. A continue-on-error mode records files that fail and
+  processes the rest instead of aborting on the first error; the default still aborts. The result reports the failed
+  count and the failed items, exposing only the non-secret visible file id, base name, and reason.
+- Desktop: a Continue-on-error option in the Decrypt Project and Decrypt Share dialogs, a "Default failure handling"
+  setting, and a failed-items list in the decrypt result. Project creation follows the setting.
+- CLI: `fg encrypt --continue-on-error` and `fg decrypt --continue-on-error`. Standard output reports the succeeded and
+  failed counts, each failed item is written to standard error as `failed_file=<visible id>`, and the command exits `1`
+  when any file failed.
+
 ## [1.4.0] - 2026-06-26
 
 ### Added
@@ -81,6 +94,7 @@ Do not rely on it as the only protection for valuable, sensitive, or irreplaceab
 - Integrity verification without decryption, large-file balanced splitting, and metadata-only operations such as rename.
 - A Wails desktop WebUI and a CLI (`foldersguard` / `fg`), with English and Simplified Chinese localization.
 
+[1.5.0]: https://github.com/SJasonP/FoldersGuard/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/SJasonP/FoldersGuard/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/SJasonP/FoldersGuard/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/SJasonP/FoldersGuard/compare/v1.1.0...v1.2.0

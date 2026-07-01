@@ -243,11 +243,14 @@ Resume (available for decryption):
   processed.
 - Resume is off by default, so decryption restores every file.
 
-Failure handling (planned; not yet implemented):
+Failure handling (available for encryption and decryption):
 
 - An operation can abort on the first error or continue past item-level failures, following the default failure handling
-  setting and an optional per-operation override.
-- When continuing, the result summary lists the failed item count and per-item reasons, with sensitive values hidden.
+  setting and an optional per-operation override. Decrypt Project and Decrypt Share offer a Continue-on-error option;
+  project creation follows the setting.
+- The default failure handling setting selects abort-on-first-error (default) or continue-on-error.
+- When continuing, the result summary lists the failed item count and the failed items. Only the non-secret visible file
+  id, base name, and reason are shown; passwords and internal keys stay hidden.
 
 Concurrency (planned; not yet implemented):
 

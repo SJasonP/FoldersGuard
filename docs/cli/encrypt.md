@@ -7,7 +7,7 @@ Encrypts one cleartext top-level folder and creates one active FG project.
 Usage:
 
 ```text
-fg encrypt <source-folder> --content-out <encrypted-content-folder> --max-part-size <bytes> [--export <project.fg>] [--password-stdin | --password-env <name>] [--force]
+fg encrypt <source-folder> --content-out <encrypted-content-folder> --max-part-size <bytes> [--export <project.fg>] [--password-stdin | --password-env <name>] [--force] [--continue-on-error]
 ```
 
 Arguments:
@@ -16,6 +16,8 @@ Arguments:
 - `--content-out <encrypted-content-folder>`: encrypted content output directory.
 - `--max-part-size <bytes>`: positive integer maximum part size used for balanced splitting.
 - `--export <project.fg>`: optional exported copy of the created project database.
+- `--continue-on-error`: record item-level failures and encrypt the remaining files instead of aborting on the first
+  error. The default aborts on the first error.
 
 Behavior:
 
@@ -54,6 +56,12 @@ folders=<count>
 files=<count>
 parts=<count>
 storage_objects=<count>
+encrypted_files=<count>
+failed_files=<count>
 ```
 
 `database_export` is printed only when `--export` is used.
+
+With `--continue-on-error`, `encrypted_files` is the count that succeeded and `failed_files` is the count that failed.
+Each failed item is written to standard error as `failed_file=<visible id>`, and the command exits `1` when any file
+failed. Only the non-secret visible file id is printed.
