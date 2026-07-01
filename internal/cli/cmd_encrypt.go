@@ -9,6 +9,7 @@ import (
 	"foldersguard/internal/db"
 	"foldersguard/internal/format"
 	"foldersguard/internal/fswalk"
+	"foldersguard/internal/model"
 	"foldersguard/internal/project"
 )
 
@@ -19,6 +20,7 @@ type encryptOptions struct {
 	maxPartSize     int64
 	passwordOptions passwordOptions
 	force           bool
+	continueOnError bool
 }
 
 func (c cli) encryptCommand() *cobra.Command {
@@ -44,6 +46,7 @@ func (c cli) encryptCommand() *cobra.Command {
 	command.Flags().BoolVar(&options.passwordOptions.passwordStdin, "password-stdin", false, "read password from stdin")
 	command.Flags().StringVar(&options.passwordOptions.passwordEnv, "password-env", "", "read password from an environment variable")
 	command.Flags().BoolVar(&options.force, "force", false, "replace existing outputs")
+	command.Flags().BoolVar(&options.continueOnError, "continue-on-error", false, "record item-level failures and encrypt the remaining files instead of aborting on the first error")
 	mustMarkRequired(command, "content-out")
 	mustMarkRequired(command, "max-part-size")
 	command.MarkFlagsMutuallyExclusive("password-stdin", "password-env")
@@ -116,7 +119,15 @@ func (c cli) runEncrypt(options encryptOptions) error {
 			return err
 		}
 	}
-	if err := (project.Executor{OutputRoot: contentOutput}).EncryptContent(ctx, plan); err != nil {
+	var failures []model.File
+	onFileError := func(file model.File, _ error) {
+		failures = append(failures, file)
+	}
+	if err := (project.Executor{
+		OutputRoot:      contentOutput,
+		ContinueOnError: options.continueOnError,
+		OnFileError:     onFileError,
+	}).EncryptContent(ctx, plan); err != nil {
 		return err
 	}
 
@@ -131,5 +142,13 @@ func (c cli) runEncrypt(options encryptOptions) error {
 	fmt.Fprintf(c.out, "files=%d\n", len(plan.Files))
 	fmt.Fprintf(c.out, "parts=%d\n", len(plan.Parts))
 	fmt.Fprintf(c.out, "storage_objects=%d\n", len(plan.StorageObjects))
+	fmt.Fprintf(c.out, "encrypted_files=%d\n", len(plan.Files)-len(failures))
+	fmt.Fprintf(c.out, "failed_files=%d\n", len(failures))
+	if len(failures) > 0 {
+		for _, file := range failures {
+			fmt.Fprintf(c.err, "failed_file=%s\n", file.ID)
+		}
+		return fmt.Errorf("%d file(s) failed to encrypt", len(failures))
+	}
 	return nil
 }

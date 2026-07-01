@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"foldersguard/internal/model"
 	"foldersguard/internal/project"
 )
 
@@ -17,6 +18,7 @@ type decryptOptions struct {
 	passwordOptions passwordOptions
 	force           bool
 	resume          bool
+	continueOnError bool
 }
 
 func (c cli) decryptCommand() *cobra.Command {
@@ -39,6 +41,7 @@ func (c cli) decryptCommand() *cobra.Command {
 	command.Flags().StringVar(&options.passwordOptions.passwordEnv, "password-env", "", "read password from an environment variable")
 	command.Flags().BoolVar(&options.force, "force", false, "replace existing outputs")
 	command.Flags().BoolVar(&options.resume, "resume", false, "continue an interrupted decryption, skipping outputs that already exist at the expected size")
+	command.Flags().BoolVar(&options.continueOnError, "continue-on-error", false, "record item-level failures and restore the remaining files instead of aborting on the first error")
 	command.MarkFlagsMutuallyExclusive("force", "resume")
 	mustMarkRequired(command, "content")
 	mustMarkRequired(command, "out")
@@ -72,7 +75,19 @@ func (c cli) runDecrypt(options decryptOptions) error {
 	if err != nil {
 		return err
 	}
-	if err := (project.Restorer{EncryptedRoot: options.contentRoot, OutputRoot: options.outputRoot, NoiseMode: noiseMode, Resume: options.resume}).RestoreContent(ctx, plan); err != nil {
+	var failures []model.File
+	onFileError := func(file model.File, _ error) {
+		failures = append(failures, file)
+	}
+	report, err := (project.Restorer{
+		EncryptedRoot:   options.contentRoot,
+		OutputRoot:      options.outputRoot,
+		NoiseMode:       noiseMode,
+		Resume:          options.resume,
+		ContinueOnError: options.continueOnError,
+		OnFileError:     onFileError,
+	}).RestoreContentReport(ctx, plan)
+	if err != nil {
 		return err
 	}
 
@@ -81,6 +96,13 @@ func (c cli) runDecrypt(options decryptOptions) error {
 	fmt.Fprintf(c.out, "folders=%d\n", countFolders(plan))
 	fmt.Fprintf(c.out, "files=%d\n", len(plan.Files))
 	fmt.Fprintf(c.out, "parts=%d\n", len(plan.Parts))
-	fmt.Fprintf(c.out, "restored_files=%d\n", len(plan.Files))
+	fmt.Fprintf(c.out, "restored_files=%d\n", report.DecryptedFiles)
+	fmt.Fprintf(c.out, "failed_files=%d\n", len(failures))
+	if len(failures) > 0 {
+		for _, file := range failures {
+			fmt.Fprintf(c.err, "failed_file=%s\n", file.ID)
+		}
+		return fmt.Errorf("%d file(s) failed to decrypt", len(failures))
+	}
 	return nil
 }
