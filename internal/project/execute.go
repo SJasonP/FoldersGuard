@@ -29,6 +29,14 @@ type Executor struct {
 	// before skipping it; a present but corrupt object is re-encrypted. It has no
 	// effect unless Resume is set.
 	ResumeVerify bool
+	// ContinueOnError, when true, records a file that fails to encrypt and
+	// continues with the remaining files instead of aborting. The default is to
+	// abort on the first error.
+	ContinueOnError bool
+	// OnFileError, when set, is called for each file that fails to encrypt under
+	// ContinueOnError, with the file and its error. A failed file's source is
+	// never deleted, because AfterFile runs only after a successful encryption.
+	OnFileError func(model.File, error)
 }
 
 func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject) error {
@@ -104,6 +112,13 @@ func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject)
 			VisiblePath:  visiblePath,
 			Parts:        partsByFile[file.ID.String()],
 		}); err != nil {
+			if e.ContinueOnError && ctx.Err() == nil {
+				if e.OnFileError != nil {
+					e.OnFileError(file, err)
+				}
+				e.Progress.ItemDone()
+				continue
+			}
 			return fmt.Errorf("encrypt file %s: %w", file.ID, err)
 		}
 		if e.AfterFile != nil {
