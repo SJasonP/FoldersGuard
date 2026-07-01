@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"foldersguard/internal/model"
 	"foldersguard/internal/progress"
 	"foldersguard/internal/project"
 )
@@ -49,6 +50,10 @@ func (s Service) DecryptProject(ctx context.Context, input DecryptProjectInput) 
 	if err != nil {
 		return DecryptProjectResult{}, err
 	}
+	failureHandling, err := s.resolveFailureHandling(input.FailureHandling)
+	if err != nil {
+		return DecryptProjectResult{}, err
+	}
 	deletedEncryptedFiles := 0
 	afterFile := func(restored project.RestoredFile) error {
 		if sourceCleanup != SourceCleanupDelete {
@@ -63,14 +68,25 @@ func (s Service) DecryptProject(ctx context.Context, input DecryptProjectInput) 
 		return nil
 	}
 
+	continueOnError := failureHandling == FailureHandlingContinue
+	var failures []FailedItem
+	onFileError := func(file model.File, ferr error) {
+		failures = append(failures, FailedItem{
+			FileID: file.ID.String(),
+			Reason: ferr.Error(),
+		})
+	}
+
 	tracker.StartPhase(progress.PhaseDecrypting, true)
 	report, err := (project.Restorer{
-		EncryptedRoot: input.EncryptedRoot,
-		OutputRoot:    input.OutputRoot,
-		NoiseMode:     noiseMode,
-		AfterFile:     afterFile,
-		Progress:      tracker,
-		Resume:        input.Resume,
+		EncryptedRoot:   input.EncryptedRoot,
+		OutputRoot:      input.OutputRoot,
+		NoiseMode:       noiseMode,
+		AfterFile:       afterFile,
+		Progress:        tracker,
+		Resume:          input.Resume,
+		ContinueOnError: continueOnError,
+		OnFileError:     onFileError,
 	}).RestoreContentReport(ctx, plan)
 	if err != nil {
 		return DecryptProjectResult{}, err
@@ -83,6 +99,7 @@ func (s Service) DecryptProject(ctx context.Context, input DecryptProjectInput) 
 		RestoredFolders:       report.RestoredFolders,
 		SkippedFolders:        report.SkippedFolders,
 		DeletedEncryptedFiles: deletedEncryptedFiles,
-		FailedEncryptedFiles:  0,
+		FailedEncryptedFiles:  len(failures),
+		Failures:              failures,
 	}, nil
 }

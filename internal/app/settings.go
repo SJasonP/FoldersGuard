@@ -19,6 +19,9 @@ const (
 	NoiseFileIgnoreDuringVerifyAndMatching = "ignore_during_verify_and_matching"
 	NoiseFileDoNotIgnore                   = "do_not_ignore"
 
+	FailureHandlingAbort    = "abort"
+	FailureHandlingContinue = "continue"
+
 	ThemeSystem = "system"
 	ThemeLight  = "light"
 	ThemeDark   = "dark"
@@ -35,6 +38,7 @@ type Settings struct {
 	Theme              string `json:"theme"`
 	Language           string `json:"language"`
 	BackupRetention    int    `json:"backupRetention"`
+	FailureHandling    string `json:"failureHandling"`
 }
 
 func DefaultSettings() Settings {
@@ -45,6 +49,7 @@ func DefaultSettings() Settings {
 		Theme:              ThemeSystem,
 		Language:           LanguageSystem,
 		BackupRetention:    DefaultBackupRetention,
+		FailureHandling:    FailureHandlingAbort,
 	}
 }
 
@@ -139,6 +144,14 @@ func normalizeSettings(settings Settings) (Settings, error) {
 	}
 	if settings.BackupRetention == 0 {
 		settings.BackupRetention = DefaultBackupRetention
+	}
+
+	switch settings.FailureHandling {
+	case "":
+		settings.FailureHandling = FailureHandlingAbort
+	case FailureHandlingAbort, FailureHandlingContinue:
+	default:
+		return Settings{}, fmt.Errorf("unsupported failure handling mode %q", settings.FailureHandling)
 	}
 
 	return settings, nil

@@ -14,14 +14,25 @@ type ShareOpen struct {
 	Password     string
 }
 
+// FailedItem describes one item that failed during a continue-on-error
+// operation. It carries only the non-secret visible file id and a base name and
+// reason safe to show the operator; passwords and internal keys are never
+// included.
+type FailedItem struct {
+	FileID string
+	Name   string
+	Reason string
+}
+
 type DecryptShareInput struct {
-	DatabasePath  string
-	Password      string
-	EncryptedRoot string
-	OutputRoot    string
-	Force         bool
-	SourceCleanup string
-	Resume        bool
+	DatabasePath    string
+	Password        string
+	EncryptedRoot   string
+	OutputRoot      string
+	Force           bool
+	SourceCleanup   string
+	Resume          bool
+	FailureHandling string
 }
 
 type DecryptShareResult struct {
@@ -32,16 +43,18 @@ type DecryptShareResult struct {
 	SkippedFolders        int
 	DeletedEncryptedFiles int
 	FailedEncryptedFiles  int
+	Failures              []FailedItem
 }
 
 type DecryptProjectInput struct {
-	ProjectID     string
-	Password      string
-	EncryptedRoot string
-	OutputRoot    string
-	Force         bool
-	SourceCleanup string
-	Resume        bool
+	ProjectID       string
+	Password        string
+	EncryptedRoot   string
+	OutputRoot      string
+	Force           bool
+	SourceCleanup   string
+	Resume          bool
+	FailureHandling string
 }
 
 type DecryptProjectResult struct {
@@ -52,6 +65,7 @@ type DecryptProjectResult struct {
 	SkippedFolders        int
 	DeletedEncryptedFiles int
 	FailedEncryptedFiles  int
+	Failures              []FailedItem
 }
 
 type InspectResult struct {
@@ -132,13 +146,14 @@ type ImportProjectResult struct {
 }
 
 type CreateProjectInput struct {
-	SourcePath     string
-	ContentOutput  string
-	Password       string
-	MaxPartSize    int64
-	Force          bool
-	SourceCleanup  string
-	DatabaseExport string
+	SourcePath      string
+	ContentOutput   string
+	Password        string
+	MaxPartSize     int64
+	Force           bool
+	SourceCleanup   string
+	DatabaseExport  string
+	FailureHandling string
 }
 
 type CreateProjectResult struct {
@@ -152,6 +167,7 @@ type CreateProjectResult struct {
 	DeletedCleartextFiles   int
 	DeletedCleartextFolders int
 	FailedFiles             int
+	Failures                []FailedItem
 }
 
 type ShareSummary struct {

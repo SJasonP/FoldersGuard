@@ -261,6 +261,10 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 	if err != nil {
 		return CreateProjectResult{}, err
 	}
+	failureHandling, err := s.resolveFailureHandling(input.FailureHandling)
+	if err != nil {
+		return CreateProjectResult{}, err
+	}
 	scan, err := fswalk.ScanTopFolderWithNoiseMode(input.SourcePath, noiseMode)
 	if err != nil {
 		return CreateProjectResult{}, err
@@ -310,11 +314,23 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 		return nil
 	}
 
+	continueOnError := failureHandling == FailureHandlingContinue
+	var failures []FailedItem
+	onFileError := func(file model.File, ferr error) {
+		failures = append(failures, FailedItem{
+			FileID: file.ID.String(),
+			Name:   filepath.Base(file.SourcePath),
+			Reason: ferr.Error(),
+		})
+	}
+
 	tracker.StartPhase(progress.PhaseEncrypting, true)
 	if err := (project.Executor{
-		OutputRoot: input.ContentOutput,
-		AfterFile:  afterFile,
-		Progress:   tracker,
+		OutputRoot:      input.ContentOutput,
+		AfterFile:       afterFile,
+		Progress:        tracker,
+		ContinueOnError: continueOnError,
+		OnFileError:     onFileError,
 	}).EncryptContent(ctx, plan); err != nil {
 		return CreateProjectResult{}, err
 	}
@@ -337,12 +353,13 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 		ProjectName:             plan.RootItem.RealName,
 		ContentOutput:           input.ContentOutput,
 		DatabaseExport:          input.DatabaseExport,
-		EncryptedFiles:          len(plan.Files),
+		EncryptedFiles:          len(plan.Files) - len(failures),
 		EncryptedFolders:        CountFolders(plan),
 		EncryptedParts:          len(plan.Parts),
 		DeletedCleartextFiles:   deletedFiles,
 		DeletedCleartextFolders: deletedFolders,
-		FailedFiles:             0,
+		FailedFiles:             len(failures),
+		Failures:                failures,
 	}, nil
 }
 
@@ -380,6 +397,25 @@ func (s Service) resolveSourceCleanupMode(requested string) (string, error) {
 		return requested, nil
 	default:
 		return "", fmt.Errorf("unsupported source cleanup mode %q", requested)
+	}
+}
+
+func (s Service) resolveFailureHandling(requested string) (string, error) {
+	if requested == "" {
+		settings, err := s.ReadSettings()
+		if err != nil {
+			return "", err
+		}
+		requested = settings.FailureHandling
+	}
+
+	switch requested {
+	case "":
+		return FailureHandlingAbort, nil
+	case FailureHandlingAbort, FailureHandlingContinue:
+		return requested, nil
+	default:
+		return "", fmt.Errorf("unsupported failure handling mode %q", requested)
 	}
 }
 
