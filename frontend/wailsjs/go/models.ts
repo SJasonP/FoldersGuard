@@ -354,6 +354,22 @@ export namespace main {
 	        this.failureHandling = source["failureHandling"];
 	    }
 	}
+	export class FailedItem {
+	    fileId: string;
+	    name: string;
+	    reason: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FailedItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.fileId = source["fileId"];
+	        this.name = source["name"];
+	        this.reason = source["reason"];
+	    }
+	}
 	export class CreateProjectResult {
 	    projectId: string;
 	    projectName: string;
@@ -385,7 +401,7 @@ export namespace main {
 	        this.failedFiles = source["failedFiles"];
 	        this.failures = this.convertValues(source["failures"], FailedItem);
 	    }
-
+	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
@@ -539,7 +555,7 @@ export namespace main {
 	        this.failedEncryptedFiles = source["failedEncryptedFiles"];
 	        this.failures = this.convertValues(source["failures"], FailedItem);
 	    }
-
+	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
@@ -609,7 +625,7 @@ export namespace main {
 	        this.failedEncryptedFiles = source["failedEncryptedFiles"];
 	        this.failures = this.convertValues(source["failures"], FailedItem);
 	    }
-
+	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
 		    if (!a) {
 		        return a;
@@ -686,6 +702,7 @@ export namespace main {
 	        this.outputPath = source["outputPath"];
 	    }
 	}
+	
 	export class ImportProjectRequest {
 	    inputPath: string;
 	    password: string;
@@ -950,23 +967,6 @@ export namespace main {
 		    return a;
 		}
 	}
-	export class FailedItem {
-	    fileId: string;
-	    name: string;
-	    reason: string;
-
-	    static createFrom(source: any = {}) {
-	        return new FailedItem(source);
-	    }
-
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.fileId = source["fileId"];
-	        this.name = source["name"];
-	        this.reason = source["reason"];
-	    }
-	}
-
 	export class Settings {
 	    defaultMaxPartSize: number;
 	    sourceCleanupMode: string;

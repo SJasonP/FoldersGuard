@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"foldersguard/internal/content"
 	"foldersguard/internal/model"
@@ -37,6 +38,11 @@ type Executor struct {
 	// ContinueOnError, with the file and its error. A failed file's source is
 	// never deleted, because AfterFile runs only after a successful encryption.
 	OnFileError func(model.File, error)
+	// Concurrency is the number of files encrypted at once. A value of 1 or less
+	// encrypts files sequentially. Concurrency is across files; within-file chunk
+	// streaming is unchanged. Folders are always created up front, before any
+	// file is encrypted.
+	Concurrency int
 }
 
 func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject) error {
@@ -73,7 +79,15 @@ func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject)
 		}
 	}
 
-	for _, file := range plan.Files {
+	// cbMu serializes the AfterFile and OnFileError callbacks so a caller can keep
+	// simple, non-atomic counters and slices even when files encrypt concurrently.
+	var cbMu sync.Mutex
+
+	// encryptOne performs all work for one file. It returns an error only for
+	// conditions that must abort the whole operation; under ContinueOnError, a
+	// file that fails to encrypt is recorded and nil is returned so the operation
+	// proceeds.
+	encryptOne := func(ctx context.Context, file model.File) error {
 		if err := ctx.Err(); err != nil {
 			return err
 		}
@@ -95,12 +109,15 @@ func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject)
 				// run AfterFile so source cleanup still applies.
 				e.Progress.AddBytes(file.OriginalSize)
 				if e.AfterFile != nil {
-					if err := e.AfterFile(file); err != nil {
+					cbMu.Lock()
+					err := e.AfterFile(file)
+					cbMu.Unlock()
+					if err != nil {
 						return fmt.Errorf("post-encrypt file %s: %w", file.ID, err)
 					}
 				}
 				e.Progress.ItemDone()
-				continue
+				return nil
 			}
 		}
 
@@ -114,22 +131,85 @@ func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject)
 		}); err != nil {
 			if e.ContinueOnError && ctx.Err() == nil {
 				if e.OnFileError != nil {
+					cbMu.Lock()
 					e.OnFileError(file, err)
+					cbMu.Unlock()
 				}
 				e.Progress.ItemDone()
-				continue
+				return nil
 			}
 			return fmt.Errorf("encrypt file %s: %w", file.ID, err)
 		}
 		if e.AfterFile != nil {
-			if err := e.AfterFile(file); err != nil {
+			cbMu.Lock()
+			err := e.AfterFile(file)
+			cbMu.Unlock()
+			if err != nil {
 				return fmt.Errorf("post-encrypt file %s: %w", file.ID, err)
 			}
 		}
 		e.Progress.ItemDone()
+		return nil
 	}
 
+	if e.Concurrency > 1 {
+		return encryptFilesConcurrent(ctx, plan.Files, e.Concurrency, encryptOne)
+	}
+	for _, file := range plan.Files {
+		if err := encryptOne(ctx, file); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+// encryptFilesConcurrent processes files through a bounded worker pool. The
+// first file that returns an error cancels the shared context so the remaining
+// workers stop cleanly, and that error is returned. Under ContinueOnError the
+// per-file function returns nil for item failures, so the pool runs to
+// completion.
+func encryptFilesConcurrent(ctx context.Context, files []model.File, workers int, encryptOne func(context.Context, model.File) error) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	jobs := make(chan model.File)
+	var wg sync.WaitGroup
+	var once sync.Once
+	var firstErr error
+
+	for i := 0; i < workers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for file := range jobs {
+				if ctx.Err() != nil {
+					continue
+				}
+				if err := encryptOne(ctx, file); err != nil {
+					once.Do(func() {
+						firstErr = err
+						cancel()
+					})
+				}
+			}
+		}()
+	}
+
+feed:
+	for _, file := range files {
+		select {
+		case <-ctx.Done():
+			break feed
+		case jobs <- file:
+		}
+	}
+	close(jobs)
+	wg.Wait()
+
+	if firstErr != nil {
+		return firstErr
+	}
+	return ctx.Err()
 }
 
 // fileAlreadyEncrypted reports whether a file's encrypted object(s) already
