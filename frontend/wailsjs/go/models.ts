@@ -975,6 +975,7 @@ export namespace main {
 	    language: string;
 	    backupRetention: number;
 	    failureHandling: string;
+	    encryptionConcurrency: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -989,6 +990,7 @@ export namespace main {
 	        this.language = source["language"];
 	        this.backupRetention = source["backupRetention"];
 	        this.failureHandling = source["failureHandling"];
+	        this.encryptionConcurrency = source["encryptionConcurrency"];
 	    }
 	}
 	

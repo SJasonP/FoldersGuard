@@ -16,9 +16,10 @@ func (a *App) SaveSettings(settings Settings) (Settings, error) {
 		SourceCleanupMode:  settings.SourceCleanupMode,
 		NoiseFileHandling:  settings.NoiseFileHandling,
 		Theme:              settings.Theme,
-		Language:           settings.Language,
-		BackupRetention:    settings.BackupRetention,
-		FailureHandling:    settings.FailureHandling,
+		Language:              settings.Language,
+		BackupRetention:       settings.BackupRetention,
+		FailureHandling:       settings.FailureHandling,
+		EncryptionConcurrency: settings.EncryptionConcurrency,
 	})
 	if err != nil {
 		return Settings{}, frontendError(err)
@@ -28,12 +29,13 @@ func (a *App) SaveSettings(settings Settings) (Settings, error) {
 
 func mapSettings(settings app.Settings) Settings {
 	return Settings{
-		DefaultMaxPartSize: settings.DefaultMaxPartSize,
-		SourceCleanupMode:  settings.SourceCleanupMode,
-		NoiseFileHandling:  settings.NoiseFileHandling,
-		Theme:              settings.Theme,
-		Language:           settings.Language,
-		BackupRetention:    settings.BackupRetention,
-		FailureHandling:    settings.FailureHandling,
+		DefaultMaxPartSize:    settings.DefaultMaxPartSize,
+		SourceCleanupMode:     settings.SourceCleanupMode,
+		NoiseFileHandling:     settings.NoiseFileHandling,
+		Theme:                 settings.Theme,
+		Language:              settings.Language,
+		BackupRetention:       settings.BackupRetention,
+		FailureHandling:       settings.FailureHandling,
+		EncryptionConcurrency: settings.EncryptionConcurrency,
 	}
 }

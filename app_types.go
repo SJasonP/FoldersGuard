@@ -48,8 +48,9 @@ type Settings struct {
 	NoiseFileHandling  string `json:"noiseFileHandling"`
 	Theme              string `json:"theme"`
 	Language           string `json:"language"`
-	BackupRetention    int    `json:"backupRetention"`
-	FailureHandling    string `json:"failureHandling"`
+	BackupRetention       int    `json:"backupRetention"`
+	FailureHandling       string `json:"failureHandling"`
+	EncryptionConcurrency int    `json:"encryptionConcurrency"`
 }
 
 // FailedItem describes one item that failed during a continue-on-error

@@ -43,6 +43,11 @@ export function SettingsView({
                                extra={t('backupRetentionHint')}>
                         <InputNumber min={1} precision={0} style={{width: '100%'}}/>
                     </Form.Item>
+                    <Form.Item name="encryptionConcurrency" label={t('encryptionConcurrency')}
+                               extra={t('encryptionConcurrencyHint')}>
+                        <InputNumber min={0} precision={0} style={{width: '100%'}}
+                                     placeholder={t('encryptionConcurrencyAutoHint')}/>
+                    </Form.Item>
                     <Form.Item name="sourceCleanupMode" label={t('sourceCleanupMode')} rules={[{required: true}]}>
                         <Select
                             options={[
