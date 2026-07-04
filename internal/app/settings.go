@@ -39,6 +39,9 @@ type Settings struct {
 	Language           string `json:"language"`
 	BackupRetention    int    `json:"backupRetention"`
 	FailureHandling    string `json:"failureHandling"`
+	// EncryptionConcurrency is the number of files encrypted at once. Zero means
+	// derive a default from the host CPU count; 1 forces sequential encryption.
+	EncryptionConcurrency int `json:"encryptionConcurrency"`
 }
 
 func DefaultSettings() Settings {
@@ -50,6 +53,8 @@ func DefaultSettings() Settings {
 		Language:           LanguageSystem,
 		BackupRetention:    DefaultBackupRetention,
 		FailureHandling:    FailureHandlingAbort,
+
+		EncryptionConcurrency: 0,
 	}
 }
 
@@ -152,6 +157,10 @@ func normalizeSettings(settings Settings) (Settings, error) {
 	case FailureHandlingAbort, FailureHandlingContinue:
 	default:
 		return Settings{}, fmt.Errorf("unsupported failure handling mode %q", settings.FailureHandling)
+	}
+
+	if settings.EncryptionConcurrency < 0 {
+		return Settings{}, fmt.Errorf("encryption concurrency must not be negative")
 	}
 
 	return settings, nil

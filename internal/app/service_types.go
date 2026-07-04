@@ -154,6 +154,9 @@ type CreateProjectInput struct {
 	SourceCleanup   string
 	DatabaseExport  string
 	FailureHandling string
+	// Concurrency overrides the number of files encrypted at once. Zero uses the
+	// EncryptionConcurrency setting, which in turn defaults to a CPU-derived value.
+	Concurrency int
 }
 
 type CreateProjectResult struct {

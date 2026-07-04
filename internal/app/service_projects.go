@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 
 	"foldersguard/internal/db"
@@ -265,6 +266,10 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 	if err != nil {
 		return CreateProjectResult{}, err
 	}
+	concurrency, err := s.resolveEncryptionConcurrency(input.Concurrency)
+	if err != nil {
+		return CreateProjectResult{}, err
+	}
 	scan, err := fswalk.ScanTopFolderWithNoiseMode(input.SourcePath, noiseMode)
 	if err != nil {
 		return CreateProjectResult{}, err
@@ -331,6 +336,7 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 		Progress:        tracker,
 		ContinueOnError: continueOnError,
 		OnFileError:     onFileError,
+		Concurrency:     concurrency,
 	}).EncryptContent(ctx, plan); err != nil {
 		return CreateProjectResult{}, err
 	}
@@ -398,6 +404,38 @@ func (s Service) resolveSourceCleanupMode(requested string) (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported source cleanup mode %q", requested)
 	}
+}
+
+// resolveEncryptionConcurrency resolves the number of files to encrypt at once.
+// A positive override wins; otherwise the EncryptionConcurrency setting is used,
+// and a zero setting derives a default from the host CPU count. The result is
+// always at least 1.
+func (s Service) resolveEncryptionConcurrency(override int) (int, error) {
+	if override > 0 {
+		return override, nil
+	}
+	settings, err := s.ReadSettings()
+	if err != nil {
+		return 0, err
+	}
+	if settings.EncryptionConcurrency > 0 {
+		return settings.EncryptionConcurrency, nil
+	}
+	return DefaultEncryptionConcurrency(), nil
+}
+
+// DefaultEncryptionConcurrency derives a concurrency default from the host CPU
+// count, bounded so a very large core count does not spawn an excessive number
+// of concurrent file encryptions.
+func DefaultEncryptionConcurrency() int {
+	n := runtime.NumCPU()
+	if n < 1 {
+		return 1
+	}
+	if n > 8 {
+		return 8
+	}
+	return n
 }
 
 func (s Service) resolveFailureHandling(requested string) (string, error) {

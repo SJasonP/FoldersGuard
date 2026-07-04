@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"foldersguard/internal/app"
 	"foldersguard/internal/db"
 	"foldersguard/internal/format"
 	"foldersguard/internal/fswalk"
@@ -21,6 +22,7 @@ type encryptOptions struct {
 	passwordOptions passwordOptions
 	force           bool
 	continueOnError bool
+	concurrency     int
 }
 
 func (c cli) encryptCommand() *cobra.Command {
@@ -37,6 +39,9 @@ func (c cli) encryptCommand() *cobra.Command {
 			if options.maxPartSize <= 0 {
 				return fmt.Errorf("max part size must be positive")
 			}
+			if options.concurrency < 0 {
+				return fmt.Errorf("concurrency must not be negative")
+			}
 			return c.runEncrypt(options)
 		},
 	}
@@ -47,6 +52,7 @@ func (c cli) encryptCommand() *cobra.Command {
 	command.Flags().StringVar(&options.passwordOptions.passwordEnv, "password-env", "", "read password from an environment variable")
 	command.Flags().BoolVar(&options.force, "force", false, "replace existing outputs")
 	command.Flags().BoolVar(&options.continueOnError, "continue-on-error", false, "record item-level failures and encrypt the remaining files instead of aborting on the first error")
+	command.Flags().IntVar(&options.concurrency, "concurrency", 0, "number of files encrypted concurrently (default derived from CPU count; 1 forces sequential)")
 	mustMarkRequired(command, "content-out")
 	mustMarkRequired(command, "max-part-size")
 	command.MarkFlagsMutuallyExclusive("password-stdin", "password-env")
@@ -119,6 +125,10 @@ func (c cli) runEncrypt(options encryptOptions) error {
 			return err
 		}
 	}
+	concurrency := options.concurrency
+	if concurrency <= 0 {
+		concurrency = app.DefaultEncryptionConcurrency()
+	}
 	var failures []model.File
 	onFileError := func(file model.File, _ error) {
 		failures = append(failures, file)
@@ -127,6 +137,7 @@ func (c cli) runEncrypt(options encryptOptions) error {
 		OutputRoot:      contentOutput,
 		ContinueOnError: options.continueOnError,
 		OnFileError:     onFileError,
+		Concurrency:     concurrency,
 	}).EncryptContent(ctx, plan); err != nil {
 		return err
 	}
