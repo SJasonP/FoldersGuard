@@ -179,15 +179,12 @@ Exit codes with `--continue-on-error`:
   `failed_file=<visible id>`. Only the non-secret visible file id is printed; internal keys and passwords are never
   printed.
 
-## Planned CLI Additions
+## Concurrency
 
-The addition below is planned and not yet implemented. It follows the same global rules, password input, project
-reference, and overwrite rules as the rest of the CLI.
-
-New flag on `fg encrypt`:
-
-- `--concurrency <n>`: number of files encrypted concurrently. The default is derived from the host CPU count. `1`
-  forces sequential encryption.
+`fg encrypt --concurrency <n>` is available: it sets the number of files encrypted concurrently. The default is derived
+from the host CPU count. `1` forces sequential encryption. Concurrency is across files; within-file chunk streaming is
+unchanged. Like `--continue-on-error`, the flag is an explicit switch and does not read the WebUI encryption-concurrency
+setting.
 
 The `fg passwd` and `fg backups` maintenance commands are already available; see
 [maintenance CLI commands](cli/maintenance.md).

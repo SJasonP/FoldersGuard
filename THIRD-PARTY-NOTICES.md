@@ -28,7 +28,7 @@ based on `go list -deps -test=false`.
 | `github.com/wailsapp/wails/v2`         |                            `v2.12.0` | MIT             |
 | `golang.org/x/sys`                     |                            `v0.46.0` | BSD-style       |
 | `golang.org/x/term`                    |                            `v0.44.0` | BSD-style       |
-| `modernc.org/libc`                     |                            `v1.73.4` | MIT / BSD-style |
+| `modernc.org/libc`                     |                            `v1.73.5` | MIT / BSD-style |
 | `modernc.org/mathutil`                 |                             `v1.7.1` | BSD-style       |
 | `modernc.org/memory`                   |                            `v1.11.0` | BSD-style       |
 | `modernc.org/sqlite`                   |                            `v1.53.0` | BSD-style       |
@@ -753,7 +753,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/libc v1.73.4 - LICENSE
+### modernc.org/libc v1.73.5 - LICENSE
 
 ```text
 Copyright (c) 2017 The Libc Authors. All rights reserved.
@@ -785,7 +785,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/libc v1.73.4 - LICENSE-3RD-PARTY.md
+### modernc.org/libc v1.73.5 - LICENSE-3RD-PARTY.md
 
 ```text
 # Third-Party Software Notices

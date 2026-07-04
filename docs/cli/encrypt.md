@@ -7,7 +7,7 @@ Encrypts one cleartext top-level folder and creates one active FG project.
 Usage:
 
 ```text
-fg encrypt <source-folder> --content-out <encrypted-content-folder> --max-part-size <bytes> [--export <project.fg>] [--password-stdin | --password-env <name>] [--force] [--continue-on-error]
+fg encrypt <source-folder> --content-out <encrypted-content-folder> --max-part-size <bytes> [--export <project.fg>] [--password-stdin | --password-env <name>] [--force] [--continue-on-error] [--concurrency <n>]
 ```
 
 Arguments:
@@ -18,6 +18,8 @@ Arguments:
 - `--export <project.fg>`: optional exported copy of the created project database.
 - `--continue-on-error`: record item-level failures and encrypt the remaining files instead of aborting on the first
   error. The default aborts on the first error.
+- `--concurrency <n>`: number of files encrypted concurrently. The default is derived from the host CPU count. `1`
+  forces sequential encryption. Concurrency is across files; within-file chunk streaming is unchanged.
 
 Behavior:
 

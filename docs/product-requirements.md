@@ -177,17 +177,17 @@ Restore rules:
 - Directory metadata is restored after child entries are restored.
 - Platform or filesystem limitations may reduce timestamp precision.
 
-## Planned Feature Set (v1.2–v1.6)
+## Feature Set (v1.2–v1.6)
 
-The planned feature set extends v1.1 with reliability and security hardening for large, valuable data.
+This feature set extends v1.1 with reliability and security hardening for large, valuable data. All of it is
+implemented as of v1.6.
 
 Versioning approach:
 
-- Each feature ships as its own minor release, starting at v1.2, in the dependency order of the subsections below.
+- Each feature shipped as its own minor release, starting at v1.2, in the dependency order of the subsections below.
 - None of these features changes the storage format, so the storage format version is unchanged and every release stays
   data-compatible with v1.
-- The target version numbers are the current plan and may shift.
-- Items marked planned are specified here to be built against and are not yet implemented.
+- Each subsection records the release in which the feature shipped.
 
 ### Metadata-Database Backup
 
@@ -242,13 +242,15 @@ Versioning approach:
 
 ### Parallel Encryption
 
-**Status: Planned for v1.6 — not yet implemented.**
+**Status: Implemented in v1.6.**
 
 - File encryption may process multiple files concurrently with a bounded worker pool.
-- Concurrency defaults to a value derived from the host CPU count and is configurable.
+- Concurrency defaults to a value derived from the host CPU count and is configurable through a setting and, on the CLI,
+  a `--concurrency` flag. A value of 1 encrypts sequentially.
 - Within-file chunk streaming is unchanged; concurrency is across files, not within a file.
 - Byte-weighted progress remains accurate and monotonic under concurrency.
-- Source-file deletion and folder-creation ordering remain correct under concurrency.
+- Source-file deletion and folder-creation ordering remain correct under concurrency: folders are created up front, and
+  each source is deleted only after its own file is encrypted.
 - A failure in one worker stops the operation cleanly, unless continue-on-error mode is enabled.
 
 ## Security Expectations

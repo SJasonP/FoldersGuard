@@ -31,6 +31,6 @@ Output:
 
 ```text
 app_id=com.SJasonP.FoldersGuard
-product_version=1.5.0
+product_version=1.6.0
 format_version=fg-native-v1
 ```

@@ -10,6 +10,17 @@ same `.fg` / `.fgs` databases and encrypted content. No 1.x release changes the 
 FoldersGuard is experimental software and makes no guarantee of security, cryptographic correctness, or data durability.
 Do not rely on it as the only protection for valuable, sensitive, or irreplaceable data.
 
+## [1.6.0] - 2026-07-05
+
+### Added
+
+- Parallel encryption. File encryption can process several files at once through a bounded worker pool, across files
+  (within-file chunk streaming is unchanged). Byte-weighted progress stays accurate and monotonic, folders are created
+  before any file is encrypted, and each source is deleted only after its own file succeeds.
+- Desktop: an "Encryption concurrency" setting, where 0 derives a default from the host CPU count and 1 encrypts
+  sequentially. Project creation follows the setting.
+- CLI: `fg encrypt --concurrency <n>`, defaulting to a CPU-derived value; `1` forces sequential encryption.
+
 ## [1.5.0] - 2026-07-02
 
 ### Added
@@ -94,6 +105,7 @@ Do not rely on it as the only protection for valuable, sensitive, or irreplaceab
 - Integrity verification without decryption, large-file balanced splitting, and metadata-only operations such as rename.
 - A Wails desktop WebUI and a CLI (`foldersguard` / `fg`), with English and Simplified Chinese localization.
 
+[1.6.0]: https://github.com/SJasonP/FoldersGuard/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/SJasonP/FoldersGuard/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/SJasonP/FoldersGuard/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/SJasonP/FoldersGuard/compare/v1.2.0...v1.3.0

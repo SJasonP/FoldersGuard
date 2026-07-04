@@ -252,7 +252,8 @@ Failure handling (available for encryption and decryption):
 - When continuing, the result summary lists the failed item count and the failed items. Only the non-secret visible file
   id, base name, and reason are shown; passwords and internal keys stay hidden.
 
-Concurrency (planned; not yet implemented):
+Concurrency (available for encryption):
 
-- Encryption can process several files at once, following the encryption concurrency setting.
-- Concurrency does not change the progress display, which remains byte-weighted.
+- Encryption can process several files at once, following the encryption concurrency setting. The setting takes a file
+  count; 0 derives a default from the host CPU count, and 1 encrypts sequentially.
+- Concurrency does not change the progress display, which remains byte-weighted and monotonic.
