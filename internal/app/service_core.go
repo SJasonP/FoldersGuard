@@ -39,6 +39,11 @@ func (s Service) ProjectsDir() string {
 }
 
 func (s Service) StagedContentDir() string {
+	// A user-configured staging location wins. A read error or an unset value
+	// falls through to the automatic location.
+	if settings, err := s.ReadSettings(); err == nil && settings.StagedContentLocation != "" {
+		return settings.StagedContentLocation
+	}
 	if desktopDir := userDesktopDir(); desktopDir != "" {
 		return desktopDir
 	}

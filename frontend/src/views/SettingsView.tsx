@@ -1,5 +1,6 @@
 import {Button, Form, InputNumber, Select, Space, Typography} from 'antd';
 import type {SettingsModel} from '../types';
+import {PathInput} from '../components/common/PathInput';
 
 type SettingsViewProps = {
     settings: SettingsModel | null;
@@ -47,6 +48,15 @@ export function SettingsView({
                                extra={t('encryptionConcurrencyHint')}>
                         <InputNumber min={0} precision={0} style={{width: '100%'}}
                                      placeholder={t('encryptionConcurrencyAutoHint')}/>
+                    </Form.Item>
+                    <Form.Item name="stagedContentLocation" label={t('stagedContentLocation')}
+                               extra={t('stagedContentLocationHint')}>
+                        <PathInput
+                            dialogKind="open-directory"
+                            dialogTitle={t('stagedContentLocation')}
+                            placeholder={t('stagedContentLocationAutoHint')}
+                            t={t}
+                        />
                     </Form.Item>
                     <Form.Item name="sourceCleanupMode" label={t('sourceCleanupMode')} rules={[{required: true}]}>
                         <Select

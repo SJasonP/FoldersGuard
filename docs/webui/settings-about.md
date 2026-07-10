@@ -11,9 +11,10 @@ Supported settings:
 - Noise file handling: ignore everywhere, ignore only during verification and matching, or do not ignore.
 - Theme: system, light, or dark.
 - Language: system, English (United States), or Simplified Chinese.
-- Encryption concurrency: number of files encrypted at once (planned).
-- Database backup retention: number of project-database backups kept per project (planned).
-- Default failure handling: abort on the first error, or continue and report item-level failures (planned).
+- Encryption concurrency: number of files encrypted at once.
+- Database backup retention: number of project-database backups kept per project.
+- Default failure handling: abort on the first error, or continue and report item-level failures.
+- Staging location: where content is staged while applying project changes when encrypted content is not connected.
 
 Default settings:
 
@@ -22,9 +23,11 @@ Default settings:
 - Noise file handling defaults to ignore everywhere.
 - Theme defaults to system.
 - Language defaults to system.
-- Encryption concurrency defaults to a value derived from the host CPU count (planned).
-- Database backup retention defaults to a small bounded number of backups (planned).
-- Default failure handling defaults to abort on the first error (planned).
+- Encryption concurrency defaults to a value derived from the host CPU count.
+- Database backup retention defaults to a small bounded number of backups.
+- Default failure handling defaults to abort on the first error.
+- Staging location defaults to empty, which stages to the user's Desktop when available and otherwise to a folder under
+  the data directory. When set, it must be an absolute directory path.
 
 Settings behavior:
 

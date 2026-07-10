@@ -34,6 +34,31 @@ func TestStagedContentDirFallsBackToDataDirWithoutDesktop(t *testing.T) {
 	}
 }
 
+func TestStagedContentDirUsesConfiguredLocation(t *testing.T) {
+	home := t.TempDir()
+	if err := os.Mkdir(filepath.Join(home, "Desktop"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("HOME", home)
+
+	custom := t.TempDir()
+	service := Service{DataDir: filepath.Join(t.TempDir(), "data")}
+	if _, err := service.SaveSettings(Settings{StagedContentLocation: custom}); err != nil {
+		t.Fatal(err)
+	}
+	// The configured location wins over the Desktop.
+	if got := service.StagedContentDir(); got != custom {
+		t.Fatalf("staged content dir = %q, want configured %q", got, custom)
+	}
+}
+
+func TestSaveSettingsRejectsRelativeStagedContentLocation(t *testing.T) {
+	service := Service{DataDir: filepath.Join(t.TempDir(), "data")}
+	if _, err := service.SaveSettings(Settings{StagedContentLocation: "relative/dir"}); err == nil {
+		t.Fatal("expected a relative staged content location to be rejected")
+	}
+}
+
 func TestStagedContentDirectoryNameUsesProjectNameAndLocalMinute(t *testing.T) {
 	createdAt := time.Date(2026, 5, 12, 10, 1, 0, 0, time.Local)
 	got := stagedContentDirectoryName("  My:Vault/Archive?*  ", createdAt)

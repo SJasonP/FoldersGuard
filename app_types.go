@@ -51,6 +51,7 @@ type Settings struct {
 	BackupRetention       int    `json:"backupRetention"`
 	FailureHandling       string `json:"failureHandling"`
 	EncryptionConcurrency int    `json:"encryptionConcurrency"`
+	StagedContentLocation string `json:"stagedContentLocation"`
 }
 
 // FailedItem describes one item that failed during a continue-on-error

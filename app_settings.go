@@ -20,6 +20,7 @@ func (a *App) SaveSettings(settings Settings) (Settings, error) {
 		BackupRetention:       settings.BackupRetention,
 		FailureHandling:       settings.FailureHandling,
 		EncryptionConcurrency: settings.EncryptionConcurrency,
+		StagedContentLocation: settings.StagedContentLocation,
 	})
 	if err != nil {
 		return Settings{}, frontendError(err)
@@ -37,5 +38,6 @@ func mapSettings(settings app.Settings) Settings {
 		BackupRetention:       settings.BackupRetention,
 		FailureHandling:       settings.FailureHandling,
 		EncryptionConcurrency: settings.EncryptionConcurrency,
+		StagedContentLocation: settings.StagedContentLocation,
 	}
 }

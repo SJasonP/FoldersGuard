@@ -976,6 +976,7 @@ export namespace main {
 	    backupRetention: number;
 	    failureHandling: string;
 	    encryptionConcurrency: number;
+	    stagedContentLocation: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Settings(source);
@@ -991,6 +992,7 @@ export namespace main {
 	        this.backupRetention = source["backupRetention"];
 	        this.failureHandling = source["failureHandling"];
 	        this.encryptionConcurrency = source["encryptionConcurrency"];
+	        this.stagedContentLocation = source["stagedContentLocation"];
 	    }
 	}
 	

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -42,6 +43,11 @@ type Settings struct {
 	// EncryptionConcurrency is the number of files encrypted at once. Zero means
 	// derive a default from the host CPU count; 1 forces sequential encryption.
 	EncryptionConcurrency int `json:"encryptionConcurrency"`
+	// StagedContentLocation overrides where the WebUI stages content it cannot
+	// upload directly while applying project changes. An empty value uses the
+	// automatic location: the user's Desktop when available, otherwise a folder
+	// under the data directory. When set, it must be an absolute path.
+	StagedContentLocation string `json:"stagedContentLocation"`
 }
 
 func DefaultSettings() Settings {
@@ -161,6 +167,11 @@ func normalizeSettings(settings Settings) (Settings, error) {
 
 	if settings.EncryptionConcurrency < 0 {
 		return Settings{}, fmt.Errorf("encryption concurrency must not be negative")
+	}
+
+	settings.StagedContentLocation = strings.TrimSpace(settings.StagedContentLocation)
+	if settings.StagedContentLocation != "" && !filepath.IsAbs(settings.StagedContentLocation) {
+		return Settings{}, fmt.Errorf("staged content location must be an absolute path")
 	}
 
 	return settings, nil
