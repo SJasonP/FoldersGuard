@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 
+	"foldersguard/internal/content"
 	"foldersguard/internal/model"
 	"foldersguard/internal/noise"
 )
@@ -14,6 +16,70 @@ type restoreSelection struct {
 	fileIDs     map[string]struct{}
 	folderIDs   map[string]struct{}
 	sourcePaths map[string]string
+}
+
+// RestoreSpaceSizes returns per-file output sizes and encrypted source sizes in
+// restore order. It uses the same content-selection rules as restoration.
+func (r Restorer) RestoreSpaceSizes(ctx context.Context, plan model.PlannedProject) ([]int64, []int64, error) {
+	selection, err := r.selectAvailableContent(ctx, plan, itemsByID(plan))
+	if err != nil {
+		return nil, nil, err
+	}
+	visiblePaths := visiblePathsByItem(plan)
+	partsByFile := partsByFileID(plan.Parts)
+	logicalPaths, err := logicalRealPaths(plan)
+	if err != nil {
+		return nil, nil, err
+	}
+	var outputs, freed []int64
+	for _, file := range plan.Files {
+		if _, ok := selection.fileIDs[file.ID.String()]; !ok {
+			continue
+		}
+		if r.Resume {
+			outputPath, err := content.SafeJoin(r.OutputRoot, logicalPaths[file.ID.String()])
+			if err != nil {
+				return nil, nil, err
+			}
+			if info, err := os.Stat(outputPath); err == nil && !info.IsDir() && info.Size() == file.OriginalSize {
+				continue
+			} else if err != nil && !os.IsNotExist(err) {
+				return nil, nil, fmt.Errorf("stat restored output: %w", err)
+			}
+		}
+		var encryptedSize int64
+		switch file.StorageKind {
+		case model.StorageKindSingle:
+			info, err := os.Stat(selection.sourcePaths[visiblePaths[file.ID.String()]])
+			if err != nil {
+				return nil, nil, fmt.Errorf("stat encrypted source: %w", err)
+			}
+			encryptedSize = info.Size()
+		case model.StorageKindSplit:
+			parts := append([]model.Part(nil), partsByFile[file.ID.String()]...)
+			sort.Slice(parts, func(i, j int) bool { return parts[i].Index < parts[j].Index })
+			for _, part := range parts {
+				path := selection.sourcePaths[visiblePaths[file.ID.String()]+"/"+part.VisibleName.String()]
+				info, err := os.Stat(path)
+				if err != nil {
+					return nil, nil, fmt.Errorf("stat encrypted part: %w", err)
+				}
+				if r.IncrementalCleanup {
+					outputs = append(outputs, part.Size)
+					freed = append(freed, info.Size())
+					continue
+				}
+				encryptedSize += info.Size()
+			}
+		default:
+			return nil, nil, fmt.Errorf("unsupported storage kind %q", file.StorageKind)
+		}
+		if !r.IncrementalCleanup || file.StorageKind != model.StorageKindSplit {
+			outputs = append(outputs, file.OriginalSize)
+			freed = append(freed, encryptedSize)
+		}
+	}
+	return outputs, freed, nil
 }
 
 func (r Restorer) selectAvailableContent(ctx context.Context, plan model.PlannedProject, itemByID map[string]model.Item) (restoreSelection, error) {

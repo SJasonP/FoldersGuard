@@ -1,6 +1,7 @@
 package content
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -12,6 +13,23 @@ import (
 	fgcrypto "foldersguard/internal/crypto"
 	"foldersguard/internal/model"
 )
+
+func TestEncryptedObjectSize(t *testing.T) {
+	for _, size := range []int64{0, 1, defaultChunkSize, defaultChunkSize + 1} {
+		key := bytes.Repeat([]byte{1}, 32)
+		aead, err := fgcrypto.NewAES256GCM(key)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var output bytes.Buffer
+		if err := writeEncryptedObject(context.Background(), aead, bytes.NewReader(make([]byte, size)), &output, nil, 0, nil); err != nil {
+			t.Fatal(err)
+		}
+		if got := int64(output.Len()); got != EncryptedObjectSize(size) {
+			t.Fatalf("size %d: encrypted size = %d, estimate = %d", size, got, EncryptedObjectSize(size))
+		}
+	}
+}
 
 func TestEncryptSingleFile(t *testing.T) {
 	root := t.TempDir()

@@ -236,8 +236,8 @@ Versioning approach:
 - In continue-on-error mode, file-level failures are recorded and the operation processes the remaining items.
 - The result reports the count and the list of failed items with reasons; only the non-secret visible file id, base
   name, and reason are exposed, and passwords and internal keys stay hidden.
-- A source file is never deleted when its own encryption failed, and an encrypted object is never deleted when its own
-  decryption failed.
+- Normal cleanup never deletes a source whose file failed. Under explicitly destructive incremental cleanup, completed
+  split parts may already have been truncated or deleted before a later part fails.
 - Cancellation still aborts the operation immediately regardless of mode.
 
 ### Parallel Encryption
@@ -250,8 +250,24 @@ Versioning approach:
 - Within-file chunk streaming is unchanged; concurrency is across files, not within a file.
 - Byte-weighted progress remains accurate and monotonic under concurrency.
 - Source-file deletion and folder-creation ordering remain correct under concurrency: folders are created up front, and
-  each source is deleted only after its own file is encrypted.
+  normal cleanup waits for the complete operation to succeed. Incremental cleanup forces sequential encryption.
 - A failure in one worker stops the operation cleanly, unless continue-on-error mode is enabled.
+
+### Disk-Space Preflight And Incremental Cleanup
+
+- Before encryption or decryption starts, FG calculates the complete output size, including encrypted object framing
+  and authentication overhead, and refuses the operation when the output volume lacks that space plus a safety reserve.
+- Source cleanup is one four-way setting: keep; delete after the complete operation; delete after each completed file; or
+  delete after each completed part. The last two choices require accepting a strong warning when settings are saved.
+- Per-part encryption proceeds from the tail and truncates each completed source part; per-part decryption deletes each
+  authenticated encrypted part. Unsplit files remain file-granular.
+- Per-part cleanup requires a finite maximum part size. Operations may not override that setting by disabling
+  splitting, because doing so would remove the promised peak-space bound for newly encrypted large files.
+- Per-file and per-part cleanup reduce required free space only when source and output are on the same filesystem. Otherwise the
+  output volume must still hold the complete output.
+- Per-file and per-part encryption are sequential so peak requirements remain bounded and predictable. The configured maximum
+  part size bounds large-file peak usage, and preflight includes cumulative ciphertext overhead.
+- This mode substantially reduces fault tolerance: a later failure or damaged output may leave no source copy to retry.
 
 ## Security Expectations
 

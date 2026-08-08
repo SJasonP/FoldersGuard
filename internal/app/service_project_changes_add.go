@@ -34,6 +34,8 @@ func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Stor
 	if err != nil {
 		return projectAddApplyResult{}, err
 	}
+	progressiveCleanup := sourceCleanup == SourceCleanupAfterFile || sourceCleanup == SourceCleanupAfterPart
+	partCleanup := sourceCleanup == SourceCleanupAfterPart
 
 	// Plan every add first so the combined byte and item total is known before
 	// any encryption begins. PrepareAdd later assigns storage names but does not
@@ -45,6 +47,8 @@ func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Stor
 	planned := make([]plannedAdd, 0, len(input.AddChanges))
 	var totalBytes int64
 	var totalFiles int
+	var encryptedSizes, sourceSizes []int64
+	var sourcePaths []string
 
 	seenAdds := make(map[string]struct{}, len(input.AddChanges))
 	for _, change := range input.AddChanges {
@@ -64,6 +68,9 @@ func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Stor
 		if err != nil {
 			return projectAddApplyResult{}, err
 		}
+		if partCleanup && maxPartSize >= NoSplitMaxPartSize {
+			return projectAddApplyResult{}, ErrIncrementalRequiresSplit
+		}
 		scan, err := fswalk.ScanPathWithNoiseMode(change.SourcePath, noiseMode)
 		if err != nil {
 			return projectAddApplyResult{}, err
@@ -73,10 +80,19 @@ func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Stor
 			return projectAddApplyResult{}, err
 		}
 		planned = append(planned, plannedAdd{change: change, addition: addition})
+		additionEncryptedSizes, additionSourceSizes := encryptionSpaceSizes(addition, partCleanup)
+		encryptedSizes = append(encryptedSizes, additionEncryptedSizes...)
+		sourceSizes = append(sourceSizes, additionSourceSizes...)
+		for range additionEncryptedSizes {
+			sourcePaths = append(sourcePaths, change.SourcePath)
+		}
 		for _, file := range addition.Files {
 			totalBytes += file.OriginalSize
 		}
 		totalFiles += len(addition.Files)
+	}
+	if err := ensureOperationSpaceForSources(sourcePaths, stagedContentPath, encryptedSizes, sourceSizes, progressiveCleanup); err != nil {
+		return projectAddApplyResult{}, err
 	}
 
 	tracker.StartPhase(progress.PhaseEncrypting, true)
@@ -84,7 +100,7 @@ func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Stor
 	tracker.SetTotalItems(totalFiles)
 
 	for _, pa := range planned {
-		operations, err := s.applyOnePlannedAdd(ctx, store, pa.change, pa.addition, stagedContentPath, input.EncryptedRoot, contentConnected, sourceCleanup, noiseMode, tracker)
+		operations, err := s.applyOnePlannedAdd(ctx, store, pa.change, pa.addition, stagedContentPath, input.EncryptedRoot, contentConnected, sourceCleanup, noiseMode, progressiveCleanup, partCleanup, tracker)
 		if err != nil {
 			return projectAddApplyResult{}, err
 		}
@@ -95,7 +111,7 @@ func (s Service) applyProjectAddChanges(ctx context.Context, store *storage.Stor
 	return result, nil
 }
 
-func (s Service) applyOnePlannedAdd(ctx context.Context, store *storage.Store, change ProjectAddChange, addition model.PlannedProject, stagedContentPath, encryptedRoot string, contentConnected bool, sourceCleanup, noiseMode string, tracker *progress.Tracker) (projectAddApplyResult, error) {
+func (s Service) applyOnePlannedAdd(ctx context.Context, store *storage.Store, change ProjectAddChange, addition model.PlannedProject, stagedContentPath, encryptedRoot string, contentConnected bool, sourceCleanup, noiseMode string, progressiveCleanup, partCleanup bool, tracker *progress.Tracker) (projectAddApplyResult, error) {
 	addition, operations, err := store.PrepareAdd(ctx, change.TargetFolderPath, addition)
 	if err != nil {
 		return projectAddApplyResult{}, err
@@ -104,6 +120,26 @@ func (s Service) applyOnePlannedAdd(ctx context.Context, store *storage.Store, c
 		OutputRoot:         stagedContentPath,
 		Progress:           tracker,
 		SkipProgressTotals: true,
+		Concurrency:        1,
+		ReverseParts:       partCleanup,
+		AfterPart: func(file model.File, part model.Part) error {
+			if !partCleanup {
+				return nil
+			}
+			if err := os.Truncate(file.SourcePath, part.Offset); err != nil {
+				return fmt.Errorf("truncate encrypted source through completed part: %w", err)
+			}
+			return nil
+		},
+		AfterFile: func(file model.File) error {
+			if !progressiveCleanup {
+				return nil
+			}
+			if err := os.Remove(file.SourcePath); err != nil {
+				return fmt.Errorf("delete source file: %w", err)
+			}
+			return nil
+		},
 	}).EncryptContent(ctx, addition); err != nil {
 		return projectAddApplyResult{}, err
 	}
@@ -155,7 +191,7 @@ func (s Service) applyOnePlannedAdd(ctx context.Context, store *storage.Store, c
 // only after a successful commit so an interrupted add never deletes a source
 // whose encrypted content was rolled back.
 func (s Service) cleanupAddedSources(sourcePath string, addition model.PlannedProject, sourceCleanup, noiseMode string) error {
-	if sourceCleanup != SourceCleanupDelete {
+	if sourceCleanup == SourceCleanupKeep {
 		return nil
 	}
 	for _, file := range addition.Files {

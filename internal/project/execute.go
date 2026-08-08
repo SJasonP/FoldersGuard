@@ -16,6 +16,10 @@ type Executor struct {
 	OutputRoot string
 	Encryptor  content.Encryptor
 	AfterFile  func(model.File) error
+	AfterPart  func(model.File, model.Part) error
+	// ReverseParts is used by destructive incremental cleanup so a completed
+	// tail part can be released with a safe file truncation.
+	ReverseParts bool
 	// Progress, when set, receives byte-weighted progress for the encryption
 	// phase. A nil tracker is safe and ignored.
 	Progress *progress.Tracker
@@ -35,8 +39,9 @@ type Executor struct {
 	// abort on the first error.
 	ContinueOnError bool
 	// OnFileError, when set, is called for each file that fails to encrypt under
-	// ContinueOnError, with the file and its error. A failed file's source is
-	// never deleted, because AfterFile runs only after a successful encryption.
+	// ContinueOnError, with the file and its error. AfterFile runs only after a
+	// successful file; a caller using AfterPart may already have destructively
+	// released completed split parts.
 	OnFileError func(model.File, error)
 	// Concurrency is the number of files encrypted at once. A value of 1 or less
 	// encrypts files sequentially. Concurrency is across files; within-file chunk
@@ -121,7 +126,16 @@ func (e Executor) EncryptContent(ctx context.Context, plan model.PlannedProject)
 			}
 		}
 
-		if err := encryptor.EncryptFile(ctx, content.FileSource{
+		fileEncryptor := encryptor
+		fileEncryptor.ReverseParts = e.ReverseParts
+		if e.AfterPart != nil {
+			fileEncryptor.AfterPart = func(part model.Part) error {
+				cbMu.Lock()
+				defer cbMu.Unlock()
+				return e.AfterPart(file, part)
+			}
+		}
+		if err := fileEncryptor.EncryptFile(ctx, content.FileSource{
 			FileID:       file.ID.String(),
 			AbsolutePath: file.SourcePath,
 			Key:          file.Key,

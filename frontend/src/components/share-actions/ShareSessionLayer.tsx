@@ -94,7 +94,7 @@ export function ShareSessionLayer({
             <DecryptShareModal
                 open={decryptShareDialogOpen}
                 loading={decryptShareLoading}
-                sourceCleanupMode={settings?.sourceCleanupMode ?? 'delete'}
+                sourceCleanupMode={settings?.sourceCleanupMode ?? 'after_operation'}
                 defaultFailureHandling={settings?.failureHandling ?? 'abort'}
                 onCancel={onCloseDecryptShare}
                 onSubmit={(values) => onDecryptShare(values)}

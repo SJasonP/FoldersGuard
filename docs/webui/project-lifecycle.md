@@ -40,9 +40,10 @@ Create behavior:
   not added to FG metadata.
 - Hard links are treated as normal files.
 - Source file handling follows Settings.
-- When source file handling is set to delete, each cleartext file is deleted immediately after that file is successfully
-  encrypted.
-- Cleartext files that fail to encrypt are not deleted.
+- Source handling may keep data, delete after the operation, delete after each file, or delete after each part. Per-part
+  mode encrypts split files from the tail and truncates each completed part.
+- Normal cleanup preserves failed files. Per-file and per-part modes may already have deleted completed data before a
+  later file or part fails.
 - When source file handling is set to delete, directories are removed after their child entries have been processed and
   only if they are empty.
 

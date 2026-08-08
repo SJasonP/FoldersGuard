@@ -7,7 +7,11 @@ Settings controls WebUI preferences.
 Supported settings:
 
 - Default maximum part size in MB.
-- Source file handling: keep source files, or delete source files after successful processing.
+- Source file handling has four mutually exclusive choices: keep sources; delete everything after the operation succeeds;
+  delete after each file succeeds; or delete after each part succeeds.
+- The per-file and per-part choices show a strong warning only when the setting is saved. Both reduce fault tolerance.
+- Per-part cleanup requires a maximum part size of at least 5 MB. Split encryption runs from the tail and truncates each
+  completed tail; split decryption deletes each authenticated encrypted part.
 - Noise file handling: ignore everywhere, ignore only during verification and matching, or do not ignore.
 - Theme: system, light, or dark.
 - Language: system, English (United States), or Simplified Chinese.
@@ -18,7 +22,7 @@ Supported settings:
 
 Default settings:
 
-- Source file handling defaults to delete source files.
+- Source file handling defaults to delete source files after the entire operation succeeds.
 - Default maximum part size defaults to disabled file splitting.
 - Noise file handling defaults to ignore everywhere.
 - Theme defaults to system.

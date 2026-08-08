@@ -32,6 +32,9 @@ a mixed selection without exposing parent folders, siblings, or unrelated projec
   folders.
 - Integrity verification: verify encrypted content without decrypting it, and detect missing or tampered encrypted
   objects before restore or sharing.
+- Disk-space preflight: encryption and decryption refuse to start unless the destination has enough calculated capacity.
+- Four source-cleanup choices: keep sources, delete after the operation, delete after each file, or delete after each
+  part. The progressive choices warn when saved because they greatly reduce fault tolerance.
 - Hidden real names: visible encrypted file and directory names are UUID values.
 - Separate metadata: FoldersGuard data is separate from encrypted content, so metadata-only changes such as renaming do
   not require the encrypted content to be present.

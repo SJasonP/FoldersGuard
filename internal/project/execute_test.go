@@ -176,6 +176,64 @@ func TestRestorerRejectsTamperedContent(t *testing.T) {
 	}
 }
 
+func TestSplitIncrementalCleanupReleasesAndRestoresByPart(t *testing.T) {
+	ctx := context.Background()
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	plaintext := []byte("abcdefghijklmnopqrstuvwxyz")
+	mustWrite(t, filepath.Join(source, "large.bin"), plaintext)
+	scan, err := fswalk.ScanTopFolder(source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := (Planner{MaxPartSize: 8}).Plan(scan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan.Parts) < 2 {
+		t.Fatalf("parts = %d, want split file", len(plan.Parts))
+	}
+
+	var truncatedAt []int64
+	encrypted := filepath.Join(root, "encrypted")
+	err = (Executor{
+		OutputRoot:   encrypted,
+		ReverseParts: true,
+		AfterPart: func(file model.File, part model.Part) error {
+			truncatedAt = append(truncatedAt, part.Offset)
+			return os.Truncate(file.SourcePath, part.Offset)
+		},
+		AfterFile: func(file model.File) error { return os.Remove(file.SourcePath) },
+	}).EncryptContent(ctx, plan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 1; i < len(truncatedAt); i++ {
+		if truncatedAt[i] >= truncatedAt[i-1] {
+			t.Fatalf("truncate offsets = %v, want strictly descending", truncatedAt)
+		}
+	}
+
+	deletedParts := 0
+	restored := filepath.Join(root, "restored")
+	_, err = (Restorer{
+		EncryptedRoot:      encrypted,
+		OutputRoot:         restored,
+		IncrementalCleanup: true,
+		AfterPart: func(part RestoredPart) error {
+			deletedParts++
+			return os.Remove(part.EncryptedAbsPath)
+		},
+	}).RestoreContentReport(ctx, plan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if deletedParts != len(plan.Parts) {
+		t.Fatalf("deleted parts = %d, want %d", deletedParts, len(plan.Parts))
+	}
+	assertFile(t, filepath.Join(restored, filepath.Base(source), "large.bin"), plaintext)
+}
+
 func encryptedPathForRealPath(t *testing.T, encryptedRoot string, plan model.PlannedProject, realPath string) string {
 	t.Helper()
 	logicalPaths, err := logicalRealPaths(plan)

@@ -43,11 +43,11 @@ type ShareSummary struct {
 }
 
 type Settings struct {
-	DefaultMaxPartSize int64  `json:"defaultMaxPartSize"`
-	SourceCleanupMode  string `json:"sourceCleanupMode"`
-	NoiseFileHandling  string `json:"noiseFileHandling"`
-	Theme              string `json:"theme"`
-	Language           string `json:"language"`
+	DefaultMaxPartSize    int64  `json:"defaultMaxPartSize"`
+	SourceCleanupMode     string `json:"sourceCleanupMode"`
+	NoiseFileHandling     string `json:"noiseFileHandling"`
+	Theme                 string `json:"theme"`
+	Language              string `json:"language"`
 	BackupRetention       int    `json:"backupRetention"`
 	FailureHandling       string `json:"failureHandling"`
 	EncryptionConcurrency int    `json:"encryptionConcurrency"`
@@ -133,10 +133,10 @@ type VerifyProjectResult struct {
 }
 
 type DecryptProjectRequest struct {
-	ProjectID     string `json:"projectId"`
-	Password      string `json:"password"`
-	EncryptedPath string `json:"encryptedPath"`
-	OutputPath    string `json:"outputPath"`
+	ProjectID       string `json:"projectId"`
+	Password        string `json:"password"`
+	EncryptedPath   string `json:"encryptedPath"`
+	OutputPath      string `json:"outputPath"`
 	Force           bool   `json:"force"`
 	SourceCleanup   string `json:"sourceCleanup"`
 	Resume          bool   `json:"resume"`
@@ -166,10 +166,10 @@ type VerifyShareRequest struct {
 }
 
 type DecryptShareRequest struct {
-	DatabasePath  string `json:"databasePath"`
-	Password      string `json:"password"`
-	EncryptedPath string `json:"encryptedPath"`
-	OutputPath    string `json:"outputPath"`
+	DatabasePath    string `json:"databasePath"`
+	Password        string `json:"password"`
+	EncryptedPath   string `json:"encryptedPath"`
+	OutputPath      string `json:"outputPath"`
 	Force           bool   `json:"force"`
 	SourceCleanup   string `json:"sourceCleanup"`
 	Resume          bool   `json:"resume"`

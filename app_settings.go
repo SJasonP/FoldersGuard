@@ -12,10 +12,10 @@ func (a *App) ReadSettings() (Settings, error) {
 
 func (a *App) SaveSettings(settings Settings) (Settings, error) {
 	saved, err := a.service.SaveSettings(app.Settings{
-		DefaultMaxPartSize: settings.DefaultMaxPartSize,
-		SourceCleanupMode:  settings.SourceCleanupMode,
-		NoiseFileHandling:  settings.NoiseFileHandling,
-		Theme:              settings.Theme,
+		DefaultMaxPartSize:    settings.DefaultMaxPartSize,
+		SourceCleanupMode:     settings.SourceCleanupMode,
+		NoiseFileHandling:     settings.NoiseFileHandling,
+		Theme:                 settings.Theme,
 		Language:              settings.Language,
 		BackupRetention:       settings.BackupRetention,
 		FailureHandling:       settings.FailureHandling,

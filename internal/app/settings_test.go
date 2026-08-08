@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -29,7 +30,7 @@ func TestSaveSettingsPersistsNormalizedValues(t *testing.T) {
 
 	saved, err := service.SaveSettings(Settings{
 		DefaultMaxPartSize: 8 * BytesPerMB,
-		SourceCleanupMode:  SourceCleanupKeep,
+		SourceCleanupMode:  SourceCleanupAfterPart,
 		NoiseFileHandling:  NoiseFileDoNotIgnore,
 		Theme:              ThemeDark,
 		Language:           LanguageZHCN,
@@ -37,7 +38,7 @@ func TestSaveSettingsPersistsNormalizedValues(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if saved.DefaultMaxPartSize != 8*BytesPerMB || saved.SourceCleanupMode != SourceCleanupKeep || saved.NoiseFileHandling != NoiseFileDoNotIgnore || saved.Theme != ThemeDark || saved.Language != LanguageZHCN {
+	if saved.DefaultMaxPartSize != 8*BytesPerMB || saved.SourceCleanupMode != SourceCleanupAfterPart || saved.IncrementalSourceCleanup || saved.NoiseFileHandling != NoiseFileDoNotIgnore || saved.Theme != ThemeDark || saved.Language != LanguageZHCN {
 		t.Fatalf("saved settings = %+v", saved)
 	}
 
@@ -64,5 +65,30 @@ func TestSaveSettingsDisablesSmallDefaultMaxPartSize(t *testing.T) {
 	}
 	if saved.DefaultMaxPartSize != 0 {
 		t.Fatalf("default max part size = %d, want disabled", saved.DefaultMaxPartSize)
+	}
+}
+
+func TestSaveSettingsRequiresSplittingForIncrementalCleanup(t *testing.T) {
+	service, err := NewService(filepath.Join(t.TempDir(), "data"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = service.SaveSettings(Settings{SourceCleanupMode: SourceCleanupAfterPart})
+	if !errors.Is(err, ErrIncrementalRequiresSplit) {
+		t.Fatalf("error = %v, want incremental cleanup split requirement", err)
+	}
+}
+
+func TestNormalizeSettingsMigratesLegacyIncrementalCleanup(t *testing.T) {
+	settings, err := normalizeSettings(Settings{
+		DefaultMaxPartSize:       8 * BytesPerMB,
+		SourceCleanupMode:        SourceCleanupDelete,
+		IncrementalSourceCleanup: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if settings.SourceCleanupMode != SourceCleanupAfterPart || settings.IncrementalSourceCleanup {
+		t.Fatalf("migrated settings = %+v", settings)
 	}
 }

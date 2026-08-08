@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	fgcrypto "foldersguard/internal/crypto"
@@ -20,7 +21,20 @@ const (
 	objectMagic      = "FGOBJv1\n"
 	noncePrefixSize  = 8
 	defaultChunkSize = 4 * 1024 * 1024
+	chunkHeaderSize  = 9
+	gcmOverheadSize  = 16
 )
+
+// EncryptedObjectSize returns the exact number of bytes written for an object
+// using the default chunk size. The format always writes a final chunk record,
+// including for empty inputs and inputs exactly divisible by the chunk size.
+func EncryptedObjectSize(plaintextSize int64) int64 {
+	if plaintextSize < 0 {
+		return 0
+	}
+	records := plaintextSize/int64(defaultChunkSize) + 1
+	return int64(len(objectMagic)+noncePrefixSize) + plaintextSize + records*(chunkHeaderSize+gcmOverheadSize)
+}
 
 type FileSource struct {
 	FileID       string
@@ -37,6 +51,10 @@ type Encryptor struct {
 	// OnBytes, when set, is called with the number of plaintext bytes processed
 	// after each chunk is encrypted. It enables byte-weighted progress.
 	OnBytes func(int64)
+	// ReverseParts processes split parts from the end of the source toward the
+	// beginning, allowing a caller to truncate the completed tail safely.
+	ReverseParts bool
+	AfterPart    func(model.Part) error
 }
 
 func (e Encryptor) EncryptFile(ctx context.Context, source FileSource) error {
@@ -85,26 +103,39 @@ func (e Encryptor) encryptSplit(ctx context.Context, aead cipher.AEAD, source Fi
 		return fmt.Errorf("split file requires parts")
 	}
 
-	input, err := os.Open(source.AbsolutePath)
-	if err != nil {
-		return fmt.Errorf("open source: %w", err)
-	}
-	defer input.Close()
-
 	dir := filepath.Join(e.OutputRoot, filepath.FromSlash(source.VisiblePath))
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("create split output directory: %w", err)
 	}
 
-	for _, part := range source.Parts {
+	parts := append([]model.Part(nil), source.Parts...)
+	if e.ReverseParts {
+		sort.Slice(parts, func(i, j int) bool { return parts[i].Offset > parts[j].Offset })
+	} else {
+		sort.Slice(parts, func(i, j int) bool { return parts[i].Offset < parts[j].Offset })
+	}
+	for _, part := range parts {
 		if err := ctx.Err(); err != nil {
 			return err
+		}
+		input, err := os.Open(source.AbsolutePath)
+		if err != nil {
+			return fmt.Errorf("open source: %w", err)
 		}
 		section := io.NewSectionReader(input, part.Offset, part.Size)
 		outputPath := filepath.Join(dir, part.VisibleName.String())
 		associatedData := []byte(fmt.Sprintf("fg-content-v1:part:%s:%d:%d:%d", source.FileID, part.Index, part.Offset, part.Size))
 		if err := e.sealReader(ctx, aead, section, outputPath, associatedData); err != nil {
+			_ = input.Close()
 			return fmt.Errorf("encrypt part %d: %w", part.Index, err)
+		}
+		if err := input.Close(); err != nil {
+			return fmt.Errorf("close source after part %d: %w", part.Index, err)
+		}
+		if e.AfterPart != nil {
+			if err := e.AfterPart(part); err != nil {
+				return fmt.Errorf("post-encrypt part %d: %w", part.Index, err)
+			}
 		}
 	}
 	return nil
@@ -452,7 +483,7 @@ func SafeJoin(root, relative string) (string, error) {
 }
 
 func writeChunkRecord(writer io.Writer, final bool, plaintextLen uint32, ciphertext []byte) error {
-	var header [9]byte
+	var header [chunkHeaderSize]byte
 	if final {
 		header[0] = 1
 	}

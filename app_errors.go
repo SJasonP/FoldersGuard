@@ -9,11 +9,13 @@ import (
 )
 
 const (
-	errorCodeInvalidPassword      = "FG_INVALID_PASSWORD"
-	errorCodeOutputFolderNotEmpty = "FG_OUTPUT_FOLDER_NOT_EMPTY"
-	errorCodeOutputInsideSource   = "FG_OUTPUT_INSIDE_SOURCE"
-	errorCodeOutputContainsSource = "FG_OUTPUT_CONTAINS_SOURCE"
-	errorCodeSourceTargetSame     = "FG_SOURCE_TARGET_SAME"
+	errorCodeInvalidPassword          = "FG_INVALID_PASSWORD"
+	errorCodeOutputFolderNotEmpty     = "FG_OUTPUT_FOLDER_NOT_EMPTY"
+	errorCodeOutputInsideSource       = "FG_OUTPUT_INSIDE_SOURCE"
+	errorCodeOutputContainsSource     = "FG_OUTPUT_CONTAINS_SOURCE"
+	errorCodeSourceTargetSame         = "FG_SOURCE_TARGET_SAME"
+	errorCodeInsufficientDiskSpace    = "FG_INSUFFICIENT_DISK_SPACE"
+	errorCodeIncrementalRequiresSplit = "FG_INCREMENTAL_REQUIRES_SPLIT"
 )
 
 func frontendError(err error) error {
@@ -34,6 +36,12 @@ func frontendError(err error) error {
 	}
 	if errors.Is(err, app.ErrSourceTargetSame) {
 		return codedError(errorCodeSourceTargetSame, err)
+	}
+	if errors.Is(err, app.ErrInsufficientDiskSpace) {
+		return codedError(errorCodeInsufficientDiskSpace, err)
+	}
+	if errors.Is(err, app.ErrIncrementalRequiresSplit) {
+		return codedError(errorCodeIncrementalRequiresSplit, err)
 	}
 	return err
 }

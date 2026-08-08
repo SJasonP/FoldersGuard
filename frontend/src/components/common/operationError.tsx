@@ -14,6 +14,8 @@ const codedErrorMessages: Array<[string, string]> = [
     ['FG_OUTPUT_INSIDE_SOURCE', 'errorOutputInsideSource'],
     ['FG_OUTPUT_CONTAINS_SOURCE', 'errorOutputContainsSource'],
     ['FG_SOURCE_TARGET_SAME', 'errorSourceTargetSame'],
+    ['FG_INSUFFICIENT_DISK_SPACE', 'errorInsufficientDiskSpace'],
+	['FG_INCREMENTAL_REQUIRES_SPLIT', 'errorIncrementalRequiresSplit'],
 ];
 
 function rawErrorMessage(error: unknown): string {

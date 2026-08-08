@@ -19,6 +19,10 @@ type Restorer struct {
 	OutputRoot    string
 	NoiseMode     string
 	AfterFile     func(RestoredFile) error
+	AfterPart     func(RestoredPart) error
+	// IncrementalCleanup makes disk-space estimation use split parts as the
+	// release unit instead of treating every logical file as indivisible.
+	IncrementalCleanup bool
 	// Progress, when set, receives byte-weighted progress for restore.
 	// A nil tracker is safe and ignored.
 	Progress *progress.Tracker
@@ -32,9 +36,9 @@ type Restorer struct {
 	// abort on the first error.
 	ContinueOnError bool
 	// OnFileError, when set, is called for each file that fails to decrypt under
-	// ContinueOnError, with the file and its error. A failed file's encrypted
-	// source is never deleted, because AfterFile runs only after a successful
-	// restore.
+	// ContinueOnError, with the file and its error. AfterFile runs only after a
+	// successful restore; a caller using AfterPart may already have destructively
+	// released authenticated split parts.
 	OnFileError func(model.File, error)
 }
 
@@ -42,6 +46,13 @@ type RestoredFile struct {
 	File                   model.File
 	EncryptedPaths         []string
 	EncryptedAbsolutePaths []string
+}
+
+type RestoredPart struct {
+	File             model.File
+	Part             model.Part
+	EncryptedPath    string
+	EncryptedAbsPath string
 }
 
 type RestoreReport struct {
@@ -309,7 +320,18 @@ func (r Restorer) restoreSplit(ctx context.Context, file model.File, sourcePaths
 			_ = temp.Close()
 			return fmt.Errorf("restore part %s: %w", part.ID, err)
 		}
-		_ = input.Close()
+		if err := input.Close(); err != nil {
+			_ = temp.Close()
+			return fmt.Errorf("close encrypted part %s: %w", part.ID, err)
+		}
+		if r.AfterPart != nil {
+			if err := r.AfterPart(RestoredPart{
+				File: file, Part: part, EncryptedPath: part.VisibleName.String(), EncryptedAbsPath: partPath,
+			}); err != nil {
+				_ = temp.Close()
+				return fmt.Errorf("post-restore part %s: %w", part.ID, err)
+			}
+		}
 	}
 	if err := temp.Chmod(0o600); err != nil {
 		_ = temp.Close()

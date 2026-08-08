@@ -35,10 +35,12 @@ export function DecryptProjectModal({
     const [form] = Form.useForm<DecryptProjectValues>();
     useResetFormOnClose(form, open);
     const sourceCleanupLabel = (value: string) => {
-        if (value === 'delete') {
-            return t('sourceCleanupDelete');
-        }
-        return t('sourceCleanupKeep');
+		switch (value) {
+			case 'after_operation': return t('sourceCleanupAfterOperation');
+			case 'after_file': return t('sourceCleanupAfterFile');
+			case 'after_part': return t('sourceCleanupAfterPart');
+			default: return t('sourceCleanupKeep');
+		}
     };
 
     const confirmSubmit = (values: DecryptProjectValues) => {

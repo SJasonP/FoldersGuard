@@ -169,6 +169,8 @@ Required confirmations:
 - Export Project.
 - Delete Project.
 - Delete source files after successful processing.
+- Select per-file or per-part source deletion. Saving either choice requires a strong warning because source data is
+  released before the whole operation finishes, greatly reducing recovery options.
 - Overwrite existing output.
 
 Confirmation content:
@@ -227,8 +229,10 @@ No cancellation and locking:
 
 Status rules:
 
-- Files that fail authentication or fail to decrypt are not deleted.
-- Files that fail to encrypt are not deleted from the cleartext source.
+- Normal cleanup preserves files that fail authentication, decryption, or encryption. Delete-while-processing may have
+  already released earlier completed split parts before a later part fails.
+- Encryption and decryption calculate required output space before changing the output and refuse to start when the
+  destination cannot complete the operation.
 - Completed operations show a result summary.
 - Failed operations show recoverable details and keep sensitive values hidden.
 

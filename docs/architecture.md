@@ -240,8 +240,8 @@ A long-running content operation can be re-run after an interruption and continu
   present but corrupt or partially written object is rewritten.
 - On resume, decryption and restore treat an output as complete when the output path exists and matches the expected
   decrypted content.
-- Source-file deletion under delete-source remains safe: a source file is deleted only after its encrypted object is
-  confirmed complete in the same run, or verified complete on resume.
+- Source-file deletion under normal delete-source waits for the complete operation to succeed. Incremental cleanup may
+  delete a source after its encrypted object is confirmed complete in the same run or verified complete on resume.
 - Resumption verifies an existing object before skipping it. A faster skip-by-presence option may be offered; the
   integrity-verifying mode is the default.
 - If the plan changed between runs, such as a different split size or added or removed items, resumption applies only to
@@ -257,9 +257,28 @@ Content operations choose between aborting on the first error and continuing pas
   one entry.
 - Fatal conditions abort regardless of policy: a full output disk, a database error, or any condition that threatens the
   integrity of the project database or the whole operation.
-- A source file is never deleted when its own encryption failed.
+- Normal cleanup preserves a source file when encryption fails. Incremental cleanup may already have truncated completed
+  tail parts before a later part fails; this destructive tradeoff is disclosed before the setting is enabled.
 - The operation result reports the number of failed items and a per-item reason. Internal keys and passwords are never
   included in failure detail.
+
+### Disk Space And Source Cleanup
+
+Encryption and restoration perform a disk-space preflight before modifying their output. Normal operation requires the
+destination filesystem to hold the complete calculated output plus a small reserve. Encryption includes the exact v1
+object header, chunk-record, and authentication-tag overhead in that calculation.
+
+The source-cleanup setting offers keep, after-operation, after-file, and after-part modes. The last two trade
+recoverability for lower peak usage. Split encryption in after-part mode processes parts from
+the tail toward the beginning and truncates the source to the completed part's offset. Split restoration deletes each
+authenticated encrypted part after appending it to the temporary plaintext output. Unsplit objects remain file-granular.
+Space can be reclaimed only when source and output resolve to the same filesystem; cross-filesystem operations still
+require full destination capacity. Incremental encryption uses one worker, and its peak calculation uses part order and
+includes accumulated ciphertext expansion.
+
+After-part cleanup requires a finite configured maximum part size. Newly encrypted files above that threshold are split,
+so a single large file cannot silently revert the mode to whole-file peak usage. Existing unsplit encrypted objects remain
+indivisible during restoration and still require enough space for their complete plaintext output.
 
 ### Change Password
 
@@ -295,7 +314,8 @@ File encryption may process multiple files concurrently.
   configurable.
 - Concurrency is across files; chunk streaming within a single file remains sequential.
 - Folder-creation ordering and source-file deletion remain correct under concurrency: a folder exists before its
-  children are written, and a source file is deleted only after its own encrypted object is complete.
+  children are written. Normal cleanup waits for the entire operation; incremental cleanup is sequential and releases
+  only a completed and authenticated file or split part.
 - Progress remains byte-weighted, accurate, and monotonic under concurrency.
 
 ## Directory Hierarchy Policy

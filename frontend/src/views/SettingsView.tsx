@@ -1,4 +1,4 @@
-import {Button, Form, InputNumber, Select, Space, Typography} from 'antd';
+import {App as AntApp, Button, Form, InputNumber, Select, Space, Typography} from 'antd';
 import type {SettingsModel} from '../types';
 import {PathInput} from '../components/common/PathInput';
 
@@ -20,6 +20,30 @@ export function SettingsView({
                                  t,
                              }: SettingsViewProps) {
     const [form] = Form.useForm<SettingsModel>();
+    const {modal} = AntApp.useApp();
+    const submitSettings = (values: SettingsModel) => {
+        if (values.sourceCleanupMode === 'after_part' && values.defaultMaxPartSize <= 0) {
+            modal.error({
+                title: t('incrementalCleanupRequiresSplitTitle'),
+                content: t('incrementalCleanupRequiresSplitBody'),
+            });
+            return;
+        }
+        const destructiveMode = values.sourceCleanupMode === 'after_file' || values.sourceCleanupMode === 'after_part';
+        const previousDestructiveMode = settings?.sourceCleanupMode === 'after_file' || settings?.sourceCleanupMode === 'after_part';
+        if (destructiveMode && (!previousDestructiveMode || values.sourceCleanupMode !== settings?.sourceCleanupMode)) {
+            modal.confirm({
+                title: t('incrementalCleanupWarningTitle'),
+                content: t('incrementalCleanupWarningBody'),
+                okText: t('incrementalCleanupEnable'),
+                okButtonProps: {danger: true},
+                cancelText: t('cancel'),
+                onOk: () => onSave(values),
+            });
+            return;
+        }
+        onSave(values);
+    };
 
     if (settings && form.getFieldValue('language') === undefined) {
         form.setFieldsValue(settings);
@@ -33,7 +57,7 @@ export function SettingsView({
                 layout="vertical"
                 initialValues={settings ?? undefined}
                 disabled={disabled || loading}
-                onFinish={onSave}
+                onFinish={submitSettings}
             >
                 <div className="settings-grid">
                     <Form.Item name="defaultMaxPartSize" label={t('defaultMaxPartSize')}>
@@ -62,7 +86,9 @@ export function SettingsView({
                         <Select
                             options={[
                                 {value: 'keep', label: t('sourceCleanupKeep')},
-                                {value: 'delete', label: t('sourceCleanupDelete')},
+                                {value: 'after_operation', label: t('sourceCleanupAfterOperation')},
+                                {value: 'after_file', label: t('sourceCleanupAfterFile')},
+                                {value: 'after_part', label: t('sourceCleanupAfterPart')},
                             ]}
                         />
                     </Form.Item>

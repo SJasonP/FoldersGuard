@@ -33,12 +33,14 @@ export function CreateProjectModal({
     const [form] = Form.useForm<CreateProjectValues>();
     useResetFormOnClose(form, open);
     const effectiveDefaultMaxPartSize = settings?.defaultMaxPartSize ?? 0;
-    const sourceCleanupMode = settings?.sourceCleanupMode ?? 'delete';
+    const sourceCleanupMode = settings?.sourceCleanupMode ?? 'after_operation';
     const sourceCleanupLabel = (value: string) => {
-        if (value === 'delete') {
-            return t('sourceCleanupDelete');
-        }
-        return t('sourceCleanupKeep');
+		switch (value) {
+			case 'after_operation': return t('sourceCleanupAfterOperation');
+			case 'after_file': return t('sourceCleanupAfterFile');
+			case 'after_part': return t('sourceCleanupAfterPart');
+			default: return t('sourceCleanupKeep');
+		}
     };
 
     const confirmSubmit = (values: CreateProjectValues) => {

@@ -246,7 +246,7 @@ export function ProjectSessionLayer({
             <DecryptProjectModal
                 open={decryptDialogOpen}
                 loading={decryptLoading}
-                sourceCleanupMode={settings?.sourceCleanupMode ?? 'delete'}
+                sourceCleanupMode={settings?.sourceCleanupMode ?? 'after_operation'}
                 defaultFailureHandling={settings?.failureHandling ?? 'abort'}
                 onCancel={onCloseDecrypt}
                 onSubmit={onDecryptProject}

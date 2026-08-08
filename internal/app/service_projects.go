@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"sort"
 
+	"foldersguard/internal/content"
 	"foldersguard/internal/db"
 	"foldersguard/internal/format"
 	"foldersguard/internal/fswalk"
@@ -239,18 +240,12 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 	if err != nil {
 		return CreateProjectResult{}, err
 	}
-	if err := PrepareDirectoryOutputWithNoiseMode(input.ContentOutput, input.Force, "content output", noiseMode); err != nil {
-		return CreateProjectResult{}, err
-	}
 	if input.DatabaseExport != "" {
 		if err := ValidateOutputOutsideSource(input.SourcePath, input.DatabaseExport); err != nil {
 			return CreateProjectResult{}, err
 		}
 		if !format.IsProjectExtension(input.DatabaseExport) {
 			return CreateProjectResult{}, fmt.Errorf("database export must use %s extension", format.ProjectExtension)
-		}
-		if err := PrepareFileOutput(input.DatabaseExport, input.Force); err != nil {
-			return CreateProjectResult{}, err
 		}
 	}
 
@@ -277,6 +272,28 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 	plan, err := project.Planner{MaxPartSize: maxPartSize}.Plan(scan)
 	if err != nil {
 		return CreateProjectResult{}, err
+	}
+	progressiveCleanup := sourceCleanup == SourceCleanupAfterFile || sourceCleanup == SourceCleanupAfterPart
+	partCleanup := sourceCleanup == SourceCleanupAfterPart
+	if progressiveCleanup {
+		if maxPartSize >= NoSplitMaxPartSize {
+			if partCleanup {
+				return CreateProjectResult{}, ErrIncrementalRequiresSplit
+			}
+		}
+		concurrency = 1
+	}
+	encryptedSizes, sourceSizes := encryptionSpaceSizes(plan, partCleanup)
+	if err := ensureOperationSpace(input.SourcePath, input.ContentOutput, encryptedSizes, sourceSizes, progressiveCleanup); err != nil {
+		return CreateProjectResult{}, err
+	}
+	if err := PrepareDirectoryOutputWithNoiseMode(input.ContentOutput, input.Force, "content output", noiseMode); err != nil {
+		return CreateProjectResult{}, err
+	}
+	if input.DatabaseExport != "" {
+		if err := PrepareFileOutput(input.DatabaseExport, input.Force); err != nil {
+			return CreateProjectResult{}, err
+		}
 	}
 
 	activeDatabase, err := s.ActiveProjectDatabasePath(plan.Project.ID.String())
@@ -308,8 +325,10 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 	}
 
 	var deletedFiles int
+	var successfullyEncrypted []model.File
 	afterFile := func(file model.File) error {
-		if sourceCleanup != SourceCleanupDelete {
+		successfullyEncrypted = append(successfullyEncrypted, file)
+		if !progressiveCleanup {
 			return nil
 		}
 		if err := os.Remove(file.SourcePath); err != nil {
@@ -331,14 +350,32 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 
 	tracker.StartPhase(progress.PhaseEncrypting, true)
 	if err := (project.Executor{
-		OutputRoot:      input.ContentOutput,
-		AfterFile:       afterFile,
+		OutputRoot: input.ContentOutput,
+		AfterFile:  afterFile,
+		AfterPart: func(file model.File, part model.Part) error {
+			if !partCleanup {
+				return nil
+			}
+			if err := os.Truncate(file.SourcePath, part.Offset); err != nil {
+				return fmt.Errorf("truncate encrypted source through completed part: %w", err)
+			}
+			return nil
+		},
+		ReverseParts:    partCleanup,
 		Progress:        tracker,
 		ContinueOnError: continueOnError,
 		OnFileError:     onFileError,
 		Concurrency:     concurrency,
 	}).EncryptContent(ctx, plan); err != nil {
 		return CreateProjectResult{}, err
+	}
+	if sourceCleanup == SourceCleanupAfterOperation && len(failures) == 0 {
+		for _, file := range successfullyEncrypted {
+			if err := os.Remove(file.SourcePath); err != nil {
+				return CreateProjectResult{}, fmt.Errorf("delete source file: %w", err)
+			}
+			deletedFiles++
+		}
 	}
 	tracker.StartPhase(progress.PhaseFinalizing, false)
 	_, _ = s.SaveLocalProjectName(SaveLocalProjectNameInput{
@@ -347,7 +384,7 @@ func (s Service) CreateProject(ctx context.Context, input CreateProjectInput) (C
 	})
 
 	deletedFolders := 0
-	if sourceCleanup == SourceCleanupDelete {
+	if sourceCleanup != SourceCleanupKeep && (progressiveCleanup || len(failures) == 0) {
 		deletedFolders, err = removeEmptyFoldersUnderRoot(input.SourcePath, noiseMode)
 		if err != nil {
 			return CreateProjectResult{}, err
@@ -398,12 +435,49 @@ func (s Service) resolveSourceCleanupMode(requested string) (string, error) {
 
 	switch requested {
 	case "":
-		return SourceCleanupDelete, nil
-	case SourceCleanupKeep, SourceCleanupDelete:
+		return SourceCleanupAfterOperation, nil
+	case SourceCleanupDelete:
+		return SourceCleanupAfterOperation, nil
+	case SourceCleanupKeep, SourceCleanupAfterOperation, SourceCleanupAfterFile, SourceCleanupAfterPart:
 		return requested, nil
 	default:
 		return "", fmt.Errorf("unsupported source cleanup mode %q", requested)
 	}
+}
+
+func encryptionSpaceSizes(plan model.PlannedProject, incremental bool) ([]int64, []int64) {
+	partsByFile := make(map[string][]model.Part)
+	for _, part := range plan.Parts {
+		partsByFile[part.FileID.String()] = append(partsByFile[part.FileID.String()], part)
+	}
+	outputs := make([]int64, 0, len(plan.Files))
+	freed := make([]int64, 0, len(plan.Files))
+	for _, file := range plan.Files {
+		var encryptedSize int64
+		if file.StorageKind == model.StorageKindSplit {
+			parts := partsByFile[file.ID.String()]
+			if incremental {
+				sort.Slice(parts, func(i, j int) bool { return parts[i].Offset > parts[j].Offset })
+			}
+			for _, part := range parts {
+				partEncryptedSize := content.EncryptedObjectSize(part.Size)
+				if incremental {
+					outputs = append(outputs, partEncryptedSize)
+					freed = append(freed, part.Size)
+					continue
+				}
+				encryptedSize += partEncryptedSize
+			}
+			if incremental {
+				continue
+			}
+		} else {
+			encryptedSize = content.EncryptedObjectSize(file.OriginalSize)
+		}
+		outputs = append(outputs, encryptedSize)
+		freed = append(freed, file.OriginalSize)
+	}
+	return outputs, freed
 }
 
 // resolveEncryptionConcurrency resolves the number of files to encrypt at once.

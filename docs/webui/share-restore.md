@@ -41,9 +41,10 @@ Decrypt behavior:
 - Restored outputs keep supported restored file and directory metadata.
 - Directory objects do not contain encrypted file data and do not need to be decrypted.
 - Source file handling follows Settings.
-- When source file handling is set to delete, each encrypted file is deleted immediately after that file is successfully
-  decrypted.
-- Encrypted files that fail authentication or cannot be decrypted are not deleted.
+- Source handling may keep data, delete after the operation, delete after each file, or delete after each part. Per-part
+  mode deletes each authenticated split part immediately; unsplit objects remain file-granular.
+- Normal cleanup preserves failed encrypted files. Progressive modes may already have deleted completed data before a
+  later file or part fails.
 
 Output conflict behavior:
 
@@ -211,9 +212,10 @@ Share decryption behavior:
 - FG restores the shared content's directory structure relative to the output directory.
 - Restored outputs keep supported restored file and directory metadata.
 - Source file handling follows Settings.
-- When source file handling is set to delete, each encrypted file is deleted immediately after that file is successfully
-  decrypted.
-- Encrypted files that fail authentication or cannot be decrypted are not deleted.
+- Source handling may keep data, delete after the operation, delete after each file, or delete after each part. Per-part
+  mode deletes each authenticated split part immediately; unsplit objects remain file-granular.
+- Normal cleanup preserves failed encrypted files. Progressive modes may already have deleted completed data before a
+  later file or part fails.
 
 After completion, the WebUI reports:
 

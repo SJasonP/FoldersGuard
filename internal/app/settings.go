@@ -13,8 +13,11 @@ const (
 	MinimumSplitPartSizeMB int64 = 5
 	NoSplitMaxPartSize     int64 = 1 << 62
 
-	SourceCleanupKeep   = "keep"
-	SourceCleanupDelete = "delete"
+	SourceCleanupKeep           = "keep"
+	SourceCleanupAfterOperation = "after_operation"
+	SourceCleanupAfterFile      = "after_file"
+	SourceCleanupAfterPart      = "after_part"
+	SourceCleanupDelete         = "delete" // Legacy request and settings value.
 
 	NoiseFileIgnoreEverywhere              = "ignore_everywhere"
 	NoiseFileIgnoreDuringVerifyAndMatching = "ignore_during_verify_and_matching"
@@ -35,11 +38,14 @@ const (
 type Settings struct {
 	DefaultMaxPartSize int64  `json:"defaultMaxPartSize"`
 	SourceCleanupMode  string `json:"sourceCleanupMode"`
-	NoiseFileHandling  string `json:"noiseFileHandling"`
-	Theme              string `json:"theme"`
-	Language           string `json:"language"`
-	BackupRetention    int    `json:"backupRetention"`
-	FailureHandling    string `json:"failureHandling"`
+	// IncrementalSourceCleanup is read only to migrate the earlier two-field
+	// settings shape. New settings persist cleanup timing in SourceCleanupMode.
+	IncrementalSourceCleanup bool   `json:"incrementalSourceCleanup,omitempty"`
+	NoiseFileHandling        string `json:"noiseFileHandling"`
+	Theme                    string `json:"theme"`
+	Language                 string `json:"language"`
+	BackupRetention          int    `json:"backupRetention"`
+	FailureHandling          string `json:"failureHandling"`
 	// EncryptionConcurrency is the number of files encrypted at once. Zero means
 	// derive a default from the host CPU count; 1 forces sequential encryption.
 	EncryptionConcurrency int `json:"encryptionConcurrency"`
@@ -53,7 +59,7 @@ type Settings struct {
 func DefaultSettings() Settings {
 	return Settings{
 		DefaultMaxPartSize: 0,
-		SourceCleanupMode:  SourceCleanupDelete,
+		SourceCleanupMode:  SourceCleanupAfterOperation,
 		NoiseFileHandling:  NoiseFileIgnoreEverywhere,
 		Theme:              ThemeSystem,
 		Language:           LanguageSystem,
@@ -117,13 +123,22 @@ func normalizeSettings(settings Settings) (Settings, error) {
 	if settings.DefaultMaxPartSize < MinimumSplitPartSizeMB*BytesPerMB {
 		settings.DefaultMaxPartSize = 0
 	}
-
 	switch settings.SourceCleanupMode {
 	case "":
-		settings.SourceCleanupMode = SourceCleanupDelete
-	case SourceCleanupKeep, SourceCleanupDelete:
+		settings.SourceCleanupMode = SourceCleanupAfterOperation
+	case SourceCleanupDelete:
+		if settings.IncrementalSourceCleanup {
+			settings.SourceCleanupMode = SourceCleanupAfterPart
+		} else {
+			settings.SourceCleanupMode = SourceCleanupAfterOperation
+		}
+	case SourceCleanupKeep, SourceCleanupAfterOperation, SourceCleanupAfterFile, SourceCleanupAfterPart:
 	default:
 		return Settings{}, fmt.Errorf("unsupported source cleanup mode %q", settings.SourceCleanupMode)
+	}
+	settings.IncrementalSourceCleanup = false
+	if settings.SourceCleanupMode == SourceCleanupAfterPart && settings.DefaultMaxPartSize == 0 {
+		return Settings{}, fmt.Errorf("%w: set a maximum part size of at least %d MB", ErrIncrementalRequiresSplit, MinimumSplitPartSizeMB)
 	}
 
 	switch settings.NoiseFileHandling {
