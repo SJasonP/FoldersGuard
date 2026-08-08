@@ -17,7 +17,7 @@ based on `go list -deps -test=false`.
 | `github.com/leaanthony/go-ansi-parser` |                             `v1.6.1` | MIT             |
 | `github.com/leaanthony/slicer`         |                             `v1.6.0` | MIT             |
 | `github.com/leaanthony/u`              |                             `v1.1.1` | MIT             |
-| `github.com/mattn/go-isatty`           |                            `v0.0.22` | MIT             |
+| `github.com/mattn/go-isatty`           |                            `v0.0.24` | MIT             |
 | `github.com/mutecomm/go-sqlcipher/v4`  |                             `v4.4.2` | MIT / BSD-style |
 | `github.com/ncruces/go-strftime`       |                             `v1.0.0` | MIT             |
 | `github.com/pkg/errors`                |                             `v0.9.1` | BSD-style       |
@@ -25,13 +25,13 @@ based on `go list -deps -test=false`.
 | `github.com/rivo/uniseg`               |                             `v0.4.7` | MIT             |
 | `github.com/spf13/cobra`               |                            `v1.10.2` | Apache-2.0      |
 | `github.com/spf13/pflag`               |                            `v1.0.10` | BSD-style       |
-| `github.com/wailsapp/wails/v2`         |                            `v2.12.0` | MIT             |
-| `golang.org/x/sys`                     |                            `v0.46.0` | BSD-style       |
-| `golang.org/x/term`                    |                            `v0.44.0` | BSD-style       |
-| `modernc.org/libc`                     |                            `v1.73.5` | MIT / BSD-style |
+| `github.com/wailsapp/wails/v2`         |                            `v2.13.0` | MIT             |
+| `golang.org/x/sys`                     |                            `v0.47.0` | BSD-style       |
+| `golang.org/x/term`                    |                            `v0.45.0` | BSD-style       |
+| `modernc.org/libc`                     |                            `v1.75.2` | MIT / BSD-style |
 | `modernc.org/mathutil`                 |                             `v1.7.1` | BSD-style       |
-| `modernc.org/memory`                   |                            `v1.11.0` | BSD-style       |
-| `modernc.org/sqlite`                   |                            `v1.53.0` | BSD-style       |
+| `modernc.org/memory`                   |                            `v1.12.0` | BSD-style       |
+| `modernc.org/sqlite`                   |                            `v1.56.0` | BSD-style       |
 
 The frontend is bundled into the desktop application. Its package dependency manifest currently includes:
 
@@ -225,7 +225,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### github.com/mattn/go-isatty v0.0.22 - LICENSE
+### github.com/mattn/go-isatty v0.0.24 - LICENSE
 
 ```text
 Copyright (c) Yasuhiro MATSUMOTO <mattn.jp@gmail.com>
@@ -663,7 +663,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### github.com/wailsapp/wails/v2 v2.12.0 - LICENSE
+### github.com/wailsapp/wails/v2 v2.13.0 - LICENSE
 
 ```text
 MIT License
@@ -689,7 +689,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### golang.org/x/sys v0.46.0 - LICENSE
+### golang.org/x/sys v0.47.0 - LICENSE
 
 ```text
 Copyright 2009 The Go Authors.
@@ -721,7 +721,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### golang.org/x/term v0.44.0 - LICENSE
+### golang.org/x/term v0.45.0 - LICENSE
 
 ```text
 Copyright 2009 The Go Authors.
@@ -753,7 +753,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/libc v1.73.5 - LICENSE
+### modernc.org/libc v1.75.2 - LICENSE
 
 ```text
 Copyright (c) 2017 The Libc Authors. All rights reserved.
@@ -785,7 +785,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/libc v1.73.5 - LICENSE-3RD-PARTY.md
+### modernc.org/libc v1.75.2 - LICENSE-3RD-PARTY.md
 
 ```text
 # Third-Party Software Notices
@@ -1127,7 +1127,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/memory v1.11.0 - LICENSE
+### modernc.org/memory v1.12.0 - LICENSE
 
 ```text
 Copyright (c) 2017 The Memory Authors. All rights reserved.
@@ -1159,7 +1159,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/memory v1.11.0 - LICENSE-GO
+### modernc.org/memory v1.12.0 - LICENSE-GO
 
 ```text
 Copyright (c) 2009 The Go Authors. All rights reserved.
@@ -1191,13 +1191,13 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/memory v1.11.0 - LICENSE-LOGO
+### modernc.org/memory v1.12.0 - LICENSE-LOGO
 
 ```text
 https://commons.wikimedia.org/wiki/File:Memory_infra_logo.png
 ```
 
-### modernc.org/memory v1.11.0 - LICENSE-MMAP-GO
+### modernc.org/memory v1.12.0 - LICENSE-MMAP-GO
 
 ```text
 Copyright (c) 2011, Evan Shaw <edsrzf@gmail.com>
@@ -1226,7 +1226,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### modernc.org/sqlite v1.53.0 - LICENSE
+### modernc.org/sqlite v1.56.0 - LICENSE
 
 ```text
 Copyright (c) 2017 The Sqlite Authors. All rights reserved.

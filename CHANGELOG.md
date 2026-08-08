@@ -10,6 +10,23 @@ same `.fg` / `.fgs` databases and encrypted content. No 1.x release changes the 
 FoldersGuard is experimental software and makes no guarantee of security, cryptographic correctness, or data durability.
 Do not rely on it as the only protection for valuable, sensitive, or irreplaceable data.
 
+## [1.7.0] - 2026-08-08
+
+### Added
+
+- Desktop encryption and decryption now calculate required output space before modifying the output and refuse to start
+  when the destination volume cannot complete the operation. The calculation includes encrypted-format overhead, a
+  safety reserve, and same-filesystem peak usage for progressive cleanup modes.
+- Desktop source handling is now one four-way setting: keep sources, delete everything after the operation succeeds,
+  delete after each file succeeds, or delete after each part succeeds. Saving either progressive mode shows a warning
+  because source data may be removed before the whole operation succeeds.
+- Per-part cleanup connects source deletion to file splitting so very large files need only limited free space. Split
+  encryption works from the tail and truncates each completed plaintext part; split decryption deletes each
+  authenticated encrypted part. This mode requires a finite maximum part size of at least 5 MB.
+- Desktop settings now allow choosing where encrypted content is staged while applying project changes without a
+  connected encrypted-content location. An empty setting keeps the automatic default: the user's Desktop when available,
+  otherwise a directory under the FoldersGuard data directory. Configured locations must be absolute paths.
+
 ## [1.6.0] - 2026-07-05
 
 ### Added
@@ -105,6 +122,7 @@ Do not rely on it as the only protection for valuable, sensitive, or irreplaceab
 - Integrity verification without decryption, large-file balanced splitting, and metadata-only operations such as rename.
 - A Wails desktop WebUI and a CLI (`foldersguard` / `fg`), with English and Simplified Chinese localization.
 
+[1.7.0]: https://github.com/SJasonP/FoldersGuard/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/SJasonP/FoldersGuard/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/SJasonP/FoldersGuard/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/SJasonP/FoldersGuard/compare/v1.3.0...v1.4.0
