@@ -2,8 +2,6 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {App as AntApp, ConfigProvider} from 'antd';
 import type {ColumnsType} from 'antd/es/table';
-import enUS from 'antd/locale/en_US';
-import zhCN from 'antd/locale/zh_CN';
 import {AppInfo, SetManualContentGuideCloseGuardActive, SetUILanguage} from '../wailsjs/go/main/App';
 import i18n, {resolveSystemLanguage, type SupportedLanguage} from './i18n';
 import {resolveTheme, themeAlgorithm, type ThemeMode} from './theme';
@@ -27,11 +25,7 @@ import {AppShell} from './components/app/AppShell';
 import {ProjectSessionLayer} from './components/project-actions/ProjectSessionLayer';
 import {ProjectBrowserLayer} from './components/project-browser/ProjectBrowserLayer';
 import {showStartupError} from './components/common/operationError';
-
-const antLocales: Record<SupportedLanguage, typeof enUS> = {
-    'en-US': enUS,
-    'zh-CN': zhCN,
-};
+import {antLocales} from './antdLocale';
 
 type AppBodyProps = {
     language: SupportedLanguage;
@@ -597,6 +591,7 @@ function App() {
     return (
         <ConfigProvider
             locale={antLocales[language]}
+            direction={language === 'ar' ? 'rtl' : 'ltr'}
             theme={{
                 algorithm: themeAlgorithm(resolvedTheme),
                 token: {

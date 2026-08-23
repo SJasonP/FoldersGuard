@@ -68,6 +68,20 @@ func TestSaveSettingsDisablesSmallDefaultMaxPartSize(t *testing.T) {
 	}
 }
 
+func TestSaveSettingsAcceptsSupportedLanguages(t *testing.T) {
+	for _, language := range []string{LanguageENUS, LanguageZHCN, LanguageAR, LanguageFR, LanguageRU, LanguageES} {
+		t.Run(language, func(t *testing.T) {
+			settings, err := normalizeSettings(Settings{Language: language})
+			if err != nil {
+				t.Fatalf("normalize %q: %v", language, err)
+			}
+			if settings.Language != language {
+				t.Fatalf("language = %q, want %q", settings.Language, language)
+			}
+		})
+	}
+}
+
 func TestSaveSettingsRequiresSplittingForIncrementalCleanup(t *testing.T) {
 	service, err := NewService(filepath.Join(t.TempDir(), "data"))
 	if err != nil {

@@ -35,8 +35,7 @@ In v1, FG data is stored only in FG's data directory, but users may export it.
 - Support large files by splitting them into balanced parts when needed.
 - Require both sender and recipient to use FG.
 - Provide a local desktop WebUI for normal interactive use.
-- Provide WebUI localization for American English and Simplified Chinese, with an extensible structure for adding more
-  languages.
+- Provide WebUI localization for American English, Simplified Chinese, Arabic, French, Russian, and Spanish.
 - Provide a complete WebUI dark theme and automatically follow system light or dark appearance by default.
 - Provide a CLI for stable automation and scripting.
 - Allow renaming files and directories by updating only FG data, without requiring access to encrypted content.

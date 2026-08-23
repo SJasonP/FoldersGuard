@@ -45,7 +45,8 @@ func Capture(path string, info fs.FileInfo) (Metadata, error) {
 func Apply(path string, metadata Metadata) error {
 	capabilities := capabilitySet(metadata.Capabilities)
 	if capabilities[CapabilityMode] {
-		if err := os.Chmod(path, fs.FileMode(metadata.Mode)); err != nil {
+		mode := fs.FileMode(metadata.Mode) &^ (fs.ModeSetuid | fs.ModeSetgid | fs.ModeSticky)
+		if err := os.Chmod(path, mode); err != nil {
 			return fmt.Errorf("restore mode: %w", err)
 		}
 	}

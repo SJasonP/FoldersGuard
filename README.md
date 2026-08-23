@@ -47,7 +47,7 @@ a mixed selection without exposing parent folders, siblings, or unrelated projec
 ## Status
 
 FoldersGuard is a work in progress. It currently includes a Go core, a CLI, a Wails desktop WebUI, SQLCipher-backed
-`.fg` and `.fgs` databases, English and Simplified Chinese localization, and release scripts for signed and notarized
+`.fg` and `.fgs` databases, American English, Simplified Chinese, Arabic, French, Russian, and Spanish localization, and release scripts for signed and notarized
 macOS builds.
 
 The implementation should be treated as experimental software until independently reviewed and tested.

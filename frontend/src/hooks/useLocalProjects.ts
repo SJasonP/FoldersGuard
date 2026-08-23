@@ -4,10 +4,11 @@ import {ListLocalProjects} from '../../wailsjs/go/main/App';
 import type {LocalProjectRow, LocalProjectSummary} from '../types';
 import {formatDateTime} from '../formatters';
 import {showOperationError} from '../components/common/operationError';
+import type {SupportedLanguage} from '../i18n';
 
 type UseLocalProjectsArgs = {
     enabled: boolean;
-    language: 'en-US' | 'zh-CN';
+    language: SupportedLanguage;
     modalApi: ModalHookAPI;
     t: (key: string) => string;
 };

@@ -234,7 +234,7 @@ Design's locale provider.
 
 Rules:
 
-- English (United States) and Simplified Chinese resources must both be present.
+- English (United States), Simplified Chinese, Arabic, French, Russian, and Spanish resources must all be present.
 - English (United States) is the fallback locale.
 - UI components reference translation keys instead of hard-coded display strings.
 - Adding a new language must be limited to adding locale resources and registering the locale.

@@ -14,7 +14,7 @@ Supported settings:
   completed tail; split decryption deletes each authenticated encrypted part.
 - Noise file handling: ignore everywhere, ignore only during verification and matching, or do not ignore.
 - Theme: system, light, or dark.
-- Language: system, English (United States), or Simplified Chinese.
+- Language: system, English (United States), Simplified Chinese, Arabic, French, Russian, or Spanish.
 - Encryption concurrency: number of files encrypted at once.
 - Database backup retention: number of project-database backups kept per project.
 - Default failure handling: abort on the first error, or continue and report item-level failures.
@@ -74,11 +74,16 @@ Supported languages:
 
 - English (United States).
 - Simplified Chinese.
+- Arabic.
+- French.
+- Russian.
+- Spanish.
 
 Localization behavior:
 
 - All user-visible WebUI text must come from localization resources.
 - English (United States) is the fallback language.
+- All six supported languages have complete resource keys; missing future translations fall back to English (United States).
 - Missing translations fall back to English (United States).
 - The language setting supports system matching.
 - System language changes are applied automatically when the language setting is system.

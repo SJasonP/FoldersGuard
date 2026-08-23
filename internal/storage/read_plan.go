@@ -424,8 +424,8 @@ ORDER BY visible_path`)
 		if err := rows.Scan(&objectIDText, &itemIDText, &objectTypeText, &visiblePath, &size, &integrity); err != nil {
 			return nil, fmt.Errorf("scan storage object: %w", err)
 		}
-		if visiblePath == "" {
-			return nil, fmt.Errorf("storage object %s visible path is required", objectIDText)
+		if err := validateStorageVisiblePath(visiblePath); err != nil {
+			return nil, fmt.Errorf("storage object %s visible path: %w", objectIDText, err)
 		}
 		leaf := filepath.Base(filepath.FromSlash(visiblePath))
 		if leaf == "." || leaf == "" {

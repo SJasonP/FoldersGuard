@@ -1,7 +1,7 @@
 import i18n from './i18n';
 
 function currentLanguage() {
-    return i18n.language === 'zh-CN' ? 'zh-CN' : 'en-US';
+    return i18n.language;
 }
 
 export function formatDateTime(value: Date | string | null | undefined) {

@@ -1,0 +1,27 @@
+import enUS from './en-US';
+
+const ru = {
+    ...enUS,
+    about: 'О программе', addItem: 'Добавить элемент', applyChanges: 'Применить изменения', applyChangesConfirm: 'Применить ожидающие изменения?',
+    applyChangesFailed: 'Не удалось применить изменения.', applyChangesSucceeded: 'Изменения применены.', applyWarnings: 'Предупреждения', available: 'Доступен',
+    availabilityStatus: 'Состояние доступности', browse: 'Обзор', browseFile: 'Файл', browseFolder: 'Папка', cancel: 'Отмена', close: 'Закрыть',
+    contentConnected: 'Зашифрованное содержимое подключено', contentOperations: 'Операции с содержимым', continueAction: 'Продолжить', copyrightNotice: 'Уведомление об авторских правах',
+    createProject: 'Создать проект', createProjectConfirm: 'Создать проект и начать шифрование выбранной исходной папки?', createProjectFailed: 'Не удалось создать проект.', createProjectSucceeded: 'Проект создан.',
+    createShare: 'Создать общий ресурс', createShareFailed: 'Не удалось создать общий ресурс.', createShareSucceeded: 'Общий ресурс создан.', createSourcePath: 'Путь исходной папки', dataDirectory: 'Каталог данных',
+    decryptProject: 'Расшифровать проект', decryptProjectFailed: 'Не удалось расшифровать проект.', decryptProjectSucceeded: 'Проект расшифрован.', decryptShare: 'Расшифровать общий ресурс', decryptShareFailed: 'Не удалось расшифровать общий ресурс.', decryptShareSucceeded: 'Общий ресурс расшифрован.',
+    defaultMaxPartSize: 'Максимальный размер части по умолчанию (МБ)', deleteProject: 'Удалить проект', deleteProjectConfirm: 'Удалить эту локальную базу данных из каталога данных FG?', deleteProjectFailed: 'Не удалось удалить проект.', deleteProjectSucceeded: 'Проект удалён.', discard: 'Отменить', discardChanges: 'Отменить изменения',
+    encryptedContentPath: 'Путь зашифрованного содержимого', errorLoadingProjects: 'Не удалось загрузить локальные проекты.', errorLoadingSettings: 'Не удалось загрузить настройки.', errorOperationFailed: 'Операция завершилась ошибкой. Проверьте данные и повторите попытку.',
+    errorOutputFolderNotEmpty: 'Папка вывода не пуста. Очистите её или включите принудительную перезапись.', errorPasswordIncorrect: 'Неверный пароль или база данных не открывается с этим паролем.', errorSavingSettings: 'Не удалось сохранить настройки.',
+    errorInsufficientDiskSpace: 'На диске вывода недостаточно свободного места для завершения операции.', errorIncrementalRequiresSplit: 'Удаление по частям требует конечного максимального размера части. Настройте разбиение файлов.',
+    exportProject: 'Экспортировать проект', exportProjectFailed: 'Не удалось экспортировать проект.', exportProjectSucceeded: 'Проект экспортирован.', fileCount: 'Количество файлов', fileSize: 'Размер файла', foldersGuard: 'FoldersGuard', folderName: 'Имя папки', folderCount: 'Количество папок', formatVersion: 'Версия формата', home: 'Главная',
+    importProject: 'Импортировать проект', importProjectFailed: 'Не удалось импортировать проект.', importProjectSucceeded: 'Проект импортирован.', inspectProject: 'Проверить проект', inspectShare: 'Проверить общий ресурс', invalidItemName: 'Введите одно допустимое имя без разделителей пути.', itemDetails: 'Сведения об элементе', itemName: 'Имя', itemPath: 'Путь', itemType: 'Тип', itemTypeFile: 'Файл', itemTypeFolder: 'Папка',
+    verifyProject: 'Проверить содержимое проекта', verifyProjectFailed: 'Не удалось проверить проект.', verifyProjectSucceeded: 'Содержимое проекта проверено.', verifyShare: 'Проверить содержимое общего ресурса', verifyShareFailed: 'Не удалось проверить общий ресурс.', verifyShareSucceeded: 'Содержимое общего ресурса проверено.',
+    language: 'Язык', languageEnglishUS: 'Английский (США)', languageSimplifiedChinese: 'Упрощённый китайский', languageArabic: 'Арабский', languageFrench: 'Французский', languageRussian: 'Русский', languageSpanish: 'Испанский', languageSystem: 'Системный', loading: 'Загрузка',
+    localProjects: 'Локальные проекты', noProjects: 'Локальные проекты не найдены.', noPendingChanges: 'Нет ожидающих изменений.', password: 'Пароль', passwordConfirm: 'Подтвердите пароль', passwordMismatch: 'Пароли не совпадают.', pendingChanges: 'Ожидающие изменения', projectName: 'Имя проекта', refresh: 'Обновить', removeItem: 'Удалить элемент', renameItem: 'Переименовать элемент',
+    saveSettings: 'Сохранить настройки', searchProjects: 'Поиск проектов', selectedShareItemCount: 'Выбрано элементов: {{count}}', settings: 'Настройки', settingsSaved: 'Настройки сохранены.',
+    sourceCleanupMode: 'Обработка исходных файлов', sourceCleanupKeep: 'Сохранять исходные файлы', sourceCleanupAfterOperation: 'Удалить всё после успешного завершения операции', sourceCleanupAfterFile: 'Удалять после каждого успешного файла', sourceCleanupAfterPart: 'Удалять после каждой успешной части',
+    stagedContentLocation: 'Место временного хранения', stagedContentLocationHint: 'Где хранить содержимое при применении изменений без подключённого зашифрованного хранилища. Пусто = автоматический Рабочий стол.', stagedContentLocationAutoHint: 'Автоматически (Рабочий стол)',
+    operationRunning: 'Выполняется', operationPreparing: 'Подготовка', operationPhaseEncrypting: 'Шифрование', operationPhaseDecrypting: 'Расшифровка', operationPhaseVerifying: 'Проверка', operationPhaseFinalizing: 'Завершение', theme: 'Тема', themeDark: 'Тёмная', themeLight: 'Светлая', themeSystem: 'Системная', save: 'Сохранить', unavailable: 'Недоступно', viewOpenSourceLicenses: 'Уведомления сторонних компонентов',
+} as const;
+
+export default ru;

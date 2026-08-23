@@ -90,7 +90,10 @@ func (e Encryptor) encryptSingle(ctx context.Context, aead cipher.AEAD, source F
 	}
 	defer input.Close()
 
-	outputPath := filepath.Join(e.OutputRoot, filepath.FromSlash(source.VisiblePath))
+	outputPath, err := SafeJoin(e.OutputRoot, source.VisiblePath)
+	if err != nil {
+		return fmt.Errorf("resolve single-file output: %w", err)
+	}
 	associatedData := []byte("fg-content-v1:file:" + source.FileID)
 	if err := e.sealReader(ctx, aead, input, outputPath, associatedData); err != nil {
 		return fmt.Errorf("encrypt single file: %w", err)
@@ -103,7 +106,10 @@ func (e Encryptor) encryptSplit(ctx context.Context, aead cipher.AEAD, source Fi
 		return fmt.Errorf("split file requires parts")
 	}
 
-	dir := filepath.Join(e.OutputRoot, filepath.FromSlash(source.VisiblePath))
+	dir, err := SafeJoin(e.OutputRoot, source.VisiblePath)
+	if err != nil {
+		return fmt.Errorf("resolve split-file output: %w", err)
+	}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("create split output directory: %w", err)
 	}

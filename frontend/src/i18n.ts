@@ -2,6 +2,10 @@ import i18n from 'i18next';
 import {initReactI18next} from 'react-i18next';
 import enUS from './locales/en-US';
 import zhCN from './locales/zh-CN';
+import ar from './locales/ar';
+import fr from './locales/fr';
+import ru from './locales/ru';
+import es from './locales/es';
 
 export const resources = {
     'en-US': {
@@ -10,13 +14,23 @@ export const resources = {
     'zh-CN': {
         translation: zhCN,
     },
+    ar: {translation: ar},
+    fr: {translation: fr},
+    ru: {translation: ru},
+    es: {translation: es},
 } as const;
 
 export type SupportedLanguage = keyof typeof resources;
 export type LanguageSetting = SupportedLanguage | 'system';
 
 export function resolveSupportedLanguage(language: string | undefined): SupportedLanguage {
-    return language?.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en-US';
+    const normalized = language?.toLowerCase() ?? '';
+    if (normalized.startsWith('zh')) return 'zh-CN';
+    if (normalized.startsWith('ar')) return 'ar';
+    if (normalized.startsWith('fr')) return 'fr';
+    if (normalized.startsWith('ru')) return 'ru';
+    if (normalized.startsWith('es')) return 'es';
+    return 'en-US';
 }
 
 export function resolveSystemLanguage(): SupportedLanguage {
@@ -24,8 +38,8 @@ export function resolveSystemLanguage(): SupportedLanguage {
 }
 
 export function resolveLanguageSetting(setting: string | undefined, systemLanguage: SupportedLanguage): SupportedLanguage {
-    if (setting === 'zh-CN' || setting === 'en-US') {
-        return setting;
+    if (setting && setting in resources) {
+        return setting as SupportedLanguage;
     }
     return systemLanguage;
 }

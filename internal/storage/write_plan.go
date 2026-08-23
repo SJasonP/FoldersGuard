@@ -149,6 +149,9 @@ INSERT INTO parts (
 func writeStorageObjects(ctx context.Context, tx *sql.Tx, objects []model.StorageObject) error {
 	visibleLeaves := make(map[string]string, len(objects))
 	for _, object := range objects {
+		if err := validateStorageVisiblePath(object.VisiblePath); err != nil {
+			return fmt.Errorf("storage object %s visible path: %w", object.ID, err)
+		}
 		leaf := filepath.Base(filepath.FromSlash(object.VisiblePath))
 		if leaf == "." || leaf == "" {
 			return fmt.Errorf("storage object %s visible path leaf is required", object.ID)

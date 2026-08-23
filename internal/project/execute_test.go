@@ -293,6 +293,21 @@ func TestSafeJoinRejectsEscapes(t *testing.T) {
 	}
 }
 
+func TestExecutorRejectsFolderOutsideOutputRoot(t *testing.T) {
+	root := t.TempDir()
+	output := filepath.Join(root, "output")
+	plan := model.PlannedProject{StorageObjects: []model.StorageObject{{
+		Type:        model.StorageObjectTypeFolder,
+		VisiblePath: "../escaped-folder",
+	}}}
+	if err := (Executor{OutputRoot: output}).createFolders(context.Background(), plan); err == nil {
+		t.Fatal("expected unsafe folder visible path to be rejected")
+	}
+	if _, err := os.Stat(filepath.Join(root, "escaped-folder")); !os.IsNotExist(err) {
+		t.Fatalf("folder outside output root was created: %v", err)
+	}
+}
+
 func mustMkdir(t *testing.T, path string) {
 	t.Helper()
 	if err := os.MkdirAll(path, 0o755); err != nil {

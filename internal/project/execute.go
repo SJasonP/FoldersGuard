@@ -281,7 +281,10 @@ func (e Executor) createFolders(ctx context.Context, plan model.PlannedProject) 
 		if object.Type != model.StorageObjectTypeFolder {
 			continue
 		}
-		path := filepath.Join(e.OutputRoot, filepath.FromSlash(object.VisiblePath))
+		path, err := content.SafeJoin(e.OutputRoot, object.VisiblePath)
+		if err != nil {
+			return fmt.Errorf("resolve output folder %s: %w", object.VisiblePath, err)
+		}
 		if err := os.MkdirAll(path, 0o755); err != nil {
 			return fmt.Errorf("create output folder %s: %w", object.VisiblePath, err)
 		}

@@ -128,6 +128,10 @@ export function SettingsView({
                                 {value: 'system', label: t('languageSystem')},
                                 {value: 'en-US', label: t('languageEnglishUS')},
                                 {value: 'zh-CN', label: t('languageSimplifiedChinese')},
+                                {value: 'ar', label: t('languageArabic')},
+                                {value: 'fr', label: t('languageFrench')},
+                                {value: 'ru', label: t('languageRussian')},
+                                {value: 'es', label: t('languageSpanish')},
                             ]}
                         />
                     </Form.Item>

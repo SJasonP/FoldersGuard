@@ -33,6 +33,10 @@ const (
 	LanguageSystem = "system"
 	LanguageENUS   = "en-US"
 	LanguageZHCN   = "zh-CN"
+	LanguageAR     = "ar"
+	LanguageFR     = "fr"
+	LanguageRU     = "ru"
+	LanguageES     = "es"
 )
 
 type Settings struct {
@@ -160,7 +164,7 @@ func normalizeSettings(settings Settings) (Settings, error) {
 	switch settings.Language {
 	case "", LanguageSystem:
 		settings.Language = LanguageSystem
-	case LanguageENUS, LanguageZHCN:
+	case LanguageENUS, LanguageZHCN, LanguageAR, LanguageFR, LanguageRU, LanguageES:
 	default:
 		return Settings{}, fmt.Errorf("unsupported language %q", settings.Language)
 	}

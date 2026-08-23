@@ -1,0 +1,38 @@
+import enUS from './en-US';
+
+const es = {
+    ...enUS,
+    about: 'Acerca de', addItem: 'Añadir elemento', applyChanges: 'Aplicar cambios', applyChangesConfirm: '¿Aplicar estos cambios pendientes?',
+    applyChangesFailed: 'No se pudieron aplicar los cambios.', applyChangesSucceeded: 'Cambios aplicados.', applyWarnings: 'Advertencias',
+    available: 'Disponible', availabilityStatus: 'Estado de disponibilidad', browse: 'Examinar', browseFile: 'Archivo', browseFolder: 'Carpeta',
+    cancel: 'Cancelar', close: 'Cerrar', contentConnected: 'Contenido cifrado conectado', contentOperations: 'Operaciones de contenido', continueAction: 'Continuar',
+    copyrightNotice: 'Aviso de derechos de autor', createProject: 'Crear proyecto', createProjectConfirm: '¿Crear este proyecto y cifrar la carpeta de origen seleccionada?',
+    createProjectFailed: 'No se pudo crear el proyecto.', createProjectSucceeded: 'Proyecto creado.', createShare: 'Crear recurso compartido',
+    createShareFailed: 'No se pudo crear el recurso compartido.', createShareSucceeded: 'Recurso compartido creado.', createSourcePath: 'Ruta de la carpeta de origen',
+    dataDirectory: 'Directorio de datos', decryptProject: 'Descifrar proyecto', decryptProjectFailed: 'No se pudo descifrar el proyecto.', decryptProjectSucceeded: 'Proyecto descifrado.',
+    decryptShare: 'Descifrar recurso compartido', decryptShareFailed: 'No se pudo descifrar el recurso compartido.', decryptShareSucceeded: 'Recurso compartido descifrado.',
+    defaultMaxPartSize: 'Tamaño máximo de parte predeterminado (MB)', deleteProject: 'Eliminar proyecto', deleteProjectConfirm: '¿Eliminar esta base de datos local del directorio de datos de FG?',
+    deleteProjectFailed: 'No se pudo eliminar el proyecto.', deleteProjectSucceeded: 'Proyecto eliminado.', discard: 'Descartar', discardChanges: 'Descartar cambios',
+    encryptedContentPath: 'Ruta del contenido cifrado', errorLoadingProjects: 'No se pudieron cargar los proyectos locales.', errorLoadingSettings: 'No se pudieron cargar los ajustes.',
+    errorOperationFailed: 'La operación falló. Comprueba los datos e inténtalo de nuevo.', errorOutputFolderNotEmpty: 'La carpeta de salida no está vacía. Vacíala o activa la sobrescritura forzada.',
+    errorPasswordIncorrect: 'La contraseña no es correcta o no permite abrir esta base de datos.', errorSavingSettings: 'No se pudieron guardar los ajustes.',
+    errorInsufficientDiskSpace: 'No hay suficiente espacio libre en el disco de salida para completar la operación.',
+    errorIncrementalRequiresSplit: 'La eliminación por partes requiere un tamaño máximo de parte finito. Configura la división.',
+    exportProject: 'Exportar proyecto', exportProjectFailed: 'No se pudo exportar el proyecto.', exportProjectSucceeded: 'Proyecto exportado.',
+    fileCount: 'Número de archivos', fileSize: 'Tamaño del archivo', foldersGuard: 'FoldersGuard', folderName: 'Nombre de carpeta', folderCount: 'Número de carpetas',
+    formatVersion: 'Versión del formato', home: 'Inicio', importProject: 'Importar proyecto', importProjectFailed: 'No se pudo importar el proyecto.', importProjectSucceeded: 'Proyecto importado.',
+    inspectProject: 'Inspeccionar proyecto', inspectShare: 'Inspeccionar recurso compartido', invalidItemName: 'Introduce un nombre válido sin separadores de ruta.', itemDetails: 'Detalles del elemento',
+    itemName: 'Nombre', itemPath: 'Ruta', itemType: 'Tipo', itemTypeFile: 'Archivo', itemTypeFolder: 'Carpeta', verifyProject: 'Verificar contenido del proyecto',
+    verifyProjectFailed: 'No se pudo verificar el proyecto.', verifyProjectSucceeded: 'Contenido del proyecto verificado.', verifyShare: 'Verificar contenido compartido',
+    verifyShareFailed: 'No se pudo verificar el recurso compartido.', verifyShareSucceeded: 'Contenido compartido verificado.', language: 'Idioma',
+    languageEnglishUS: 'Inglés (Estados Unidos)', languageSimplifiedChinese: 'Chino simplificado', languageArabic: 'Árabe', languageFrench: 'Francés', languageRussian: 'Ruso', languageSpanish: 'Español', languageSystem: 'Sistema', loading: 'Cargando',
+    localProjects: 'Proyectos locales', noProjects: 'No se encontraron proyectos locales.', noPendingChanges: 'No hay cambios pendientes.', password: 'Contraseña', passwordConfirm: 'Confirmar contraseña', passwordMismatch: 'Las contraseñas no coinciden.',
+    pendingChanges: 'Cambios pendientes', projectName: 'Nombre del proyecto', refresh: 'Actualizar', removeItem: 'Eliminar elemento', renameItem: 'Cambiar nombre del elemento',
+    saveSettings: 'Guardar ajustes', searchProjects: 'Buscar proyectos', selectedShareItemCount: 'Elementos seleccionados: {{count}}', settings: 'Ajustes', settingsSaved: 'Ajustes guardados.',
+    sourceCleanupMode: 'Gestión de archivos de origen', sourceCleanupKeep: 'Conservar archivos de origen', sourceCleanupAfterOperation: 'Eliminar todo cuando termine la operación', sourceCleanupAfterFile: 'Eliminar después de cada archivo correcto', sourceCleanupAfterPart: 'Eliminar después de cada parte correcta',
+    stagedContentLocation: 'Ubicación de preparación', stagedContentLocationHint: 'Dónde se prepara el contenido al aplicar cambios sin contenido cifrado conectado. Vacío = Escritorio automático.', stagedContentLocationAutoHint: 'Automático (tu Escritorio)',
+    operationRunning: 'En ejecución', operationPreparing: 'Preparando', operationPhaseEncrypting: 'Cifrando', operationPhaseDecrypting: 'Descifrando', operationPhaseVerifying: 'Verificando', operationPhaseFinalizing: 'Finalizando',
+    theme: 'Tema', themeDark: 'Oscuro', themeLight: 'Claro', themeSystem: 'Sistema', save: 'Guardar', unavailable: 'No disponible', viewOpenSourceLicenses: 'Ver avisos de terceros',
+} as const;
+
+export default es;

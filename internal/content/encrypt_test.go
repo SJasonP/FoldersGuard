@@ -120,6 +120,50 @@ func TestEncryptSplitFile(t *testing.T) {
 	}
 }
 
+func TestEncryptFileRejectsVisiblePathOutsideOutputRoot(t *testing.T) {
+	root := t.TempDir()
+	input := filepath.Join(root, "input.txt")
+	mustWrite(t, input, []byte("sensitive"))
+
+	key, err := fgcrypto.GenerateKey256()
+	if err != nil {
+		t.Fatal(err)
+	}
+	escaped := filepath.Join(root, "escaped")
+	err = Encryptor{OutputRoot: filepath.Join(root, "out")}.EncryptFile(context.Background(), FileSource{
+		FileID:       uuid.New().String(),
+		AbsolutePath: input,
+		Key:          key,
+		StorageKind:  model.StorageKindSingle,
+		VisiblePath:  "../escaped",
+	})
+	if err == nil {
+		t.Fatal("expected an unsafe visible path to be rejected")
+	}
+	if _, statErr := os.Stat(escaped); !os.IsNotExist(statErr) {
+		t.Fatalf("path outside output root was created: %v", statErr)
+	}
+
+	part := model.Part{
+		ID: uuid.New(), FileID: uuid.New(), Index: 0,
+		VisibleName: uuid.New(), Offset: 0, Size: 9,
+	}
+	err = Encryptor{OutputRoot: filepath.Join(root, "out")}.EncryptFile(context.Background(), FileSource{
+		FileID:       part.FileID.String(),
+		AbsolutePath: input,
+		Key:          key,
+		StorageKind:  model.StorageKindSplit,
+		VisiblePath:  "../escaped-split",
+		Parts:        []model.Part{part},
+	})
+	if err == nil {
+		t.Fatal("expected an unsafe split-file visible path to be rejected")
+	}
+	if _, statErr := os.Stat(filepath.Join(root, "escaped-split")); !os.IsNotExist(statErr) {
+		t.Fatalf("split path outside output root was created: %v", statErr)
+	}
+}
+
 func mustWrite(t *testing.T, path string, data []byte) {
 	t.Helper()
 	if err := os.WriteFile(path, data, 0o644); err != nil {
